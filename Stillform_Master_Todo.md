@@ -1279,6 +1279,19 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## 🐛 Bugs / Defects
 
+### 🔧 GPT4O_GUARDRAILS_AUDIT §2.2 client-side reconciliation — needed before TestFlight (added May 17, 2026)
+
+**Source:** GPT4O_GUARDRAILS_AUDIT.md §2.2 inventoried 5 client-side guardrails (C1–C5) against `src/App.jsx`. Phase A deleted that file. The audit's substrate-level analysis (§1 + §3 G1–G23 cross-walk against `netlify/functions/reframe.js`) is unaffected and still valid — server-side guardrails are intact. Client-side row needs reconciliation against `src/v2/`.
+
+**Verify in v2 (or build if missing):**
+- C1: AES-256 at rest for all SECURE_KEYS (was 17 keys in v1; v2 SECURE_KEYS list may differ — confirm coverage)
+- C2: Plausible event tracking for `crisisDetected` and `liabilityGuard` response flags from reframe.js (server emits flags; client must wire them into Plausible events)
+- C3: Image upload validation (3-file max, 10MB/file, 20MB total, MIME whitelist) — confirm v2 Reframe attachments path enforces these
+- C4: `voiceRepairUsed` telemetry — confirm Plausible event wired in v2 Reframe call site
+- C5: Crisis/liability tagging → fallback templates locked client-side — confirm v2 Reframe response handler routes `crisisDetected`/`liabilityGuard` to safety surfaces and not editable threads
+
+**Pre-TestFlight gate** — privacy/safety claims in user-facing materials must match the v2 substrate reality, same logic that made the original audit pre-TestFlight. If a v1 guardrail isn't replicated in v2, either build the equivalent or update privacy/safety copy to reflect the actual v2 behavior.
+
 ### 🔧 Stillform-targeted preflight script — needed before launch (added May 17, 2026 from Phase A under-tracking)
 
 **Caught when Security Gate failed on commit `fb8918d`.** Phase A (Phase A: delete v1 frontend code, route bare URL to Stillform) deleted `scripts/ship-preflight.mjs` and `scripts/core-loop-smoke.mjs` along with the v1 frontend, but didn't update `package.json` or `.github/workflows/security-gate.yml` which still referenced both scripts. CI failure surfaced the gap. Classic failure-class-17 under-tracking — the dependent infra references should have been cleaned in the same commit. Cleaned in `[next commit]`.

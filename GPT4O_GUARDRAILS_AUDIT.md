@@ -18,7 +18,7 @@ The master todo (lines 430-432) refers to two prior audit documents:
 
 Per Prime Directive (NO FABRICATION, NO ASSUMPTIONS): this document does not pretend Phase 1+2 exist or fill them in retroactively. Instead, it does the actual work the master todo named as Phase 3 — "actual guardrails review against substrate findings, mapping each shipped guardrail to which native pull it corrects/duplicates/conflicts with. Plus actioning anything found" — grounded directly in:
 
-1. The shipped guardrail code (line refs into `netlify/functions/reframe.js` and `src/App.jsx`).
+1. The shipped guardrail code (line refs into `netlify/functions/reframe.js` — still valid; `src/App.jsx` refs in §2.2 below are pre Phase A and need v2 reconciliation).
 2. Publicly-documented GPT-4o substrate behavior (citations below).
 3. The framework Stillform's prompts ARE doing (Wells 2009 detached mindfulness / MCT) vs the framework GPT-4o defaults to (CBT-coded, therapy-trained comfort).
 
@@ -114,15 +114,17 @@ All file references current as of HEAD `9badb72` (May 8, 2026).
 | G29 | 8 GOLDEN RESPONSE EXAMPLES (paired good/bad — accent, kids, jealousy, partner, freeze, $400 short, etc.) | 876-905 | Prompt |
 | G30 | `EMPHASIS` rule (one *italic* per response max) | 826 | Prompt |
 
-### 2.2 Client-side — `src/App.jsx`
+### 2.2 Client-side — `src/App.jsx` *(needs v2 reconciliation post Phase A)*
 
-| # | Guardrail | Line | Type |
+> **⚠️ STALE LINE REFS — May 17, 2026.** The client-side guardrails below were inventoried against `src/App.jsx` which was deleted in Phase A (commit `237167b`). Stillform's current frontend lives in `src/v2/`. The substrate-level protections (server-side server in `reframe.js`) are unaffected and remain valid. The client-side row needs reconciliation against the v2 codebase: verify that AES-256 encryption at rest for SECURE_KEYS, Plausible crisis/liability telemetry, image upload validation, voiceRepairUsed telemetry, and crisis/liability fallback routing are all present in v2 with equivalent or stronger behavior. Tracked in Master Todo as a pre-TestFlight follow-up.
+
+| # | Guardrail | Line (pre Phase A) | Type |
 |---|---|---|---|
-| C1 | AES-256 at rest for all 17 SECURE_KEYS (Path A complete May 8) | 8654-9022 | Storage |
-| C2 | Plausible event tracking for `crisisDetected` and `liabilityGuard` flags | 10023-10024 | Telemetry |
-| C3 | Image upload validation (3-file max, 10MB/file, 20MB total, MIME whitelist) | (App.jsx OCR section, see master todo) | Input validation |
-| C4 | `voiceRepairUsed` telemetry | 10029 | Telemetry |
-| C5 | Crisis/liability tagging → fallback templates locked client-side | 10047-10048 | Routing |
+| C1 | AES-256 at rest for all 17 SECURE_KEYS (Path A complete May 8) | 8654-9022 (deleted file) | Storage |
+| C2 | Plausible event tracking for `crisisDetected` and `liabilityGuard` flags | 10023-10024 (deleted file) | Telemetry |
+| C3 | Image upload validation (3-file max, 10MB/file, 20MB total, MIME whitelist) | (App.jsx OCR section, see master todo — deleted file) | Input validation |
+| C4 | `voiceRepairUsed` telemetry | 10029 (deleted file) | Telemetry |
+| C5 | Crisis/liability tagging → fallback templates locked client-side | 10047-10048 (deleted file) | Routing |
 
 ---
 
@@ -208,7 +210,7 @@ Classifications:
 ### G16 — `LOW_DEMAND_FLAGS` (medicated, depleted, sleep, pain, hormonal, gut)
 **Substrate default:** GPT-4o doesn't know about user state. Stillform's bio-filter is the only signal that says "this user is depleted right now — be brief, don't make them think." Without this, every response would be calibrated to a hypothetical fully-resourced user.
 **Classification:** CORRECTS (real, distinctive). This is one of Stillform's actual differentiators — the substrate has no equivalent.
-**Action:** None. Comment at line 609-612 about cross-file sync (App.jsx isLowDemandBioFilter) is a real maintenance hazard but already documented.
+**Action:** None. Comment at line 609-612 about cross-file sync (App.jsx `isLowDemandBioFilter`) was documented as a maintenance hazard pre Phase A; with `src/App.jsx` deleted, the cross-file sync concern is resolved. Stillform (v2) needs to define `isLowDemandBioFilter` (or equivalent) in a shared v2 module if/where client-side bio-filter classification is needed — tracked in the §2.2 v2 reconciliation follow-up.
 
 ### G17 — Crisis detection + safety override
 **Substrate default:** GPT-4o's crisis behavior under the March 2026 Model Spec wellbeing update is "acknowledge feelings, do not reinforce inaccurate beliefs, refer to professional help when appropriate". This is structurally aligned with what Stillform wants but lacks Stillform's specific resources (988, Crisis Text Line) and stay-with-them framing.
