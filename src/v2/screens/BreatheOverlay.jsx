@@ -8,29 +8,45 @@ import React, { useEffect, useState } from "react";
  * per-beat). A short, bounded breathing pacer the user can pull up
  * anytime to stabilize.
  *
- * Pattern: box breathing — 4s inhale · 4s hold · 4s exhale · 4s hold.
- * Universally calming, no contraindications, well-understood (Naval
- * SEALs / Andrew Huberman / clinical literature). v2 ships with this
- * one pattern; cyclic-sigh and quick-reset variants can come back in
- * Phase 3 alongside the user-config layer.
+ * Pattern: Cyclic Sighing (Balban 2023) — 4s inhale through nose, 1s
+ * top-off (second small inhale to fully expand lungs), 8s slow exhale
+ * through mouth. Double-inhale + extended exhale is the signature shape
+ * of the protocol and the active ingredient in the Balban et al. 2023
+ * study showing cyclic sighing outperforming box breathing and mindful
+ * meditation on daily mood + state-anxiety reduction over a 28-day
+ * comparison.
  *
- * Bounded: ~96s (six cycles), then auto-fades to a "done" state with a
- * Return button. Per canon framing law: breath is a TOOL not the product.
- * It opens, you use it, it closes. No engagement loop.
+ * Duration: 6 rounds (~78s), not the full 5-minute Balban protocol.
+ * Quick Breathe is the "acute relief" surface per master todo line 23,
+ * and canon §10 frames breath as a tool not the product. Running the
+ * full 23-round Balban protocol here drifts into meditation-app
+ * territory. 6 rounds gives the user the cyclic-sighing pattern shape
+ * in a duration similar to the prior box-breathing (~96s) — enough to
+ * down-regulate, not enough to become a sit-down practice. Users who
+ * want more can tap the pill again. The spine close + wind-down
+ * surfaces (via BreathingSession component) run the full 23-round
+ * protocol because they're deliberate practice contexts.
+ *
+ * Bounded: ~78s, then auto-fades to a "done" state with a Return
+ * button. Per canon framing law: breath is a TOOL not the product. It
+ * opens, you use it, it closes. No engagement loop.
  *
  * @param {boolean} open
  * @param {function(): void} onClose
  */
 
+// Cyclic Sighing phases. Per-phase duration (seconds) and scale value
+// drive both timing and the visual breath-circle scaling. Top-off
+// pushes the circle slightly larger than the main inhale (2.6 vs 2.4)
+// because that second inhale meaningfully expands the lungs further —
+// the geometry mirrors the breath.
 const PHASES = [
-  { id: "in",     label: "Breathe in", scale: 2.4 },
-  { id: "hold-1", label: "Hold",       scale: 2.4 },
-  { id: "out",    label: "Breathe out", scale: 1   },
-  { id: "hold-2", label: "Hold",       scale: 1   },
+  { id: "in",      label: "Breathe in",  scale: 2.4, durationMs: 4000 },
+  { id: "top-off", label: "Top off",     scale: 2.6, durationMs: 1000 },
+  { id: "out",     label: "Breathe out", scale: 1.0, durationMs: 8000 },
 ];
 
-const PHASE_DURATION_MS = 4000;
-const TARGET_CYCLES = 6; // ~96s total
+const TARGET_CYCLES = 6; // ~78s total at 13s per cycle
 
 export default function BreatheOverlay({ open, onClose }) {
   const [phaseIndex, setPhaseIndex] = useState(0);
@@ -46,19 +62,29 @@ export default function BreatheOverlay({ open, onClose }) {
 
     let i = 0;
     let cycles = 0;
-    const tick = setInterval(() => {
-      i = (i + 1) % PHASES.length;
-      setPhaseIndex(i);
-      // A cycle completes when we wrap back to 'in' (index 0).
-      if (i === 0) {
-        cycles += 1;
-        setCycleCount(cycles);
-        if (cycles >= TARGET_CYCLES) {
-          clearInterval(tick);
-          setDone(true);
+    let timeoutId = null;
+
+    // Per-phase scheduling because Cyclic Sighing has variable phase
+    // durations (4s / 1s / 8s) — can't use a single setInterval. Each
+    // tick reads the CURRENT phase's duration before scheduling the
+    // next advance. A cycle completes when we wrap back to index 0.
+    const scheduleNext = () => {
+      const currentPhaseDuration = PHASES[i].durationMs;
+      timeoutId = setTimeout(() => {
+        i = (i + 1) % PHASES.length;
+        setPhaseIndex(i);
+        if (i === 0) {
+          cycles += 1;
+          setCycleCount(cycles);
+          if (cycles >= TARGET_CYCLES) {
+            setDone(true);
+            return; // stop the chain
+          }
         }
-      }
-    }, PHASE_DURATION_MS);
+        scheduleNext();
+      }, currentPhaseDuration);
+    };
+    scheduleNext();
 
     const onKey = (e) => {
       if (e.key === "Escape") onClose?.();
@@ -70,7 +96,7 @@ export default function BreatheOverlay({ open, onClose }) {
     document.body.style.overflow = "hidden";
 
     return () => {
-      clearInterval(tick);
+      if (timeoutId) clearTimeout(timeoutId);
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
@@ -139,7 +165,7 @@ export default function BreatheOverlay({ open, onClose }) {
  * ActiveState — the breathing pacer in motion.
  *
  * A circle that expands and contracts with the breath phase. The scale
- * transition uses the phase's full 4s duration so the user's breath can
+ * transition uses the current phase's duration so the user's breath can
  * follow the geometry. Phase label below, cycle count quietly below that.
  * -------------------------------------------------------------------- */
 function ActiveState({ phase, cycleCount }) {
@@ -147,7 +173,10 @@ function ActiveState({ phase, cycleCount }) {
     <>
       {/* The breath circle. Scale is set inline based on current phase,
           so React state changes drive the transition — the CSS transition
-          smoothly interpolates between scales over PHASE_DURATION_MS. */}
+          smoothly interpolates between scales over the current phase's
+          duration. Per-phase duration means Cyclic Sighing's 1s top-off
+          gets a snappy expansion while the 8s exhale gets the long
+          slow contraction that defines the protocol's effect. */}
       <div
         aria-hidden="true"
         style={{
@@ -157,7 +186,7 @@ function ActiveState({ phase, cycleCount }) {
           background: "radial-gradient(circle, rgba(184, 134, 43, 0.18) 0%, rgba(184, 134, 43, 0.04) 60%, transparent 100%)",
           border: "0.5px solid var(--sf-accent-line, rgba(184, 134, 43, 0.32))",
           transform: `scale(${phase.scale})`,
-          transition: "transform 4000ms cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: `transform ${phase.durationMs}ms cubic-bezier(0.4, 0, 0.2, 1)`,
         }}
       />
 
@@ -195,8 +224,13 @@ function ActiveState({ phase, cycleCount }) {
 /* -----------------------------------------------------------------------
  * DoneState — the bounded close.
  *
- * Six cycles is enough for a stabilization pass; longer drifts into
- * meditation-app territory (canon: breath is a tool, not the product).
+ * Six rounds of Cyclic Sighing (~78s) is enough for a stabilization
+ * pass; the full Balban 23-round protocol drifts into meditation-app
+ * territory (canon: breath is a tool, not the product). Users who want
+ * more can tap Quick Breathe again. The full protocol lives in spine
+ * close + wind-down (BreathingSession component) where the surface IS
+ * deliberate breath practice.
+ *
  * The user sees a single restrained "Done." line + Return button.
  * -------------------------------------------------------------------- */
 function DoneState({ onClose }) {
