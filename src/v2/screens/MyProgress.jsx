@@ -87,6 +87,12 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="Ambient conditions you've noticed correlate with how you feel — weather, hydration, the kind of conversation you just left."
           onTap={() => handleNavigate("context-profile")}
         />
+
+        <ProgressEntry
+          title="Trigger Profile"
+          description="External situations you've named as consistently hitting hard — performance reviews, hard conversations, certain people."
+          onTap={() => handleNavigate("trigger-profile")}
+        />
       </section>
     </main>
   );

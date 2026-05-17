@@ -6,6 +6,7 @@ import Spine from "./screens/Spine.jsx";
 import FoundationVerify from "./screens/FoundationVerify.jsx";
 import MyProgress from "./screens/MyProgress.jsx";
 import ContextProfile from "./screens/ContextProfile.jsx";
+import TriggerProfile from "./screens/TriggerProfile.jsx";
 
 /**
  * AppV2 — root of the v2 frontend.
@@ -67,6 +68,7 @@ export default function AppV2() {
             // they add their case here. Unknown targets fall through
             // silently (defensive — landing only emits known ids).
             if (target === "context-profile") setScreen("context-profile");
+            else if (target === "trigger-profile") setScreen("trigger-profile");
           }}
         />
       </div>
@@ -80,6 +82,14 @@ export default function AppV2() {
             owns the route stack; ContextProfile doesn't know its
             parent. */}
         <ContextProfile onExit={() => setScreen("my-progress")} />
+      </div>
+    );
+  }
+
+  if (screen === "trigger-profile") {
+    return (
+      <div className="sf-v2">
+        <TriggerProfile onExit={() => setScreen("my-progress")} />
       </div>
     );
   }
