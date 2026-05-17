@@ -1,5 +1,7 @@
 # Termly ToS — TestFlight-Blocking Action Brief
 
+> **STATUS — May 17, 2026.** Per Completed Archive lines 500, 538, 541, 581: **Termly ToS + Privacy Policy published live, LEGAL_VERSION pinning shipped, Lemon Squeezy customer portal validated.** Some specific items in this brief may still be pending — Master Todo line 559 lists "Termly" in remaining launch-mechanical items. Verify against current Termly dashboard which of Step 1 (Google Voice), Step 2 (Termly questionnaire updates), Step 3 (Privacy Policy phone check) are done vs open before launch. The 2 `src/App.jsx` line refs (`15107` trial gate + "legal links") point at v1 code deleted in Phase A; trial gate logic carried into v2 (verify path), legal-link wiring needs v2 carry-forward verification.
+
 **Date:** May 8, 2026
 **Prepared by:** Claude
 **Action time required from Arlin:** ~10–15 minutes total (Termly questionnaire + Google Voice setup)
