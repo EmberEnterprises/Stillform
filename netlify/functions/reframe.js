@@ -277,6 +277,64 @@ Your previous output failed validation. Repair it to pass all constraints while 
 - The user is the operator; you reflect what they have given you and force a precise pick.
 Return only valid JSON.`;
 
+
+/*
+ * REFRAME_PRACTICE_SCHEMA — slim output contract for v2 spine calls.
+ *
+ * Phase 4.5b (locked May 17, 2026): v2 spine calls do NOT consume
+ * candidate_names — verified in src/v2/lib/reframeApi.js, which only
+ * reads reframe / question / next_step / error / crisisDetected.
+ *
+ * The v1 REFRAME_RESPONSE_SCHEMA mandates candidate_names on turn 1
+ * AND provides the canned phrase "Which one is it — or something I
+ * missed?" as the example for the question field. Models follow JSON
+ * schemas as hard constraints, so the slim REFRAME_PRACTICE_BASE alone
+ * (Phase 4.5) wasn't sufficient — the schema kept driving the regression.
+ *
+ * This slim schema keeps the SAME JSON shape for back-compat with any
+ * code that parses the response, but flips candidate_names to "MUST be
+ * null" and the question rules to require open-shaped questions on
+ * turn 1, not closed multiple-choice picks. The result is a single-
+ * probe turn-1 surface that matches what the v2 spine UI was actually
+ * designed for.
+ */
+const REFRAME_PRACTICE_SCHEMA = `OUTPUT CONTRACT — HARD REQUIREMENT (v2 spine):
+Return ONLY valid JSON with this exact shape:
+{
+  "distortion": "string or null",
+  "candidate_names": null,
+  "mechanism": "string or null",
+  "reframe": "1-5 sentence response",
+  "next_step": "single actionable step sentence or null",
+  "question": "single short question or null"
+}
+Rules:
+- "candidate_names": MUST be null on every turn of every session. This surface does NOT consume candidate_names. Do not populate it; do not list candidates inside "reframe" as a workaround. Single probe only.
+- "reframe": 1-5 sentences, no lists, no empathy boilerplate. On turn 1, this is a single concrete probe — pick ONE specific element of what the user wrote and surface a hypothesis they couldn't have written on their own. Mirror at least two of their exact words (or one quoted phrase) so they can tell you actually read what they said.
+- At most one question mark total across "reframe" and "question".
+- "question": short. Open-shaped on turn 1 — questions that ask "what" or "where" or "how" (not "which one"). The canned v1 closing phrase "Which one is it — or something I missed?" is BANNED on this surface; that phrase locks the user into multiple-choice when the work is a single probe. Closed yes/no questions are acceptable later in the session to confirm a name the user has surfaced.
+- "next_step" and "mechanism" may be null.
+- No markdown fences. JSON only.`;
+
+
+/*
+ * QUALITY_RETRY_PROMPT_V2 — slim retry for v2 validation failures.
+ *
+ * Phase 4.5b: parallel to REFRAME_PRACTICE_SCHEMA. The v1 retry prompt
+ * re-injects the candidate_names mandate on every retry, which would
+ * undo the gating if validation fails and a retry runs. The v2 retry
+ * mirrors the slim schema instead.
+ */
+const QUALITY_RETRY_PROMPT_V2 = `QUALITY RETRY OVERRIDE (v2 spine):
+Your previous output failed validation. Repair it to pass all constraints while preserving meaning.
+- Must satisfy the v2 OUTPUT CONTRACT exactly. candidate_names MUST be null.
+- Remove banned phrases and therapy filler.
+- Keep one mechanism only; do not switch frameworks mid-response.
+- The user came here through a Notice surface that already asked them to name what's specifically present in their state. Your turn-1 job is to probe ONE concrete element of what they wrote — NOT to surface 3-4 candidates. Mirror at least two of their exact words. Surface ONE hypothesis the user couldn't have written on their own. Ask ONE open question (what / where / how), not a closed multiple-choice pick.
+- The user is the operator; you make precise space for their work.
+Return only valid JSON.`;
+
+
 // ─── BANNED_OUTPUT — Consolidated ban manifest (GPT4O Guardrails Audit Action 2)
 // Single source of truth for post-process patterns the AI must never produce.
 // Each entry: { pattern, type: "regex" | "substring", category, note? }
@@ -1469,6 +1527,62 @@ Do NOT open new patterns or surface new work — closure is putting down, not pi
 };
 
 
+/*
+ * METACOGNITIVE_ARC_V2_TURN1_OVERRIDE — single-probe enforcement for v2.
+ *
+ * Phase 4.5b (locked May 17, 2026): METACOGNITIVE_ARC's TURN 1 section
+ * endorses the candidate_names workflow ("the existing candidate_names
+ * pattern is correct in shape"). For v1 callers this is correct — v1's
+ * spine UI consumes candidate_names as clickable options. For v2 calls
+ * it's wrong — v2 doesn't consume candidate_names AND the multi-
+ * candidate framing on turn 1 produces the May 17 regression.
+ *
+ * Rather than rewrite the arc (which would change v1 behavior), this
+ * override is pushed AFTER the arc + BEAT_ADDITIONS in contextParts
+ * when beat is set. Recency-weighted attention means the override
+ * supersedes the arc's TURN 1 endorsement for v2 calls.
+ *
+ * Contains the exact failed exchange from May 17 as the WRONG counter-
+ * example with point-by-point annotation, plus a constructed RIGHT
+ * example showing the single-probe shape. Counter-examples land harder
+ * than rule-stating with these models — concrete > abstract.
+ */
+const METACOGNITIVE_ARC_V2_TURN1_OVERRIDE = `V2 TURN 1 OVERRIDE — REPLACES THE CANDIDATE-NAMES PATTERN IN THE ARC ABOVE:
+
+The arc's TURN 1 candidate-names workflow does NOT apply to this surface. The user came here through the v2 Notice screen — they already named what's specifically present in their state. Surfacing 3-4 candidates on top of that is structurally redundant AND produces the regression caught in the May 17 audit.
+
+V2 TURN 1 = single probe. Specifically:
+- Pick ONE concrete element of what the user actually wrote — not a theme across what they wrote, not a meta-frame on top.
+- Mirror two of their exact words (or one quoted phrase) in the opening sentence. Anchored reflection IS the precision.
+- Surface ONE hypothesis the user couldn't have written on their own — a probe of what might be underneath the named thing, not a paraphrase of the named thing.
+- Ask ONE open-shaped question — "what" or "where" or "how." Open questions invite a specific answer. Closed multiple-choice questions ("which one is it") force a pick from candidates you proposed, which is the workflow this override exists to prevent.
+- candidate_names is null on this surface. Do not populate it. Do not list candidates inside reframe as a workaround.
+
+If the user named multiple things in their input, do NOT list them back and ask which to focus on. Pick the one most likely to be load-bearing — the one most concrete, most specific, or most likely to keep running if left unexamined. They can redirect to a different element in their reply.
+
+WRONG turn 1 (May 17 audit — the regression to avoid):
+User input: "jealousy, grief and injustice"
+AI output: "These are powerful signals. Sorting out which one holds the most weight could help you process it clearly. Which one is it — or something I missed?"
+What's wrong:
+- "These are powerful signals" is a generic theme frame, not a probe of any specific element
+- "process" is on the banned-phrases list
+- "Sorting out which one holds the most weight" is the multi-candidate workflow this surface doesn't want
+- "Which one is it — or something I missed?" is the canned v1 schema example phrase — banned on this surface
+- No specific element of what the user wrote was picked or probed; the response is structurally identical to what would have been produced for any three-feeling input
+
+RIGHT turn 1 — single probe of one specific element:
+User input: "jealousy, grief and injustice"
+AI output: "*Injustice* is the third one you named — and the one that usually keeps running after the other two settle. What happened that's reading as injustice — a specific moment, or a longer pattern coming into focus?"
+What works:
+- One user word mirrored and emphasized (*injustice*) — anchored reflection
+- One concrete element picked (the third named feeling) — not a meta-frame
+- One hypothesis the user couldn't have written on their own ("usually keeps running after the other two settle") — that's a probe, not a paraphrase
+- One open question ("What happened...") — invites a specific answer, can't be closed with yes/no or "A or B"
+- candidate_names is null in the JSON output
+
+The probe doesn't have to be perfect — if the user redirects, you pick up from their redirect on turn 2. The work is the single probe, not a comprehensive read.`;
+
+
 exports.handler = async function(event) {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: createCorsHeaders(event), body: "" };
@@ -2118,6 +2232,17 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
         contextParts.push(BEAT_ADDITIONS[beat]);
       }
 
+      // Phase 4.5b (May 17, 2026): v2 spine calls (any beat set) get an
+      // explicit override that supersedes the arc's TURN 1 candidate-
+      // names endorsement. Pushed AFTER BEAT_ADDITIONS so recency-
+      // weighted attention puts it adjacent to the user message. The
+      // override contains the May 17 failed exchange as a concrete
+      // counter-example — concrete examples land harder than abstract
+      // rules with these models. No-op for v1 callers (beat is null).
+      if (beat) {
+        contextParts.push(METACOGNITIVE_ARC_V2_TURN1_OVERRIDE);
+      }
+
       // Phase 4 #4 (May 16, 2026): for EOD beat, inject today's thread
       // entries so the AI can reference what the user named across the
       // day when helping them distill. Only EOD uses this — morning is
@@ -2365,7 +2490,13 @@ WHAT STAYING SHARP LOOKS LIKE:
 
     if (scienceRoute) {
       contextParts.push(buildSciencePrompt(scienceRoute));
-      contextParts.push(REFRAME_RESPONSE_SCHEMA);
+      // Phase 4.5b (May 17, 2026): v2 spine calls (beat set) get the
+      // slim REFRAME_PRACTICE_SCHEMA — candidate_names: null, single-
+      // probe turn-1 rules, open-shaped question requirement, banned
+      // v1 canned-phrase example. v1 callers keep REFRAME_RESPONSE_
+      // SCHEMA with full candidate_names workflow. Same JSON shape on
+      // the wire either way; only the model-facing rules differ.
+      contextParts.push(beat ? REFRAME_PRACTICE_SCHEMA : REFRAME_RESPONSE_SCHEMA);
       contextParts.push("ENTRY GUARD: Do not assume something is wrong just because the user opened Reframe. If the input is casual or playful, stay friendly and useful without forcing a problem-state frame.");
       if (isPositiveState) {
         contextParts.push("POSITIVE / RESOLVED STATE MODE: The user may be reporting relief, progress, a win, or that they figured something out. Do NOT drag this into a problem frame. Do NOT hunt for the hidden negative angle. Acknowledge the movement accurately, reinforce what worked, and help them hold onto the useful lesson or next carry-forward move. If a question helps, ask what clicked or what they want to keep from this.");
@@ -2466,9 +2597,15 @@ WHAT STAYING SHARP LOOKS LIKE:
     let lastFailureReasons = ["no response"];
 
     for (let attempt = 0; attempt < 2; attempt++) {
+      // Phase 4.5b (May 17, 2026): v2 spine retries get the slim
+      // QUALITY_RETRY_PROMPT_V2 which mirrors the slim schema (no
+      // candidate_names mandate, single-probe instructions). v1
+      // retries keep the original prompt with candidate_names
+      // enforcement.
+      const retryPrompt = beat ? QUALITY_RETRY_PROMPT_V2 : QUALITY_RETRY_PROMPT;
       const attemptSystemPrompt = attempt === 0
         ? systemPrompt
-        : `${systemPrompt}\n\n${QUALITY_RETRY_PROMPT}\nValidation failures: ${lastFailureReasons.join("; ")}`;
+        : `${systemPrompt}\n\n${retryPrompt}\nValidation failures: ${lastFailureReasons.join("; ")}`;
       const attemptMessages = attempt === 0
         ? messages
         : [
