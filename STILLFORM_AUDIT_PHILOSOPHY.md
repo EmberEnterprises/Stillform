@@ -1,5 +1,5 @@
 # STILLFORM AUDIT PHILOSOPHY
-**ARA Embers LLC · May 12, 2026 · v2.0**
+**ARA Embers LLC · May 12, 2026 · v2.1 (updated May 17, 2026)**
 
 > **Session-start ground truth lives in `STILLFORM_CANON.md`.** This file retained for deep reference (full nine-layer audit with 35+ specific questions, evidence requirements, war stories). Read CANON first.
 
