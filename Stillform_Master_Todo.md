@@ -1279,6 +1279,16 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## 🐛 Bugs / Defects
 
+### 🔧 Stillform-targeted preflight script — needed before launch (added May 17, 2026 from Phase A under-tracking)
+
+**Caught when Security Gate failed on commit `fb8918d`.** Phase A (Phase A: delete v1 frontend code, route bare URL to Stillform) deleted `scripts/ship-preflight.mjs` and `scripts/core-loop-smoke.mjs` along with the v1 frontend, but didn't update `package.json` or `.github/workflows/security-gate.yml` which still referenced both scripts. CI failure surfaced the gap. Classic failure-class-17 under-tracking — the dependent infra references should have been cleaned in the same commit. Cleaned in `[next commit]`.
+
+**The deleted ship-preflight.mjs was 190 lines of v1-only checks** — every single check targeted `src/App.jsx` invariants (calibration helpers, integration adapters, loop telemetry, tutorial copy locks, FAQ entries, etc.). Restoring it would just check nonexistent code.
+
+**Stillform needs its own preflight script before launch.** Build #X (sequence with launch-readiness work). Should check `src/v2/` invariants — locked chip vocabulary matches `CHIP_DEFINITIONS.md`, `beatConfig.js` exports the four beats, `Spine.jsx` wires beat-aware variants, persistence keys match canonical list, `netlify/functions/reframe.js` METACOGNITIVE_ARC and BEAT_ADDITIONS present, banned phrases (CANON section 4) not present in user-facing copy. Modeled after the v1 pattern (rg-based must-match / must-not-match assertions) but targeting Stillform's actual surface set.
+
+**Current Security Gate workflow steps after cleanup:** Checkout → Setup Node → Install deps → Build → Security smoke checks. Build catches React/import/syntax breaks; security:smoke catches CORS / RLS / endpoint-auth regressions. These are sufficient as a safety net until Stillform-targeted preflight is built.
+
 ### ✅ RESOLVED May 7, 2026 — Auto-trigger cloud sync + restore purchases on app open for logged-in users (originally added May 6, 2026)
 
 **Resolved by Launch Sync useEffect at `src/App.jsx:14000-14028`** (added May 7, dependency `[syncSignedIn]`, debounced 2 minutes). On app open with active session, fires `sbSyncDown()` and forces `setSubscriptionCheckTick(n => n + 1)` — which in turn triggers `sbCheckSubscriptionStatus()` at line 13958. Comment at line 13988 explicitly references this Master Todo entry.
