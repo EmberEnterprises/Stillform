@@ -1279,6 +1279,19 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## 🐛 Bugs / Defects
 
+### 🔧 REFRAME_UI_FOUNDATION_SPEC v2 reconciliation — open question (added May 17, 2026)
+
+**Source:** Phase D-2a audit. Spec drafted May 13, 2026 as "Commit 2" against v1's `src/App.jsx`; v1 deleted in Phase A before Commit 2 shipped. Line refs throughout the spec (CSS ~825-935, message rendering ~13768-13810, input + action row ~13858-14020) all stale.
+
+**Partial carry-into-v2 status** (walked `src/v2/screens/spine/Reframe.jsx`):
+- ✅ Move 1 (drop card container) — appears shipped (no backgroundColor/border on AI messages)
+- ⚠️ Move 2 (first sentence as typographic event) — no firstSentence wiring detected in v2
+- ⚠️ Move 3 (Reply pill + overflow) — v2 uses inline reply input, not pill-then-expand
+- ✅ Move 4 (mono for user, serif for AI) — appears shipped (MonoLabel imported and used, editorial-serif body confirmed)
+- ⚠️ Move 5 (Reply pill collapse during read) — n/a if Move 3 not in current form
+
+**Open question:** Are Moves 2, 3, 5 still desired for a future v2 Reframe.jsx iteration, or were they intentionally deselected when v2 was built? The design principles remain valid framing for future Reframe-surface work regardless; v1 line refs are obsolete.
+
 ### 🔧 docs/STILLFORM_TESTING_CHECKLIST.md — v2 rewrite needed before TestFlight (added May 17, 2026)
 
 **Source:** Phase D-1 subdirectory audit. 26kB / 14-section checklist last reviewed April 28, 2026 — describes v1 surfaces deleted in Phase A: Tutorial card sequence, BreatheGroundTool merged phases, separate Body Scan Tool, three-mode Reframe Tool, standalone Composure Check, Quick Breathe Panic Mode, v1 home with bio-filter-routed CTA, v1 Settings, v1 FAQ. None of these exist in v2.

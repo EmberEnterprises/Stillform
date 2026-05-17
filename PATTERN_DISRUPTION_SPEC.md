@@ -59,7 +59,7 @@ The AI runs the pattern check **after every data point lands** that could be the
 
 ### 2.5 AI-offline backup case
 
-When the AI is down and the user falls back to Self Mode, captured data is stored. When the AI comes back online, it reads the gap-period data and folds it into pattern detection same as live data. Backlogged patterns trigger notifications identically to live ones — no special language, no apology framing. The user opted into AI-assisted composure architecture; the AI catching up after an outage is exactly what was promised. Transparency, not softening.
+When the AI is down and the user falls back to Self Mode, captured data is stored. When the AI comes back online, it reads the gap-period data and folds it into pattern detection same as live data. Backlogged patterns trigger notifications identically to live ones — no special language, no apology framing. The user opted into an AI-assisted metacognition practice; the AI catching up after an outage is exactly what was promised. Transparency, not softening.
 
 ---
 
@@ -162,7 +162,7 @@ The surface shows:
 - The eight detection dimensions described in plain language so the user can see the AI's analytical lens
 - An option to clear the history
 
-This is the agency principle in concrete form. The user signed up for AI-assisted composure architecture. The AI doing pattern reads is not a violation — it's the deal. Transparency about *what the AI sees* is what makes the deal honest.
+This is the agency principle in concrete form. The user signed up for an AI-assisted metacognition practice. The AI doing pattern reads is not a violation — it's the deal. Transparency about *what the AI sees* is what makes the deal honest.
 
 There is no off-switch for pattern detection itself. The user can dismiss notifications, dismiss prompts, ignore offers. They cannot turn off the AI's read. Doing so would defeat the architecture they signed up for.
 

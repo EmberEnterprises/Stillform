@@ -1,6 +1,17 @@
 # REFRAME UI FOUNDATION — Commit 2 Spec
 **ARA Embers LLC · v1.0 · Drafted May 13, 2026**
 
+> **⚠️ V2 RECONCILIATION NEEDED — May 17, 2026.** This spec was drafted against v1's `src/App.jsx` which was deleted in Phase A (commit `237167b`). The line refs throughout (CSS block ~825-935, message rendering ~13768-13810, input + action row ~13858-14020, verification checklist's `node -c src/App.jsx`) are all stale.
+>
+> **Partial carry-into-v2 status:** Walking `src/v2/screens/spine/Reframe.jsx`:
+> - ✅ **Move 1** (drop card container) — appears shipped; no backgroundColor/border on AI messages
+> - ⚠️ **Move 2** (first sentence as typographic event) — no firstSentence wiring detected in v2
+> - ⚠️ **Move 3** (Reply pill + overflow) — v2 uses inline reply input, not the pill-then-expand pattern specified
+> - ✅ **Move 4** (mono for user, serif for AI) — appears shipped; `MonoLabel` component imported and used, editorial-serif body confirmed via component comment
+> - ⚠️ **Move 5** (Reply pill collapse during read) — n/a if Move 3 not in current form
+>
+> **Open question for Arlin:** Are the unshipped Moves (2, 3, 5) still desired for a future v2 Reframe.jsx iteration, or were they intentionally deselected when v2 was built? The 5 design principles below remain valid framing for future Reframe surface work regardless; the v1 line refs are obsolete. Tracked in Master Todo as a Reframe-polish follow-up. Treat this spec as design thinking for future Reframe.jsx iterations, NOT as enforceable build target until reconciled.
+
 The spec for the next code commit on the Reframe screen. No code touches `src/App.jsx` until Arlin signs off on this spec.
 
 ---
