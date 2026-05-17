@@ -1306,6 +1306,36 @@ When a user is already signed in, opening the app does not automatically sync cl
 
 </details>
 
+### 🔧 Supabase Site URL config still on localhost:3000 — CRITICAL launch blocker (added May 12, 2026 from phone-test)
+
+**Caught during phone test May 12 evening.** Email confirmation link sent on fresh signup pointed to `http://localhost:3000` (Supabase's dev default Site URL). Phone browser returned `ERR_CONNECTION_REFUSED`. Every new signup since this config was created has hit this wall — anyone signing up fresh can never confirm their email.
+
+**This is a Supabase dashboard fix, not a code fix.** Arlin (project owner) needs to:
+1. Supabase dashboard → Stillform project
+2. Authentication → URL Configuration
+3. Set Site URL = `https://stillformapp.com`
+4. Verify Redirect URLs include `https://stillformapp.com/*`
+5. (Optional) Authentication → Email Templates → Confirm signup → verify template uses `{{ .ConfirmationURL }}`
+
+**Severity:** Launch-blocking. Every fresh signup is broken until this flips. Dashboard click — not a code task. Surface this to Arlin first thing if it hasn't been resolved.
+
+### 💳 Restore purchase by email — no recovery path for accountless users (added May 12, 2026 from phone-test)
+
+**Caught during phone test May 12 evening.** Manage Subscription portal shipped May 4 (line 1668 above) works for users who are signed in with active `lemon_customer_id`. It does NOT cover the case where a user has deleted their account / switched devices / had a Supabase outage / lost access — and still has an active Lemon Squeezy subscription tied to their email.
+
+**Needed flow:**
+1. Subscribe screen surfaces "I already paid" or "Restore purchase" affordance prominently (currently appears nowhere from May 12 screenshot)
+2. User enters their email
+3. Backend checks Lemon Squeezy for an active subscription matching that email
+4. If found: prompts user to create or sign in with that email, links Supabase account back to existing subscription record
+
+**Implementation notes:**
+- Lemon Squeezy customer portal URL is per-customer-signed (24h valid) — a webhook check + portal redirect may be the lightest implementation path
+- Distinct from shipped Manage Subscription (which assumes signed-in state with `lemon_customer_id` already linked)
+- Likely needs a new Netlify function: `subscription-lookup-by-email.js` (or extend `subscription-portal.js` to accept email lookup)
+
+**Severity:** Blocks user recovery. Anyone who deletes their account, switches devices, or hits a Supabase outage hits this — including Arlin during the May 12 test. Launch-required if delete-account split (entry above) is launch-required, because the two together are the complete account-recovery story.
+
 ### 🗑️ Delete account vs delete data split — REQUIRED for launch parity (added May 13, 2026 from phone-test)
 
 Currently Settings has a single deletion path. Two distinct user intents need separate flows:
