@@ -2,6 +2,8 @@
 ### Living SHIP list across sessions (April 7, 2026 onward)
 ### Test each item. Check it off only when verified on live site.
 
+> **CONTEXT — May 17, 2026.** This punch list spans April 7 → present. Some checked [x] items below were shipped before the **May 11–12 framing law cascade** and use older framing vocabulary in their item descriptions ("composure architecture intro" at line 501, etc.); the work shipped is preserved as historical record. Some open [ ] TODO items have been **superseded by Phase A (May 17 v1 frontend deletion)** which went beyond their original scope — those are flagged inline. New items going forward should use current framing (metacognition practice per CANON §4 + STILLFORM_FRAMING_LAW.md) and reference v2 architecture (`src/v2/`).
+
 ---
 
 ## SHIP MODE — ACCOMMODATING CURRENT APP STAGE
@@ -201,8 +203,8 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 
 ### Medium priority — reliability and delivery safety
 - [x] UAT fallback complexity documented with explicit operational visibility + retrieval checks (`docs/SECURITY_HARDENING_RUNBOOK.md` + cloud history retrieval endpoint)
-- [ ] Begin App.jsx modularization phase 1 (home/UAT surfaces, Reframe UI/state, settings/data-management)
-- [ ] Confirm modularization goal met: reduced regression blast radius for high-churn zones
+- [x] ~~Begin App.jsx modularization phase 1 (home/UAT surfaces, Reframe UI/state, settings/data-management)~~ — **SUPERSEDED by Phase A (May 17, 2026): v1 frontend deleted entirely; current architecture is `src/v2/` with separated spine, beat configs, and component modules. Modularization goal achieved via replacement, not refactor.**
+- [x] ~~Confirm modularization goal met: reduced regression blast radius for high-churn zones~~ — **SUPERSEDED by Phase A: v2 architecture is modular by design (Spine.jsx + screens/spine/ + lib/ + components/).**
 
 ### Near-term (this week)
 - [x] Add CI gate that runs build + `ship:preflight` + `smoke:core-loop` on PR/push (`.github/workflows/security-gate.yml` + `security:smoke`)
