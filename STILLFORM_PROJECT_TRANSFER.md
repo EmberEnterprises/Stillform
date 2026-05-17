@@ -120,7 +120,7 @@ Based on Barrett (2017) constructed emotion theory, Kashdan/Barrett/McKnight (20
 
 > **⚠️ For the most current state, read `STILLFORM_HANDOFF_MAY_13_2026.md` first.** It contains the May 13 session work (10 brainstorm ideas integrated), branch state, and immediate next tasks. The section below is the persistent build-architecture record; the handoff doc is the operational state.
 
-**Live at stillformapp.com. Lemon Squeezy LIVE — paywall active.** Working branch: `feat/home-wiring-surface` (10 commits ahead of the May 12 handoff state, well ahead of `main`). Production deployed at the May 12 evening cleanup commit (`cf970eb`); the May 13 brainstorm-integration commits are pushed to GitHub but not yet deployed (Arlin triggers Netlify manually). `src/App.jsx` ~29,637 lines.
+**Live at stillformapp.com. Lemon Squeezy LIVE — paywall active.** Working branch: `feat/home-wiring-surface` (10 commits ahead of the May 12 handoff state, well ahead of `main`). Production deployed at the May 12 evening cleanup commit (`cf970eb`); the May 13 brainstorm-integration commits are pushed to GitHub but not yet deployed (Arlin triggers Netlify manually). 
 
 ### Infrastructure
 - Hosting: Netlify Pro
@@ -146,7 +146,7 @@ Based on Barrett (2017) constructed emotion theory, Kashdan/Barrett/McKnight (20
 - What Shifted — one-line affect labeling after Reframe (Lieberman 2007)
 - Next Move — 4 buttons: Send a message / Hold a boundary / Delay your response / Let it go
 - Lock-in — personalized statement by Next Move plus regulation type, 20-second pause
-- LOCK_IN_STATEMENTS constant in App.jsx — 8 approved statements, regulation-type personalized
+- LOCK_IN_STATEMENTS constant — 8 approved statements, regulation-type personalized
 
 ### Lock-in Statements (approved — do not change)
 - Send message body-first: "The physical state cleared first, which made the response possible."
@@ -191,7 +191,7 @@ Based on Barrett (2017) constructed emotion theory, Kashdan/Barrett/McKnight (20
 - Home link — Stillform logo routes home on all screens except home
 - Internationalization scaffolding — captureDeviceLocale fires Plausible event for demand data, Settings → Language section with "Request a language" mailto button. NO i18next install yet — translation work deferred until translator budget exists.
 
-### Current Routing Logic (App.jsx hero CTA onClick)
+### Current Routing Logic (hero CTA onClick)
 ```
 offBaseline = bioFilter includes: activated, depleted, pain, sleep, medicated
 
@@ -252,7 +252,7 @@ Of my 8 substantive code commits today, 3 had real bugs that broke the Vite buil
 Another instance of Claude (via Cursor, with the same EmberEnterprises GitHub token) made 3 follow-up commits to fix these. The science card feature is now working on main; latest CI run on fc4e8158 is green.
 
 What I missed and what changes:
-- Should have checked existing import pattern in App.jsx BEFORE writing the new component. The pattern was visible in the file.
+- Should have checked existing import patterns BEFORE writing the new component. The pattern was visible in the file.
 - Python scripts embedding JS code should never use `\n` threaded through `str.replace()`. Either triple-quoted Python strings or direct file write via create_file.
 - Decorative comment dividers must use dashes or other non-conflict-pattern characters.
 - After every code commit, file should be re-read from main and visually inspected. "Shipped clean, ready for trigger" is wrong framing when only Security Gate green confirms clean.
@@ -278,7 +278,7 @@ After the Plain-Language Neuroscience Surface shipped, the work shifted to the c
 - "Finding" replaces "card" as user-facing language
 - **Ownership principle (load-bearing):** Stillform owns its tools, instruments, and practices. Stillform NEVER claims ownership of the science. Science is the researchers'; implementation is Stillform's. The principle was sharpened twice in the May 1 session — overcorrection is also a form of ownership claim (e.g., "delivers the granularity training" understates what Stillform built; "IS the granularity training" correctly identifies the chip system as the practice that instantiates the published mechanism).
 
-**Locked ⓘ modal copy** (replaces v2 copy in App.jsx on next code update):
+**Locked ⓘ modal copy** (replaces current copy on next code update):
 
 ```
 THE SCIENCE BEHIND THIS
@@ -331,8 +331,8 @@ Balban 2023, Lieberman 2007, Torre & Lieberman 2018, Barrett 2001, Kashdan 2015,
 
 1. Update Science Sheet to fix the 8 citation/journal errors and soften the Ma 2017 cortisol framing
 2. Replace v4 corpus in `netlify/functions/reframe.js` with v5 (50 findings across 22 studies, multi-angle keys, `paywalled` flag per entry, `source_url` field, "Read the study →" link rendering, multi-finding-per-study routing logic)
-3. Replace `STATIC_SCIENCE_CARDS` in `src/App.jsx` with 20 selected v5 findings
-4. Replace ⓘ modal copy in App.jsx with the locked v4 modal text above
+3. Replace `STATIC_SCIENCE_CARDS` with 20 selected v5 findings
+4. Replace ⓘ modal copy with the locked v4 modal text above
 5. Manual deploy via Netlify (Arlin triggers)
 
 ### IP / copyright risk assessment (May 1 evening)
@@ -524,7 +524,7 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 - **Bio-filter routing gap** — RESOLVED via `shouldBodyRouteToScan(bioFilter)` helper. Pain/Off-baseline/Something route to Body Scan; Activated/Sleep/Depleted/Medicated route to Breathe. Per Ochsner & Gross (2005). Commit `d74fe6bc`.
 
-- **Disconnected/Distant chip** — RESOLVED. Chip added to both chip arrays at App.jsx:6202 and 7176. New ReframeTool useEffect routes feelState=="distant" → Body Scan via onComplete("scan"). feelMap entry added to reframe.js:1190 with science-grounded prompt. Per Porges (2011) polyvagal + Siegel (1999) window of tolerance. Commit `aaa64d89`.
+- **Disconnected/Distant chip** — RESOLVED. Chip added to both chip arrays. New ReframeTool useEffect routes feelState=="distant" → Body Scan via onComplete("scan"). feelMap entry added to reframe.js:1190 with science-grounded prompt. Per Porges (2011) polyvagal + Siegel (1999) window of tolerance. Commit `aaa64d89`.
 
 - **Stuck chip routing question** — CLOSED by implementation. Dead branch at hero CTA (line 12418) was removed. Per design: chips inform AI context, bio-filter is routing override mechanism. Stuck stays as Reframe-clarity routing for all types. Commit `86b89844`.
 
@@ -581,7 +581,7 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 ## 6. Key Files
 
-- src/App.jsx — entire frontend (15,272 lines as of Apr 27, 2026)
+
 - netlify/functions/reframe.js — AI serverless function (GPT-4o, 1446 lines)
 - netlify/functions/health.js — lightweight GET endpoint for AI-recovery detection (no Anthropic call). Used by ReframeTool's polling effect when in Self Mode due to AI failure.
 - scripts/ship-preflight.mjs — 41 must-match security checks + 8 TimeKeeper guards (run before every push)
@@ -828,7 +828,7 @@ Composure stays as a marketable felt outcome — NOT the product headline. Still
 
 ### Files touched this session
 
-- `src/App.jsx` (~+1000 lines net across 10 commits)
+
 - `src/practice-surface/PracticeSurface.jsx` (~+400 lines — three new helpers + three new render cards + props extension)
 - `netlify/functions/reframe.js` (+2 lines — `sessionPrecision` destructure + context push)
 
