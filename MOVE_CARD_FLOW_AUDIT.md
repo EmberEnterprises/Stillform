@@ -102,7 +102,7 @@ A library of ~20-40 hand-written somatic prompt sequences (each 30-90s, each tag
 
 ### Option C: Deterministic rule-based selection from library
 
-No AI at all. Move card library + a state-to-sequence mapping rule. State chip + bio-filter + signal area determine the sequence. Pure code.
+No AI at all. Move card Database + a state-to-sequence mapping rule. State chip + bio-filter + signal area determine the sequence. Pure code.
 
 - **Pros:** Free at the margin (no API). Fully deterministic. Predictable. Auditable. No latency. No failure mode. Library upkeep is the only ongoing work.
 - **Cons:** Loses the "generated for the user's current state" personalization the spec calls for. Risk of repeated sequences feeling stale. Doesn't ladder up to the AI-personalization story Stillform's pricing implies.
@@ -125,9 +125,9 @@ Hybrid leaning: ship Option B, but keep the library design pluggable so a future
 
 Six distinct surfaces. Numbered by ship priority.
 
-### 8a. Move card library (foundation)
+### 8a. Move card Database (foundation)
 
-A new module `src/move-card/library.js` (or inline in [Stillform code] alongside existing breathing pattern arrays). Each entry:
+A new module `src/move-card/database.js` (or inline in the Stillform frontend alongside existing breathing pattern arrays). Each entry:
 
 ```
 {
@@ -259,7 +259,7 @@ Per `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` ship order line 314 ("1-2 builds").
 
 | Phase | Scope | Approx diff size |
 |---|---|---|
-| 8a | Move card library + science-tagged sequences | ~250 lines (data-heavy) |
+| 8a | Move card Database + science-tagged sequences | ~250 lines (data-heavy) |
 | 8b | Selection function (Netlify + deterministic fallback) | ~180 lines (60 client + 120 backend) |
 | 8c | `<MoveCardTool>` runner + extracted shared `<SomaticPromptRunner>` from Disruptor | ~150 lines net (refactor + new component) |
 | 8d | Discoverability pill on home with draggable persistence | ~120 lines |
@@ -296,11 +296,13 @@ If Arlin overrides any default in §6, the audit is updated in place. The bigges
 Move card is independent of Today's Brief audit's open calls. Either build can ship first depending on Arlin's preference.
 
 
-## 10. Pair-authored sequence library — preserved content
+## 10. Pair-authored sequence Database — preserved content
 
-**Status:** 22 pair-authored Move card sequences (10 from May 8 + 12 from May 14 coverage-gap fill) preserved here as locked content for the Phase 6 Stillform Move card build. This content originated as `src/move-card/library.js` in the prior frontend implementation; that file was deleted with the rest of the prior frontend code, but its content is the work product of an Arlin + Claude pair-author session against `PATTERN_DISRUPTION_SPEC.md` §4.2 mechanisms and represents real cognitive work that should not be lost. When Phase 6 builds Move card, this is the foundation library.
+**Status:** 22 pair-authored Move card sequences (10 from May 8 + 12 from May 14 coverage-gap fill) preserved here as locked content for the Phase 6 Stillform Move card build. This content originated as `src/move-card/library.js` in the prior frontend implementation; that file was deleted with the rest of the prior frontend code, but its content is the work product of an Arlin + Claude pair-author session against `PATTERN_DISRUPTION_SPEC.md` §4.2 mechanisms and represents real cognitive work that should not be lost. When Phase 6 builds Move card, this is the foundation Database.
 
-**What's locked here vs what's revisable:** The 22 sequences (prompts, durations, prompt kinds, fitness taxonomy, science tags) are locked — they were pair-authored against locked science. The helper functions at the bottom (`getSequenceById`, `selectByDeterministicRule`) document a deterministic-fallback selection pattern that Phase 6 may keep or adapt; the audit's §3b backend selection function and §2 architectural recommendation (Option B: AI-selected from library, deterministic fallback) still stand as the architecture.
+**Naming note for Phase 6 rebuild:** The preserved code below uses the constant name `MOVE_CARD_LIBRARY` and the file name `library.js`, reflecting the original naming at the time of authoring. When Phase 6 rebuilds, **rename to `MOVE_CARD_DATABASE`** (file: `src/move-card/database.js`) to disambiguate from the user-facing **User-Invented Move Library** specced in `REFRAME_UI_FOUNDATION_SPEC.md`. The two are distinct: this Database is the AI-side curated source of pair-authored sequences; the User-Invented Move Library is the user-facing surface where users save moves they invent. Conflating them in code or copy would confuse both layers.
+
+**What's locked here vs what's revisable:** The 22 sequences (prompts, durations, prompt kinds, fitness taxonomy, science tags) are locked — they were pair-authored against locked science. The helper functions at the bottom (`getSequenceById`, `selectByDeterministicRule`) document a deterministic-fallback selection pattern that Phase 6 may keep or adapt; the audit's §3b backend selection function and §2 architectural recommendation (Option B: AI-selected from Database, deterministic fallback) still stand as the architecture.
 
 **Voice note from the source file:** "prestige-operator declarative. Same as Disruptor. Second person imperative is fine here because these are bodily instructions, not advice. 'Press your feet flat' not 'you might want to try pressing your feet flat.'"
 
@@ -333,7 +335,7 @@ Move card is independent of Today's Brief audit's open calls. Either build can s
 - PATTERN_DISRUPTION_SPEC §4.2 names "counter-rhythm breath" but no sequence enacted it → #21 counter-rhythm-breath-60s
 - shoulders signalArea covered only via stacking → #22 shoulders-deep-yoke-60s
 
-### The library — full preserved content
+### The Database — full preserved content
 
 ```javascript
 // Move Card Library — Engagement Architecture Engine 2, Build #8 Phase 8a
