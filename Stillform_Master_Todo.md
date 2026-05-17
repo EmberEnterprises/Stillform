@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 4 COMPLETE — all 8 sub-items shipped: beat-aware spine variants live; morning + EOD AI prompts wired via BEAT_ADDITIONS; EOD reads today's thread; wind-down minimal flow + reusable BreathingSession; micro-credit + breathing offer on Close; CANON §7.2 + CHIP_DEFINITIONS reconciliation. Ready for Arlin's testing pass.)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 4 ✅ COMPLETE — all 8 sub-items shipped: beat-aware spine variants live. Phase 4.5 ⏳ IN PROGRESS — system prompt density reduction: swap CALM_SYSTEM for slim REFRAME_PRACTICE_BASE when beat is set, dropping turn-1 stack from ~5,000 → ~2,500 words so the metacognitive arc actually fires. v1 callers untouched.)**
 
 ---
 
@@ -258,6 +258,66 @@ This is the architectural floor under Principle C. Every AI surface ships with a
   7. ✅ shipped `707f06c` (combined with #6) — Breathing offer + Close render + Plausible events. When `breathingOffer` prop is set, Close becomes a step machine: compose → breathing-offer (Start / Skip card) → breathing-running (BreathingSession) → onReturnHome. Skip OR breathing-complete both call onReturnHome with the takeaway. When `breathingOffer` is null, primary action stays "Return home" and exits directly. `resolveBreathingPattern()` helper maps `config.close.breathingOffer` to BreathingSession pattern keys: deep-regulate → deep-regulate, cyclic-sighing → cyclic-sighing, quick-reset → quick-reset, box → quick-reset (Phase 4 shortcut; full 4-4-4-4 box pattern adds in polish). `BREATHING_OFFER_COPY` map provides per-pattern headline + body + labelInfo (each cites relevant research). Plausible events: `Breathing Offer Shown` (on step landing), `Breathing Offer Tapped` (Start), `Breathing Offer Skipped` (Skip). Props: `{beat, pattern}`. `Spine.jsx` passes `config.close.breathingOffer` + `beat` to Close. EOD now offers Deep Regulate before exit; morning offers Box (routed to Quick Reset); main has no offer; wind-down doesn't route through Close.
 
   8. ✅ shipped `[next commit]` — CANON §7.2 + CHIP_DEFINITIONS reconciliation. **CANON §7.2 added** ("Beat-Aware Spine Variants, locked May 16, 2026") — covers: beat lock at session mount; the `beatConfig` shape as single source of truth; per-beat behavior table (main / morning / EOD / wind-down) with chip subsets, AI prompt additions, breathing offers, completion flags; cross-beat enhancements (micro-credit, breathing offer); telemetry surface inventory; design principle (variants of the same spine, never replacements; wind-down is the one exception, justified by Canon §10). **CHIP_DEFINITIONS_DRAFT.md reconciled**: Unsure definition added (10th chip, was missing — "one state that hasn't surfaced into language yet"). New "Phase 4 — per-beat chip subsets" section documents the morning 7-chip / EOD 8-chip / wind-down no-chip filters with rationale for which chips are excluded per beat (e.g., EOD excludes Excited/Focused because those signal the day hasn't closed yet). Footer updated to note 10th chip + reconciliation date. Phase 4 architectural work complete.
+
+- **4.5** — System prompt density reduction (v2 turn-1 quality fix, locked May 16, 2026)
+
+  **Why this exists:** Arlin's first EOD test through the v2 spine produced a textbook restate-as-frame + binary-options response — exactly the regression METACOGNITIVE_ARC was supposed to prevent. Root cause diagnosed by prompt-density audit: total system prompt for a v2 EOD turn-1 call is ~5,000 words / ~7,000 tokens. Well past the ~1,500–2,500 word threshold where instruction-following degrades. The arc's PROBE-don't-restate rule is one signal among many; the model fell back to therapy-mode pattern-matching.
+
+  **Biggest single offender:** `CALM_SYSTEM` at 3,122 words. Specifically its **GOLDEN RESPONSE EXAMPLES** section (~1,400 words) which teaches a "restate + 3-4 candidates + closing pick question" workflow that directly conflicts with the arc's "probe-don't-restate" turn-1 rule. The examples are concrete and structurally specific; the arc rule is abstract. The model follows the examples. Result: every v2 EOD/morning session opens with the format Arlin saw.
+
+  **Strategy (Option B, picked May 16, 2026):** When `beat` is set (v2 path, indicating the request comes from the v2 spine), swap `CALM_SYSTEM` / `CLARITY_SYSTEM` for a slim `REFRAME_PRACTICE_BASE` that contains ONLY persona + voice + banned phrases + liability rails + safety basics (~600 words target). Everything else — the analytical workflow, the turn-1 instructions, the technique vocabulary — lives in `METACOGNITIVE_ARC` + `BEAT_ADDITIONS[beat]` + `USER_VOICE_PRESERVATION` which already layer on top.
+
+  **What gets cut from the slim base (covered elsewhere in v2 stack):**
+  - "Bounded analytical engagement" bullets — arc covers
+  - Long metacognition citations (Flavell / Schraw / Veenman / Frontiers / Wells / Hitchcock) — arc has the relevant ones
+  - "YOUR JOB IN A RESPONSE" candidate-names workflow — arc replaces with PROBE-first technique sequence
+  - GOLDEN EXAMPLES (~1,400 words) — these are teaching the wrong turn-1 behavior; arc handles turn-1 instruction
+  - "WHAT THE ANALYTICAL WORK LOOKS LIKE" technique list — arc covers with self-distance / surface distortion / fact-vs-forecast / constructed-emotion / implementation intention
+  - "PRESENCE-FIRST WHEN STATE IS LOUD" — covered by arc's heavy-state handling guidance + bio-filter contextParts
+  - "WHAT TO NOTICE FOR SESSION CONTINUITY" — only relevant for session count > 0; session-count throttle handles this separately
+  - "80/20 RULE" — covered by arc's "anchor specifically to their words" rule
+  - candidate_names structured output reference — v2 spine doesn't consume candidate_names (verified in reframeApi.js); only consumes `reframe` / `question` / `next_step` / `error` / `crisisDetected`
+
+  **What stays in the slim base (essential, not covered elsewhere):**
+  - Stillform persona one-liner (the metacognition framing)
+  - VOICE register (direct, warm, plain, brief)
+  - Banned phrases (therapy jargon + love language) — the explicit anti-drift list
+  - EMPHASIS rule (*asterisks*)
+  - RESPONSE SHAPE rule (1-5 sentences, one question max, casual questioning style)
+  - NO NAMES privacy rule
+  - "WHEN THE EXPERIENCE IS REAL" reality-first guidance
+  - PATTERN RESPECT
+  - MIRRORING (match style, don't mirror chaos)
+  - SCATTERED INPUT (pick loudest signal)
+  - STATE AWARENESS (context informs, never explains)
+  - EGO AWARENESS (don't push harder on pushback)
+  - DECISION FRICTION (high-stakes guardrail)
+  - ABSOLUTE PROHIBITIONS — LIABILITY (medical / financial / legal)
+  - THIRD-PARTY PRIVACY
+  - JSON output contract reference
+
+  **Routing logic:** `let systemPrompt = mode === "clarity" ? CLARITY_SYSTEM : mode === "hype" ? HYPE_SYSTEM : CALM_SYSTEM;` becomes `let systemPrompt = beat ? (mode === "hype" ? HYPE_SYSTEM : REFRAME_PRACTICE_BASE) : (mode === "clarity" ? CLARITY_SYSTEM : mode === "hype" ? HYPE_SYSTEM : CALM_SYSTEM);`. So:
+  - v1 callers (no beat sent) keep CALM_SYSTEM / CLARITY_SYSTEM exactly as today — zero change to v1 behavior, full back-compat.
+  - v2 callers (beat is set) get the slim base for calm + clarity modes. Hype mode stays on HYPE_SYSTEM (hype is Phase 6 pre-event work, not yet in v2 spine, but if it ever comes from v2 it should still get the existing hype framing because hype is a totally different practice register).
+
+  **Expected token budget after fix:**
+  - REFRAME_PRACTICE_BASE: ~600 words
+  - METACOGNITIVE_ARC: 1,036 words
+  - BEAT_ADDITIONS[beat]: ~200-250 words
+  - TODAY'S THREAD (EOD only): ~100-300 words
+  - USER_VOICE_PRESERVATION: 168 words
+  - Small conditional adders (~300 words)
+  - **Total: ~2,500 words** vs ~5,000 today. Below the instruction-degradation threshold.
+
+  **Success criterion:** Arlin reruns the same EOD test ("hung out with friends, got drunk, etc."). The AI's turn-1 response no longer restates her input as a frame and offers binary options. Instead it probes specifically — picks one concrete element of what she wrote and asks a precise question. The present-tense "now I feel like I'm too drunk" is acknowledged rather than pivoted away from.
+
+  **Risk:** Low. v1 callers untouched (no beat sent, old path runs as-is). v2 callers get a leaner stack, which should improve quality. Worst case: the slim base is TOO slim and the model drifts on voice; remediation is adding back specific voice rules, not reverting the swap.
+
+  **Files affected:** `netlify/functions/reframe.js` — add `REFRAME_PRACTICE_BASE` constant near CALM_SYSTEM / CLARITY_SYSTEM declarations; modify systemPrompt routing to check `beat` first.
+
+  **Item:**
+
+  1. ⏳ in progress — Add `REFRAME_PRACTICE_BASE` (~600 words) to reframe.js. Route systemPrompt selection to use it when `beat` is set and mode is calm or clarity. Verify build clean, syntax check backend.
 
 - **5** — My Progress
   - Library (external curated knowledge — human behavior, neuroscience, ethics). **Includes:** (a) dopamine science entry — Lembke 2021, Volkow on D2 receptor downregulation, pleasure-pain balance, why cheap hits make composure harder; (b) gut-brain axis entry — Mayer 2016, Cryan & Dinan on vagus-microbiome signaling; (c) brain fog entry — blood sugar, inflammation, ultra-processed foods; (d) neuroplasticity-supporting nutrition entry — omega-3, flavonoids, polyphenols, curcumin, Mediterranean / time-restricted eating (Mattson 2018). Strictly educational — Library only, no tracking surface, no prescription. Per nutrition cross-cutting concern below.
