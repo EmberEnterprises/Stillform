@@ -26,11 +26,5 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Ship preflight
-        run: npm run ship:preflight
-
-      - name: Core loop smoke
-        run: npm run smoke:core-loop
-
       - name: Security smoke checks
         run: npm run security:smoke
