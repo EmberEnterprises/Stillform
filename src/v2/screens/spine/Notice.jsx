@@ -11,7 +11,7 @@ import MonoLabel from "../../components/MonoLabel.jsx";
  * representations. So the surface treats free-text precision as the
  * primary action and small chips as scaffolding for users who freeze.
  *
- * This explicitly fixes the surface critique Arlin gave the v1 Notice
+ * This explicitly fixes the surface critique Arlin gave the earlier Notice
  * screen (May 15, 2026):
  *   - No "EACH SPECIFIC NAME IS A CONCEPT BUILT" meta-talk (it described
  *     the practice instead of being it)

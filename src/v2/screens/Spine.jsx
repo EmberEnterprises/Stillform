@@ -137,11 +137,11 @@ export default function Spine({ onExit }) {
 
     // Phase 4 #3 (May 16, 2026): write the per-beat completion flag so
     // the beat router (getCurrentBeat) advances to the next beat on
-    // subsequent loads. Schema matches v1 — { date: "YYYY-MM-DD", ... }
-    // — so v1 readers (stillform_checkin_today, stillform_eod_today,
+    // subsequent loads. Schema is { date: "YYYY-MM-DD", ... }
+    // — so readers (stillform_checkin_today, stillform_eod_today,
     // stillform_winddown_today) recognize v2-completed beats. The
     // selectedChip is carried as a lightweight "mood" hint; remaining
-    // v1 fields (energy / bio / tension / etc.) are null because the
+    // Legacy fields (energy / bio / tension / etc.) are null because the
     // v2 spine doesn't ask those questions — Notice + chip is the
     // entire morning check-in surface in v2.
     if (config.completionFlag) {

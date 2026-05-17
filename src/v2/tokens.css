@@ -98,7 +98,7 @@
  *
  * The :has() selectors below scope a reset + ground background to the
  * html/body elements ONLY when a .sf-v2 wrapper is actually mounted in
- * the page. v1 routes never see these styles. This avoids the default
+ * the page. Non-Stillform routes never see these styles. This avoids the default
  * 8px body margin showing as a visible border around the v2 canvas, and
  * ensures the ground extends edge-to-edge on every viewport.
  * ------------------------------------------------------------------ */

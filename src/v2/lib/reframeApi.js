@@ -2,7 +2,7 @@
  * reframeApi.js — wrapper for the existing reframe.js Netlify function.
  *
  * The backend at /netlify/functions/reframe.js was built over months in
- * v1. v2 calls it with the same payload shape v1 uses so all AI prompts
+ * Stillform calls this with a stable payload shape so all AI prompts
  * (calm / clarity / hype routing, presence-first mode, framing law
  * compliance, etc.) work without modification.
  *
@@ -34,7 +34,7 @@ const REFRAME_API_URL = "/.netlify/functions/reframe";
  *   stuck/anxious-spiral → clarity
  *   everything else → calm
  *
- * Matches v1's routing logic (src/App.jsx line 11517-11518).
+ * Routing follows the canonical mode → prompt mapping in reframe.js.
  *
  * @param {string|null} feelState — chip id or free-text precision name
  * @param {string} input — the user's message (used for content-based routing)

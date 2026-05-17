@@ -13,8 +13,8 @@ import MonoLabel from "./MonoLabel.jsx";
  * Tapping the pill is a no-op for now; visual placement and treatment is
  * what Phase 1 verifies.
  *
- * Future: v1 had this draggable with position persistence. Drag mechanics
- * can come back as a polish pass once the static placement is verified.
+ * Future: drag mechanics + position persistence are an optional polish
+ * pass once the static placement is verified.
  *
  * Design system notes: amber is used at MAX 5% of any screen. Here the
  * accent appears as a small dot (4px) + the border hairline. Never as fill.

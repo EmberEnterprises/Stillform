@@ -1,11 +1,10 @@
 /*
  * identity.js — install_id helper.
  *
- * Matches v1's stillform_install_id key exactly so v2 users have the same
- * identity v1 created. Backend (reframe.js et al.) requires install_id
- * or user_id for auth.
+ * Reads/creates the user's stillform_install_id. Backend (reframe.js
+ * et al.) requires install_id or user_id for auth.
  *
- * Shape matches v1's getOrCreateInstallId (src/App.jsx ~line 10550):
+ * Shape:
  *   - reads stillform_install_id from localStorage
  *   - creates a crypto.randomUUID() on first call if missing
  *   - falls back to sf_<timestamp>_<random> if crypto unavailable

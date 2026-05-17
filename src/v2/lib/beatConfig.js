@@ -41,8 +41,8 @@
  *    scaffold the right frame (morning forward-leaning, EOD retrospective).
  *    Same word = same meaning across beats.
  *
- * 5. v1 storage shape compatibility. `completionFlag` values match v1's
- *    storage keys (stillform_checkin_today, stillform_eod_today) so v1's
+ * 5. Storage shape stable. `completionFlag` values use canonical
+ *    storage keys (stillform_checkin_today, stillform_eod_today) that the rest of the app's
  *    beat.js detection keeps working during the dual-live period. New
  *    flags (stillform_winddown_today) are v2-only.
  *
@@ -162,7 +162,7 @@ const MORNING_CONFIG = {
     takeawayPlaceholder: "The anchor for today…",
     // Box breathing (4-4-4-4) for sustained focus through the day.
     breathingOffer: "box",
-    // v1-compatible flag — beat.js reads this same key.
+    // Completion flag — beat.js reads this same key.
     completionFlag: "stillform_checkin_today",
     completionShape: "morning",
   },
@@ -194,7 +194,7 @@ const EOD_CONFIG = {
     takeawayPlaceholder: "What stays from today…",
     // Deep Regulate (coherent ~5-6 bpm) for integrative down-regulation.
     breathingOffer: "deep-regulate",
-    // v1-compatible flag — beat.js reads this same key.
+    // Completion flag — beat.js reads this same key.
     completionFlag: "stillform_eod_today",
     completionShape: "eod",
   },
@@ -226,7 +226,7 @@ const WIND_DOWN_CONFIG = {
     takeawayPlaceholder: null,
     // Deep Regulate embedded inline before the close moment.
     breathingOffer: "deep-regulate",
-    // v2-only flag (no v1 equivalent — wind-down is new).
+    // Completion flag for the wind-down beat.
     completionFlag: "stillform_winddown_today",
     completionShape: "winddown",
   },

@@ -17,8 +17,7 @@ import Button from "./Button.jsx";
  * progress is functionally complete for the user — they don't need a
  * pulsing circle to follow a 4-4-8-2 cycle.
  *
- * Patterns (single source of truth here — v1 has equivalents in
- * src/App.jsx around line 7428, kept in sync):
+ * Patterns (single source of truth here):
  *   - "deep-regulate": 4-4-8-2 cycle, ~3 minutes, downregulation
  *   - "cyclic-sighing": 4-1-8 cycle, ~5 minutes, Balban 2023
  *   - "quick-reset": 4-4-6, ~1 minute, fast settle
@@ -176,8 +175,7 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
 }
 
 /* -----------------------------------------------------------------------
- * PATTERNS — single source of truth for v2 breathing patterns.
- * Kept in sync with v1's pattern data (src/App.jsx ~line 7428).
+ * PATTERNS — single source of truth for Stillform's breathing patterns.
  *
  * Each pattern: { label, phases: [{name, duration, instruction}], totalRounds }
  *

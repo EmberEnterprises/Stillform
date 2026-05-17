@@ -24,7 +24,7 @@
  *     stillform_v2_today_thread localStorage key.
  *   - Reset the key when the local date changes (rollover at midnight
  *     in the user's timezone).
- *   - For users with v1 history, optionally backfill from
+ *   - For users with prior history, optionally backfill from
  *     stillform_sessions on first v2 visit.
  */
 

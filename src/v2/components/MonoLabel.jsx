@@ -11,7 +11,7 @@ import InfoModal from "./InfoModal.jsx";
  * Optional info button: when `infoBody` (and optional `infoTitle`) are
  * provided, MonoLabel renders an inline ⓘ button next to its text.
  * Tapping the button opens a quiet InfoModal with science-grounded
- * explanation. Restores the info-button affordance from v1 (PRE-SLEEP,
+ * explanation. Info-button affordance for editorial copy (PRE-SLEEP,
  * granularity-gym, etc.), now built into the label primitive itself so
  * any section heading can carry its rationale.
  *

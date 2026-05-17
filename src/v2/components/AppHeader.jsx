@@ -10,7 +10,7 @@ import React from "react";
  *
  * Design system: Cormorant Garamond serif at display-sm scale, with
  * intentional weight contrast — "Still" at 300, "form" at 400 with the
- * accent color as a single-character emphasis (matching v1's existing
+ * accent color as a single-character emphasis
  * wordmark identity treatment).
  */
 export default function AppHeader() {

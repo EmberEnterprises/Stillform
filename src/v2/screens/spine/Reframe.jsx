@@ -12,7 +12,7 @@ import { sendReframeMessage } from "../../lib/reframeApi.js";
  *
  * Per the substance critique (canon §10, May 14): the AI should produce
  * differentiation, not empathy or textbook reflection. The reframe.js
- * backend has the prompts; v2 calls it with the same payload v1 used.
+ * backend has the prompts; Stillform calls it with the canonical payload.
  *
  * Visual: editorial conversation. AI messages are serif body at editorial
  * scale (body-lg in display-md container) so they feel like reading, not

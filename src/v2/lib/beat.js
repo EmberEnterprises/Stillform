@@ -18,7 +18,7 @@
  *   - Wind-down: hour >= 21 (overrides EOD if EOD complete; aligns with
  *                bedtime surface per canon Phase 3 May 15)
  *
- * Storage keys (v1 shapes, unchanged):
+ * Storage keys:
  *   stillform_checkin_today  → { date: "YYYY-MM-DD", ... }
  *   stillform_eod_today      → { date: "YYYY-MM-DD", ... }
  *
@@ -26,8 +26,7 @@
  */
 
 /**
- * Local-date YYYY-MM-DD for "today." Matches v1's TimeKeeper.stillformDay
- * shape closely enough for the home's beat detection (v1 uses a 4am rollover
+ * Local-date YYYY-MM-DD for "today." The home's beat detection uses a 4am rollover
  * which differs from midnight; Phase 1 uses midnight rollover for simplicity,
  * which means a 2-3am session reads as the prior day. This is acceptable
  * for Phase 1 visual audit; full TimeKeeper integration lands when the

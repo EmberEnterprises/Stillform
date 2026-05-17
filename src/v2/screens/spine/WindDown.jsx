@@ -22,7 +22,7 @@ import { localDateKey } from "../../lib/beat.js";
  * principle: nothing persists until the user reaches close):
  *   - stillform_tomorrow_anchor — if anchor text was entered. Read by
  *     next morning's beat as concierge context per Pillar 3.
- *   - stillform_winddown_today — completion flag, v1-compatible shape.
+ *   - stillform_winddown_today — completion flag.
  *   - stillform_v2_sessions — session record with beat: "wind-down",
  *     precisionName: anchor, mode: "self", selfMode: true. Threads
  *     are NOT updated (wind-down is tomorrow-facing, not today-thread).
