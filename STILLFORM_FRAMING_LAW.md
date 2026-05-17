@@ -1,5 +1,5 @@
 # STILLFORM FRAMING LAW
-**ARA Embers LLC · May 12, 2026 · v1.0**
+**ARA Embers LLC · May 12, 2026 · v1.1 (extended May 17, 2026)**
 
 > **Session-start ground truth lives in `STILLFORM_CANON.md`.** This file retained for deep reference (full text, version history, edge cases). Read CANON first.
 
@@ -95,6 +95,15 @@ They are NOT:
 - People who want to feel better without doing the practice work
 
 This audience is the design constraint. Features that serve "people in distress" without also serving "people enhancing themselves" violate the framing. Because this audience is analytical by inclination, the analytical substance of the practice is a feature, not a bug — it matches how they already think.
+
+**BANNED AUDIENCE CHARACTERIZATIONS.** The audience is NEVER framed by emotional intensity, in any context including critique, marketing, internal specs, AI prompts, or commentary on prior work. Specifically banned phrases:
+
+- "intense people"
+- "feel everything at full volume"
+- "high-intensity" (when applied to the audience or users, not as scientific-literature category vocabulary about emotion states)
+- "tool for intense people"
+
+These descriptions reduce the audience to a feeling and miss what they actually want (enhancement, sharper thinking, understanding of their own processing). Self-mastery has nothing to do with intensity. When historical docs use these phrases, flag them inline; when reviewing pre-research framing (promo, blog, Reddit drafts), say "pre-research framing" rather than requoting the banned phrasing.
 
 ---
 
@@ -333,6 +342,8 @@ The audit philosophy (`STILLFORM_AUDIT_PHILOSOPHY.md`) references this doc as th
 ## VERSIONING
 
 **v1.0 — May 12, 2026.** Established after the regulation-framing narrowing was identified as systemic across the app, memory, and docs. Replaces the implicit framing scattered across prior docs.
+
+**v1.1 — May 17, 2026.** Extended THE AUDIENCE section with a "BANNED AUDIENCE CHARACTERIZATIONS" subsection enumerating the four specific banned phrases that were previously listed only in `STILLFORM_CANON.md` line 58 and Arlin's user-memory absolute rule: "intense people," "feel everything at full volume," "high-intensity" (when applied to audience/users), "tool for intense people." Surfaced during Phase D-5a audit when CANON's enumeration was found to be more complete than the supreme reference. Supreme reference should be the most complete; CANON is downstream. No framing change; closes an asymmetry.
 
 Future versions update this doc when the framing evolves. Cosmetic edits don't require a version bump; substantive framing changes do.
 
