@@ -36,7 +36,7 @@
  *    step. Future variants (Reset surface in Phase 6) also use minimal.
  *
  * 4. Chip vocabulary is consistent across beats; subsets vary. The 10
- *    feel chips (per CHIP_DEFINITIONS_DRAFT.md April 30 2026) form the
+ *    feel chips (per CHIP_DEFINITIONS.md April 30 2026) form the
  *    user's emotional vocabulary; per-beat configs select subsets that
  *    scaffold the right frame (morning forward-leaning, EOD retrospective).
  *    Same word = same meaning across beats.
@@ -76,7 +76,7 @@
  *   }
  */
 
-// The full feel-chip vocabulary, per CHIP_DEFINITIONS_DRAFT.md April 30 2026.
+// The full feel-chip vocabulary, per CHIP_DEFINITIONS.md April 30 2026.
 // Single source for chip ids + labels within the variant layer. If the
 // user-facing definitions are updated, this list updates in lockstep.
 //

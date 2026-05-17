@@ -253,7 +253,7 @@ Plus the feature-specific spec for whatever I'm working on:
 | Low-demand mode | `LOW_DEMAND_PHASE_2_SPEC.md`, `LOW_DEMAND_PHASE_3_SPEC.md` |
 | Plain Language Science cards | `PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md` |
 | Three-category data feed | `THREE_CATEGORY_DATA_FEED_SPEC.md` |
-| Chip definitions | `CHIP_DEFINITIONS_DRAFT.md` |
+| Chip definitions | `CHIP_DEFINITIONS.md` |
 | Closing language | `CLOSING_LANGUAGE_CANDIDATES.md` |
 | AI regression test | `AI_REGRESSION_TEST_19.md`, `AI_REGRESSION_RESULTS_MAY_7.md` |
 | Build / launch | `BUILD_GUIDE.md`, `STILLFORM_LAUNCH_TRANSFER_NEXT.md`, `Test_Day_Plan_2026-05-07.md` |

@@ -1,6 +1,6 @@
 # CLOSING LANGUAGE CANDIDATES — Round 2 Tier 1 Fix
 
-**Status:** Draft for review. NOT YET WIRED to code. Same pattern as CHIP_DEFINITIONS_DRAFT — copy gets approved before App.jsx changes.
+**Status:** Draft for review. NOT YET WIRED to code. Same pattern as CHIP_DEFINITIONS — copy gets approved before code wiring.
 
 **Why this draft exists:** Round 2 consultation (Apr 30) — all four AIs converged that current closing language frames sessions as outcome-achieved instead of rehearsal-completed. Examples: "Composure restored," "Signal cleared," "System calibrated." These read as the system's verdict on whether the session "worked," not as the user marking that they practiced staying themselves.
 

@@ -1,12 +1,12 @@
-# CHIP_DEFINITIONS_DRAFT.md
+# CHIP_DEFINITIONS.md
 **Stillform — Feel chip ⓘ definitions**
-**ARA Embers LLC · April 30, 2026**
+**ARA Embers LLC · Locked Apr 30, 2026 · Last updated May 16, 2026 (Unsure added as 10th chip + Phase 4 beat-subset reconciliation)**
 
 ---
 
 ## What this is
 
-User-facing definitions for each of the 9 feel chips. These appear when a user taps the ⓘ button next to a chip. **For Arlin's review before code wiring** — the registry isn't shipped to App.jsx until copy is approved.
+**The locked source of truth for the 10 feel chips and their user-facing definitions.** Definitions appear when a user taps the ⓘ button next to a chip. Single source of truth for chip semantics across the app; `src/v2/lib/beatConfig.js` and any future chip surface reads from this file's vocabulary. If a chip is added, removed, or revised, this file is the canonical destination for the change.
 
 ## Voice anchor
 
@@ -98,18 +98,21 @@ These subsets are configured in `beatConfig.js` (`selectChips()` helper) and ren
 
 ---
 
-## What's coming next (after copy approval)
+## v2 ⓘ wiring — pending Phase 4 action
 
-If you approve the copy:
+The 10 definitions above need to be wired as ⓘ glyphs on the chip row in Stillform's v2 spine (`src/v2/`). v1 wired this via `CHIP_DEFINITIONS` constant in App.jsx with 3 render sites (showPostRating, PresentStateChips, Body Scan What Shifted); that wiring was deleted with v1 in Phase A.
 
-1. **Registry constant in App.jsx** — `const CHIP_DEFINITIONS = { excited: {...}, focused: {...}, ... }` near the existing `TOOL_DEBRIEF_COPY` declaration. Single source of truth.
-2. **ⓘ button next to each chip** — small ⓘ glyph in the chip row, tappable, opens existing `setInfoModal` with the chip's definition. Same pattern as bio-filter ⓘ, Lock-in ⓘ, etc.
-3. **Wired across all chip render sites** — three locations: `feelChips` in showPostRating block (~line 6512), `feelChips` in PresentStateChips component (~line 8140), `feelChips` in Body Scan What Shifted screen (~line 4224 of staged file). Single registry, three wirings.
-4. **No copy duplication** — the AI prompt feelMap in reframe.js stays the operational voice for AI behavior; the registry is the user-facing voice. Both reference the same state, in different audiences' languages.
-5. **v2 spine ⓘ wiring** — the v2 `Notice.jsx` chip row should also surface the ⓘ definitions. Same registry, fourth wiring point.
+**What v2 needs:**
 
-If you want changes to any of the 10 definitions, mark them up and I'll redraft. If a chip definition needs to lean harder in any direction (more body-focused, more contrast with adjacent chips, more on what the system does when it's selected), tell me which way.
+1. **Registry constant** — `CHIP_DEFINITIONS` exported from a shared v2 module (likely `src/v2/lib/chipDefinitions.js` or inlined in `beatConfig.js` since both consume from the same 10-chip canon). Single source of truth in code.
+2. **ⓘ glyph on chip row** — small tappable ⓘ next to each chip in `src/v2/notice/Notice.jsx`. Same visual treatment as bio-filter ⓘ and Lock-in ⓘ in the v1 build (carried into v2 design system).
+3. **infoModal wiring** — tapping ⓘ opens the existing modal pattern with the chip's definition string.
+4. **Beat-aware** — per beat-subset rules in §"Phase 4 — per-beat chip subsets" below, only the chips the beat surfaces get rendered, but each rendered chip gets its ⓘ.
+
+**Rule:** if any chip definition is revised here, the registry must be updated and the change ships together — the doc and the code stay in lock-step (per CANON Section 10 "Spec → master todo entry, same session").
+
+If a chip definition needs to lean harder in any direction (more body-focused, more contrast with adjacent chips, more on what the system does when it's selected), revise in this file and update the registry in the same commit.
 
 ---
 
-*ARA Embers LLC · Chip Definitions Draft · April 30, 2026 · last updated May 16, 2026 (Unsure added + Phase 4 beat-subset reconciliation)*
+*ARA Embers LLC · Chip Definitions · Locked Apr 30, 2026 · last updated May 17, 2026 (renamed from CHIP_DEFINITIONS.md; v1 wiring section retired post Phase A; v2 wiring action added)*

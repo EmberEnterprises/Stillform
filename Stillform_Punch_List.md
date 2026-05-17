@@ -112,7 +112,7 @@ What this means for future sessions:
 - [x] Master Todo: 4 entries marked ✅ RESOLVED + Phase 1 of low-demand documented
 - [x] Transfer doc: Apr 30 session log + composure/self-mastery decision + integrity gap analysis
 - [x] Science Sheet: Cyclic Sighing + Russell circumplex chip framework + three-category data feed
-- [x] CHIP_DEFINITIONS_DRAFT.md committed (Arlin approved)
+- [x] CHIP_DEFINITIONS.md committed (Arlin approved)
 - [x] Master Todo: more entries marked RESOLVED (Reframe title, Chip ⓘ, Cyclic sighing)
 - [x] Round 4 architectural consultation prompt drafted (never sent)
 - [x] Closing Language candidates draft

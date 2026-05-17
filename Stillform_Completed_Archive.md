@@ -871,14 +871,14 @@ State additions: showWhatShifted, postStateChip, shiftLabel, shiftLabelExpanded,
 Spec at BODY_SCAN_WHAT_SHIFTED_SPEC.md (committed to repo root).
 
 ### ✅ Settled chip — low-arousal positive — SHIPPED Apr 30 (commits 768b56ed in App.jsx + ad4a43f1 in reframe.js)
-Settled added as 9th chip. Russell-circumplex-grouped chip ordering implemented at all chip render sites: Excited · Focused · Settled · Anxious · Angry · Stuck · Mixed · Flat · Distant. AI prompt branch added in reframe.js feelMap for maintain-state framing (no regulate-down posture, surface patterns more freely, no Self Mode nudge, no protective suppression). Chip definition copy committed via CHIP_DEFINITIONS_DRAFT.md (Arlin approved).
+Settled added as 9th chip. Russell-circumplex-grouped chip ordering implemented at all chip render sites: Excited · Focused · Settled · Anxious · Angry · Stuck · Mixed · Flat · Distant. AI prompt branch added in reframe.js feelMap for maintain-state framing (no regulate-down posture, surface patterns more freely, no Self Mode nudge, no protective suppression). Chip definition copy committed via CHIP_DEFINITIONS.md (Arlin approved).
 
 **Why this mattered for the data feed:** Without a low-arousal positive chip, Category A (regulated shift) was impossible to detect when users actually arrived at the regulated state. With Settled live, the three-category framework works end-to-end.
 
 Spec at SETTLED_CHIP_SPEC.md (committed to repo root).
 
 ### ✅ Chip ⓘ button — define what each chip covers — SHIPPED Apr 30
-CHIP_DEFINITIONS registry added to App.jsx as top-level constant. ⓘ buttons wired at all 3 chip render sites (Body Scan What Shifted, showPostRating, PresentStateChips). Per CHIP_DEFINITIONS_DRAFT.md (Arlin approved Apr 30 after copy review).
+CHIP_DEFINITIONS registry added to App.jsx as top-level constant. ⓘ buttons wired at all 3 chip render sites (Body Scan What Shifted, showPostRating, PresentStateChips). Per CHIP_DEFINITIONS.md (Arlin approved Apr 30 after copy review).
 
 Each chip definition is ~40-60 words, anchored to reframe.js feelMap voice but rewritten for user-facing context — no clinical jargon, no pathologizing, body and mind both named, tells user what selecting the chip does in the system. Tapping ⓘ opens existing setInfoModal pattern.
 
