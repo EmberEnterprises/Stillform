@@ -326,19 +326,24 @@ Token in user memory edits is STALE; always use the URL-extracted one.
 
 **Payments:** Lemon Squeezy (live mode active).
 
-**AI:** Anthropic Claude API via Netlify function `netlify/functions/reframe.js`. Three system prompts: CALM_SYSTEM (~line 858), CLARITY_SYSTEM (~line 988), HYPE_SYSTEM (~line 1093). GPT-4o vision for screenshot/image analysis in Reframe.
+**AI:** OpenAI GPT-4o via Netlify function `netlify/functions/reframe.js`. Single substrate. System prompts: `CALM_SYSTEM`, `CLARITY_SYSTEM`, `HYPE_SYSTEM`. Cross-cutting constants layered on top: `METACOGNITIVE_ARC`, `USER_VOICE_PRESERVATION`, `BEAT_ADDITIONS`, `LOW-DEMAND OVERRIDE`, `SAFETY OVERRIDE`, `LIABILITY GUARD`. Verify by name (`grep -n "const CALM_SYSTEM"` etc.) before editing — line numbers drift.
 
 **Cloud sync:** Supabase (three-table schema with RLS + AES-256 encryption).
 
 **Analytics:** Plausible.
 
-**Primary frontend file:** `src/App.jsx` (~29,500 lines). Key function locations (subject to drift; always verify before editing):
-- `SessionCloseScreen` (~15399)
-- `PresentStateChips` (~15917)
-- `NoticeStepScreen` (~14992)
-- `QBPill getSavedPos` (~18815)
-- `startGuidedSession` (~21972)
-- Hero CTA / home screen (~25299)
+**Primary frontend:** `src/v2/` is Stillform's frontend. Entry: `src/main.jsx` → `AppV2`. Key surfaces (subject to drift; always verify by `view` before editing):
+- `src/v2/AppV2.jsx` — root entry, routes between Home and Spine
+- `src/v2/screens/Home.jsx` + `SmartScreen.jsx` — home composition, beat-aware editorial blocks
+- `src/v2/screens/spine/` — Notice → Reframe → Close flow
+- `src/v2/screens/BreatheOverlay.jsx` — Quick Breathe (Cyclic Sighing protocol)
+- `src/v2/screens/MyProgress.jsx` + `ContextProfile.jsx` + `TriggerProfile.jsx` + `Today.jsx` — diagnostic stack editors + My Progress landing
+- `src/v2/lib/beatConfig.js` — beat-aware variants per CANON §7.2
+- `src/v2/lib/reframeApi.js` — Reframe API client + beat/source plumbing
+- `src/v2/lib/contextProfile.js` + `triggerProfile.js` — diagnostic stack data layers
+- `src/v2/lib/smartScreen.js` — home composition logic
+
+**Legacy note:** Prior frontend at `src/App.jsx` was deleted in commit `237167b` (Phase A, May 17, 2026). Never read it, port from it, or use it as a pattern source. Stillform is just Stillform.
 
 **GitHub API pattern for large operations:** write JSON payload to temp file via Python, pass via `-d @{tmpfile}` to curl. Use git low-level API (blobs/trees/commits) to bypass 409 conflicts when contents API fails.
 
