@@ -1,6 +1,8 @@
 # LOW-DEMAND MODE PHASE 3 — REFRAME SPEC
 
-**Status:** Spec draft for review. Awaiting Arlin's call before code wiring.
+> **⚠️ PARTIAL SHIP — verified May 14, 2026** per Master Todo line 1696: **AI SIDE SHIPPED, UI SIDE OPEN.** The AI behavior change in `netlify/functions/reframe.js` landed (commit `9783d94`). The user-facing UI strip in Reframe is still open as a launch-readiness item — tracked in Master Todo as 🔥 priority. The 3 `src/App.jsx` line refs in this doc point at v1 code deleted in Phase A; the UI work needs to land in `src/v2/screens/spine/Reframe.jsx` instead.
+
+**Status:** Spec draft for review. AI side shipped; UI side awaiting Arlin's call before code wiring.
 
 **Date:** April 30, 2026
 

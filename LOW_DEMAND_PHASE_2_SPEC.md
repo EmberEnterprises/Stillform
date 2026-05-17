@@ -1,5 +1,7 @@
 # LOW-DEMAND MODE PHASE 2 — BODY SCAN SPEC
 
+> **✅ SHIPPED — verified May 8, 2026** per Master Todo line 1696. Body Scan low-demand mode landed alongside Phase 1's Breathe low-demand pattern (Phase 1 shipped Apr 30, commit `81e2c0b7`). The one `src/App.jsx` line ref in this doc points at v1 code deleted in Phase A; current low-demand wiring lives in `src/v2/` modules. The architectural decision rationale, science alignment, and implementation outline below remain the substantive WHY of the shipped Phase 2.
+
 **Status:** Spec draft for review. Awaiting Arlin's call before code wiring.
 
 **Date:** April 30, 2026
