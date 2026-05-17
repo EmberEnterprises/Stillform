@@ -4,6 +4,7 @@ import "./components.css";
 import Home from "./screens/Home.jsx";
 import Spine from "./screens/Spine.jsx";
 import FoundationVerify from "./screens/FoundationVerify.jsx";
+import MyProgress from "./screens/MyProgress.jsx";
 import ContextProfile from "./screens/ContextProfile.jsx";
 
 /**
@@ -12,23 +13,20 @@ import ContextProfile from "./screens/ContextProfile.jsx";
  * Phase 5 routing (state machine, no URL hash for now):
  *   home            → main journey home, beat-aware (Phase 1)
  *   spine           → Notice → Reframe → Close (Phase 2)
+ *   my-progress     → diagnostic stack landing (Phase 5 sub-item #2)
  *   context-profile → diagnostic stack editor (Phase 5 sub-item #1)
  *   verify          → foundation primitives audit (?v=2&verify=1)
  *
- * Phase 5 note: context-profile is currently routed directly from
- * HomeFooter's Progress link as a placeholder. When the full My Progress
- * landing surface ships (later Phase 5 sub-item), Progress will route
- * to that landing and ContextProfile becomes one tab inside it.
- *
- * Browser back behavior: state machine doesn't intercept the back
- * button. Each editor screen passes an onExit handler that returns
- * to home.
+ * Two-level back behavior under Progress:
+ *   home → my-progress (Progress link in HomeFooter)
+ *   my-progress → context-profile (entry tap)
+ *   context-profile → my-progress (back from editor)
+ *   my-progress → home (back from landing)
  *
  * The .sf-v2 root scopes every v2 style so the existing App.jsx is
  * completely untouched.
  *
- * Anchor: STILLFORM_CANON.md §architecture (Notice → Reframe → Close spine,
- * three engines, three home surfaces, one element per beat).
+ * Anchor: STILLFORM_CANON.md §architecture.
  */
 function pickInitialScreen() {
   try {
@@ -59,10 +57,29 @@ export default function AppV2() {
     );
   }
 
+  if (screen === "my-progress") {
+    return (
+      <div className="sf-v2">
+        <MyProgress
+          onExit={() => setScreen("home")}
+          onNavigate={(target) => {
+            // Map editor ids → screen state. As future editors ship,
+            // they add their case here. Unknown targets fall through
+            // silently (defensive — landing only emits known ids).
+            if (target === "context-profile") setScreen("context-profile");
+          }}
+        />
+      </div>
+    );
+  }
+
   if (screen === "context-profile") {
     return (
       <div className="sf-v2">
-        <ContextProfile onExit={() => setScreen("home")} />
+        {/* onExit returns to my-progress (parent), NOT home. AppV2
+            owns the route stack; ContextProfile doesn't know its
+            parent. */}
+        <ContextProfile onExit={() => setScreen("my-progress")} />
       </div>
     );
   }
@@ -72,12 +89,10 @@ export default function AppV2() {
       <Home
         onBeginSession={() => setScreen("spine")}
         onNavigate={(target) => {
-          // Phase 5 sub-item #1: "progress" is the only nav id with a
-          // real destination right now. Routes directly to the Context
-          // Profile editor as a placeholder until the full My Progress
-          // landing surface ships (later sub-item). Other ids (library,
-          // faq, settings, crisis-resources) stay no-op for now.
-          if (target === "progress") setScreen("context-profile");
+          // Phase 5: 'progress' routes to the MyProgress landing.
+          // Library / FAQ / Settings / Crisis-Resources stay no-op
+          // until their own sub-items ship.
+          if (target === "progress") setScreen("my-progress");
         }}
       />
     </div>
