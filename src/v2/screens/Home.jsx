@@ -29,7 +29,7 @@ import BreatheOverlay from "./BreatheOverlay.jsx";
  * @param {function(): void} onBeginSession — opens the spine when the
  *   Active prompt's Begin button is tapped.
  */
-export default function Home({ onBeginSession }) {
+export default function Home({ onBeginSession, onNavigate }) {
   const [breatheOpen, setBreatheOpen] = useState(false);
 
   return (
@@ -39,7 +39,7 @@ export default function Home({ onBeginSession }) {
       <SmartScreen onBeginSession={onBeginSession} />
 
       <div className="sf-fade-enter sf-fade-enter--delay-2">
-        <HomeFooter onNavigate={() => { /* Phase 5+ */ }} />
+        <HomeFooter onNavigate={onNavigate || (() => { /* no-op fallback */ })} />
       </div>
 
       <QuickBreathe onTap={() => setBreatheOpen(true)} />
