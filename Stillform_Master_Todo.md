@@ -994,6 +994,9 @@ These are decisions that have been made and locked. If a new Claude session read
 After Round 2 consultation found 4 AIs converged on "closing language frames as outcome not rehearsal," CLOSING_LANGUAGE_CANDIDATES.md was drafted with three voice options across 7 close screens. Arlin's pushback: "the current language has a science behind it too" and "feels more prestige and less putting words into someone's mouth." Captured in Science Sheet section "System Observation + User Override (Architectural Conditioning Pattern)" — the current language ("Composure restored," "Signal cleared," "STATE SHIFT +2 · FUNCTIONAL") is precise observation paired with explicit override pathways ("I don't feel regulated yet" button). Together they train interoceptive accuracy via supervised-learning-like pattern: system makes prediction, user accepts or corrects, both directions improve over time. Round 2 AIs read words in isolation without seeing override architecture; they were wrong.
 
 ### Stillform discipline / market positioning correction (locked May 1, 2026)
+
+> **⚠️ PARTIALLY SUPERSEDED — May 17, 2026.** This entry was locked May 1, 2026 — **before STILLFORM_FRAMING_LAW.md (May 12, 2026) v1.0+ defined the framing**. The substantive thinking below remains valid: Arlin's correct read of the market ("self mastery tool using metacognition with composure as its final outcome... Anyone who wants to enhance themselves are our market"), the safeguards-not-target-market distinction, and the rejection of repair/trauma/intensity/"carry a lot" framing. **What is superseded:** the specific phrase "Composure Architecture is the load-bearing definition" — per FRAMING_LAW.md, **composure is the felt outcome, not the product framing**. Stillform IS a metacognition practice; composure is one outcome users feel. The May 1 thinking was the seed that produced the May 12 framing law clarification; preserved here so the evolution is traceable. Treat the bullets below as historical record of May 1 thinking, not as current framing direction.
+
 After repeated drift toward repair-coded / trauma-coded / intensity-coded language across consultation rounds and home copy proposals, Arlin named the actual market correctly: "This is a self mastery tool using metacognition with composure as its final outcome... Anyone who wants to enhance themselves are [our market]." Safeguards exist for users in distress — they are not the market.
 
 **Key reframes locked:**
@@ -1303,6 +1306,19 @@ Implementation order in spec: CSS variables → typography → components → sc
 - ⚠️ Move 5 (Reply pill collapse during read) — n/a if Move 3 not in current form
 
 **Open question:** Are Moves 2, 3, 5 still desired for a future v2 Reframe.jsx iteration, or were they intentionally deselected when v2 was built? The design principles remain valid framing for future Reframe-surface work regardless; v1 line refs are obsolete.
+
+### 🔧 v1 line refs in open TODOs — sweeping retarget needed for v2 work (added May 17, 2026)
+
+**Source:** Phase D-5d sweep pass. Multiple open `[ ]` TODO items in this Master Todo still reference `src/App.jsx` line numbers that pointed at v1 code deleted in Phase A (commit `237167b`). The **work each TODO describes is still relevant** — these items are real launch-readiness gaps — but the line-ref portion of each item is now meaningless. Examples surfaced during the sweep:
+
+- **Phone-tap verification of EOD save flow** (line 729) — references `App.jsx ~20369`; needs v2 EOD save flow location
+- **My Progress redesign** (line 1627) — references `App.jsx:17167`; needs v2 MyProgress location (likely `src/v2/screens/MyProgress.jsx`)
+- **Self Mode redesign** (line 1634) — references `App.jsx:16255`; needs v2 SelfReframe location (currently `src/v2/screens/spine/SelfReframe.jsx`)
+- **Premium sound packs** (lines 1717-1725) — references `App.jsx:27897-27921`; needs v2 sound-packs surface (may not exist yet)
+- **Cognitive Function Measurement** (line 1735) — references `App.jsx:8349`; the feature itself was reverted, so this ref is doubly stale
+- **Subscription URL param trust window** (line 1834) — references `App.jsx:8869`; needs v2 subscription gate location
+
+**To resolve:** When picking up any of these TODOs, the first move is Layer 1.1 grep against `src/v2/` to find the current code location, then update the TODO entry with the live v2 path before doing the work. Do NOT trust the line numbers as written — they were verified against v1 (some as recently as May 14), but every line ref is dead post May 17. The descriptions and rationale around each TODO remain accurate; only the code-coordinate portions are stale.
 
 ### 🔧 docs/STILLFORM_TESTING_CHECKLIST.md — v2 rewrite needed before TestFlight (added May 17, 2026)
 
