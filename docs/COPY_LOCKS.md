@@ -1,5 +1,7 @@
 # Stillform Copy Locks
 
+> **⚠️ V2 RECONCILIATION PENDING — May 17, 2026.** Phase A deleted the v1 frontend (`src/App.jsx`) and the preflight enforcement script (`scripts/ship-preflight.mjs`). Most entries below were locked against v1 surfaces that no longer exist. Only TWO entries currently point at live surfaces: the **Splash tagline** (in `public/manifest.json`) and the **Reframe soft-entry greeting** (in `netlify/functions/reframe.js`). All other entries — Tutorial Page 0 lines, Pulse descriptor, Signal Profile + Pattern Check, Proof area 2, Science Evidence section, setupFlow keys, Focus Check labels — reference v1 surfaces deleted in Phase A. They are not currently enforced (preflight gone) and may or may not have v2 equivalents. The FAQ CONSTRAINED entries also use "composure" framing that needs reconciliation against `STILLFORM_FRAMING_LAW.md`. **Until reconciliation is done, treat this doc as historical reference for what was locked in v1, not as current enforcement.** Master Todo Bugs/Defects tracks the reconciliation as a launch-readiness item.
+
 This document defines locked and constrained copy anchors for setup bridge, tutorial, and AI entry copy surfaces.
 Any edits to **LOCKED** strings require explicit approval and a matching preflight update.
 

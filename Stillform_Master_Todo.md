@@ -1279,6 +1279,24 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## 🐛 Bugs / Defects
 
+### 🔧 docs/STILLFORM_TESTING_CHECKLIST.md — v2 rewrite needed before TestFlight (added May 17, 2026)
+
+**Source:** Phase D-1 subdirectory audit. 26kB / 14-section checklist last reviewed April 28, 2026 — describes v1 surfaces deleted in Phase A: Tutorial card sequence, BreatheGroundTool merged phases, separate Body Scan Tool, three-mode Reframe Tool, standalone Composure Check, Quick Breathe Panic Mode, v1 home with bio-filter-routed CTA, v1 Settings, v1 FAQ. None of these exist in v2.
+
+**Doc flagged in-place** with a "DO NOT use as-is" banner.
+
+**To rewrite:** Walk the v2 spine (Notice → Reframe → Close in `src/v2/screens/spine/`) + beat variants (main / morning / EOD / wind-down per `beatConfig.js`) + smart-screen home + MyProgress landing + Context/Trigger Profile editors + Self-led mode (`SelfReframe.jsx`) + BreathingSession + WindDown. Each section: discrete observable behaviors with expected outcomes. Same precision as the v1 checklist; rebuild it against current v2 reality. Launch-readiness gate per the doc's own purpose statement.
+
+### 🔧 docs/COPY_LOCKS.md v2 reconciliation — needed before launch (added May 17, 2026)
+
+**Source:** Phase D-1 subdirectory audit. Phase A deleted `src/App.jsx` and `scripts/ship-preflight.mjs` (which enforced COPY_LOCKS), but `docs/COPY_LOCKS.md` was not reconciled. Of ~17 LOCKED entries + 6 CONSTRAINED entries, only **2 still point at live surfaces:** Splash tagline (`public/manifest.json`) and Reframe soft-entry greeting (`netlify/functions/reframe.js:455`). The rest reference v1 surfaces deleted in Phase A.
+
+**To reconcile:**
+1. **Verify v2 equivalents exist** for each v1-locked surface (Tutorial Page 0 lines, Pulse descriptor, Signal Profile + Pattern Check, Proof area 2 / Check-in consistency, Science Evidence section title, setupFlow calibration-combined, Focus Check / Go-No-Go labels). Some may have v2 implementations; some may have been retired entirely.
+2. **Rewrite the locked anchors table** to reflect v2 surfaces with their actual live file paths (`src/v2/...`).
+3. **Reconcile FAQ CONSTRAINED entries** against STILLFORM_FRAMING_LAW.md — current copy uses "composure and performance platform" + "metacognitive composure practice" which is borderline relative to the May 12 framing law cascade.
+4. **Re-establish preflight enforcement** as part of the Stillform-targeted preflight script (already tracked as a separate Bugs/Defects entry above) — without enforcement, locks are aspirational, not real.
+
 ### 🔧 GPT4O_GUARDRAILS_AUDIT §2.2 client-side reconciliation — needed before TestFlight (added May 17, 2026)
 
 **Source:** GPT4O_GUARDRAILS_AUDIT.md §2.2 inventoried 5 client-side guardrails (C1–C5) against `src/App.jsx`. Phase A deleted that file. The audit's substrate-level analysis (§1 + §3 G1–G23 cross-walk against `netlify/functions/reframe.js`) is unaffected and still valid — server-side guardrails are intact. Client-side row needs reconciliation against `src/v2/`.

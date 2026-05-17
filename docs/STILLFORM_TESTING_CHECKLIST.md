@@ -1,5 +1,7 @@
 # Stillform Testing Checklist
 
+> **⚠️ V2 RECONCILIATION REQUIRED — May 17, 2026.** This checklist was last reviewed April 28, 2026 — before the May 11–12 metacognition rebuild and before Phase A (May 17) which deleted the v1 frontend (`src/App.jsx`). The 14 sections below describe v1 surfaces, tools, and behaviors that no longer exist: Tutorial card sequence, BreatheGroundTool with merged pre-rate / breathing / ground / post-rate phases, separate Body Scan Tool, Reframe Tool with three-mode buttons, standalone Composure Check, Quick Breathe Panic Mode, v1 home with bio-filter-routed CTA, v1 Settings UI, v1 FAQ surface. **DO NOT use this checklist for v2 testing — it will fail in misleading ways because the surfaces it tests no longer exist.** Stillform's current frontend is in `src/v2/` with a different architecture (spine = Notice → Reframe → Close, beat-aware variants, smart-screen home, MyProgress landing, separate Context/Trigger Profile editors). A v2-targeted testing checklist is tracked as a launch-readiness item in `Stillform_Master_Todo.md` Bugs/Defects section.
+
 **Purpose:** Deterministic test pass before any deploy publish, before TestFlight build, before public launch. Every item is a discrete observable behavior with an expected outcome. If something doesn't match, that's a bug — no interpretation needed.
 
 **How to use:**
@@ -9,7 +11,7 @@
 4. Don't skip the "negative" checks (item should NOT do X) — those catch silent bugs
 5. After each session, clear `localStorage` and refresh to test next state
 
-**Last reviewed:** April 28, 2026
+**Last reviewed:** April 28, 2026 (pre-v2 rebuild and pre-Phase A — see banner above)
 
 ---
 

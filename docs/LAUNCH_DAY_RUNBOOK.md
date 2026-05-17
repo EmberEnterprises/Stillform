@@ -4,9 +4,9 @@ Use this checklist in order. Stop on any failed gate.
 
 ### Launch timing note (operator lock)
 
-- Do **not** run broad launch this week.
-- Next feasible target: **Monday, April 20, 2026 (local)** for coordinated launch execution.
-- Until then: keep UAT controlled, stabilize Settings UX, and avoid countdown messaging that creates tester anxiety.
+- Launch date TBD — Phase 4/5/6 in progress, launch readiness tracked in `Stillform_Master_Todo.md`.
+- The "Monday, April 20, 2026" target previously listed here is past; this section needs a current date when launch window is locked.
+- Until then: keep UAT controlled, stabilize spine UX, and avoid countdown messaging that creates tester anxiety.
 
 ---
 
@@ -16,16 +16,14 @@ Run:
 
 ```bash
 npm run build
-npm run ship:preflight
-node scripts/core-loop-smoke.mjs
 npm run security:smoke
 ```
 
 Expected:
 - Build passes
-- SHIP preflight passes
-- Core loop smoke prints all checks as `✓`
 - Security smoke passes
+
+> **Note (May 17, 2026):** `npm run ship:preflight` and `scripts/core-loop-smoke.mjs` were removed during Phase A (v1 frontend deletion) — both scripts were v1-only. A Stillform-targeted preflight script is tracked as a launch-readiness item in `Stillform_Master_Todo.md` Bugs/Defects section; when it ships, add the relevant command back here.
 
 ---
 
