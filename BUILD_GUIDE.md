@@ -4,6 +4,8 @@
 **Changes:** Widget routing fix + improved visual design  
 **Commit:** eaef420
 
+> **⚠️ V2 RECONCILIATION NOTE — May 17, 2026.** This guide was last updated April 4, 2026, before the v1 → v2 transition. The **Quick Start workflow** (pull → install → build → Android APK → install on phone/watch) remains operationally valid. The **"What Changed in This Update" section** and **File Structure diagram** reference `src/App.jsx` which was deleted in Phase A (commit `237167b`). Current frontend lives in `src/v2/`. The Widget Routing section describes v1's widget handler; v2's widget integration needs verification.
+
 ## Quick Start (5 min)
 
 ### 1. Pull Latest Code

@@ -2,6 +2,8 @@
 
 A complete reference for all Stillform native integrations, build procedures, and testing.
 
+> **⚠️ V2 RECONCILIATION NOTE — May 17, 2026.** This index and the guides it points to (BUILD_GUIDE, WATCH_GUIDE, SHARE_EXTENSION_GUIDE) were authored before the v1 → v2 transition. Build / deploy / Android Studio workflows remain operationally valid. Code-location references — `src/App.jsx` for share-link handling, App.jsx in the File Structure diagram — point at code deleted in Phase A (commit `237167b`). Current frontend lives in `src/v2/`. When a guide references App.jsx, translate to the equivalent v2 module.
+
 ## 📚 Guide Index
 
 ### 1. **BUILD_GUIDE.md** — Get Started Here
