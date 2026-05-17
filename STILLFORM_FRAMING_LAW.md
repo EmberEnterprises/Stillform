@@ -1,5 +1,5 @@
 # STILLFORM FRAMING LAW
-**ARA Embers LLC · May 12, 2026 · v1.2 (extended May 17, 2026)**
+**ARA Embers LLC · May 12, 2026 · v1.3 (extended May 17, 2026)**
 
 > **Session-start ground truth lives in `STILLFORM_CANON.md`.** This file retained for deep reference (full text, version history, edge cases). Read CANON first.
 
@@ -326,6 +326,8 @@ Stillform's user treatment is governed by these principles. Every surface, every
 
 **6. Vulnerability awareness.** Users will expose their most vulnerable parts in Stillform if they trust the surface. Design every surface as if the user is about to share something they haven't told anyone. Make them feel they're in a place worth that trust. Not by telling them — by being it.
 
+**7. Honesty paired with acceptance.** Acceptance protects users from judgment, not from truth. Stillform names what it observes honestly — even when the pattern is real, significant, or uncomfortable to face. Sanitizing observations under cover of "acceptance" is filtering, not protection (see the mirror-integrity rule in `STILLFORM_CANON.md` Section 10). Common-pattern framing is honest because it's true; minimization disguised as comfort is dishonest. Users came to Stillform to see themselves clearly — that's the contract. The voice softens delivery; it never softens substance.
+
 These principles also live in `STILLFORM_CANON.md` Section 10 (intentional duplication; hard truths get memorized through reinforcement, not assumed through inheritance).
 
 ---
@@ -366,6 +368,8 @@ The audit philosophy (`STILLFORM_AUDIT_PHILOSOPHY.md`) references this doc as th
 **v1.1 — May 17, 2026.** Extended THE AUDIENCE section with a "BANNED AUDIENCE CHARACTERIZATIONS" subsection enumerating the four specific banned phrases that were previously listed only in `STILLFORM_CANON.md` line 58 and Arlin's user-memory absolute rule: "intense people," "feel everything at full volume," "high-intensity" (when applied to audience/users), "tool for intense people." Surfaced during Phase D-5a audit when CANON's enumeration was found to be more complete than the supreme reference. Supreme reference should be the most complete; CANON is downstream. No framing change; closes an asymmetry.
 
 **v1.2 — May 17, 2026.** Added new section "USER TREATMENT — INTEGRITY, EMPATHY, ACCEPTANCE" between SCIENCE FOUNDATION and OPERATIONAL RULES. Six principles governing how Stillform treats users across every surface: no judgment / unconditional acceptance, no problem surfaced without path forward, show acceptance don't tell it, common-pattern posture, integrity through research, vulnerability awareness. Locked during Bias Profile / Workshop brainstorm — these principles emerged from the conversation about how validated psychometric instruments should land in Stillform's voice (non-clinical adaptation, no scoring as good/bad, common-pattern framing for legal and emotional safety, integrity-through-research as a prerequisite for deployment). Duplicated to CANON Section 10 by design — hard truths get reinforced through visible repetition across the supreme references, not assumed through inheritance.
+
+**v1.3 — May 17, 2026.** Added principle 7 ("Honesty paired with acceptance") to USER TREATMENT section. Arlin's framing: "honesty is hand in hand with integrity." Closes a gap in the six previously-locked principles where "no judgment / unconditional acceptance" could drift into softening the substance of observations to spare user feelings. Principle 7 names the contract: users came to Stillform to see themselves clearly; the voice softens delivery, never substance. Connects to the existing mirror-integrity operating rule (CANON §10, locked April 30, 2026) and broadens it from data-display only to a posture across every USER TREATMENT principle. Duplicated to CANON v1.7.
 
 Future versions update this doc when the framing evolves. Cosmetic edits don't require a version bump; substantive framing changes do.
 

@@ -1,5 +1,5 @@
 # STILLFORM CANON
-**ARA Embers LLC · v1.6 · Originally consolidated May 13, 2026 · Last extended May 17, 2026**
+**ARA Embers LLC · v1.7 · Originally consolidated May 13, 2026 · Last extended May 17, 2026**
 
 The single source-of-truth doc Claude reads at session start. Distills the operational essence of:
 
@@ -304,6 +304,8 @@ Stillform's user treatment is governed by these principles. Every surface, every
 
 - **Vulnerability awareness.** Users will expose their most vulnerable parts in Stillform if they trust the surface. Design every surface as if the user is about to share something they haven't told anyone. Make them feel they're in a place worth that trust. Not by telling them — by being it.
 
+- **Honesty paired with acceptance.** Acceptance protects users from judgment, not from truth. Stillform names what it observes honestly — even when the pattern is real, significant, or uncomfortable to face. Sanitizing observations under cover of "acceptance" is filtering, not protection (see the mirror-integrity operating rule above, locked April 30, 2026). Common-pattern framing is honest because it's true; minimization disguised as comfort is dishonest. Users came to Stillform to see themselves clearly — that's the contract. The voice softens delivery; it never softens substance.
+
 ---
 
 ## 11 · CURRENT STATE (May 13, 2026)
@@ -411,6 +413,8 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 ---
 
 ## VERSIONING
+
+**v1.7 — May 17, 2026.** Added principle 7 ("Honesty paired with acceptance") to USER TREATMENT subsection in Section 10. Arlin's framing: "honesty is hand in hand with integrity." Closes a gap in the six previously-locked principles where "no judgment / unconditional acceptance" could drift into softening the substance of observations to spare user feelings. Principle 7 names the contract: users came to Stillform to see themselves clearly; the voice softens delivery, never substance. Connects to the mirror-integrity operating rule (locked April 30, 2026, also in Section 10) and broadens it from data-display only to a posture across every USER TREATMENT principle. Duplicated to FRAMING_LAW v1.3.
 
 **v1.6 — May 17, 2026.** Added "USER TREATMENT — INTEGRITY, EMPATHY, ACCEPTANCE" subsection at end of Section 10, locking six principles governing user treatment across every surface: no judgment / unconditional acceptance, no problem surfaced without path forward, show acceptance don't tell it, common-pattern posture, integrity through research, vulnerability awareness. Also corrects header version from stale v1.3 to current v1.6 (v1.4 and v1.5 entries on May 14 added to versioning history but never updated header). Duplicated to `STILLFORM_FRAMING_LAW.md` v1.2 by design — hard truths get reinforced through visible repetition across the supreme references, not assumed through inheritance. Locked during Bias Profile / Workshop brainstorm — these principles emerged from the conversation about how validated psychometric instruments (MCQ-30, CD-Quest, MAIA-2, etc.) should land in Stillform's voice (non-clinical adaptation, no scoring as good/bad, common-pattern framing for legal and emotional safety, integrity-through-research as a prerequisite for deployment, vulnerability-awareness because users will expose their most sensitive parts if the surface is worth that trust).
 
