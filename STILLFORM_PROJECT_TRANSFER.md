@@ -41,6 +41,10 @@ Concept-formation is the core mechanism. The structured analytical work that Sti
 
 The practice doesn't graduate from analytical to observational. It deepens analytical capacity until analysis becomes fast, granular, and effortless. The "observational" experience in mature practice is what high-skill analysis looks like from the inside (Barrett 2017 constructed emotion theory — perception is concept-construction running at speed).
 
+### The Theory of Change
+
+The reason Stillform exists, in Arlin's framing: **less noise in people's heads → more capacity to think about each other → relational repair at scale.** When the user's internal noise quiets through the practice, the cognitive bandwidth that was occupied by self-mediation becomes available for other people. Sharper internal pattern-recognition extends outward as sharper perception of others. The product's downstream impact is not just individual cognitive expansion — it's a multiplier on the user's capacity for relationships, collaboration, and being present with the people in their life. This is the load-bearing reason for the work, not a marketing claim. It informs every design decision that comes down to "does this strengthen the user's relationship to themselves and, therefore, to others, or does it isolate them inside the app?" Features that pull the user into the app and keep them there fail the test; features that strengthen the user's capacity to leave the app and engage with their actual life pass it.
+
 ### The Four Pillars (revised May 12, 2026 — aligned with STILLFORM_FRAMING_LAW.md)
 
 **Concept-building as the substance.** Each Reframe session, each pulse chip selection, each trigger-profile entry, each bias-profiler reading adds to or refines an entry in the user's concept library. This is the work. Hoemann et al. (2021) — experience sampling itself increases emotional granularity. Stillform IS an Ecological Momentary Intervention (Myin-Germeys et al. 2016, 2018).

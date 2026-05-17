@@ -751,6 +751,28 @@ Stage definitions → Trigger Profile → Today's Brief → Mirror surface → A
 
 ---
 
+## 🧠 NEUROPLASTICITY-ACCELERATION PATTERNS — Queued ideas (May 13 brainstorm)
+
+A May 13 brainstorm produced 10 neuroplasticity-acceleration ideas. Each routes through the universal Notice → Reframe → Close spine. Several already shipped to current scope (granularity gym, pre-sleep at EOD, pre-event Today's Brief, concept library visibility, stage transition ritual). Five ideas + one unifying architecture remain queued for Phase 6+ consideration.
+
+**Source-driven entry context architecture (the unifying pattern).** Spine entries get an optional `source` axis (orthogonal to the `beat` axis already locked in CANON §7.2). Each source provides its own Notice banner header + body copy and its own AI directive at Reframe. Beat names *when* in the day; source names *what triggered this specific session*. Seven source values from the brainstorm: default retrieval, `spaced`, `pre-event`, `pre-mortem`, `open-recall`, `pre-sleep`, `deep-revisit`. AI directives forbid the failure mode for each source (rehearsal theater for pre-event, pattern suggestion for open-recall, re-reading old content for deep-revisit). Storage key carries the source for the session lifecycle. Considered alongside Phase 6+ surface plans — implementation decision pending Phase 5 completion.
+
+**Queued ideas not yet captured in shipped scope:**
+
+1. **Spaced retrieval prompts** (Roediger & Karpicke 2006 testing effect + spacing effect). Practice-surface card surfaces a specific past pattern from a 3-7 day window (recent) or 7/21/60 day spaced-return windows (longer arc). Pattern label is shown; user enters spine session re-engaging with the named pattern in current context. Source values: default retrieval, `spaced`.
+
+2. **Open recall** (Roediger & Karpicke 2006 free-recall potency). When no specific retrieval candidate is available AND user has ≥3 sessions, a card invites the user to name the pattern themselves at Notice. No pattern surfaced from system — pure free recall. Source value: `open-recall`, pattern-less entry. Highest neuroplasticity impact per the research; least scaffolded; appropriate only after baseline practice has been built.
+
+3. **Trigger pre-mortem** (Gollwitzer 1999 implementation intentions, no-calendar variant). Card surfaces when a Trigger Profile entry has high lifetime encounter count (≥3); user runs a pre-mortem rep anticipating the trigger's next appearance and pre-installing a response. Different from #4 Pre-event Today's Brief which depends on a calendar event match — this is calendar-independent, trigger-driven anticipation. Source value: `pre-mortem`.
+
+4. **Deep revisit / spaced reframe** (Wells 2009 metacognitive therapy + Roediger & Karpicke 2006 spacing). Card surfaces a saved-Reframe distortion from a 7-30 day window. **BOUNDED guardrail:** only the distortion label surfaces at Notice; the saved Reframe text is NEVER re-shown (Wells 2009 Type 2 rumination guardrail — re-reading old emotional content is the rumination affordance the framing law bans). User enters fresh session with the distortion label as the seed, treating it as new material in present context. Source value: `deep-revisit`.
+
+5. **Name the move at close** (Anderson 2007 procedural knowledge externalization). Optional single-line input on SessionCloseScreen — user names the move that worked. Externalized concept at session close, stored as MOVES NAMED in the My Progress library. Different temporal slot from #3 granularity gym (which captures precision at Notice entry, before the work); this captures the procedural concept at close (after the work, articulating what move resolved it). Pair: precision-at-entry + move-at-close = full session arc captured as named concepts.
+
+**Status:** Queued for Phase 6+ consideration. Each idea ships in bounded form per Framing Law (no rumination affordances, no surveillance framing). The source-driven architecture is the load-bearing piece — if the source axis is built, individual ideas plug into it incrementally. If Phase 6 sequencing skips the source architecture, each idea would need its own ad-hoc Notice + AI-directive plumbing.
+
+---
+
 ## 🗂️ MASTER TODO AUDIT-PASS — May 14 evening DELTA
 
 **Baseline:** Master Todo at commit `9783d94` (May 14, 11:26 UTC — Arlin-prompted verification-against-code update). The full re-classification (Buckets A–F) lives at lines 456–528 above; this is the DELTA: **17 PRs shipped between `9783d94` and HEAD `86d2a22`** that aren't reflected in the file's classifications above.
@@ -1283,6 +1305,24 @@ When a user is already signed in, opening the app does not automatically sync cl
 **Why TestFlight-blocking:** Apple reviewers will sign in and expect their data and active subscription to be present without manual Settings actions. Real UX gap for any returning user.
 
 </details>
+
+### 🗑️ Delete account vs delete data split — REQUIRED for launch parity (added May 13, 2026 from phone-test)
+
+Currently Settings has a single deletion path. Two distinct user intents need separate flows:
+
+1. **Delete my data, keep my account** — wipes practice data, profiles, sessions, journal, named moves, anchors, capacity baseline, all surfaces. Account and subscription remain. User can sign in fresh and rebuild practice on the same account/subscription.
+
+2. **Delete my account entirely** — closes the Supabase account record, cancels the Lemon Squeezy subscription, wipes all device-local data. Irreversible. No path back to the same account.
+
+**Status of underlying tech:** IndexedDB device-key wipe + overflow blob clear is shipped and verified (`CryptoStore.deleteKey()` + `SecureStore.clear()` wired into the account-delete flow, both via Promise.all and awaited so the post-reload state is fully wiped). The forensic-deletion completeness is done; the UX split is not. Both flows need:
+- Clear copy distinguishing the two intents (the difference matters)
+- Confirmation that names what will be lost specifically per path
+- Backend route (`account-delete.js` for full deletion, a separate data-only wipe path for the keep-account variant)
+- Settings → Account section UI
+
+**Why launch-required:** Privacy regulations + user trust both demand the keep-account path. Currently a returning user who wants to "start fresh" has to delete their account and re-buy. App-Store-review surface scrutiny will land here too — single-path destructive flows fail reviewer pattern-matching on standard data hygiene.
+
+Source surfaced in `PHONE_TEST_ISSUES_MAY_12_EVENING.md` ISSUE 2.
 
 ### ⌚ Watch haptic breathing companion — pattern ID mismatch (Galaxy Watch Ultra / Wear OS) — SOURCE FIXED, APK BUILD PENDING
 
