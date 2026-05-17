@@ -1,5 +1,7 @@
 # COGNITIVE FUNCTION MEASUREMENT — Phase 1 Decision Audit
 
+> **⚠️ STALE — May 17, 2026:** Per Completed Archive line 456, this audit "covers a feature that no longer exists." The implementation that derived from these decisions (Builds #31-37, #46) was **reverted entirely May 7** due to UX failures (see status header in `COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md`). The 4 lockable decisions inside (naming, Arlin-authored stimuli, surface placement, AI distinctiveness rubric) may still inform a future redesign — Cognitive Function Measurement was Arlin's chosen engagement mechanic and the spec remains good — but the specific implementation approach this audit committed to was wrong and won't be re-attempted. Preserved as a redesign input, not as current direction. If a redesign happens, expect these decisions to be revisited from scratch with the revert lessons in hand.
+
 **Date:** May 6, 2026
 **Source:** COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md (Apr 30, 2026, 283 lines)
 **Purpose:** Lock the Phase 1 decisions before build starts. Each section names a real question, the stakes, the realistic options, and a recommendation grounded in what the spec already says + what the codebase already supports.

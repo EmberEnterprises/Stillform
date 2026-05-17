@@ -2,7 +2,9 @@
 
 **Working title:** Function Tests / Capacity Tests / Practice Evidence (final naming TBD with Arlin)
 
-**Status:** Specification draft. NOT YET BUILT. For Arlin's review when she wakes.
+> **⚠️ STATUS — May 17, 2026:** Phase 0 storage layer + Phase 1 UI were implemented May 7 (Builds #31-37, #46) then **REVERTED entirely on May 7 late session** due to multiple UX failures: AffectLabelingExercise rendered unconditionally on every screen, orphaned JSX, non-functional "Done" button, 9-chip vocabulary collided with existing app feel-state chips, hostile "0/12 — counted as not matched" UX on skip-all, stimuli mismatched what affect-labeling research actually measures. Storage key `stillform_function_checks` was removed from SYNC_KEYS in the revert. **Per Arlin: spec is good, implementation approach was wrong. Needs different design pass, not a re-attempt of the same code.** This was Arlin's chosen engagement mechanic (May 1, "Arlin chose #2") but is currently neither shipped nor on a forward path. See `COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md` for the decision audit that fed the reverted implementation; both docs preserved as redesign inputs.
+
+**Status:** Specification draft. NOT YET BUILT (Phase 0+1 attempted + reverted May 7). For Arlin's review when she wakes.
 
 **Date:** April 30, 2026
 
