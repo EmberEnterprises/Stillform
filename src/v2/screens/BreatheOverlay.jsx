@@ -16,20 +16,23 @@ import React, { useEffect, useState } from "react";
  * meditation on daily mood + state-anxiety reduction over a 28-day
  * comparison.
  *
- * Duration: 6 rounds (~78s), not the full 5-minute Balban protocol.
- * Quick Breathe is the "acute relief" surface per master todo line 23,
- * and canon §10 frames breath as a tool not the product. Running the
- * full 23-round Balban protocol here drifts into meditation-app
- * territory. 6 rounds gives the user the cyclic-sighing pattern shape
- * in a duration similar to the prior box-breathing (~96s) — enough to
- * down-regulate, not enough to become a sit-down practice. Users who
- * want more can tap the pill again. The spine close + wind-down
- * surfaces (via BreathingSession component) run the full 23-round
- * protocol because they're deliberate practice contexts.
+ * Duration: 23 rounds (~5 min) — Balban et al. 2023's studied protocol
+ * dose. The user runs it for as long as feels necessary; the corner X
+ * close is always available for early exit. This is the user-led
+ * framing: Stillform doesn't decide when you're done, you do. The
+ * studied benefits (mood + state-anxiety reduction) accrue throughout
+ * the protocol, not at a magic 5-min threshold — exiting at 60s or 3
+ * min is fine if that's when you've settled.
  *
- * Bounded: ~78s, then auto-fades to a "done" state with a Return
- * button. Per canon framing law: breath is a TOOL not the product. It
- * opens, you use it, it closes. No engagement loop.
+ * Canon §10 ("breath is a tool, not the product") rules out engagement
+ * loops around breath — no streaks, no required practice, no breath-
+ * use metrics — but does NOT require brevity. A 5-min optional session
+ * with always-available early exit is fully consistent with the canon.
+ *
+ * Bounded: ~5 min if you run the full protocol, less if you don't.
+ * Either way the surface auto-fades to a "done" state with a Return
+ * button after the configured round count. It opens, you use it, it
+ * closes. No engagement loop.
  *
  * @param {boolean} open
  * @param {function(): void} onClose
@@ -46,7 +49,7 @@ const PHASES = [
   { id: "out",     label: "Breathe out", scale: 1.0, durationMs: 8000 },
 ];
 
-const TARGET_CYCLES = 6; // ~78s total at 13s per cycle
+const TARGET_CYCLES = 23; // Full Balban 2023 protocol (~5 min at 13s/cycle)
 
 export default function BreatheOverlay({ open, onClose }) {
   const [phaseIndex, setPhaseIndex] = useState(0);
@@ -217,6 +220,22 @@ function ActiveState({ phase, cycleCount }) {
       >
         Cycle {cycleCount + 1} of {TARGET_CYCLES}
       </div>
+
+      {/* User-led duration note — the protocol runs up to 5 min, but
+          you exit when you've settled. Subtle, mono-faint, not a
+          prompt to act, just an orientation. */}
+      <div
+        style={{
+          marginTop: "var(--sf-space-8, 8px)",
+          fontFamily: "var(--sf-font-mono, monospace)",
+          fontSize: "9px",
+          letterSpacing: "0.12em",
+          color: "var(--sf-text-faint, rgba(255,255,255,0.28))",
+          textTransform: "lowercase",
+        }}
+      >
+        end when you've settled
+      </div>
     </>
   );
 }
@@ -224,14 +243,14 @@ function ActiveState({ phase, cycleCount }) {
 /* -----------------------------------------------------------------------
  * DoneState — the bounded close.
  *
- * Six rounds of Cyclic Sighing (~78s) is enough for a stabilization
- * pass; the full Balban 23-round protocol drifts into meditation-app
- * territory (canon: breath is a tool, not the product). Users who want
- * more can tap Quick Breathe again. The full protocol lives in spine
- * close + wind-down (BreathingSession component) where the surface IS
- * deliberate breath practice.
+ * If the user runs the full Balban 23-round protocol (~5 min), the
+ * pacer auto-completes and shows Done. If they exit early via the
+ * corner X (the more common case in practice — users settle before
+ * the 5-min mark), they bypass this state entirely.
  *
- * The user sees a single restrained "Done." line + Return button.
+ * Canon §10: breath is a tool not the product. The done state is
+ * restrained — single line, single Return button, no engagement
+ * affordances ("how did that feel," "track your practice," etc.).
  * -------------------------------------------------------------------- */
 function DoneState({ onClose }) {
   return (
