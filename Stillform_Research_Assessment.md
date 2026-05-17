@@ -148,7 +148,7 @@ A consistent pattern across breathing, chatbot, and app research: immediate effe
 
 4. **AI dependency risk.** If users rely on the AI instead of developing internal regulation skills, the app becomes a crutch, not scaffolding.
 
-5. **Small target market.** Neurodivergent, high-intensity people who hate meditation — how big is this? It may be bigger than expected, but it's not "everyone."
+5. **Small target market.** Neurodivergent, high-intensity people who hate meditation — how big is this? It may be bigger than expected, but it's not "everyone." ⚠️ *"Neurodivergent, high-intensity people who hate meditation" is pre-research audience framing superseded by CANON §4 ban on audience-by-intensity characterization. The market-size concern is legitimate; the audience description should be rewritten before any external use. The substantive question — how large is the segment looking for metacognition-practice-style self-mastery tools — remains open.*
 
 6. **Founder capacity.** Neurological disability affecting cognitive function. Building a product that requires consistent development, marketing, and user support.
 
