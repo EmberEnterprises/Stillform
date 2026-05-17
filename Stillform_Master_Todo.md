@@ -1279,6 +1279,12 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## 🐛 Bugs / Defects
 
+### 🔧 v2 Settings surface — needed before launch (added May 17, 2026)
+
+**Source:** Phase D-2h audit. `SETTINGS_REWRITE_SPEC.md` was locked April 17, 2026 — predates the v1 → v2 transition. No references in Completed Archive or Master Todo for a Settings shell/rewrite ship. `src/v2/` has no Settings surface yet (no `Settings.jsx`, no `settings/` directory).
+
+**To build:** Walk SETTINGS_REWRITE_SPEC.md (section keys, labels, structural decisions still valid as design direction), reconcile against current v2 architecture (`src/v2/screens/spine/` + `beatConfig.js` + `CHIP_DEFINITIONS.md`), then ship the Settings surface. Launch-readiness — users need a Settings surface for tutorial replay, theme toggle, integration management, account management, etc.
+
 ### 🔧 REFRAME_UI_FOUNDATION_SPEC v2 reconciliation — open question (added May 17, 2026)
 
 **Source:** Phase D-2a audit. Spec drafted May 13, 2026 as "Commit 2" against v1's `src/App.jsx`; v1 deleted in Phase A before Commit 2 shipped. Line refs throughout the spec (CSS ~825-935, message rendering ~13768-13810, input + action row ~13858-14020) all stale.

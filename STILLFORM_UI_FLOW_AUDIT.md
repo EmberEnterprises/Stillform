@@ -2,6 +2,10 @@
 **ARA Embers LLC · May 7, 2026**
 **Walked from the canonical docs and the actual code, not from memory.**
 
+> **STATUS — May 17, 2026 (per Completed Archive line 455 and Master Todo line 1722):** **Mixed.** Items 1-3, 6-8 **SHIPPED May 7.** Item 4 **environment-blocked** (Watch APK build, requires Android Studio locally). Item 5 **shipped later May 7** (audit status flag for item 5 is stale — fix landed in v1's App.jsx Breathe + Body Scan, now in deleted code; v2 carry forward needs verification). Items 9, 11-14 are **observation walks pending phone time** — not code work, listed in Master Todo as launch-readiness audits that may surface real issues.
+>
+> **⚠️ V1 LINE REFS STALE.** All 10 `src/App.jsx` line refs throughout this audit point at code deleted in Phase A. The walks themselves were performed against v1; for v2 re-audits, walk `src/v2/` modules directly.
+
 ---
 
 ## Method

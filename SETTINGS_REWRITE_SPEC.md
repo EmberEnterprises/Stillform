@@ -1,6 +1,8 @@
 # Settings Rewrite Spec
 **Locked April 17, 2026 — confirm before coding**
 
+> **STATUS — May 17, 2026:** **Unshipped.** No references in Completed Archive or Master Todo for a Settings shell/rewrite ship. `src/v2/` has no Settings surface yet. This spec predates the v1 → v2 transition (locked April 17, before the May 11–12 metacognition rebuild and the Phase A v1 deletion). The section keys, labels, and structural decisions remain valid as design direction; when Stillform builds the Settings surface in v2, this spec is the starting point — though it should be re-walked against current spine architecture (`src/v2/screens/spine/`) and current canonical surfaces (CHIP_DEFINITIONS, beatConfig, etc.) before code lands. Tracked in Master Todo Bugs/Defects as a pre-launch follow-up.
+
 This is the agreed structure. Every section key, label, and sub-item is listed.
 No code changes until Arlin confirms this is correct.
 
