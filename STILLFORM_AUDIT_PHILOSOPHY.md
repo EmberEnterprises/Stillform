@@ -671,6 +671,38 @@ If any step fails, return to the earliest failed layer. Don't push partial-pass 
 
 ---
 
+## Phone-test fix workflow
+
+A parallel workflow to the feature-ship sequence above. Arlin runs phone tests on the deployed build and surfaces findings via screenshot (sometimes with a few words of context, sometimes just the image). The Claude workflow for receiving and resolving each finding:
+
+1. **RECEIVE.** Look at the screenshot. Note the surface, the visible text, what's wrong (visual / copy / functional / interaction). If the screenshot is ambiguous and Arlin gave no context, ask ONE clear binary clarifying question — don't pile multiple options on her. If it's clear, proceed.
+
+2. **GROUND TRUTH.** `grep -n` for the exact strings visible in the screenshot against the Stillform frontend (`src/v2/` and its subdirectories) plus relevant backend functions (`netlify/functions/*.js`). View the surrounding code (50-100 lines around match). Identify the component + state + props involved. Don't guess at file paths — verify by grep.
+
+3. **LAYER 0 FRAMING AUDIT (if touching copy or surface placement).** Does this fix drift toward banned framings (regulation app, wellness app, composure app, crisis tool, intensity audience)? Does it invite rumination affordances? Does it support the analytical-to-observational developmental arc? If a concern surfaces, re-scope the fix to stay aligned before writing code.
+
+4. **LAYER 0.5 DOCS (if touching surfaces with specs).** Is this surface covered by a spec doc, CANON section, or framing law clause? Does the spec already answer the design question? Diverge from spec only with explicit acknowledgment to Arlin.
+
+5. **MINIMUM-VIABLE FIX.** `str_replace` the smallest change that resolves the finding. Resist re-architecting nearby code unless the finding requires it. One commit per finding when possible. If the finding suggests a deeper architectural issue, flag it as a separate item — don't expand scope silently.
+
+6. **VERIFY.** `npm run build` (must be green). `git status` (working tree should show only the intended change, no incidental edits). If a preflight or AI-regression script exists for the touched surface, run it.
+
+7. **COMMIT.** Branch determined by current workflow (typically `main` for Stillform post-deploy fixes, or a feature branch if mid-build). Message names: the screenshot finding (what Arlin saw) + the surface (file + component) + the minimum-viable fix.
+
+8. **PUSH + REPORT (when Arlin gives push approval).** Brief reply: "fixed and pushed — ready for re-deploy." Wait for her to trigger the Netlify deploy (manual; she always triggers). She'll confirm when deployed.
+
+### Special cases for phone-test findings
+
+- **Finding requires Arlin's decision** (voice / framing / design / content production / judgment outside framing law's scope): flag the finding as needing her input, don't act autonomously, ask the specific question, wait for her answer before any code.
+- **Finding suggests a deeper architectural issue:** flag it, propose a scoped path forward, wait for her go before any structural change. Don't bundle architecture with a tactical fix.
+- **Finding overlaps with an existing master-todo item:** reference the item, update its entry with the new signal from the phone test, ship the minimum fix anchored to the existing scope rather than redesigning.
+
+### Why this workflow lives in the audit philosophy
+
+The phone-test workflow is itself an audit workflow — Arlin is the auditor; the screenshot is the audit finding; Claude is the implementer. Each step maps to the existing layers: GROUND TRUTH is Layer 1 (pre-existence + source verification); FRAMING AUDIT is Layer 0; DOCS is Layer 0.5; MINIMUM-VIABLE FIX is Layer 2 + Layer 6 (hygiene + self-skepticism, "is this the smallest change that resolves it?"); VERIFY is Layer 2 + Layer 5. The workflow exists to keep phone-test fixes from bypassing the framing and document audits that the main feature-ship sequence enforces — phone-test fixes are still real changes and still need the gates.
+
+---
+
 ## What changes in how I report to Arlin
 
 **Before:** "All 35 audits passed, ready to push."
