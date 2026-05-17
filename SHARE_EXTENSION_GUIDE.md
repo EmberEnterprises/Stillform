@@ -4,6 +4,8 @@
 **Last Updated:** April 4, 2026  
 **Platforms:** Android (native), iOS (planned)
 
+> **⚠️ V2 RECONCILIATION NOTE — May 17, 2026.** Native Android share intent handling is unchanged (lives in Capacitor / Android manifest, not affected by Phase A). The 2 `src/App.jsx` line refs in this guide document the v1 deep-link receiver (`?share=` query param → first-run guard → Reframe pre-fill) — that React code was deleted in Phase A. v2 needs equivalent wiring: receive `?share=` on app load, guard behind first-run completion, route to v2 Reframe surface with pre-filled text. Tracked as launch-readiness work — share extension is shipped at the native layer but its React-side handler needs v2 carry-forward.
+
 ## Overview
 
 Users can share text from ANY app (Notes, Messages, Twitter, Email, etc.) directly to Stillform. The shared text lands pre-filled in the **Reframe tool**, ready for AI analysis, once first-run setup has been completed.

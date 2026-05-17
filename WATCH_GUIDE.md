@@ -4,6 +4,8 @@
 **Last Updated:** April 4, 2026  
 **Watch Device:** Samsung Galaxy Watch Ultra (Wear OS 4+)
 
+> **⚠️ V2 RECONCILIATION NOTE — May 17, 2026.** This guide documents the native Wear OS haptic integration shipped Apr 4. No `src/App.jsx` line refs in this guide (architecture details are native-side: Capacitor plugin + Wear OS module). The phone-side trigger for sending breathing patterns to the watch was wired in v1's BreatheGroundTool — that React code was deleted in Phase A. The native layer is unchanged. The v2 phone-side wiring needs to be carried into the v2 breathing surface (`src/v2/` modules); verify on hardware before launch. Tracked in Master Todo as Watch validation work.
+
 ## Overview
 
 When a user starts a breathing session on their phone, the connected Wear OS watch automatically receives the breathing pattern and guides them with:

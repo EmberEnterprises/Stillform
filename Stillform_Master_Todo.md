@@ -1279,6 +1279,12 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## 🐛 Bugs / Defects
 
+### 🔧 Share extension v2 carry-forward — needed before launch (added May 17, 2026)
+
+**Source:** Phase D-3b audit. Native Android share intent handling shipped Apr 4 (per `SHARE_EXTENSION_GUIDE.md`) and lives in the Capacitor / Android manifest layer — unchanged by Phase A. The phone-side React handler (deep-link receiver for `?share=` query param, first-run guard, Reframe pre-fill routing) was in v1's `src/App.jsx` — deleted in Phase A.
+
+**v2 needs:** Receive `?share=` on app load → guard behind first-run completion → route to v2 Reframe surface with pre-filled text. Same UX as v1; new React-side wiring against the v2 spine.
+
 ### 🔧 v2 Settings surface — needed before launch (added May 17, 2026)
 
 **Source:** Phase D-2h audit. `SETTINGS_REWRITE_SPEC.md` was locked April 17, 2026 — predates the v1 → v2 transition. No references in Completed Archive or Master Todo for a Settings shell/rewrite ship. `src/v2/` has no Settings surface yet (no `Settings.jsx`, no `settings/` directory).
