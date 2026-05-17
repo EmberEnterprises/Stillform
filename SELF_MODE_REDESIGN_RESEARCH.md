@@ -1,6 +1,10 @@
 # Self Mode Redesign — Research & Design Proposal
 
 > **SUPERSESSION NOTE — May 12, 2026:** Framing language in this document predates STILLFORM_FRAMING_LAW.md (May 12, 2026). Specific terms updated in-place: "regulation app" (line 51) → "metacognition practice"; "composure architecture is built FROM..." (line 126) → "the practice is built FROM...". The substance of the Self Mode redesign (body-first when arousal is high, past self → present self, one thing on screen at a time, AI-down resilience) remains valid under the framing law. When this doc is consulted for build work, refer to STILLFORM_FRAMING_LAW.md for current product framing; the design principles below stand.
+>
+> **UPDATE — May 17, 2026:** §1 line 25 audience characterization revised — "high-intensity, neurodivergent, hates manipulation" removed per CANON §4 (audience never framed by emotional intensity). Substantive point (users read system pretense quickly) preserved.
+>
+> **⚠️ STATUS AMBIGUITY — May 17, 2026 (needs Arlin's resolution):** A v2 Self Mode shipped May 7 (commit `5c8a2db`, files `src/v2/lib/selfMode.js` + `src/v2/screens/spine/SelfReframe.jsx`) implements a **4-prompt self-led flow** (somatic → granular → assumption → move) — NOT the "Past Self / Present Self" architecture specified in §5–§6 below. The framing was locked May 7 (§15) but the build diverged. **Open question:** Is the shipped 4-prompt Self Mode the new design (and Past Self / Present Self is superseded), OR is the shipped version a placeholder and Past Self / Present Self is still the build target? This doc remains an active spec until Arlin resolves this. If superseded, this doc becomes a historical record and should be archived/deleted; if still active, the spec needs reconciliation against the shipped state. Master Todo line 847 references `src/App.jsx:16255` which is gone (Phase A) — that reference is stale regardless of resolution.
 
 **Status:** Research + design proposal, May 7, 2026. Per Arlin's May 7 directive. Awaiting sign-off before any build.
 **Author of this draft:** Claude, synthesizing existing implementation + literature + design principles.
@@ -22,7 +26,7 @@ What goes wrong with the current implementation:
 
 2. **No use of the user's accumulated data.** Every Self Mode session starts blank. The user has spent weeks building a Bias Profile, a Signal Profile, saved Reframes, journal entries, Pattern Disruption history — none of it shows up in Self Mode. The app forgets who it's talking to the moment AI is gone.
 
-3. **Visually it reads as a downgrade.** Same general layout as AI Reframe but with the "good part" removed. Users in this audience (high-intensity, neurodivergent, hates manipulation) read this as "the app is broken right now" — which is the worst possible read.
+3. **Visually it reads as a downgrade.** Same general layout as AI Reframe but with the "good part" removed. Users — who tend to read system pretense quickly — read this as "the app is broken right now" — which is the worst possible read.
 
 4. **No skip path for high-arousal states.** Linear 5-step flow with required input. A user in a panic spiral can't complete it and gets stuck mid-flow with no graceful exit.
 
