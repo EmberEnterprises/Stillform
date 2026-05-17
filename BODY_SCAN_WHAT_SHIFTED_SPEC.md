@@ -2,6 +2,8 @@
 **Stillform Body Scan What Shifted — implementation spec**
 **ARA Embers LLC · April 30, 2026**
 
+> **✅ SHIPPED Apr 30, 2026** — commit `890469aa` (combined with three-category data feed Build) per Completed Archive line 866. Body Scan post-completion What Shifted moment carried into v2 spine completion pattern. The implementation section below describes v1 component architecture (`src/App.jsx` deleted in Phase A); current Body Scan What Shifted wiring lives in `src/v2/` modules. The science rationale (interoceptive labeling, felt-shift capture as somatic signal), UI copy structure, and edge-case handling captured here remain the substantive WHY of the shipped feature.
+
 ---
 
 ## What this is

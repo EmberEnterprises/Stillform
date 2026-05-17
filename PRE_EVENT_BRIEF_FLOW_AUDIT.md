@@ -1,5 +1,9 @@
 # Pre-event Brief — Layer 0.6 Flow Audit
 
+> **STATUS — May 17, 2026.** This audit informed shipped work: **Phases 7a–7d SHIPPED** (backend, frontend helpers, notification update, display screen) per Completed Archive line 450 and Master Todo line 705. **Phase 7e (Trigger Profile match detection) DEFERRED post-launch** per audit recommendation. The architectural rationale (Option A: on-demand at notification tap), science alignment, boundaries, and 8 open-call decisions are preserved as the substantive WHY of the shipped Pre-event Brief.
+>
+> **⚠️ V1 LINE REF STALE.** §3 Phase 7b describes frontend helpers placed in `src/App.jsx` after `generateTodaysBrief`. That file was deleted in Phase A. Current Pre-event Brief frontend helpers were carried into v2 — walk `src/v2/` for current implementation. If you're reading this audit to understand the WHY of the architecture, the analysis is valid. If you're using it as a code reference, the v1 line ref is the stale one.
+
 **Status:** Pre-build. Audit doc only.
 **Spec ground truth:** `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` §3.2 lines 128-130, verbatim:
 
