@@ -2,6 +2,8 @@
 **Stillform — What Shifted three-category data feed implementation spec**
 **ARA Embers LLC · April 30, 2026**
 
+> **✅ SHIPPED Apr 30, 2026** — commit `890469aa` (combined with Body Scan What Shifted Build) per Completed Archive line 855. The three-category data feed (Russell circumplex Category A active labels / Category B body-shift / Category C non-emotional) is wired in the codebase. Current v2 wiring lives in `src/v2/` modules. The category-design rationale (Russell circumplex coverage + Hayes ACT defusion legitimacy for Category B non-affect entries) below remains the substantive WHY of the shipped data feed.
+
 ---
 
 ## What this is

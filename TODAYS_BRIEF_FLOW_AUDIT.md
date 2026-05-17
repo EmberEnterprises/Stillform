@@ -4,6 +4,8 @@
 **Author: Claude · Reviewer: Arlin · Status: pending Arlin's review of open calls**
 **Last updated: May 8, 2026 (post Phase 2 capture stack + 2d.1 inline add)**
 
+> **STATUS — May 17, 2026.** This Layer 0.6 audit informed shipped work: **Phases 3a–3d SHIPPED** per Completed Archive line 451 and Master Todo line 1709 (3a backend `be4f23d`, 3b frontend helpers `b4cba8a`, 3c saveCheckin hook `19a81a6`, 3d inline display with poll `87ecfdf`). **Phase 3e (re-read surface) DEFERRED post-launch** per audit recommendation. The architectural rationale (Option A: auto-generate inline on morning check-in close), science alignment, boundaries, and 8 open-call decisions remain the substantive WHY of the shipped Today's Brief. Note: "high intensity" usage in §4 references Barrett's constructed-emotion research vocabulary (low/high arousal labeling), not audience characterization — preserved as scientific terminology per the subtle-case convention.
+
 ---
 
 ## What this doc is
