@@ -2,6 +2,8 @@
 
 *Drafted May 1, 2026. Decisions locked. Corpus verified against Science Sheet. Ready for Arlin's verification pass before code.*
 
+> **✅ SHIPPED May 1, 2026** — 8 commits + 3 follow-up build fixes per Completed Archive line 821. The Plain-Language Neuroscience cards exist in the codebase; surfacing as a destination tab is tracked separately (Completed Archive line 288: "Science is woven in moments inside tools. There is no browsable library outside of practice flow.") The one `src/App.jsx` line ref in this doc points at v1 code deleted in Phase A; current v2 implementation lives in `src/v2/` modules. The corpus design, plain-language treatment, card structure, and decision rationale below remain the substantive WHY of the shipped feature.
+
 ---
 
 ## What changed from v1

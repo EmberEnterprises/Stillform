@@ -3,9 +3,11 @@
 
 ---
 
-## ⚠️ STATUS UPDATE — May 7, 2026
+## ⚠️ STATUS UPDATE — May 7, 2026 (extended May 17, 2026)
 
 **This spec is functionally absorbed into STILLFORM_ENGAGEMENT_ARCHITECTURE.md per Path A consolidation decision (May 7).**
+
+**Additional status as of May 17, 2026:** **Partially shipped** per Master Todo line 1612 — some of the 4-section consolidation landed in v2's MyProgress (commit `479ac81`); remaining work tracked there. The doc is **also cited as authoritative source** by `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` (lines 123, 253, 279) and other canonical docs for the 30+ computed-metric inventory below — that catalog is load-bearing. Doc kept for the metric inventory + diagnosis content. The §"Diagnosis of the current screen" below describes v1's My Progress (file deleted in Phase A); the diagnosis remains valid as historical record of what motivated the redesign.
 
 The redundancy this spec called out — "Observer growth and Proof both surface session-rating delta data," "Additional stats and Composure telemetry both surface activity counts," "Three places reference follow-through from drafted actions" — is resolved by the engagement architecture's three-engine refactor:
 
