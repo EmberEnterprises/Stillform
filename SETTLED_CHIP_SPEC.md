@@ -2,6 +2,8 @@
 **Stillform — Settled chip implementation spec**
 **ARA Embers LLC · April 30, 2026**
 
+> **✅ SHIPPED Apr 30, 2026** — commits `768b56ed` (App.jsx; v1, since deleted) + `ad4a43f1` (reframe.js). Settled was added as the ninth feel chip, then carried forward to v2 as one of the locked 10 chips in `CHIP_DEFINITIONS.md` (with Unsure as the 10th, added May 16 Phase 4 reconciliation). The §"Implementation — exact changes" section below references v1's `src/App.jsx` which was deleted in Phase A; current Settled wiring lives in `src/v2/lib/beatConfig.js` (vocabulary canon) + `netlify/functions/reframe.js` (AI routing per state). The Russell circumplex rationale, word-choice elimination process, AI routing logic, and non-scope decisions remain the substantive WHY of the shipped Settled chip.
+
 ---
 
 ## What this is

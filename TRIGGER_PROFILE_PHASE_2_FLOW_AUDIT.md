@@ -1,6 +1,10 @@
 # TRIGGER PROFILE PHASE 2 — FLOW AUDIT
 **ARA Embers LLC · May 8, 2026 · Layer 0.6 audit output per audit philosophy v1.3**
 
+> **STATUS — May 17, 2026.** This Layer 0.6 audit informed shipped work: **Phases 2a–2d.1 SHIPPED** (Trigger Profile Settings CRUD, capture surfaces, mirror sheet wiring) per Completed Archive line 452 and Master Todo line 614. **Phases 2e (calibration seed) + 2f (trigger-tagged sessions) DEFERRED** per audit defaults. The architectural rationale, science alignment, and 8 open-call decisions captured here are preserved as the substantive WHY of the shipped Trigger Profile system.
+>
+> **⚠️ V1 LINE REFS STALE.** All `src/App.jsx` line references throughout this doc (4332-4347, 4357-4479, 9086, 8480, 9797, 3923) point at code deleted in Phase A. The helper inventory (`getTriggerProfile`, `saveTriggerProfile`, `addTrigger`, etc.) was carried forward to v2; current implementation lives in `src/v2/` modules. If you're reading this audit to understand the WHY of Trigger Profile architecture, the analysis is valid. If you're using it as a code reference, walk to the v2 implementation instead.
+
 ---
 
 ## What this doc is
