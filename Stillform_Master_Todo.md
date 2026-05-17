@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 17, 2026 (Phase 2.5 ✅ (`a2e108f`) — Quick Breathe pill runs Cyclic Sighing. Phase 4 ✅. Phase 4.5 ✅ (`2fe7d06`). Phase 4.5b ✅ (`a14aa6d`) — slim v2 Reframe stack: base + schema + arc-turn-1 override, three reinforcing signals against multi-candidate workflow. All untested code-only changes batched to one deploy at end of Phase 5 per Arlin's token-discipline plan. Nothing outstanding pre-Phase 5. Ready to start Phase 5 — My Progress surfaces + diagnostic stack editors + AI Mediation queue.)**
+**ARA Embers LLC · last updated May 17, 2026 (Phase 2.5 ✅. Phase 4 ✅. Phase 4.5/4.5b ✅. Nothing outstanding pre-Phase 5. Phase 5 ⏳ STARTED — sub-item #1: Context Profile foundation, locked scope: data layer + editor UI + route. Pure CRUD; Reframe API plumbing + autodetection split to later sub-items. Diagnostic stack editor pattern established by Context Profile, then Trigger/Bias/Signal/Bio-filter editors follow same template.)**
 
 ---
 
@@ -366,6 +366,29 @@ This is the architectural floor under Principle C. Every AI surface ships with a
     - **Context Profile** (new, locked May 16, 2026): user-named ambient/ongoing conditions and observed correlations with state shifts. Captures environmental factors (cold weather, low pressure days, fluorescent rooms, travel/jetlag), physiological inputs (gluten, third coffee, hydration drop, hormonal phase), dietary observations (food → fog correlations), and other recurring context the user has noticed correlates with cognitive/emotional states. Different from Trigger Profile because Triggers = external/situational provocations (events that happen TO the user); Context = ambient/ongoing conditions (states the user is IN). Different surfacing patterns: Triggers surface as *"this thing came up again"*; Context surfaces as *"you've named fog 5 times this week, all on rainy days."* **Boundary held strictly:** Stillform doesn't claim causation, doesn't propose causes, doesn't track symptoms, doesn't capture medical data. The label is the user's hypothesis. Stillform NEVER asks what the user ate, never lists foods, never prescribes, never moralizes about food. Just helps the user surface patterns they've already observed in their own data. Especially valuable for users with chronic conditions (autoimmune, Lyme/babesia, inflammation history) who fail mass-prescriptive diet/wellness apps because the apps assume baseline the apps don't have. User has the baseline; Stillform helps them see what they've already noticed.
     - **Bio-filter expands with dopamine-aware flags** (*"overstimulated"* / *"post-binge"*) per dopamine cross-cutting concern below — AI prompts adapt per flag because depleted-from-stimulation needs different framing than depleted-from-effort.
   - Signal Log (long-term past-session review)
+
+  **Phase 5 sub-item #1 — Context Profile foundation (locked May 17, 2026):**
+
+  Starting Phase 5 with Context Profile because (a) it's new — no v1 baggage; (b) it establishes the editor pattern for Trigger/Bias/Signal/Bio-filter editors that follow; (c) unblocks the expanded AI Mediation queue which references Context Profile heavily; (d) has the strictest guardrails — getting them right first means subsequent editors inherit the discipline.
+
+  Sub-item #1 scope is INTENTIONALLY TIGHT — data layer + editor UI + route only. No Reframe API plumbing yet (that's AI Mediation queue scope, separate). No autodetection of correlations yet (that's the two-layer pattern detection scope, also separate). Pure CRUD interface for the user to name what they've already observed.
+
+  **Files affected:**
+  - `src/v2/lib/contextProfile.js` (NEW) — pure data module. Mirrors v1 Trigger Profile pattern (`src/App.jsx:5611-5704`) but adapted for context semantics. Schema: `{ contexts: [{ id, label, description, createdAt, lastSeen, encounterCount }], updatedAt }`. Helpers: `getContextProfile`, `saveContextProfile`, `addContextEntry`, `updateContextEntry`, `deleteContextEntry`, `incrementContextEncounter`, `formatContextProfileForAI` (forward-looking — used by AI Mediation queue in later sub-item). NO category enum (freeform labels, per guardrail #1). NO food/symptom/medical fields (per guardrail #2). Optional `description` field for longer notes the user writes themselves. v2 plain-localStorage pattern matching `src/v2/lib/sessions.js` (fail-silent on storage unavailable; cloud sync layers later via Supabase). Storage key: `stillform_context_profile`.
+  - `src/v2/screens/ContextProfile.jsx` (NEW) — editor UI. List of entries with add/edit/delete affordances. Editorial header with hard-coded copy that orients the user to the right mental model: "Conditions you've noticed correlate with how you feel. Name what you observe — Stillform doesn't prescribe, doesn't track symptoms, just helps you see what you've already noticed." Input placeholder shows examples of the SHAPE: "e.g., rainy days, after long calls, when I haven't eaten enough." Each entry shows label + optional description + last-seen date + encounter count (mono-faint, faint enough not to feel like surveillance metrics).
+  - `src/v2/AppV2.jsx` — add `context-profile` screen state. Route from Home via HomeFooter's "Progress" link (placeholder route until full My Progress landing exists).
+  - `src/v2/components/HomeFooter.jsx` — wire "Progress" `onNavigate` to set screen to `context-profile` for now. NOTE: this is intentionally a temporary direct-link until a proper My Progress landing exists (Phase 5 sub-item later). Pattern established: Progress link works, content flows in.
+
+  **Out of scope for sub-item #1:**
+  - Reframe API plumbing (`contextProfile` field in request body) — AI Mediation queue scope
+  - Two-layer pattern detection (coded counts/frequencies + AI generative framing) — separate sub-item
+  - Trigger / Bias / Signal / Bio-filter editors — separate sub-items
+  - My Progress landing surface (tab navigation, etc.) — separate sub-item; for now Progress → ContextProfile directly
+  - Audit history integration (the `appendArtifactHistoryEntry` call from v1's addTrigger) — bigger architectural piece; v2 will get an artifact history system but not in this sub-item
+
+  **Success criterion:** User can navigate from Home → Progress → see ContextProfile editor → add a label like "rainy days" with optional description → see it in the list → edit it → delete it. The label persists across reloads. No Stillform-side prompts to enter food/symptoms/medical info. The guardrail copy makes the mental model clear.
+
+  **Risk:** Low. Pure greenfield code. v1 unchanged. Even if the editor UI is rough, the data layer is the load-bearing piece for downstream Mediation queue work.
 
 - **6** — Support Sheet (Move card + Scripts) + post-event reflection variant + Reset surface
   - Move card library spec addition: **freeze-restart sequence** — physiological sigh → silent affect label ("I'm frozen") → self-distance with name ("Arlin, what do you know?") → single first fact; ~30 sec; for in-the-moment freeze under load (Beilock choke research, Wells 2009, Kross 2014, Lieberman 2007)
