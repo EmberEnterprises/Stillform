@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 17, 2026 (Phase 2.5 ✅. Phase 4 ✅. Phase 4.5/4.5b ✅. Phase 5 ⏳ IN PROGRESS — sub-item #1 Context Profile foundation ✅ shipped `fffd12d`: data layer + editor UI + Progress route placeholder. Pattern established for subsequent diagnostic-stack editors. Next sub-item TBD with Arlin — Trigger Profile editor UI (data layer already exists in v1), Bias/Signal/Bio-filter editors, AI Mediation queue, or My Progress landing surface.)**
+**ARA Embers LLC · last updated May 17, 2026 (Phase 2.5 ✅. Phase 4 ✅. Phase 4.5/4.5b ✅. Phase 5 ⏳ — sub-item #1 Context Profile foundation ✅ `fffd12d`, sub-item #2 My Progress landing ✅ `479ac81`. Route stack established: home → my-progress → context-profile. Next: sub-item #3 Trigger Profile editor — v1 data layer exists, port to v2 + build UI following Context Profile pattern, add entry to MyProgress landing.)**
 
 ---
 
@@ -369,27 +369,7 @@ This is the architectural floor under Principle C. Every AI surface ships with a
 
   **Phase 5 sub-item #1 — Context Profile foundation:** ✅ shipped `fffd12d` — data layer (`src/v2/lib/contextProfile.js`, 7 helpers, schema mirrors v1 Trigger Profile pattern but freeform-label without category enum, optional description field, dedup by case-insensitive label) + editor UI (`src/v2/screens/ContextProfile.jsx`, inline add/edit form with two-step delete confirmation, guardrail copy oriented to "name what you observe" not "log your symptoms," placeholder text shows shape: "e.g., rainy days, after long calls, when I haven't eaten enough") + routing (AppV2 adds `context-profile` screen state; HomeFooter "progress" nav id routes here as placeholder until full My Progress landing surface ships). Established pattern for subsequent diagnostic stack editors. Build clean. All locked guardrails held — no category enum, no medical/food/symptom prompts, description is freeform user note. **Out of scope per lock (separate sub-items):** Reframe API plumbing (`contextProfile` field in request body), autodetection of correlations, other diagnostic stack editors, full My Progress landing, audit history integration.
 
-  **Phase 5 sub-item #2 — My Progress landing (locked May 17, 2026):**
-
-  Course correction from initial sequence ("Trigger editor next, landing later"): adding any second diagnostic-stack editor creates a routing problem because HomeFooter's `progress` nav id can only point at one screen. Building the landing first locks the navigation pattern; every editor plugs in cleanly afterward.
-
-  **Scope (minimal):** Landing surface that lists currently-available diagnostic-stack editors. Only Context Profile right now — Trigger/Bias/Signal/Bio-filter slots intentionally NOT shown (we don't ship placeholders for non-functional items, per the "no broken affordances" canon). When future editors ship, they add their own entries to this list. Tap an entry → navigate to that editor's screen. Back button on editor returns to landing; back button on landing returns to home.
-
-  **Files affected:**
-  - `src/v2/screens/MyProgress.jsx` (NEW) — landing surface. Editorial header ("Progress" mono label + "My Progress" serif headline + body copy: "Where what you've named lives. Edit your profile, review what you've observed, see your patterns over time." [forward-looking copy that promises Practice/Library/Roadmap surfaces without showing broken slots]). Single section for now: "Your diagnostic stack" with one entry — Context Profile. Each entry: name + brief description + arrow indicator + tap target. Empty-state framing: NOT empty (Context Profile is always present as an editor, even if user hasn't added contexts yet — the editor itself is the "item" listed).
-  - `src/v2/AppV2.jsx` — replace direct `progress` → `context-profile` routing with `progress` → `my-progress`. New `my-progress` screen state. MyProgress receives `onExit` (back to home) and `onNavigate` (target editor id) handlers. AppV2's onNavigate inside MyProgress maps editor ids to the corresponding screen state.
-  - `src/v2/screens/ContextProfile.jsx` — change `onExit` semantics: was "back to home," now "back to my-progress." AppV2 wires this when rendering ContextProfile (the editor doesn't need to know the destination — AppV2 manages the route stack).
-
-  **Out of scope (deliberately):**
-  - Trigger Profile / Bias / Signal / Bio-filter entries — those ship in their own sub-items, then add to the landing
-  - Library section on landing — Library is its own Phase 5 sub-item; not on landing yet
-  - Roadmap / Mirror Strip / Signal Log / Pattern Disruption sections — separate sub-items
-  - Live preview data on cards (e.g., "2 contexts named") — could add later as polish; landing ships as plain entry list first
-  - Per-entry visited-state, last-edited timestamps, etc. — polish
-
-  **Success criterion:** User taps Progress on home → sees My Progress landing → sees Context Profile entry → taps it → enters Context Profile editor → taps back → returns to My Progress landing (not home) → taps back again → returns to home. Two-level back behavior works cleanly.
-
-  **Risk:** Very low. New screen + routing wiring. ContextProfile existing behavior unchanged except for back destination.
+  **Phase 5 sub-item #2 — My Progress landing:** ✅ shipped `479ac81` — `src/v2/screens/MyProgress.jsx` (NEW): editorial header + "Your diagnostic stack" section with one entry (Context Profile, full-row tap target, serif title + sans description + mono arrow). No placeholder slots for future editors per "no broken affordances." AppV2 routing rewired: HomeFooter "progress" → MyProgress landing (was direct to ContextProfile); MyProgress passes onNavigate to AppV2 which maps editor ids → screen states; ContextProfile.onExit destination changed from "home" to "my-progress" via AppV2 wiring (ContextProfile itself NOT edited — editor doesn't know its parent, AppV2 owns the route stack). Two-level back behavior: home → my-progress → context-profile (entry tap) → my-progress (back from editor) → home (back from landing). Build clean.
 
 - **6** — Support Sheet (Move card + Scripts) + post-event reflection variant + Reset surface
   - Move card library spec addition: **freeze-restart sequence** — physiological sigh → silent affect label ("I'm frozen") → self-distance with name ("Arlin, what do you know?") → single first fact; ~30 sec; for in-the-moment freeze under load (Beilock choke research, Wells 2009, Kross 2014, Lieberman 2007)
