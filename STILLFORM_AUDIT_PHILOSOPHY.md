@@ -291,7 +291,7 @@ I added this layer because I designed Trigger Profile capture points for Build #
   - `STILLFORM_PROJECT_TRANSFER.md` — Daily Loop section (canonical user day)
   - `STILLFORM_PROJECT_TRANSFER.md` — Current Routing Logic section (which tools each processing type defaults to)
   - `STILLFORM_PROJECT_TRANSFER.md` — Key Features Built (existing affordances I might be duplicating)
-  - The actual `TOOLS` array in `src/App.jsx`
+  - The actual `TOOLS` array in `src/v2/`
   - The hero CTA routing logic in code
 - **Evidence:** Quotes from the doc with line references for the flow facts I'm building on. Not summaries — exact text.
 - **Pass:** Every flow claim in my proposal traces to a quoted line in the canonical docs or code.
@@ -344,7 +344,7 @@ This question matters most after a context-window compaction, after a session br
 - Storage keys: `stillform_x_*` — features that persist data leave a key trail
 - For UI work: also grep tokens that appear in comments naming the surface (e.g., `STAGE LABEL`, `CAPACITY LINE`)
 
-The Mirror duplicate would have been caught by any of: `grep "Mirror" src/App.jsx` (would have shown the existing anchor + sheet), `grep "showMirrorSheet"` (would have shown the existing useState), `grep "MIRROR ANCHOR"` (would have shown the existing comment block). I grepped for "STAGE_DEFINITIONS" and "computeStageMarkers" — the names of NEW code — but not for the feature name itself.
+The Mirror duplicate would have been caught by any of: `grep "Mirror" src/[Stillform code]` (would have shown the existing anchor + sheet), `grep "showMirrorSheet"` (would have shown the existing useState), `grep "MIRROR ANCHOR"` (would have shown the existing comment block). I grepped for "STAGE_DEFINITIONS" and "computeStageMarkers" — the names of NEW code — but not for the feature name itself.
 
 ### Question 1.2: "Does the science actually match the implementation?"
 - **Evidence:** Side-by-side written comparison. "The research [Author Year] measures X by doing Y. The implementation does Z. They match because [reason]" — OR — "They don't match because [gap]; here's how to close it."
@@ -434,7 +434,7 @@ The Stillform codebase has a pre-existing architectural inconsistency: some SECU
 Behavior audits answer "does this thing actually work?" — the question hygiene audits never ask.
 
 ### Question 3.1: "Does each new component have an explicit conditional wrapper?"
-- **Evidence:** For every new render block in App.jsx (or any file), show the conditional that gates it: `{condition && (<Component />)}` or `{condition ? <A /> : <B />}`. List each new component, show its gate.
+- **Evidence:** For every new render block in [Stillform code] (or any file), show the conditional that gates it: `{condition && (<Component />)}` or `{condition ? <A /> : <B />}`. List each new component, show its gate.
 - **Pass:** Every new component has an explicit conditional. None render unconditionally.
 - **Fail:** Any new component renders without a conditional wrapper. ← This is the bug that shipped Practice Signals.
 
@@ -725,6 +725,8 @@ Documented from real failures so far:
 15. **Read-write path mismatch on persisted data** (commit 1f49ddb, May 8 night, surfaced same session) — Layer 2.39. Changed `getEodHistory` and `_s2LongestSustainedCheckinRun` from raw localStorage reads to `secureRead` to address the encryption-at-rest inconsistency, without checking that the corresponding WRITES still went through raw `localStorage.setItem` in `appendDailyLoopHistory` (line 5139). Result: those helpers returned stale boot-time SecureCache snapshots, missing all writes from the current session. Tests passed against pre-seeded data; production was broken for any in-session data. Reverted in the same session. Two more sites (line 17223 getSignalDivergence, line 19704 My Progress sessions reader) had the same pre-existing bug; both fixed via raw read alignment with explicit `// SECURE-KEYS-ALLOW:` markers. The broader encryption-at-rest architectural inconsistency (some SECURE_KEYS use secureWrite, others use raw localStorage) is pre-existing tech debt flagged for future audit, not fixed in scope.
 16. **Framing drift via narrowed science citations and regulation-app defaults** (May 11–12, 2026, surfaced in framing rebuild) — NEW Layer 0 (Framing Audit). The v1.x audit philosophy's Standing Requirement cited Lieberman 2007 / Barrett 2017 / Mehling 2012 / Wells 2009 / Russell / Lehrer — a regulation-coded list — which made every feature recommendation pull toward regulation framing because the citations themselves were regulation-coded. Memory edits about identity ("composure as a way of being," "regulation app") accumulated over weeks and compounded the drift. Well-intentioned audit layers reinforced the framing instead of catching it because there was no Layer ABOVE Layer 0 (doc context) checking whether the proposal aligned with the constitutional product framing. The fix: STILLFORM_FRAMING_LAW.md established as supreme reference (May 12); audit philosophy v2.0 adds Layer 0 (Framing Audit) as the gate; Standing Requirement extended to require Framing alignment as the first articulation; Layer 4 voice audit gains Q4.6/Q4.7/Q4.8 for regulation drift, rumination affordances, and "graduate from analysis" anti-patterns; the canonical doc inventory flags COMPOSURE_SELF_MASTERY_LEGIBILITY.md as contaminating pending step (c) doc inventory audit. This is a different class of failure than the others — it's not about code or assumption-based shipping. It's about ARCHITECTURAL drift in the audit philosophy itself. The audit philosophy was narrowing the product framing without anyone noticing for weeks.
 
+17. **Under-tracking pattern — spec/decision-to-master-todo desync** (May 8, 2026, surfaced from weeks of accumulated drift) — Layer 0.5 (Document Context) plus the "Spec → master todo entry, same session" operating rule in CANON Section 10. Pattern compounds in five steps: (1) Discussion produces a decision or surfaces an idea; (2) Spec gets drafted in a repo file; (3) The decision or spec is not formalized in master todo; (4) Time passes — work isn't done, isn't tracked, isn't visible; (5) When Arlin asks "what's left," the answer doesn't include the items because they're not in master todo; she surfaces the gap herself; frustration compounds because the work was supposed to be visible. Specific items found under-tracked for weeks at the May 8 session: Engagement Architecture Engine 2 (7 surfaces, specced May 7), CFM (specced Apr 30, chosen as #2 engagement mechanic), 5 sound packs (UI "Coming soon" promise), Self Mode redesign (drafted May 7), My Progress redesign (deferred May 7), native launcher icons (known Apr 9), info button discipline gap, voice consistency drift. The fix is lock-step pairing: spec commit → master todo entry, in the same session, mandatory. The audit signal in any session that drafts a spec or settles a decision: pause before commit, write the master todo entry first, then ship.
+
 When new failure classes appear, document them here and add the audit that catches them.
 
 ---
@@ -752,5 +754,7 @@ When new failure classes appear, document them here and add the audit that catch
 - Documented **failure class 16**: Framing drift via narrowed science citations and regulation-app defaults. The audit philosophy itself was the locus of drift for weeks until the framing rebuild caught it.
 
 This is the audit philosophy's largest version jump. The 8 layers became 9. The standing requirement gained a dimension. The doc inventory was reorganized to elevate the framing law as supreme reference. The change is structural, not incremental — driven by recognition that framing drift had been the silent failure mode for weeks, undetected because no layer audited for it.
+
+**v2.1 — May 17, 2026.** Documented failure class 17 (under-tracking pattern — spec/decision-to-master-todo desync). Cause was scope drift across multi-session work where specs were committed to repo without paired master todo entries; over weeks of accumulated drift, status appeared wrong and work was lost. The prescriptive fix is captured as an operating rule in CANON Section 10 ("Spec → master todo entry, same session"); the failure class is documented here as a diagnostic pattern to watch for in any session that drafts a spec or settles a decision.
 
 Future versions update this doc when a new failure class is identified. The audit philosophy itself is reviewable, fallible, and evolves.
