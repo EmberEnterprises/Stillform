@@ -1,5 +1,5 @@
 # STILLFORM CANON
-**ARA Embers LLC · v1.3 · Consolidated May 13, 2026**
+**ARA Embers LLC · v1.6 · Originally consolidated May 13, 2026 · Last extended May 17, 2026**
 
 The single source-of-truth doc Claude reads at session start. Distills the operational essence of:
 
@@ -288,6 +288,22 @@ No recommendation without all three. The standing requirement runs in parallel w
 
 - **Quick Breathe is always free. The panic safety valve never gates behind subscription.** Locked April 30, 2026. Quick Breathe is the persistent always-available stabilization affordance — the one element that renders outside the one-element-per-beat home structure (CANON Section 10 exception). Its purpose is acute moments where a user needs stabilization regardless of subscription state, payment status, account tier, or any other gating factor. Paywall logic explicitly excludes Quick Breathe. The principle generalizes: any future stabilization affordance that exists for crisis access (panic surface, body-down regulation tools added in emergencies) shares the same free-tier exemption. The rest of the practice (Reframe, Move card, Roadmap, profiles, the diagnostic stack) can sit behind the subscription wall; the stabilization safety valve cannot.
 
+### USER TREATMENT — INTEGRITY, EMPATHY, ACCEPTANCE (locked May 17, 2026)
+
+Stillform's user treatment is governed by these principles. Every surface, every prompt, every result presentation must hold to them. Duplicated to `STILLFORM_FRAMING_LAW.md` by design — hard truths get reinforced through visible repetition across the supreme references, not assumed through inheritance.
+
+- **No judgment, unconditional acceptance.** Users are judged everywhere — by work, family, themselves, every other app. Stillform does not pile on. No scoring presented as good/bad. No diagnoses. No deficit framing. Every observation lands as common pattern, not pathology.
+
+- **Never surface a problem without a path forward.** When Stillform names a pattern, a contradiction, a result from a deeper-look tool — there is always a way to engage with it. Naming without resolution is judgment dressed as analysis.
+
+- **Show acceptance, don't tell it.** Acceptance is felt through response quality, never through copy that says "I accept you" or "I care about you." Voice, framing, the absence of judgment in tone — these constitute felt acceptance. The care lives in HOW Stillform speaks, not in declarations of caring. *"I accept you despite this issue"* is condescending — it makes the acceptance about the issue, and the issue becomes the figure of the conversation. Forbidden.
+
+- **Common-pattern posture.** Every bias and pattern is common because every bias appears across most of the population. State commonality where applicable; this is true, defensible, and meets the user where they are without judgment.
+
+- **Integrity through research.** Before Stillform deploys a tool or instrument that derives from published research, the research itself must be read and the adaptation must be faithful to its construct. Without thorough research, integrity is missing. Without integrity, Stillform is selling something it's not — and the user, who is exposing vulnerable parts of themselves, deserves better.
+
+- **Vulnerability awareness.** Users will expose their most vulnerable parts in Stillform if they trust the surface. Design every surface as if the user is about to share something they haven't told anyone. Make them feel they're in a place worth that trust. Not by telling them — by being it.
+
 ---
 
 ## 11 · CURRENT STATE (May 13, 2026)
@@ -395,6 +411,8 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 ---
 
 ## VERSIONING
+
+**v1.6 — May 17, 2026.** Added "USER TREATMENT — INTEGRITY, EMPATHY, ACCEPTANCE" subsection at end of Section 10, locking six principles governing user treatment across every surface: no judgment / unconditional acceptance, no problem surfaced without path forward, show acceptance don't tell it, common-pattern posture, integrity through research, vulnerability awareness. Also corrects header version from stale v1.3 to current v1.6 (v1.4 and v1.5 entries on May 14 added to versioning history but never updated header). Duplicated to `STILLFORM_FRAMING_LAW.md` v1.2 by design — hard truths get reinforced through visible repetition across the supreme references, not assumed through inheritance. Locked during Bias Profile / Workshop brainstorm — these principles emerged from the conversation about how validated psychometric instruments (MCQ-30, CD-Quest, MAIA-2, etc.) should land in Stillform's voice (non-clinical adaptation, no scoring as good/bad, common-pattern framing for legal and emotional safety, integrity-through-research as a prerequisite for deployment, vulnerability-awareness because users will expose their most sensitive parts if the surface is worth that trust).
 
 **v1.5 — May 14, 2026 late evening.** Added three more operating rules to Section 10 from the late-night testing pass:
 - **Settings is for preferences. Practice content lives in My Progress / library surfaces.** Habit anchors, Trigger Profile (inside Personalization), and Capacity baseline are practice content and need to relocate from Settings to My Progress. CRUD interfaces live alongside the existing read-only library displays (STATES NAMED, TRIGGERS IDENTIFIED, MOVES NAMED). Relocation deferred to a focused next session per the substance-before-structure rule (current Settings access preserved so functionality doesn't break tonight; spec captured in Master Todo for clean execution).
