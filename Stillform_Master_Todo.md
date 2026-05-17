@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 4 ✅ COMPLETE — all 8 sub-items shipped: beat-aware spine variants live. Phase 4.5 ✅ COMPLETE — slim REFRAME_PRACTICE_BASE shipped `2fe7d06`: v2 turn-1 stack drops from ~5,000 → ~2,700 words; the metacognitive arc now has room to actually fire on turn 1. v1 callers untouched. Ready for Arlin to rerun the EOD test.)**
+**ARA Embers LLC · last updated May 17, 2026 (Phase 4 ✅ COMPLETE. Phase 4.5 ✅ shipped `2fe7d06` — slim REFRAME_PRACTICE_BASE for v2 calls; CALM_SYSTEM removed for beat-aware path. Phase 4.5b ⏳ IN PROGRESS — schema + arc-turn-1 override: the slim base alone wasn't enough because REFRAME_RESPONSE_SCHEMA + METACOGNITIVE_ARC TURN 1 still mandate the candidate-names workflow that's producing the May 17 regression. Three new constants gate v2: slim schema, slim retry, arc override with counter-example. v1 callers untouched.)**
 
 ---
 
@@ -318,6 +318,43 @@ This is the architectural floor under Principle C. Every AI surface ships with a
   **Item:**
 
   1. ✅ shipped `2fe7d06` — Added `REFRAME_PRACTICE_BASE` constant (881 words, ~5.5 KB) declared after `CLARITY_SYSTEM`, before `HYPE_SYSTEM`. Contains only: persona one-liner / VOICE register / BANNED PHRASES (explicit list with "let yourself feel" / "let yourself experience" / "give yourself permission" added because those were the exact phrases that surfaced in Arlin's failed test) / EMPHASIS rule / RESPONSE SHAPE / NO NAMES / WHEN THE EXPERIENCE IS REAL / PATTERN RESPECT / MIRRORING / SCATTERED INPUT / STATE AWARENESS / EGO AWARENESS / DECISION FRICTION / ABSOLUTE PROHIBITIONS — LIABILITY / THIRD-PARTY PRIVACY / JSON output contract reference. **Removed from base** (lives in arc/beat/voice-preservation now): bounded-analytical-engagement bullets, metacognition citations, candidate-names workflow, GOLDEN EXAMPLES (~1,400 words — the regression source), WHAT THE ANALYTICAL WORK LOOKS LIKE technique list, PRESENCE-FIRST when state is loud, WHAT TO NOTICE FOR SESSION CONTINUITY, 80/20 RULE. **Routing:** `let systemPrompt = beat ? (mode === "hype" ? HYPE_SYSTEM : REFRAME_PRACTICE_BASE) : (mode === "clarity" ? CLARITY_SYSTEM : mode === "hype" ? HYPE_SYSTEM : CALM_SYSTEM);` — v1 callers (no beat) get original mode→prompt mapping (full back-compat); v2 callers (beat set, calm or clarity mode) get the slim base; v2 hype stays on HYPE_SYSTEM (distinct register, kept consistent for future Phase 6 entry). **Verification:** node -c syntax OK; npm run build clean. **Expected v2 EOD turn-1 stack after fix:** REFRAME_PRACTICE_BASE 881 + METACOGNITIVE_ARC 1,036 + BEAT_ADDITIONS.eod ~200 + TODAY'S THREAD ~200 + USER_VOICE_PRESERVATION 168 + conditional adders ~250 = ~2,700 words total, down from ~5,000. Below the instruction-degradation threshold.
+
+- **4.5b** — Schema + arc-turn-1 gating (v2 turn-1 quality fix continued, locked May 17, 2026)
+
+  **Why this exists:** Arlin tested Phase 4.5 deploy with input "jealousy, grief and injustice." AI's turn-1 output: *"These are powerful signals. Sorting out which one holds the most weight could help you process it clearly. Which one is it — or something I missed?"* Same regression shape as the pre-4.5 test — generic frame + banned word "process" + canned closing phrase from v1 schema. The slim REFRAME_PRACTICE_BASE was necessary but not sufficient.
+
+  **Diagnosis:** The candidate-names workflow is enforced at THREE layers, not one. Slimming CALM_SYSTEM removed the GOLDEN EXAMPLES but two layers remained active for v2 calls:
+
+  1. **`REFRAME_RESPONSE_SCHEMA` (lines 252-268)** — JSON schema mandates `candidate_names: ["string", "string", "string"]` on the first user input of every session. Models follow JSON schemas strictly. The schema also literally provides the exact phrase `"Which one is it — or something I missed?"` as the example for the `question` field — which is what the model output verbatim.
+
+  2. **`METACOGNITIVE_ARC` TURN 1 passage (line 1329)** — explicitly endorses the candidate workflow: *"The existing candidate_names pattern is correct in shape (anchored open + 3-4 candidates + closed question). The failure mode is when candidates RESTATE..."* It tries to refine quality ("probe not restate") but still mandates multi-option structure.
+
+  **Critical detail:** v2 spine does NOT consume `candidate_names` — already verified in `reframeApi.js`. The field is dead data for v2. Forcing the model to populate it on v2 calls produces degenerate output (collapsed restatement + canned pick-question) AND wastes tokens AND blocks the single-probe turn-1 the arc actually wants.
+
+  **Strategy:** Gate all three layers for v2 calls. v1 callers untouched.
+
+  1. **New `REFRAME_PRACTICE_SCHEMA`** (~130 words) — same JSON shape (back-compat for any code that parses the response) but `candidate_names` MUST be null. Rules block multi-option turn 1 explicitly: "On turn 1, reframe is a single concrete probe... pick ONE specific element of what the user wrote and surface a hypothesis they couldn't have written on their own." Question rules forbid the v1 example phrase and prefer open-shaped (what/where) over closed (which one).
+
+  2. **New `QUALITY_RETRY_PROMPT_V2`** (~80 words) — slim retry for v2 validation failures. Mirrors slim schema: candidate_names MUST be null, single probe, mirror exact words, one open question.
+
+  3. **New `METACOGNITIVE_ARC_V2_TURN1_OVERRIDE`** (~270 words) — explicit override pushed AFTER arc + beat addition so the model reads it with recency-weighted attention. Contains the actual failed exchange from May 17 ("jealousy, grief and injustice") as the WRONG counter-example with annotation of what's wrong (banned word, canned phrase, generic frame, no specific element). Contains a constructed RIGHT example (single concrete element picked, one mirrored word, one hypothesis the user couldn't have written, one open question) with annotation of what works.
+
+  **Routing:**
+  - Schema push: `contextParts.push(beat ? REFRAME_PRACTICE_SCHEMA : REFRAME_RESPONSE_SCHEMA);`
+  - Retry push: `${beat ? QUALITY_RETRY_PROMPT_V2 : QUALITY_RETRY_PROMPT}`
+  - Arc override push (NEW): after BEAT_ADDITIONS push inside the calm/clarity branch, `if (beat) contextParts.push(METACOGNITIVE_ARC_V2_TURN1_OVERRIDE);`
+
+  **Expected v2 EOD turn-1 stack after fix:** ~3,000 words (up slightly from ~2,700 because override adds 270 words; down significantly from original ~5,000). Override + slim schema together provide three reinforcing signals against the multi-candidate pattern, which should overpower the arc's residual TURN 1 candidate endorsement (the arc still says "candidate_names pattern is correct in shape" for back-compat — we don't rewrite the arc; the override supersedes).
+
+  **Success criterion:** Arlin reruns the same "jealousy, grief and injustice" input. AI's turn-1 response no longer opens with "These are powerful signals" or any generic multi-option framing. Instead picks ONE of the three named feelings, mirrors one or two of her exact words, surfaces a real probe she couldn't have written on her own, and asks an open (what/where) question — not "Which one is it."
+
+  **Risk:** Low-medium. v1 callers untouched (no beat sent, all three constants bypass them). v2 callers get three reinforcing override signals. Worst case: arc still partially wins on residual sessions; remediation is to explicitly contradict the arc's TURN 1 endorsement INSIDE the override (already partially done by saying "REPLACES the candidate-names pattern in the arc above"). Failure to address: model continues to default to multi-candidate framing because v2 doesn't strip arc; we add stronger negative override.
+
+  **Files affected:** `netlify/functions/reframe.js` only — three new constants + routing edits.
+
+  **Item:**
+
+  1. ⏳ in progress — Add three new constants (REFRAME_PRACTICE_SCHEMA, QUALITY_RETRY_PROMPT_V2, METACOGNITIVE_ARC_V2_TURN1_OVERRIDE). Wire schema push to choose based on beat. Wire retry prompt to choose based on beat. Push override after BEAT_ADDITIONS inside calm/clarity branch when beat is set. Verify syntax + build.
 
 - **5** — My Progress
   - Library (external curated knowledge — human behavior, neuroscience, ethics). **Includes:** (a) dopamine science entry — Lembke 2021, Volkow on D2 receptor downregulation, pleasure-pain balance, why cheap hits make composure harder; (b) gut-brain axis entry — Mayer 2016, Cryan & Dinan on vagus-microbiome signaling; (c) brain fog entry — blood sugar, inflammation, ultra-processed foods; (d) neuroplasticity-supporting nutrition entry — omega-3, flavonoids, polyphenols, curcumin, Mediterranean / time-restricted eating (Mattson 2018). Strictly educational — Library only, no tracking surface, no prescription. Per nutrition cross-cutting concern below.
