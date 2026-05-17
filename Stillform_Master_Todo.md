@@ -371,6 +371,29 @@ This is the architectural floor under Principle C. Every AI surface ships with a
 
   **Phase 5 sub-item #2 — My Progress landing:** ✅ shipped `479ac81` — `src/v2/screens/MyProgress.jsx` (NEW): editorial header + "Your diagnostic stack" section with one entry (Context Profile, full-row tap target, serif title + sans description + mono arrow). No placeholder slots for future editors per "no broken affordances." AppV2 routing rewired: HomeFooter "progress" → MyProgress landing (was direct to ContextProfile); MyProgress passes onNavigate to AppV2 which maps editor ids → screen states; ContextProfile.onExit destination changed from "home" to "my-progress" via AppV2 wiring (ContextProfile itself NOT edited — editor doesn't know its parent, AppV2 owns the route stack). Two-level back behavior: home → my-progress → context-profile (entry tap) → my-progress (back from editor) → home (back from landing). Build clean.
 
+  **Phase 5 sub-item #3 — Trigger Profile editor (locked May 17, 2026):**
+
+  v1 has the Trigger Profile data layer (`src/App.jsx:5593-5795`) shipped under Build #2 Phase 1 (`f9aa354`). Port it to v2 + build editor UI following the ContextProfile pattern + add entry to MyProgress landing.
+
+  **Scope:**
+
+  1. **Data layer port:** `src/v2/lib/triggerProfile.js` (NEW) — mirror v1's helpers (`getTriggerProfile`, `saveTriggerProfile`, `addTrigger`, `updateTrigger`, `deleteTrigger`, `incrementTriggerEncounter`, `formatTriggerProfileForAI`) adapted to v2 conventions (plain localStorage, no `secureRead`/`secureWrite`, no SECURE_KEYS/SYNC_KEYS membership — cloud sync layers later). PRESERVE: 7-category frozen enum (`work` / `relational` / `financial` / `health` / `cross-cultural` / `current-events` / `other`); schema `{ triggers: [{ id, label, category, createdAt, lastSeen, encounterCount }], updatedAt }`; case-insensitive label dedup; encounterCount + lastSeen tracking; sort-by-encounterCount-desc + lastSeen-desc in formatter; plural-aware count labels. STORAGE KEY: `stillform_trigger_profile` (matches v1 — same store, so if user has v1 triggers, v2 reads them; forward-compatible). DEFER from v1: `appendArtifactHistoryEntry` integration (v2 audit history is a later architectural piece).
+
+  2. **Editor UI:** `src/v2/screens/TriggerProfile.jsx` (NEW) — same architectural pattern as ContextProfile.jsx (inline add/edit form, two-step delete confirm, list with mono-faint metadata, "← back" affordance returning to MyProgress). KEY DIFFERENCES from ContextProfile UI: (a) NO description field — v1 schema doesn't have one, triggers are short labels by design; (b) CATEGORY SELECTOR — chip group with 7 categories, exactly one selected at a time, defaults to "other" if user doesn't pick; (c) HEADER COPY — distinguishes triggers (events that happen TO user) from contexts (conditions user is IN): "Specific external situations you've noticed consistently hit harder than expected — performance reviews, hard conversations, certain people. Different from contexts: contexts are conditions you're in; triggers are events that happen to you."; (d) PLACEHOLDER text shows the SHAPE: "e.g., performance review, family dinner, deadline crunch."
+
+  3. **Routing wiring:** `src/v2/AppV2.jsx` — new `trigger-profile` screen state, parallel to `context-profile`; onExit returns to `my-progress`. `src/v2/screens/MyProgress.jsx` — add Trigger Profile entry to "Your diagnostic stack" section, between Context Profile and the (still empty) slots for Bias/Signal/Bio-filter. Tap routes to `trigger-profile`.
+
+  **Out of scope (deliberately):**
+  - Bias / Signal / Bio-filter editors (separate sub-items)
+  - Encounter auto-tracking from session content (v1 didn't ship this; v2 won't either at this layer — that's AI Mediation queue scope)
+  - Capture points inside the spine ("did one of your triggers fire?" mid-session) — separate UI work
+  - v1-compatible audit history integration — v2 audit history is a separate architectural piece
+  - Migrating v1 triggers to v2 — they share the same localStorage key (`stillform_trigger_profile`) so a user with v1 triggers will see them in v2 automatically. No explicit migration needed.
+
+  **Success criterion:** User taps Progress → MyProgress shows Context Profile AND Trigger Profile entries → taps Trigger Profile → editor opens → adds trigger with category → sees it in list → edits it → deletes it → back to MyProgress → back to home. Triggers persist across reloads (and across v1↔v2 toggling because they share storage key).
+
+  **Risk:** Low. v1 data layer is proven pattern; UI follows ContextProfile precedent. Storage key sharing with v1 is intentional forward-compat — user's existing triggers carry over.
+
 - **6** — Support Sheet (Move card + Scripts) + post-event reflection variant + Reset surface
   - Move card library spec addition: **freeze-restart sequence** — physiological sigh → silent affect label ("I'm frozen") → self-distance with name ("Arlin, what do you know?") → single first fact; ~30 sec; for in-the-moment freeze under load (Beilock choke research, Wells 2009, Kross 2014, Lieberman 2007)
   - Scripts confidant-voice rewrite
