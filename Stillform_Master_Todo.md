@@ -597,7 +597,7 @@ NOTICING → NAMING → ANTICIPATING → RECOGNIZING → HOLDING. Single-verb ca
 - Existing My Progress redesign work → consolidated into this architecture
 
 **What this does NOT absorb:**
-- Decision item 5 (Self Mode redesign) → stays distinct. Framing locked May 7 ("Past Self / Present Self"). See SELF_MODE_REDESIGN_RESEARCH.md.
+- Decision item 5 (Self Mode redesign) → stays distinct. Framing locked May 7 ("Past Self / Present Self"). See SELF_MODE_REDESIGN_RESEARCH.md. **Divergence note (May 17, 2026):** v2 Self Mode shipped May 7 (commit `5c8a2db`) as a 4-prompt self-led flow (somatic → granular → assumption → move) — does NOT match the spec's Past Self / Present Self architecture (body anchor → locate → name → past-self quote surfacing → close). When Self Mode work resumes, reconcile: is shipped = new design (archive spec) or shipped = placeholder (build to spec)? Status ambiguity block in the spec doc captures the open question.
 
 **Status (May 7-8, 2026):** Architecture documented in STILLFORM_ENGAGEMENT_ARCHITECTURE.md. **Foundation phases SHIPPED to repo (deploy queue manual).**
 

@@ -50,7 +50,7 @@ External elements always influence internal composure. Users don't spiral in a v
 
 These are explicitly out of scope and would betray the brand if introduced:
 
-- **Goals, streaks, badges, dopamine loops.** Betrays the audience (high-intensity, neurodivergent, hates being manipulated). Turns Stillform into Calm. Calm wins that race because they have 10x the resources.
+- **Goals, streaks, badges, dopamine loops.** Betrays the trust the practice depends on — Stillform's users notice manipulation and disengage. Turns Stillform into Calm. Calm wins that race because they have 10x the resources.
 - **Productivity-task framing** ("3 to-dos for the day"). Category drift. Makes Stillform a habit tracker.
 - **Bias-reduction claims.** Forscher et al. 2019 meta-analysis (492 studies): brief implicit-bias interventions produce small, fragile changes that don't reliably translate to behavior change. Dobbin & Kalev 2018: some bias training INCREASES backlash. The Science Sheet standard wouldn't let any "reduces bias" claim pass.
 - **90-day retrospective surfaces.** Too far from in-flow daily life. Whoop shows daily recovery scores, not quarterly reports. Strava shows the run you just finished.
