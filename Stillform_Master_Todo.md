@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 17, 2026 (Phase 4 ✅. Phase 4.5 ✅ (`2fe7d06`). Phase 4.5b ✅ (`a14aa6d`) — slim v2 Reframe stack: base + schema + arc-turn-1 override, three reinforcing signals against multi-candidate workflow. All v2 fixes untested per Arlin's batched-deploy plan — full system test at end of Phase 5. Phase 2.5 ⏳ IN PROGRESS — Quick Breathe pill rebuild to Cyclic Sighing; final pre-Phase-5 cleanup.)**
+**ARA Embers LLC · last updated May 17, 2026 (Phase 2.5 ✅ (`a2e108f`) — Quick Breathe pill runs Cyclic Sighing. Phase 4 ✅. Phase 4.5 ✅ (`2fe7d06`). Phase 4.5b ✅ (`a14aa6d`) — slim v2 Reframe stack: base + schema + arc-turn-1 override, three reinforcing signals against multi-candidate workflow. All untested code-only changes batched to one deploy at end of Phase 5 per Arlin's token-discipline plan. Nothing outstanding pre-Phase 5. Ready to start Phase 5 — My Progress surfaces + diagnostic stack editors + AI Mediation queue.)**
 
 ---
 
@@ -85,7 +85,7 @@ This is the architectural floor under Principle C. Every AI surface ships with a
 
 **Phase plan** (all pre-launch except where noted):
 
-- **2.5** ✅ shipped — Quick Breathe pill rebuild to Cyclic Sighing protocol (Phase 4 work also covered the "morning + EOD + wind-down spine variants" item that was previously tracked here; AI pattern-routing groundwork for Reframe close re-categorized as Phase 5 work since it's part of the post-EOD AI Mediation queue scope, not breath-pill scope).
+- **2.5** ✅ shipped — Quick Breathe pill rebuild to Cyclic Sighing protocol shipped `a2e108f` (BreatheOverlay.jsx: pattern swapped from Box 4-4-4-4 × 6 to Cyclic Sighing 4-1-8 × 6 rounds ~78s; per-phase setTimeout chain replaces fixed-interval; circle transition reads per-phase duration; top-off scale 2.6 > inhale 2.4 to mirror double-inhale geometry; full 23-round Balban protocol available via BreathingSession in spine close + wind-down for deliberate practice contexts). Phase 4 work covered the "morning + EOD + wind-down spine variants" item that was previously tracked here; AI pattern-routing groundwork for Reframe close re-categorized as Phase 5 work since it's part of the post-EOD AI Mediation queue scope, not breath-pill scope.
 
 - **3** ✅ shipped `a2ca390` — Smart Screen home + session persistence
   - Active prompt section: AI-generated state-aware copy with confidant-voice static fallback when AI unavailable
