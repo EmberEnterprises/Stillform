@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 17, 2026 (Phase 4 ✅ COMPLETE. Phase 4.5 ✅ slim REFRAME_PRACTICE_BASE shipped `2fe7d06`. Phase 4.5b ✅ shipped `a14aa6d` — schema + arc-turn-1 override for v2: slim REFRAME_PRACTICE_SCHEMA, slim retry, METACOGNITIVE_ARC_V2_TURN1_OVERRIDE with the May 17 failed exchange as embedded counter-example. Three reinforcing signals against the multi-candidate workflow. v1 callers untouched. Ready for Arlin to rerun the test.)**
+**ARA Embers LLC · last updated May 17, 2026 (Phase 4 ✅. Phase 4.5 ✅ (`2fe7d06`). Phase 4.5b ✅ (`a14aa6d`) — slim v2 Reframe stack: base + schema + arc-turn-1 override, three reinforcing signals against multi-candidate workflow. All v2 fixes untested per Arlin's batched-deploy plan — full system test at end of Phase 5. Phase 2.5 ⏳ IN PROGRESS — Quick Breathe pill rebuild to Cyclic Sighing; final pre-Phase-5 cleanup.)**
 
 ---
 
@@ -85,7 +85,7 @@ This is the architectural floor under Principle C. Every AI surface ships with a
 
 **Phase plan** (all pre-launch except where noted):
 
-- **2.5** ⏳ — Quick Breathe pill rebuild to Cyclic Sighing protocol; AI pattern-routing groundwork for Reframe close; morning + EOD + wind-down spine variants pending
+- **2.5** ✅ shipped — Quick Breathe pill rebuild to Cyclic Sighing protocol (Phase 4 work also covered the "morning + EOD + wind-down spine variants" item that was previously tracked here; AI pattern-routing groundwork for Reframe close re-categorized as Phase 5 work since it's part of the post-EOD AI Mediation queue scope, not breath-pill scope).
 
 - **3** ✅ shipped `a2ca390` — Smart Screen home + session persistence
   - Active prompt section: AI-generated state-aware copy with confidant-voice static fallback when AI unavailable
