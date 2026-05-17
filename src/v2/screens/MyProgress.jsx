@@ -12,10 +12,10 @@ import MonoLabel from "../components/MonoLabel.jsx";
  * editors plug in by adding their own entries here.
  *
  * Currently lists:
- *   - Context Profile (Phase 5 sub-item #1)
+ *   - Context Profile
  *
  * Future entries (each gated by their own sub-item shipping):
- *   - Trigger Profile (v1 data layer exists; UI pending)
+ *   - Trigger Profile
  *   - Bias Profile
  *   - Signal Profile
  *   - Bio-filter

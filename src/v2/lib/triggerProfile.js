@@ -1,17 +1,11 @@
 /*
- * triggerProfile.js — v2 Trigger Profile data layer.
+ * triggerProfile.js — Stillform's Trigger Profile data layer.
  *
  * Trigger Profile = user-named external/situational provocations the
  * user has noticed consistently hit harder than expected. Different
  * from Context Profile: Context = ambient conditions the user is IN
  * (rainy day, low blood sugar); Trigger = events that happen TO the
  * user (performance review, hard conversation, missed deadline).
- *
- * v2 port of v1's Trigger Profile data layer (src/App.jsx:5593-5795,
- * shipped under Build #2 Phase 1 `f9aa354`). Storage key is shared
- * with v1 (`stillform_trigger_profile`) so users carrying triggers
- * forward from v1 see them automatically in v2 — no migration step
- * needed. Schema is identical.
  *
  * Schema:
  *   {
@@ -35,16 +29,12 @@
  * queue can surface cross-category patterns ("you've named 4
  * relational triggers this month, all involving the same person").
  *
- * v2-vs-v1 differences:
- *   - Plain localStorage instead of v1's secureRead/secureWrite
- *     (cloud sync layers later via Supabase)
- *   - No appendArtifactHistoryEntry yet (v2 audit history is a
- *     later architectural piece)
- *   - Otherwise structurally identical — same key, same schema,
- *     same dedup, same sort logic, same formatter pattern
+ * Storage: plain localStorage, fail-silent on storage unavailable.
+ * Cloud sync layers later via Supabase. Audit history integration
+ * arrives with the AI Mediation queue work.
  */
 
-const STORAGE_KEY = "stillform_trigger_profile";
+const STORAGE_KEY = "stillform_v2_trigger_profile";
 
 /**
  * Frozen 7-category enum. Categories are fixed because the system
@@ -227,7 +217,7 @@ export function incrementTriggerEncounter(id) {
  * Sorts by encounterCount desc + lastSeen desc so most load-bearing
  * triggers surface first. Caps to top N. Plural-aware count labels.
  *
- * Output shape matches v1's formatter for consistency:
+ * Output shape:
  *   User's named external triggers: "label1" [category1] (3 encounters), "label2" [category2]
  *
  * @param {number} [limit=8]

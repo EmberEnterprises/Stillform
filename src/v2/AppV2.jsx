@@ -24,9 +24,6 @@ import TriggerProfile from "./screens/TriggerProfile.jsx";
  *   context-profile → my-progress (back from editor)
  *   my-progress → home (back from landing)
  *
- * The .sf-v2 root scopes every v2 style so the existing App.jsx is
- * completely untouched.
- *
  * Anchor: STILLFORM_CANON.md §architecture.
  */
 function pickInitialScreen() {

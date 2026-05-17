@@ -1,12 +1,12 @@
 /*
- * contextProfile.js — v2 Context Profile data layer.
+ * contextProfile.js — Stillform's Context Profile data layer.
  *
  * Context Profile = user-named ambient/ongoing conditions the user has
  * observed correlate with their cognitive/emotional state. Different
  * from Trigger Profile because Triggers = external events that happen
  * TO the user (a hard conversation, a missed deadline); Context =
  * ambient states the user is IN (rainy day, third coffee, post-call
- * fog). Master todo lock: May 16, 2026.
+ * fog).
  *
  * STRICT GUARDRAILS (locked in master todo, do not soften):
  *   - No causation claims. The label is the user's hypothesis, not
@@ -34,24 +34,20 @@
  *
  * Storage key: stillform_context_profile
  *
- * Storage pattern matches v2 convention (sessions.js): plain localStorage,
- * fail-silent on unavailable storage. Cloud sync (Supabase) layers later
- * when Phase 5 sub-items get to the sync surface; for now local-first.
+ * Storage: plain localStorage, fail-silent on storage unavailable.
+ * Cloud sync layers later via Supabase.
  *
- * Architectural mirror: v1 Trigger Profile (src/App.jsx:5611-5704) was
- * the template. Key adaptations for Context semantics:
- *   - No category enum (Triggers have 7 frozen categories; Context is
- *     freeform because conditions don't categorize cleanly — "rainy
+ * Design notes:
+ *   - No category enum. Conditions don't categorize cleanly — "rainy
  *     days" + "third coffee" + "post-call from mom" don't share a
  *     taxonomy and forcing one is the kind of mass-prescriptive design
- *     the guardrails reject)
+ *     the guardrails reject.
  *   - description field (Context entries often need a longer note —
  *     "rainy days" vs "rainy days when I haven't slept enough" — and
- *     the user writes both)
- *   - No appendArtifactHistoryEntry yet (v2 audit history is a later
- *     architectural piece; manual mutations don't track lineage now,
- *     will retrofit when AI Mediation queue ships and starts proposing
- *     additions that need provenance)
+ *     the user writes both).
+ *   - No audit history yet. Manual mutations don't track lineage; that
+ *     scaffolding arrives with the AI Mediation queue work, when
+ *     proposed additions need provenance.
  */
 
 const STORAGE_KEY = "stillform_context_profile";
@@ -61,9 +57,9 @@ function emptyProfile() {
 }
 
 function generateContextId() {
-  // ctx_ prefix mirrors v1's trig_ pattern for Trigger Profile. base36
-  // timestamp + 6-char random suffix gives collision-free IDs in a
-  // profile that stays under the practical ceiling of ~50 contexts.
+  // base36 timestamp + 6-char random suffix gives collision-free IDs
+  // in a profile that stays under the practical ceiling of ~50
+  // contexts.
   return `ctx_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
