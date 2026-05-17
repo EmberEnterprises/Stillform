@@ -246,7 +246,7 @@ Plus the feature-specific spec for whatever I'm working on:
 | Practice Signals / cognitive function measurement | `COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md`, `COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md` |
 | Pattern Disruption | `PATTERN_DISRUPTION_SPEC.md` |
 | My Progress / engagement architecture | `MY_PROGRESS_REDESIGN_SPEC.md`, `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` |
-| Self Mode | `SELF_MODE_REDESIGN_RESEARCH.md`, `RESEARCH_PREP_SELF_MODE_AND_EVIDENCE_CALLOUTS.md` |
+| Self Mode | `SELF_MODE_REDESIGN_RESEARCH.md` |
 | Body Scan What Shifted | `BODY_SCAN_WHAT_SHIFTED_SPEC.md` |
 | Settings | `SETTINGS_REWRITE_SPEC.md` |
 | Settled chip / Russell circumplex | `SETTLED_CHIP_SPEC.md` |
@@ -254,9 +254,9 @@ Plus the feature-specific spec for whatever I'm working on:
 | Plain Language Science cards | `PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md` |
 | Three-category data feed | `THREE_CATEGORY_DATA_FEED_SPEC.md` |
 | Chip definitions | `CHIP_DEFINITIONS.md` |
-| Closing language | `CLOSING_LANGUAGE_CANDIDATES.md` |
+| Closing language | Decision locked May 1, 2026 — stays as-is. Lives in `Stillform_Master_Todo.md` (May 1 locked decision) + `Stillform_Science_Sheet.md` (System Observation + User Override pattern). `CLOSING_LANGUAGE_CANDIDATES.md` deleted in Phase C audit. |
 | AI regression test | `AI_REGRESSION_TEST_19.md`, `AI_REGRESSION_RESULTS_MAY_7.md` |
-| Build / launch | `BUILD_GUIDE.md`, `STILLFORM_LAUNCH_TRANSFER_NEXT.md`, `Test_Day_Plan_2026-05-07.md` |
+| Build / launch | `BUILD_GUIDE.md`, `docs/LAUNCH_DAY_RUNBOOK.md` (Test_Day_Plan_2026-05-07.md + STILLFORM_LAUNCH_TRANSFER_NEXT.md deleted in Phase B/C audit) |
 | Watch companion | `WATCH_GUIDE.md` |
 | Subscription / paywall | `SUBSCRIPTION_SETUP.md` |
 | Share extension | `SHARE_EXTENSION_GUIDE.md` |
