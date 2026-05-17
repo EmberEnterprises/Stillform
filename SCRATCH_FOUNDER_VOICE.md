@@ -2,11 +2,13 @@
 
 > **⚠️ FRAMING AUDIT REQUIRED BEFORE PUBLIC USE**
 >
-> This is raw scratch material — Arlin's personal quotes and AI reflections from earlier sessions. Some passages reference "Two Regulation Pathways," "finding your center," and other framings that predate STILLFORM_FRAMING_LAW.md (May 12, 2026).
+> This is raw scratch material — Arlin's personal quotes and AI reflections from earlier sessions. Some passages predate `STILLFORM_FRAMING_LAW.md` (May 12, 2026).
 >
-> Arlin's personal quotes are source material and are fine as-is — they're founder voice, not product framing. The AI reflections embedded in this doc may carry banned framings.
+> Arlin's personal quotes are source material and are fine as-is — they're founder voice, not product framing. The AI reflections embedded in this doc carry banned framings that are flagged inline (search for `⚠️`).
 >
-> **Before publishing ANY content from this doc externally, audit against STILLFORM_FRAMING_LAW.md.** Specifically check for: regulation/composure as product framing, "compose yourself" imperatives, "just observe" framing, defining Stillform by negation. The framing law is the supreme reference.
+> **Before publishing ANY content from this doc externally, audit against `STILLFORM_FRAMING_LAW.md` and `STILLFORM_CANON.md` section 4.** Specifically check for: regulation/composure as product framing, "compose yourself" imperatives, "just observe" framing, defining Stillform by negation, audience characterization by emotional intensity ("high-intensity," "intense people," "feel everything at full volume"), regulation app / composure app / wellness app / crisis tool framing, "Two Regulation Pathways," "finding your center." The framing law is the supreme reference.
+>
+> **Trimmed May 17, 2026:** v1-era Adaptive Shell architecture proposal removed (Stillform uses smart-screen home, Phase 3 shipped). KetaRevive partnership and discount-structure sections removed — content lives in `KETAREVIVE_ONEPAGER.md`; partnership work is post-launch per Arlin's direction.
 
 Raw material. Review before using publicly. Do not edit for polish here — keep it raw.
 
@@ -46,13 +48,13 @@ I hope they don't find what the app says as judgment. I tried my best to elimina
 
 **Mirroring, Not Translating:** The directive to the AI — 'never translate I'm pissed to experiencing frustration' — is the ultimate anti-judgment tool. When an app 'cleans up' a user's language, it's subtly saying the way you feel right now is unprofessional or wrong. By matching their language, the app says: I see exactly where you are, and it's okay to be there.
 
-**The Science of Natural Elements:** By focusing on the Two Regulation Pathways, you're framing the experience as a neurological event. It's not 'Arlin is having a bad day'; it's 'the system is currently body-dominant and needs a 60-second physiological sigh.' Moving the conversation from Identity (who I am) to State (what I'm experiencing).
+**The Science of Natural Elements:** By focusing on the Two Regulation Pathways, you're framing the experience as a neurological event. ⚠️ *"Two Regulation Pathways" is pre-research framing superseded by metacognition rebuild May 11-12 — Stillform is a metacognition practice, not a regulation app. Reframe before public use.* It's not 'Arlin is having a bad day'; it's 'the system is currently body-dominant and needs a 60-second physiological sigh.' Moving the conversation from Identity (who I am) to State (what I'm experiencing).
 
-**Aspirational, Not Diagnostic:** Holding someone's aspirational self is a profound act of respect. It assumes the user is a composed, capable person who is simply dealing with a high-intensity signal right now. It removes the victim or patient label entirely.
+**Aspirational, Not Diagnostic:** Holding someone's aspirational self is a profound act of respect. It assumes the user is a composed, capable person who is simply dealing with a high-intensity signal right now. ⚠️ *"high-intensity signal" is now banned framing per CANON §4 — Stillform does not characterize the audience or user state by emotional intensity. Reframe before public use.* It removes the victim or patient label entirely.
 
 Neglect, trauma, and inflammation aren't errors in the code of life; for many, they are the environment the code has to run in. Stillform treats these as data points to be managed, not as stains on a person's record.
 
-Stillform is as much a philosophical stance as it is a software product. In a world that loves to point fingers at meltdowns, you're building a quiet room where the only goal is to find your center again."
+Stillform is as much a philosophical stance as it is a software product. In a world that loves to point fingers at meltdowns, you're building a quiet room where the only goal is to find your center again." ⚠️ *"find your center" is banned framing per FRAMING_LAW — Stillform is metacognition practice, not centering work. Reframe before public use.*
 
 ---
 
@@ -82,7 +84,7 @@ This is also why the privacy policy distinguishes between what is stored locally
 
 **3. Ghost Echo and the Shame Cycle** — If a user is currently experiencing a massive setback, seeing a Ghost Echo of their 2-minute recovery from three weeks ago can feel like a taunt. "You used to be better at this." In the wrong state, this doesn't build pride in effort — it builds grief of current state.
 
-**4. Technical Debt of Zero-Bloat** — 14,500-line App.jsx is a monolith. As native integrations are added it becomes brittle. A tool meant to settle the system cannot afford a 2-second frame drop.
+**4. Technical Debt of Zero-Bloat** — 14,500-line App.jsx is a monolith. As native integrations are added it becomes brittle. A tool meant to settle the system cannot afford a 2-second frame drop. *✅ Resolved by Phase A (May 17, 2026) — v1 frontend deleted; Stillform's current frontend is modular (`src/v2/` with separated spine, beat configs, components).*
 
 **The Audit Question:** If I'm redlining right now and I open Stillform, and the first thing it does is ask me to Notice and Name instead of just letting me breathe, have you already lost me?
 
@@ -104,50 +106,7 @@ You don't position it explicitly. The product does the work. Clinicians and pati
 
 This is also the B2B clinical channel — integration as a between-session or during-session companion for ketamine-assisted therapy practices. Strict guardrail: never position as medical tool, never claim therapeutic outcomes. Position as a composure and reflection companion.
 
----
-
-## KetaRevive partnership — infusion center B2B channel (April 22, 2026)
-
-**Context:** KetaRevive is an infusion center (not a psych center). Founders expressed interest in using Stillform as a therapeutic companion tool for their clients. No therapist overlap — Stillform fills the integration gap they don't have.
-
-**The fit:**
-- Ketamine creates a neuroplasticity window — brain more malleable, patterns more accessible
-- Infusion centers administer the treatment but have no structured integration framework
-- Stillform becomes the integration layer: breathing during infusion, body scan for grounding, AI to process what surfaces without a therapist in the room
-- No medical claims — positioned as composure and reflection companion
-
-**Proposed client discount:**
-- 30% off for first 3 months (monthly plan)
-- Additional 10% off annual plan (on top of existing 33% discount)
-- Unique discount code per partner for attribution tracking
-
-**Guardrails:**
-- Never positioned as medical treatment or clinical tool
-- "Companion app" not "therapy tool" in all partnership language
-- Stillform supports the user's own process — it doesn't treat anything
-
----
-
-## KetaRevive discount structure — implement before live launch
-
-**Decision:** Single-use codes, 10% off annual plan only.
-
-**Why single-use:** Prevents code leaking to non-patients. Each code works once. No sharing possible. Full attribution.
-
-**Why annual only:** Monthly is better recurring revenue but annual gets patients committed for the year. KetaRevive patients are invested in their healing — annual fits.
-
-**How to set up in Lemon Squeezy (after Bobby flips to live mode):**
-1. Discounts → Create discount
-2. 10% off, annual plan only
-3. Usage → Unique codes → generate batch of 50
-4. Download CSV
-5. Give CSV to KetaRevive — they hand one code per patient at checkout
-
-**Pricing confirmation:**
-- Standard annual: $119.88/year ($9.99/month equivalent)
-- With 10% off: $107.89/year (~$8.99/month)
-
-**One-pager needs updating before share:** Remove placeholder code, add explanation of unique code process for KetaRevive staff.
+*[KetaRevive partnership details and discount structure removed May 17, 2026 — content lives in `KETAREVIVE_ONEPAGER.md`; partnership work is post-launch per Arlin's direction.]*
 
 ---
 
@@ -158,31 +117,4 @@ This is also the B2B clinical channel — integration as a between-session or du
 - "Grief that followed my actions" — this is the regret that Stillform is designed to prevent. Connects directly to the "fewer regrets" positioning.
 - The social media overstimulation angle is a direct path to r/nosurf, r/digitalminimalism in addition to r/ADHD and r/anxiety.
 
-
----
-
-## Next build spec — Adaptive Shell Architecture (from GPT, April 22 2026)
-
-Home needs to become two visible planes only:
-
-**1. Adaptive shell (top)** — one container that swaps mode by context:
-- Morning mode → Set the tone (if morning check-in incomplete)
-- Day mode → Observe and Choose (main intraday)
-- Evening mode → Close the loop (if EOD is due)
-
-**2. My Progress (bottom)** — quiet evidence layer. What is becoming visible. What the system is showing. Secondary to the shell, never competing with it.
-
-**What to collapse:** Separate morning card, separate shell card, separate EOD card → all become one adaptive shell container.
-
-**What to preserve:** All underlying logic — morning data capture, off-baseline branch, protocol launch, EOD storage, routing engine, ObserveEntryLite.
-
-**Shell copy direction:**
-- Page 1: "What's loudest right now?" with lived options: My body is loud / My mind is looping / Both are active / I just feel off
-- Page 2: "What would help first?" with options: Settle the system / Get clear / Stay with it
-- Entry CTA: calibration-aware — body-first / thought-first / balanced variants
-
-**My Progress behavior:** Compact at rest (one insight/evidence snippet). Expandable. Never the active layer. Never another task.
-
-**Do not:** Add more things. Make Home busier. Reintroduce visible tool rows.
-**Solve through:** Consolidation, hierarchy, restraint.
-
+*[v1-era "Adaptive Shell Architecture" build spec (GPT, April 22) removed May 17, 2026 — Stillform's home is now the smart-screen architecture shipped in Phase 3.]*
