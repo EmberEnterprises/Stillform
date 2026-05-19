@@ -1,5 +1,5 @@
 # STILLFORM CANON
-**ARA Embers LLC · v1.7 · Originally consolidated May 13, 2026 · Last extended May 17, 2026**
+**ARA Embers LLC · v1.8 · Originally consolidated May 13, 2026 · Last extended May 17, 2026**
 
 The single source-of-truth doc Claude reads at session start. Distills the operational essence of:
 
@@ -292,13 +292,13 @@ No recommendation without all three. The standing requirement runs in parallel w
 
 Stillform's user treatment is governed by these principles. Every surface, every prompt, every result presentation must hold to them. Duplicated to `STILLFORM_FRAMING_LAW.md` by design — hard truths get reinforced through visible repetition across the supreme references, not assumed through inheritance.
 
-- **No judgment, unconditional acceptance.** Users are judged everywhere — by work, family, themselves, every other app. Stillform does not pile on. No scoring presented as good/bad. No diagnoses. No deficit framing. Every observation lands as common pattern, not pathology.
+- **No judgment, unconditional acceptance.** Users are judged everywhere — by work, family, themselves, every other app. Stillform does not pile on. No scoring presented as good/bad. No diagnoses. No deficit framing. Every observation lands as pattern, not pathology.
 
 - **Never surface a problem without a path forward.** When Stillform names a pattern, a contradiction, a result from a deeper-look tool — there is always a way to engage with it. Naming without resolution is judgment dressed as analysis.
 
 - **Show acceptance, don't tell it.** Acceptance is felt through response quality, never through copy that says "I accept you" or "I care about you." Voice, framing, the absence of judgment in tone — these constitute felt acceptance. The care lives in HOW Stillform speaks, not in declarations of caring. *"I accept you despite this issue"* is condescending — it makes the acceptance about the issue, and the issue becomes the figure of the conversation. Forbidden.
 
-- **Common-pattern posture.** Every bias and pattern is common because every bias appears across most of the population. State commonality where applicable; this is true, defensible, and meets the user where they are without judgment.
+- **Observe without prevalence framing.** Stillform names what it observes in the user's responses, without claiming the pattern is common, widespread, typical, or rare. Even when research validates prevalence distribution, prevalence framing in result delivery risks singling users out (positioning them relative to a population) or inducing anxiety (categorical framing reads as clinical). Honest observation of what's running in the user's own responses stands on its own; population context is not needed for the user to understand their own pattern. Research grounding for any pattern comes from the model that names it (e.g., "part of Wells's metacognitive model"), not from claims about distribution.
 
 - **Integrity through research.** Before Stillform deploys a tool or instrument that derives from published research, the research itself must be read and the adaptation must be faithful to its construct. Without thorough research, integrity is missing. Without integrity, Stillform is selling something it's not — and the user, who is exposing vulnerable parts of themselves, deserves better.
 
@@ -413,6 +413,8 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 ---
 
 ## VERSIONING
+
+**v1.8 — May 17, 2026.** Revised USER TREATMENT principle 4 (in Section 10 subsection) from "Common-pattern posture" to "Observe without prevalence framing." Arlin's pushback in real time during MCQ-30 adaptation work: even when research validates that a pattern is widespread, telling the user "this is common" in result delivery categorizes them (positions them relative to a population) and reads as clinical/diagnostic — exactly what Stillform is not. The original framing was supposed to reduce anxiety by normalizing patterns, but normalizing IS categorization. Prevalence-as-protection turns out to be comfort-disguised-as-honesty (the failure mode principle 7 was just locked against). Research grounding for any pattern stays — it comes from the model that names the pattern (Wells's metacognitive model, etc.), not from prevalence claims. Downstream effect: MCQ-30 result presentation language drops all prevalence framing. Duplicated to FRAMING_LAW v1.4.
 
 **v1.7 — May 17, 2026.** Added principle 7 ("Honesty paired with acceptance") to USER TREATMENT subsection in Section 10. Arlin's framing: "honesty is hand in hand with integrity." Closes a gap in the six previously-locked principles where "no judgment / unconditional acceptance" could drift into softening the substance of observations to spare user feelings. Principle 7 names the contract: users came to Stillform to see themselves clearly; the voice softens delivery, never substance. Connects to the mirror-integrity operating rule (locked April 30, 2026, also in Section 10) and broadens it from data-display only to a posture across every USER TREATMENT principle. Duplicated to FRAMING_LAW v1.3.
 
