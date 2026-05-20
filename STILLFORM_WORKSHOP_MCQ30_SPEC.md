@@ -2,7 +2,7 @@
 
 **ARA Embers LLC · spec locked May 17, 2026 · status: SPEC LOCKED, build pending**
 
-Workshop instrument #1, adapted from the MCQ-30 (Wells & Cartwright-Hatton 2004). First instrument in the Workshop layer of Bias Profile (Phase 5 sub-item #4). Serves bias Domain 4 (metacognitive beliefs).
+Workshop instrument #1, adapted from the MCQ-30 (Wells & Cartwright-Hatton 2004). First instrument in the Workshop layer of Bias Profile (Phase 5 sub-item #4). Serves the **metacognitive-beliefs pattern-work strand** (per the May 20, 2026 architecture lock — `STILLFORM_WORKSHOP_CATALOG_RESEARCH.md` — the four-domain bias model was retired in favor of three surfaces: pattern-work + capacities + optional profile. MCQ-30 sits in pattern-work alongside CD-Quest.).
 
 ---
 
@@ -152,7 +152,7 @@ The reworked items ask not "do you monitor your thinking" (Stillform's whole pra
 
 ## 7 · BIAS PROFILE CHIP MAPPING
 
-Each subscale maps to one chip in Bias Profile Domain 4 (metacognitive beliefs). Five chips from this one instrument (working labels; final naming in the Bias Profile catalog pass):
+Each subscale maps to one chip in the metacognitive-beliefs pattern-work strand. Five chips from this one instrument (working labels; final naming in the Bias Profile catalog pass):
 
 - *Worry-as-engine* (POS)
 - *Mind-as-mercy* (NEG)
@@ -191,12 +191,12 @@ A chip is proposed for the watch list when the user endorses its subscale (rings
 
 ## 11 · OPEN ITEMS / DEPENDENCIES
 
-- Bias Profile Domain 4 chip catalog must exist before chips can land (Bias Profile sub-item #4 core build).
+- Pattern-work chip catalog must exist before chips can land (Bias Profile sub-item #4 core build). The metacognitive-belief chips share the pattern-work strand with CD-Quest's cognitive-distortion chips.
 - Workshop section in Library navigation must exist as a surface (part of sub-item #4 build).
 - AI Mediation queue must support instrument proposals (push path) — overlaps the AI Mediation approval queue scope (Master Todo line 366).
 - Reframe AI must read the user's Bias Profile watch list (so endorsed chips get flagged during sessions).
 - Final chip naming pass (working labels above are provisional).
-- This is Workshop instrument #1 of a planned multi-modal catalog (~10 instruments across the four bias domains). Instrument #2 (MAIA-2, interoceptive awareness — a *capacity* instrument) tests the result-presentation pattern against a non-dysfunction construct.
+- This is Workshop instrument #1 of a multi-instrument catalog mapped across three surfaces (pattern-work, capacities, optional profile — see `STILLFORM_WORKSHOP_CATALOG_RESEARCH.md`). Instrument #2 (MAIA-2, interoceptive awareness — a *capacity* instrument) sits in the capacities surface and established the capacity result frame against a non-dysfunction construct.
 
 ---
 
