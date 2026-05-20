@@ -88,6 +88,8 @@ Mechanism: metacognitive practice → builds concept library → neuroplastic ch
 - **Cognitive reappraisal** (downstream, requires regulated baseline) — Ochsner & Gross (2005).
 - **Regulation/somatic science** (supports the spine, is not the spine) — Porges polyvagal; Gerritsen & Band (2018); Khalsa et al. (2018); Lehrer et al. (2020).
 
+**Deepened mechanism (the "why" beneath the spine):** see `STILLFORM_PRECISION_FRAMEWORK.md` (May 20, 2026). The predictive-processing account — brain as prediction machine, neuromodulators as precision-weighting, dysregulation as miscalibrated precision, metacognition (self-awareness) as the conscious recalibration and CBT as the conditioning toolset that makes it stick. Foundational explanatory layer under the breath, bias, Reframe, and Bias Profile / Workshop surfaces. Held at honest confidence: predictive processing is a leading framework, not settled law; precision is inferred from behavior, never measured as chemistry.
+
 ---
 
 ## 6 · FAILURE MODES (the rumination guard)
