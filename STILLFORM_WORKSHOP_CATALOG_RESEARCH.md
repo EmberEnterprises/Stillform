@@ -34,7 +34,7 @@ This is the key distinction from MCQ-30. MCQ-30 measures dysfunction (higher = m
 
 ### Domain fit
 
-Not one of the four bias domains — MAIA-2 serves the **interoception / body-awareness** layer. In Stillform terms it's the SENSE-layer instrument, the companion to the bio-filter and body work. It measures the foundation the precision loop runs on (you regulate and reframe what you can first sense). It would map to its own capacity surface, not the Bias Profile Domain 4 chips. Likely a distinct "capacities" section of the Workshop alongside the bias instruments.
+Not one of the (now-retired) bias domains — MAIA-2 serves the **interoception / body-awareness** layer. In Stillform terms it's the SENSE-layer instrument, the companion to the bio-filter and body work. It measures the foundation the precision loop runs on (you regulate and reframe what you can first sense). It maps to the capacities surface, not a pattern-work chip. (Per the May 20 architecture lock — see synthesis.)
 
 ### Response shape
 
@@ -242,7 +242,7 @@ And it's an **enhancement instrument, not a pathology one** — built for coachi
 
 **The instruments don't sort into "four bias domains." They sort into five functional buckets:**
 
-1. **Pattern/dysfunction instruments → the actual "bias" work.** CD-Quest (Domain 1, distortions) + MCQ-30 (Domain 4, metacognitive beliefs). Dysfunction-pattern result frame. These are the real Bias Profile.
+1. **Pattern/dysfunction instruments → the actual "bias" work.** CD-Quest (cognitive distortions) + MCQ-30 (metacognitive beliefs). Dysfunction-pattern result frame. These are the real Bias Profile / pattern-work strand.
 2. **Capacity instruments → measure what Stillform trains, mapped to its own loop.** MAIA-2 = **SENSE** (interoception) · ERQ-reappraisal = **SETTLE** (regulation = Reframe) · SRIS = **SEE** (metacognition, reflection→insight). Capacity result frame. This is the strongest discovery: a "capacities" surface could mirror the user's growth in the *exact three skills Stillform builds* — sense, settle, see — before/after.
 3. **Profile instruments → value-neutral self-knowledge.** DOSPERT (risk shape) + parts of IRI (Fantasy). Profile/mirror result frame. Optional "know your shape" surface.
 4. **Behavioral-inference constructs → not instruments.** CRT (reflective override) — read from real Reframe behavior, not a quiz. Routes to the precision framework's behavioral-inference layer (Phase 5.9).
