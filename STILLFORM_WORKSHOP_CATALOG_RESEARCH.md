@@ -6,6 +6,8 @@
 
 > Adaptation discipline (same as MCQ-30): verbatim items from any instrument are NEVER reproduced. Stillform's items are original adaptations faithful to each subscale's construct, in Stillform's voice. Fidelity is to the construct, not the wording.
 
+> **Note on domain labels in the briefs below:** the individual briefs are research snapshots written *during* the pass, and several still reference the old "Domain 1/2/3/4" model as they reason through fit. **That model was retired May 20** — the authoritative structure is the three-surface model (pattern-work · capacities · optional profile) in the LOCKED synthesis at the end of this doc and in `Stillform_Master_Todo.md`. Where a brief says "Domain N," read it as that instrument's pre-lock slot; the synthesis says where it actually lives now.
+
 ---
 
 ## BRIEF #1 — MAIA-2 (Interoceptive Awareness)
