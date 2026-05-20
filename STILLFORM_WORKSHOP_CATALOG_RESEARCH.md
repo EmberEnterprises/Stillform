@@ -115,11 +115,52 @@ Dysfunction-pattern frame, same as MCQ-30: *Pattern observed: [distortion in pla
 
 ---
 
+## BRIEF #3 — CRT (Cognitive Reflection Test) — THE BOUNDARY CASE
+
+**Citation:** Frederick, S. (2005). Cognitive Reflection and Decision Making. *Journal of Economic Perspectives*, 19(4). Originally 3 items (0–3); expanded versions exist (CRT-7, Toplak et al. 2014; CRT-2, Thomson & Oppenheimer 2016).
+
+### What it measures (construct)
+
+The tendency to **override an intuitive-but-wrong gut answer and reflect before committing.** Each item presents a problem engineered to trigger a fast, confident, incorrect answer; getting it right requires noticing your first answer is wrong and engaging deliberate reasoning (System 1 → System 2). It's a measure of reflective *disposition* — do you catch the gut read and check it.
+
+### Why this construct is pure Stillform
+
+The thing CRT measures is **metacognition in action** — and in precision-framework terms, it is *exactly* the core move: catching a high-precision intuitive prediction before acting on it, and lowering its weight enough to let reflection in. The disposition CRT targets is arguably the single most Stillform-relevant construct in the whole catalog. The construct is gold.
+
+### Why the INSTRUMENT does not fit the Workshop
+
+This is the finding. CRT is a **performance task** — a graded test with right/wrong answers producing a score (number correct). That mechanism type collides head-on with the USER TREATMENT principles in three ways that cannot be reframed away:
+
+1. **It grades the user.** Right/wrong answers are judgment by definition. Violates "no judgment, every observation lands as pattern not pathology." There is no honest way to tell someone they got 1/3 that isn't a grade.
+2. **It produces a score.** Violates the no-scores principle that MCQ-30 and MAIA-2 both had to honor. A capacity frame ("where the skill sits") works for a self-report gradient; it does not launder a right/wrong test score.
+3. **It correlates with IQ.** It will read to users as an intelligence test. Stillform's audience are enhancement-seekers who want to see themselves clearly — being quietly IQ-tested is the opposite of the contract, and a fast way to lose trust.
+
+And a practical kill-shot independent of principle: **the items are burned.** ~44% of people have already seen the CRT or its clones (familiarity inflates scores, Cohen's d = .41). The classic items are everywhere online. Any puzzle-based test decays this way the moment an app carrying it gets popular — performance puzzles do not survive contact with a scaled consumer product.
+
+### The resolution — separate the construct from the method
+
+CRT teaches the catalog an architectural distinction: **not every valuable construct should become a Workshop questionnaire.** Some contribute a construct that is better measured *behaviorally* than by an instrument.
+
+CRT's construct (reflective override) is precisely what the **precision framework's behavioral inference** already proposes to read — from the user's actual Reframe sessions, not a puzzle. Does the user, in vivo, catch their gut interpretation and consider alternatives, or commit to the first read? That behavioral signal is *more valid* than a burned puzzle (it's real behavior under real stakes, not a quiz) AND it fits every USER TREATMENT principle (observation, no score, no grade, no IQ proxy). So:
+
+> **CRT does not enter the Workshop as an instrument. Its construct routes into the precision framework's behavioral-inference layer (Phase 5.9) — measuring reflective override from how the user actually engages Reframe, never from a graded test.**
+
+### Mechanism type finding
+
+Third mechanism type identified — **performance task** — and the result is a documented *incompatibility* with the Workshop in native form. This is a valuable negative result: the catalog pass is not only collecting instruments to adapt, it is mapping which mechanism types fit Stillform's principles at all. Performance/graded tasks do not. (Self-report gradients do.) Any future instrument that grades correctness gets the same verdict and routes to behavioral inference instead.
+
+### Recommendation
+
+- **Do NOT adapt CRT as a Workshop instrument.** No graded puzzle, no score, no clever reframe of a right/wrong test.
+- **Keep the construct.** Reflective override is core — build it into the precision framework's behavioral-inference layer (read it from real Reframe behavior) and into psychoeducation (teach the gut-check move directly).
+- Logs the rule: **performance-task mechanism type = incompatible with Workshop; its construct routes to behavioral inference.**
+
+---
+
 ## CATALOG PASS — REMAINING INSTRUMENTS (to be researched in subsequent waves)
 
 Done in waves to keep each brief thorough and avoid partial work:
-- **CRT** (Frederick 2005 — cognitive reflection) — PERFORMANCE task; tests a third mechanism type (reveal-through-behavior, not self-report). Likely needs a third response shape entirely. *Next.*
-- **DOSPERT** (domain-specific risk-taking, Domain 3) — decision/cognitive bias
+- **DOSPERT** (domain-specific risk-taking, Domain 3) — decision/cognitive bias. *Next.*
 - **IRI** (Davis 1980 — interpersonal reactivity, Domain 2 microbiases) — social reading
 - Possible: SRIS or MAI (metacognitive capacity — capacity frame), ERQ/DERS (emotion regulation), TAS-20 (alexithymia)
 
@@ -128,9 +169,10 @@ After the full pass, lock the cross-cutting architecture: how many response shap
 ### Running cross-cutting findings (accumulating across briefs)
 - **Result frames so far: 2** — dysfunction-pattern (MCQ-30, CD-Quest) + capacity (MAIA-2).
 - **Response shapes so far: 3** — belief-endorsement (MCQ-30) + frequency (MAIA-2) + frequency×intensity two-part (CD-Quest).
-- **Mechanism types seen: 2** — clinical-adapted self-report (MCQ-30, CD-Quest, MAIA-2). CRT will add performance-task (3rd).
-- **Precision bridge:** CD-Quest's intensity rating is a near-direct precision self-report — strongest instrument↔precision-framework link found.
-- **Hard dependency surfaced:** one distortion vocabulary must unify METACOGNITIVE_ARC + Workshop + Domain 1 chips.
+- **Mechanism types: 3** — (1) clinical-adapted self-report = FITS (MCQ-30, CD-Quest, MAIA-2); (2) — ; (3) **performance/graded task = DOES NOT FIT** (CRT) — grades, scores, IQ-proxies, and burns out; its construct routes to behavioral inference instead.
+- **Architectural distinction surfaced (CRT):** not every valuable construct becomes a Workshop instrument. Some route to the precision framework's **behavioral-inference layer** instead of an instrument. Workshop instruments ≠ behavioral-inference constructs.
+- **Precision bridge:** CD-Quest's intensity rating is a near-direct precision self-report. CRT's construct (reflective override) is the behavioral side of the same precision move.
+- **Hard dependency:** one distortion vocabulary must unify METACOGNITIVE_ARC + Workshop + Domain 1 chips.
 
 ---
 
