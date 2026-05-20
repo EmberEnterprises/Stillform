@@ -157,23 +157,111 @@ Third mechanism type identified — **performance task** — and the result is a
 
 ---
 
-## CATALOG PASS — REMAINING INSTRUMENTS (to be researched in subsequent waves)
+## BRIEF #4 — DOSPERT (Domain-Specific Risk-Taking)
 
-Done in waves to keep each brief thorough and avoid partial work:
-- **DOSPERT** (domain-specific risk-taking, Domain 3) — decision/cognitive bias. *Next.*
-- **IRI** (Davis 1980 — interpersonal reactivity, Domain 2 microbiases) — social reading
-- Possible: SRIS or MAI (metacognitive capacity — capacity frame), ERQ/DERS (emotion regulation), TAS-20 (alexithymia)
+**Citation:** Weber, Blais & Betz (2002); revised Blais & Weber (2006, shorter 30-item, 6 items × 5 domains). Cited 2000+ times.
 
-After the full pass, lock the cross-cutting architecture: how many response shapes, how many result frames, how each mechanism type maps to surfaces, before any deep adaptation or build.
+**Construct:** Risk attitudes across 5 life domains — ethical, financial (investing + gambling), health/safety, recreational, social — measured as risk-taking likelihood, risk perception, and expected benefit. 5- or 7-point Likert. Subscale α ~.70–.86.
 
-### Running cross-cutting findings (accumulating across briefs)
-- **Result frames so far: 2** — dysfunction-pattern (MCQ-30, CD-Quest) + capacity (MAIA-2).
-- **Response shapes so far: 3** — belief-endorsement (MCQ-30) + frequency (MAIA-2) + frequency×intensity two-part (CD-Quest).
-- **Mechanism types: 3** — (1) clinical-adapted self-report = FITS (MCQ-30, CD-Quest, MAIA-2); (2) — ; (3) **performance/graded task = DOES NOT FIT** (CRT) — grades, scores, IQ-proxies, and burns out; its construct routes to behavioral inference instead.
-- **Architectural distinction surfaced (CRT):** not every valuable construct becomes a Workshop instrument. Some route to the precision framework's **behavioral-inference layer** instead of an instrument. Workshop instruments ≠ behavioral-inference constructs.
-- **Precision bridge:** CD-Quest's intensity rating is a near-direct precision self-report. CRT's construct (reflective override) is the behavioral side of the same precision move.
-- **Hard dependency:** one distortion vocabulary must unify METACOGNITIVE_ARC + Workshop + Domain 1 chips.
+**The key conceptual finding:** within-person variation across domains is ~7× the between-person variation. **Risk-taking is NOT a global trait.** A person isn't "a risk-taker" — they're bold in some domains and cautious in others. That domain-specific profile is genuinely useful self-knowledge: "you read yourself as cautious, but you're cautious *financially* and bold *socially*."
+
+**Result frame — introduces a THIRD frame: value-neutral profile/mirror.** There is no "right" risk level — high isn't a problem, low isn't a deficit. So neither the dysfunction-pattern frame (MCQ-30/CD-Quest) nor the capacity frame (MAIA-2) fits. DOSPERT needs a *value-neutral self-portrait* frame: "here's your shape across domains — no better or worse, just you." This fits USER TREATMENT perfectly (nothing to fix, pure seeing).
+
+**Precision connection:** risk *perception* = how you weight the probability and magnitude of bad outcomes. Domain-specific risk-aversion can be a domain-specific over-weighted threat prior (precision miscalibration localized to one area).
+
+**Domain fit / verdict:** Was slotted as "Domain 3 (cognitive biases)" — but DOSPERT is a **risk *profile*, not a bias or distortion.** It doesn't measure a faulty prior; it measures preference shape. **This strains the four-bias-domain model** (see synthesis). MAYBE for Stillform: useful value-neutral self-knowledge and the first profile-frame instrument, but more peripheral to the core metacognition/composure mission than CD-Quest/MCQ-30/SRIS. Lower priority; strong if a "know your shape" profile surface is wanted.
 
 ---
 
-ARA Embers LLC · Workshop Catalog Research · research drafts, nothing locked
+## BRIEF #5 — IRI (Interpersonal Reactivity Index)
+
+**Citation:** Davis (1980, 1983). 28 items, 5-point Likert, four 7-item subscales. Most widely used multidimensional empathy measure; strong psychometrics (16-item short form exists).
+
+**Construct — four facets of empathy:** Perspective Taking (cognitively adopting others' viewpoint) · Empathic Concern (other-oriented compassion) · Fantasy (identifying with fictional characters) · Personal Distress (self-oriented anxiety at others' distress). Two cognitive (PT, FS), two affective (EC, PD).
+
+**Stillform fit — the "see others clearly" layer.** Stillform's philosophy is "regulate yourself → see yourself clearly → see others clearly → let them in." IRI maps directly to *see others clearly* — especially Perspective Taking. This is the **Domain 2 (social reading)** instrument.
+
+**The architecture finding — result frames may be PER-SUBSCALE, not per-instrument.** Within this one instrument: PT and EC read as **capacity** (more is generally adaptive, trainable); Personal Distress is **nuanced** (high PD = getting flooded by others' emotions, which *impairs* helping — not "more is better," like MCQ-30's CSC and MAIA-2's Not-Worrying); Fantasy is **value-neutral profile**. So a single instrument can require capacity + nuanced + profile frames across its subscales. Result frame is a property of the subscale/construct, not the instrument.
+
+**Cross-instrument link:** Perspective Taking is the *adaptive inverse* of CD-Quest's **mind-reading** distortion. PT = actively modeling another mind (and checking); mind-reading = assuming you know it without checking (an over-weighted social prior). Two sides of the same social-cognition coin — they should be built to reference each other.
+
+**Verdict:** strong fit for the "see others" layer, especially Perspective Taking. Personal Distress connects to the regulation/SETTLE layer (getting flooded = a precision/regulation issue). Good Domain 2 anchor.
+
+---
+
+## BRIEF #6 — SRIS (Self-Reflection and Insight Scale) — STRONGEST FIT IN THE CATALOG
+
+**Citation:** Grant, Franklin & Langford (2002). 20 items, two factors: Self-Reflection (12 items, α .91) and Insight (8 items, α .87). Built explicitly for **coaching / performance enhancement** in *non-clinical* populations as well as clinical — and explicitly framed as measuring **metacognition**.
+
+**Why it's the strongest fit:** SRIS measures Stillform's *core construct directly* — and it splits it exactly along Arlin's own framing from today:
+- **Self-Reflection** = the *act* of examining your thoughts, feelings, behavior (the process — "metacognition is self-awareness").
+- **Insight** = the *clarity/understanding* that results (the outcome).
+
+And it's an **enhancement instrument, not a pathology one** — built for coaching and goal attainment, aimed at exactly Stillform's audience (enhancement-seekers, not patients).
+
+**The crucial nuance (and it's the whole Stillform thesis):** research consistently finds **self-reflection WITHOUT insight is just rumination** — and insight, not raw self-reflection, predicts well-being (Harrington & Loffredo; Lyke 2009). So more self-reflection is NOT automatically better. **Stillform's entire job is converting self-reflection INTO insight — turning the loop into clarity.** SRIS literally measures that conversion. In precision terms: insight = a well-calibrated self-model; rumination = high-precision self-focused loops that never update. This is the same generative-vs-ruminative distinction as MCQ-30's CSC, now central instead of peripheral.
+
+**Result frame:** capacity, with the critical nuance that the Self-Reflection score must never be framed as "more = better" on its own — it's the reflection→insight ratio that matters. Low insight + high reflection = the rumination signal Stillform exists to address (gently, never as a deficit).
+
+**Domain fit:** not a bias domain — a **metacognitive capacity** instrument (the SEE layer). Pairs with MAIA-2 (interoceptive capacity / SENSE). Verdict: **adopt** — arguably the flagship capacity instrument; it measures the exact skill Stillform claims to build, in the exact language Arlin uses.
+
+---
+
+## BRIEF #7 — ERQ (Emotion Regulation Questionnaire)
+
+**Citation:** Gross & John (2003). 10 items, 7-point Likert. Two independent strategies: Cognitive Reappraisal (6 items, α ~.89) and Expressive Suppression (4 items, α ~.76). Most widely used ER measure; 6-item short form exists. (Note: total score is meaningless — only the two subscales.)
+
+**The key finding — reappraisal IS Reframe.** Cognitive reappraisal = "changing the way you think about a situation to change its emotional impact." That is *exactly* what Stillform's Reframe does, and exactly the precision-framework move (update the interpretation/prior to change the emotional output). ERQ directly measures **how habitually a person already uses the core skill Stillform trains.** Expressive suppression (bottling/hiding emotion, linked to worse outcomes) is the maladaptive strategy — and notably *not* what Stillform does; Stillform reappraises, it doesn't suppress. So ERQ maps Stillform's method vs the thing it explicitly isn't.
+
+**Nuance:** ERQ measures *habitual use*, not capacity, and reappraisal isn't universally good (over-used, it can invalidate legitimate feelings). Frame carefully — not "reappraisal good / suppression bad," but "here's the strategy you lean on; Stillform builds the reappraisal muscle."
+
+**Result frame:** strategy-profile (mixed) — reappraisal reads as capacity (trainable, Stillform builds it); suppression is nuanced (worth noticing, not condemning).
+
+**Domain fit:** the **SETTLE/regulate** capacity layer. Verdict: **strong adopt** — it measures the literal skill Reframe trains, and gives a clean before/after mirror of the user growing the reappraisal muscle.
+
+---
+
+## BRIEF #8 — TAS-20 (Toronto Alexithymia Scale) — CONSTRUCT KEEP, INSTRUMENT REJECT
+
+**Citation:** Bagby, Parker & Taylor (1994). 20 items, 5-point Likert, three factors: Difficulty Identifying Feelings (incl. distinguishing them from bodily sensations) · Difficulty Describing Feelings · Externally-Oriented Thinking. α .81; EOT subscale chronically weak (~.57); clinical cutoff ≥61.
+
+**Construct relevance:** emotional granularity — the ability to identify and name what you feel — is genuinely foundational to Stillform (you can't reframe what you can't name; it underpins metacognition and ties to Barrett's constructed-emotion theory, which Stillform already uses).
+
+**Why reject the instrument:**
+1. **Deficit/clinical framing.** TAS-20 is scored so higher = more *difficulty*, with a diagnostic cutoff. "You have difficulty identifying your feelings" is close to a deficit label — in tension with the no-deficit/no-judgment principle. Would require full capacity-inversion to even consider.
+2. **Redundant with MAIA-2.** DIF explicitly overlaps interoception (distinguishing feelings from bodily sensations) = MAIA-2's Emotional Awareness. Two instruments measuring nearly the same thing.
+3. **Weak EOT subscale**, and "externally-oriented thinking" is not especially Stillform-relevant.
+
+**Verdict:** **do NOT adopt TAS-20.** KEEP the construct (emotional granularity) but capture it via the *positive* frame — fold it into MAIA-2's Emotional Awareness adaptation or a Barrett-grounded "emotional granularity" capacity surface. Logs a second rejection rule (after CRT): **deficit-framed clinical instruments with diagnostic cutoffs are in tension with the no-deficit principle — invert to capacity or route the construct elsewhere; don't import the clinical scale.**
+
+---
+
+## CATALOG PASS COMPLETE — ARCHITECTURE SYNTHESIS (DRAFT FOR REVIEW)
+
+> The full catalog pass is done (8 instruments). This synthesis is the cross-cutting architecture the pass was meant to surface. **It is a DRAFT for Arlin's clear-headed review — nothing locked.** The big call (does the four-domain model hold, how many surfaces, which instruments ship) is hers to make.
+
+**The instruments don't sort into "four bias domains." They sort into five functional buckets:**
+
+1. **Pattern/dysfunction instruments → the actual "bias" work.** CD-Quest (Domain 1, distortions) + MCQ-30 (Domain 4, metacognitive beliefs). Dysfunction-pattern result frame. These are the real Bias Profile.
+2. **Capacity instruments → measure what Stillform trains, mapped to its own loop.** MAIA-2 = **SENSE** (interoception) · ERQ-reappraisal = **SETTLE** (regulation = Reframe) · SRIS = **SEE** (metacognition, reflection→insight). Capacity result frame. This is the strongest discovery: a "capacities" surface could mirror the user's growth in the *exact three skills Stillform builds* — sense, settle, see — before/after.
+3. **Profile instruments → value-neutral self-knowledge.** DOSPERT (risk shape) + parts of IRI (Fantasy). Profile/mirror result frame. Optional "know your shape" surface.
+4. **Behavioral-inference constructs → not instruments.** CRT (reflective override) — read from real Reframe behavior, not a quiz. Routes to the precision framework's behavioral-inference layer (Phase 5.9).
+5. **Reject-but-keep-construct.** TAS-20 (emotional granularity) — construct folded into the capacity layer via positive framing; clinical scale not imported.
+
+(IRI sits across 1–3: it's the "see others" social-reading anchor for Domain 2, but its subscales split across capacity/nuanced/profile frames — proving result frame is **per-subscale, not per-instrument**.)
+
+**Three result frames total:** dysfunction-pattern · capacity · value-neutral profile. (Applied per-subscale where needed.)
+
+**Three response shapes:** belief-endorsement (MCQ-30) · frequency (MAIA-2, IRI, ERQ, SRIS) · frequency×intensity two-part (CD-Quest — and its intensity rating is the precision self-report).
+
+**Three mechanism types:** clinical-adapted self-report = FITS · performance/graded task = REJECT (CRT) · deficit-clinical-cutoff = REJECT/invert (TAS-20).
+
+**Hard dependencies before any Domain locks:**
+- One **distortion vocabulary** must unify METACOGNITIVE_ARC (reframe.js) + CD-Quest adaptation + Domain 1 chips. Can't ship two lists.
+- Decide: does the **four-domain model survive**, or does the Bias Profile become "pattern work (2 instruments) + a separate Capacities surface (3 instruments) + an optional Profile surface"? The evidence leans toward the latter.
+
+**Open calls for Arlin (clear-headed):** confirm bucket structure; confirm capacities surface = sense/settle/see mirror; pick which instruments ship at launch vs which wait; confirm two-part precision/intensity response shape; resolve distortion-vocabulary reconciliation.
+
+---
+
+ARA Embers LLC · Workshop Catalog Research · catalog pass complete · synthesis is DRAFT, nothing locked
