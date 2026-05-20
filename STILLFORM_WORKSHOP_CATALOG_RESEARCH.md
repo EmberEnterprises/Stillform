@@ -248,7 +248,7 @@ And it's an **enhancement instrument, not a pathology one** — built for coachi
 4. **Behavioral-inference constructs → not instruments.** CRT (reflective override) — read from real Reframe behavior, not a quiz. Routes to the precision framework's behavioral-inference layer (Phase 5.9).
 5. **Reject-but-keep-construct.** TAS-20 (emotional granularity) — construct folded into the capacity layer via positive framing; clinical scale not imported.
 
-(IRI sits across 1–3: it's the "see others" social-reading anchor for Domain 2, but its subscales split across capacity/nuanced/profile frames — proving result frame is **per-subscale, not per-instrument**.)
+(IRI → capacities surface as the "see others" layer (resolved, see reconciliation below); its subscales split across capacity/nuanced/profile frames — proving result frame is **per-subscale, not per-instrument**. Perspective Taking bridges to pattern-work as the adaptive inverse of mind-reading.)
 
 **Three result frames total:** dysfunction-pattern · capacity · value-neutral profile. (Applied per-subscale where needed.)
 
@@ -260,7 +260,16 @@ And it's an **enhancement instrument, not a pathology one** — built for coachi
 - One **distortion vocabulary** must unify METACOGNITIVE_ARC (reframe.js) + CD-Quest adaptation + Domain 1 chips. Can't ship two lists.
 - Decide: does the **four-domain model survive**, or does the Bias Profile become "pattern work (2 instruments) + a separate Capacities surface (3 instruments) + an optional Profile surface"? **→ DECIDED May 20: the latter. Four-domain model retired.**
 
-**Open calls remaining (downstream of the architecture lock):** confirm capacities surface = sense/settle/see growth mirror; confirm IRI placement (the "see others" extension); pick which instruments ship at launch vs which follow; confirm two-part precision/intensity response shape; resolve distortion-vocabulary reconciliation; relabel MCQ-30 spec's "Domain 4" language; add CANON pointer to the locked architecture.
+**Reconciliation — RESOLVED May 20, 2026 (working through the post-lock list):**
+- **(a) MCQ-30 "Domain 4" relabel → DONE.** Spec now reads "metacognitive-beliefs pattern-work strand."
+- **(b) Distortion vocabulary → DONE.** `STILLFORM_DISTORTION_VOCABULARY.md` — one list, two registers (clinical spine + Stillform loop-voice), unifying reframe.js + CD-Quest + pattern-work chips.
+- **(c) IRI placement → RESOLVED: capacities surface, as the "see others" layer.** The capacities surface now maps Stillform's full philosophy: **Sense** (MAIA-2) · **Settle** (ERQ) · **See yourself** (SRIS) · **See others** (IRI). This is exactly "regulate yourself → see yourself clearly → see others clearly → let them in." Nuances carried: IRI's Personal Distress subscale is regulation-adjacent (getting flooded by others' emotions — links to Settle), and Perspective Taking is the *adaptive inverse* of the mind-reading distortion (bridges to pattern-work; build them to reference each other). Reasoned call, overridable.
+- **(d) Launch instrument set → RESOLVED via the "nothing is post-launch" rule.** All SEVEN fit instruments are launch scope — MCQ-30, CD-Quest, SRIS, ERQ, MAIA-2, IRI, DOSPERT. None deferred. CRT and TAS-20 are *principled exclusions* (rejected on the merits — CRT's construct routes to behavioral inference; TAS-20's folds into capacities), NOT post-launch deferrals. The Workshop "evolving channel" = instruments *beyond this catalog* added later as enhancements to the launch-complete feature; it does not mean shipping a partial catalog. **Recommended build sequence** (sequence ≠ scope — all ship): MCQ-30 (spec'd) → CD-Quest (vocabulary done) → SRIS → ERQ → MAIA-2 → IRI → DOSPERT.
+- **(e) CANON pointer → DONE.** CANON §14 Deep References + v1.9 versioning entry record the locked architecture.
+- **Capacities surface = sense/settle/see(+see-others) growth mirror → CONFIRMED.**
+- **Two-part precision/intensity response shape (CD-Quest) → CONFIRMED** (preserve intensity as the precision self-report).
+
+**Now genuinely open (needs Arlin, not blocking):** final chip naming across the strands; the deep CD-Quest / SRIS / ERQ / MAIA-2 / IRI / DOSPERT adaptation specs (each like the MCQ-30 spec) when build begins.
 
 ---
 

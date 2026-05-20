@@ -1,5 +1,5 @@
 # STILLFORM CANON
-**ARA Embers LLC · v1.8 · Originally consolidated May 13, 2026 · Last extended May 17, 2026**
+**ARA Embers LLC · v1.9 · Originally consolidated May 13, 2026 · Last extended May 20, 2026**
 
 The single source-of-truth doc Claude reads at session start. Distills the operational essence of:
 
@@ -408,6 +408,10 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 - `B2B_IT_DEPLOYMENT_GUIDE.md` — for IT admins rolling out via MDM (Intune / Jamf / Workspace ONE); covers network, app distribution, SSO posture, sub-processors, security controls
 - `B2B_SSO_INTEGRATION.md` — SSO architecture; three implementation paths (Supabase Auth SSO / samlify / WorkOS) with decision criteria; configuration UI status; auth-flow walkthrough; JIT provisioning rules
 - `SOC2_TYPE_1_READINESS.md` — internal SOC 2 readiness inventory mapped to Trust Service Criteria; starting point for audit firm engagement
+- `STILLFORM_PRECISION_FRAMEWORK.md` — the "why" beneath every surface (predictive processing, neuromodulators as precision-weighting, metacognition + CBT). Foundational mechanism doc; pointer also in §5.
+- `STILLFORM_WORKSHOP_CATALOG_RESEARCH.md` — **the locked Bias Profile architecture (May 20, 2026).** Four-domain model retired; three surfaces — pattern-work (CD-Quest + MCQ-30) + capacities (MAIA-2/Sense, ERQ/Settle, SRIS/See, IRI/See-others) + optional profile (DOSPERT). Full 8-instrument catalog research + architecture synthesis. Read before any Bias Profile / Workshop work.
+- `STILLFORM_DISTORTION_VOCABULARY.md` — single source of truth for the distortion vocabulary across reframe.js, the CD-Quest Workshop instrument, and pattern-work chips (one list, two registers: clinical spine + Stillform loop-voice).
+- `STILLFORM_WORKSHOP_MCQ30_SPEC.md` — Workshop instrument #1 spec (metacognitive-beliefs pattern-work strand).
 - `STILLFORM_PROJECT_TRANSFER.md` — April 2026 historical project state (largely superseded by this doc and Master_Todo)
 
 **`Stillform_Master_Todo.md`** — separate live launch checklist. **NEVER summarize from memory.** Pull fresh.
@@ -415,6 +419,8 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 ---
 
 ## VERSIONING
+
+**v1.9 — May 20, 2026.** Added Deep References pointers for the Bias Profile / Workshop architecture cluster (`STILLFORM_WORKSHOP_CATALOG_RESEARCH.md` as the locked three-surface architecture, `STILLFORM_DISTORTION_VOCABULARY.md`, `STILLFORM_WORKSHOP_MCQ30_SPEC.md`) and `STILLFORM_PRECISION_FRAMEWORK.md`. Records the May 20 architecture lock: the four-domain bias model is retired in favor of three surfaces (pattern-work + capacities + optional profile); §5 already carries the precision-framework pointer. No principle changes; reference layer only.
 
 **v1.8 — May 17, 2026.** Revised USER TREATMENT principle 4 (in Section 10 subsection) from "Common-pattern posture" to "Observe without prevalence framing." Arlin's pushback in real time during MCQ-30 adaptation work: even when research validates that a pattern is widespread, telling the user "this is common" in result delivery categorizes them (positions them relative to a population) and reads as clinical/diagnostic — exactly what Stillform is not. The original framing was supposed to reduce anxiety by normalizing patterns, but normalizing IS categorization. Prevalence-as-protection turns out to be comfort-disguised-as-honesty (the failure mode principle 7 was just locked against). Research grounding for any pattern stays — it comes from the model that names the pattern (Wells's metacognitive model, etc.), not from prevalence claims. Downstream effect: MCQ-30 result presentation language drops all prevalence framing. Duplicated to FRAMING_LAW v1.4.
 
