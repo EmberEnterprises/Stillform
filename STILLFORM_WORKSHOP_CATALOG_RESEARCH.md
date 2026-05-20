@@ -236,9 +236,9 @@ And it's an **enhancement instrument, not a pathology one** — built for coachi
 
 ---
 
-## CATALOG PASS COMPLETE — ARCHITECTURE SYNTHESIS (DRAFT FOR REVIEW)
+## CATALOG PASS COMPLETE — ARCHITECTURE SYNTHESIS (★ LOCKED MAY 20, 2026)
 
-> The full catalog pass is done (8 instruments). This synthesis is the cross-cutting architecture the pass was meant to surface. **It is a DRAFT for Arlin's clear-headed review — nothing locked.** The big call (does the four-domain model hold, how many surfaces, which instruments ship) is hers to make.
+> The full catalog pass is done (8 instruments). This synthesis is the cross-cutting architecture the pass was meant to surface. **★ DECISION LOCKED by Arlin, May 20, 2026: go with the three-surface model below (four-domain model retired).** Master Todo Phase 5 sub-item #4 updated to match. Remaining open items are downstream reconciliations (below), not the architecture itself.
 
 **The instruments don't sort into "four bias domains." They sort into five functional buckets:**
 
@@ -258,10 +258,10 @@ And it's an **enhancement instrument, not a pathology one** — built for coachi
 
 **Hard dependencies before any Domain locks:**
 - One **distortion vocabulary** must unify METACOGNITIVE_ARC (reframe.js) + CD-Quest adaptation + Domain 1 chips. Can't ship two lists.
-- Decide: does the **four-domain model survive**, or does the Bias Profile become "pattern work (2 instruments) + a separate Capacities surface (3 instruments) + an optional Profile surface"? The evidence leans toward the latter.
+- Decide: does the **four-domain model survive**, or does the Bias Profile become "pattern work (2 instruments) + a separate Capacities surface (3 instruments) + an optional Profile surface"? **→ DECIDED May 20: the latter. Four-domain model retired.**
 
-**Open calls for Arlin (clear-headed):** confirm bucket structure; confirm capacities surface = sense/settle/see mirror; pick which instruments ship at launch vs which wait; confirm two-part precision/intensity response shape; resolve distortion-vocabulary reconciliation.
+**Open calls remaining (downstream of the architecture lock):** confirm capacities surface = sense/settle/see growth mirror; confirm IRI placement (the "see others" extension); pick which instruments ship at launch vs which follow; confirm two-part precision/intensity response shape; resolve distortion-vocabulary reconciliation; relabel MCQ-30 spec's "Domain 4" language; add CANON pointer to the locked architecture.
 
 ---
 
-ARA Embers LLC · Workshop Catalog Research · catalog pass complete · synthesis is DRAFT, nothing locked
+ARA Embers LLC · Workshop Catalog Research · catalog pass complete · ★ architecture LOCKED May 20, 2026 (three-surface model)
