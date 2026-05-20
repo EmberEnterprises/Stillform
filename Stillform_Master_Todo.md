@@ -397,9 +397,9 @@ This is the architectural floor under Principle C. Every AI surface ships with a
 
 
     **★ BUILD PLAN (locked May 20, 2026 — Arlin's "time to build" go; scope fully locked above):** Sequenced so each step is a coherent, build-clean, independently-reviewable increment. Netlify deploy stays MANUAL (Arlin triggers); Claude commits to repo, Arlin reviews + deploys.
-    - **Step 1 — Data layer.** `lib/biasChips.js` (frozen 20-chip catalog: id, loop-label, clinical spine, type, ⓘ definition — mirrors `CHIP_DEFINITIONS.md`) + `lib/biasProfile.js` (watch-list data layer: get/save/add/remove/increment/format-for-AI, mirrors `triggerProfile.js`). localStorage, fail-silent. ← STARTING HERE.
-    - **Step 2 — Pattern-work editor screen.** `screens/BiasProfile.jsx` following the TriggerProfile pattern (browse catalog + watch list, ⓘ on each chip via MonoLabel/InfoModal, two-step remove confirm, onExit to MyProgress) + route in `AppV2.jsx` + MyProgress nav target.
-    - **Step 3 — Capacities growth mirror.** Distinct surface (not the watch list); SRIS/ERQ/MAIA-2/IRI results over time, capacity framing, before/after.
+    - **Step 1 — Data layer. ✅ DONE** (`8911065`). `lib/biasChips.js` (frozen 20-chip catalog: id, loop-label, clinical spine, type, ⓘ definition — mirrors `CHIP_DEFINITIONS.md`) + `lib/biasProfile.js` (watch-list data layer: get/save/add/remove/increment/format-for-AI, mirrors `triggerProfile.js`). localStorage, fail-silent.
+    - **Step 2 — Pattern-work editor screen. ✅ DONE.** `screens/BiasProfile.jsx` following the TriggerProfile pattern (browse catalog grouped by type + watch list, ⓘ on each chip via InfoModal showing the Stillform-voice definition, spine hidden from user, two-step remove confirm, onExit to MyProgress) + route wired in `AppV2.jsx` + MyProgress nav entry. Build green.
+    - **Step 3 — Capacities growth mirror. ← NEXT.** Distinct surface (not the watch list); SRIS/ERQ/MAIA-2/IRI results over time, capacity framing, before/after.
     - **Step 4 — Optional profile surface.** DOSPERT, value-neutral profile frame. Lowest priority.
     - **Step 5 — Workshop entry + instruments.** Library → Workshop section; instrument take-flows (MCQ-30 first) feeding chips (pattern-work) / mirror (capacities) / profile (DOSPERT).
     - **Step 6 — reframe.js alignment.** Distortion-vocabulary alignment to the unified list + push-trigger detection (with Arlin's go + testing; live AI surface).

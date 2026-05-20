@@ -7,6 +7,7 @@ import FoundationVerify from "./screens/FoundationVerify.jsx";
 import MyProgress from "./screens/MyProgress.jsx";
 import ContextProfile from "./screens/ContextProfile.jsx";
 import TriggerProfile from "./screens/TriggerProfile.jsx";
+import BiasProfile from "./screens/BiasProfile.jsx";
 
 /**
  * AppV2 — root of the v2 frontend.
@@ -66,6 +67,7 @@ export default function AppV2() {
             // silently (defensive — landing only emits known ids).
             if (target === "context-profile") setScreen("context-profile");
             else if (target === "trigger-profile") setScreen("trigger-profile");
+            else if (target === "bias-profile") setScreen("bias-profile");
           }}
         />
       </div>
@@ -87,6 +89,14 @@ export default function AppV2() {
     return (
       <div className="sf-v2">
         <TriggerProfile onExit={() => setScreen("my-progress")} />
+      </div>
+    );
+  }
+
+  if (screen === "bias-profile") {
+    return (
+      <div className="sf-v2">
+        <BiasProfile onExit={() => setScreen("my-progress")} />
       </div>
     );
   }

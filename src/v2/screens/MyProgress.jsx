@@ -93,6 +93,12 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="External situations you've named as consistently hitting hard — performance reviews, hard conversations, certain people."
           onTap={() => handleNavigate("trigger-profile")}
         />
+
+        <ProgressEntry
+          title="Bias Profile"
+          description="Recurring shapes your thinking takes — the patterns you've put on a watch list for the Reframe AI to notice and help loosen over time."
+          onTap={() => handleNavigate("bias-profile")}
+        />
       </section>
     </main>
   );
