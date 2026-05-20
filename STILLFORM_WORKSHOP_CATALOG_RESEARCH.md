@@ -66,16 +66,71 @@ This works, and it tells us the catalog needs (at least) two result frames: **dy
 
 ---
 
+## BRIEF #2 — CD-Quest (Cognitive Distortions)
+
+**Citation:** de Oliveira, I. R. (2015). Cognitive Distortions Questionnaire (CD-Quest). Validated across English, Brazilian Portuguese, Turkish, Australian, and adolescent samples. Of the cognitive-distortion measures (CEQ, ICD, CDS, etc.), CD-Quest has the strongest psychometric evidence — total-score α .80–.86, test-retest ICC ~.87, unitary factor structure.
+
+### What it measures (construct)
+
+The frequency AND intensity of 15 common cognitive distortions over the past week. The 15 (standard Beck/Burns CBT vocabulary, public terms): dichotomous/all-or-nothing thinking · fortune-telling/catastrophizing · discounting the positive · emotional reasoning · labeling · magnification/minimization · selective abstraction (mental filter) · mind reading · overgeneralization · personalization · should statements · jumping to conclusions · blaming (self or others) · "what if…" · unfair comparisons.
+
+**Structure:** 15 items (one per distortion), each rated on BOTH frequency and intensity via a scoring grid. Designed explicitly as a self-monitoring + psychoeducation tool — to help people commit the distortions to memory, recognize them in daily life, and track them. Validated 9-item and 5-item short forms exist (Morrison et al. 2022) that reproduce the full score accurately.
+
+### Mechanism type: clinical-adapted, dysfunction-pattern frame
+
+Same family as MCQ-30 — uses the dysfunction-pattern result frame ("pattern observed + here's the lever"), not the capacity frame. BUT the distortions are far more recognizable and self-nameable than MCQ-30's metacognitive beliefs, which makes the **teach-recognize mechanism** strongly applicable here: people can self-identify "yeah, I do all-or-nothing" once given the language. So Domain 1 likely wants a *hybrid* — the instrument plus teach-recognize content drawn from the same 15-distortion set.
+
+### Domain fit
+
+**Domain 1 (cognitive distortions) — directly.** The 15 distortions become the candidate Domain 1 chips. **Critical reconciliation note:** Stillform's METACOGNITIVE_ARC (in reframe.js) already names a distortion set (perfectionism, catastrophization, all-or-nothing, mind-reading, fortune-telling, self-as-evidence, overgeneralizing). CD-Quest's 15 overlap heavily but aren't identical. **One distortion vocabulary must serve both the in-session AI naming AND the Workshop instrument AND the Bias Profile Domain 1 chips** — we can't ship two different lists of distortions. Reconciling METACOGNITIVE_ARC's set with CD-Quest's 15 is a required step before Domain 1 locks.
+
+### The precision-framework bridge (the notable finding)
+
+CD-Quest scores **intensity** separately from frequency — how strongly the distorted thought gripped the person, not just how often it occurred. **That intensity dimension is a near-direct precision self-report.** How hard a distorted thought grips you = how much confidence/precision your brain assigned that faulty prior. CD-Quest essentially has a built-in precision measure already validated. This is the cleanest bridge yet between an existing instrument and the precision framework — the "intensity" rating IS the belief-strength/precision rating that the CBT-conditioning layer (Phase 5.9) wants. Worth preserving the intensity dimension in adaptation specifically for this reason.
+
+### Response shape
+
+CD-Quest's native frequency × intensity grid is more complex than MCQ-30's single scale. Two honest options:
+- **Two-part per distortion:** "Did this show up this week?" (frequency) + "How much did it grip you?" (intensity/precision). Preserves the precision signal. This is a third response shape for the catalog.
+- **Simplified single frequency** (drop intensity) — cleaner, but loses the precision bridge. Not recommended given the precision framework's value.
+Leaning two-part, because intensity = precision and that's too valuable to drop.
+
+### Result frame
+
+Dysfunction-pattern frame, same as MCQ-30: *Pattern observed: [distortion in plain language]. [What it does.] This is one of the patterns CBT has mapped for decades. Want to add it to your Bias Profile watch list? Stillform's AI will flag it during Reframe, and the practice can loosen its grip over time.* No scores, no prevalence. The intensity reading can feed the "how strong is this prior" data quietly without showing the user a number.
+
+### Adaptation challenges
+
+- **Reconcile with METACOGNITIVE_ARC** (above) — the single biggest dependency.
+- **"Should statements" and "blaming" need judgment-free framing** (USER TREATMENT principle 1). "Should statements" must not imply the user is wrong to hold standards — frame as the rigidity of the *should*, not the having of values. "Blaming" must not blame the user for blaming.
+- **15 is a lot** but each is one item — manageable; the 9-item short form is the fallback.
+- **Psychoeducation doubling:** CD-Quest was built partly to teach. Its 15 distortions can seed both the instrument AND the Library/teach-recognize content for Domain 1 — efficient, and aligned with "knowledge is power."
+
+### Recommendation / open questions
+
+- CD-Quest is the right Workshop instrument for Domain 1, and the strongest psychometric choice in its category. High Stillform-coherence — distortions are already half-built into the product.
+- It contributes the **precision-via-intensity** bridge (most valuable cross-instrument finding so far) and reinforces the **teach-recognize** mechanism for nameable patterns.
+- Hard dependency: reconcile the distortion vocabulary across METACOGNITIVE_ARC, the Workshop instrument, and Domain 1 chips into ONE list.
+- Open: two-part (freq + intensity) response shape confirmed? Hybrid instrument + teach-recognize for Domain 1 confirmed?
+
+---
+
 ## CATALOG PASS — REMAINING INSTRUMENTS (to be researched in subsequent waves)
 
 Done in waves to keep each brief thorough and avoid partial work:
-- **CD-Quest** (Burns/Beck — cognitive distortions, Domain 1) — clinical-adapted, dysfunction-pattern frame
-- **CRT** (Frederick 2005 — cognitive reflection) — PERFORMANCE task; tests a third mechanism type (reveal-through-behavior, not self-report). Likely needs a third response shape entirely.
+- **CRT** (Frederick 2005 — cognitive reflection) — PERFORMANCE task; tests a third mechanism type (reveal-through-behavior, not self-report). Likely needs a third response shape entirely. *Next.*
 - **DOSPERT** (domain-specific risk-taking, Domain 3) — decision/cognitive bias
 - **IRI** (Davis 1980 — interpersonal reactivity, Domain 2 microbiases) — social reading
 - Possible: SRIS or MAI (metacognitive capacity — capacity frame), ERQ/DERS (emotion regulation), TAS-20 (alexithymia)
 
 After the full pass, lock the cross-cutting architecture: how many response shapes, how many result frames, how each mechanism type maps to surfaces, before any deep adaptation or build.
+
+### Running cross-cutting findings (accumulating across briefs)
+- **Result frames so far: 2** — dysfunction-pattern (MCQ-30, CD-Quest) + capacity (MAIA-2).
+- **Response shapes so far: 3** — belief-endorsement (MCQ-30) + frequency (MAIA-2) + frequency×intensity two-part (CD-Quest).
+- **Mechanism types seen: 2** — clinical-adapted self-report (MCQ-30, CD-Quest, MAIA-2). CRT will add performance-task (3rd).
+- **Precision bridge:** CD-Quest's intensity rating is a near-direct precision self-report — strongest instrument↔precision-framework link found.
+- **Hard dependency surfaced:** one distortion vocabulary must unify METACOGNITIVE_ARC + Workshop + Domain 1 chips.
 
 ---
 
