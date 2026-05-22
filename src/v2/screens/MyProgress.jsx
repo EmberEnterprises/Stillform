@@ -99,6 +99,15 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="Recurring shapes your thinking takes — the patterns you've put on a watch list for the Reframe AI to notice and help loosen over time."
           onTap={() => handleNavigate("bias-profile")}
         />
+
+        {/* TEMPORARY test entry (Step 5b) — lets the CD-Quest take-flow be
+            device-tested before the real Library → Workshop section ships in
+            5c, which will replace this tile. */}
+        <ProgressEntry
+          title="Thinking Shapes — take it (test)"
+          description="Temporary test entry for the new Workshop take-flow. The real Workshop home arrives next. Tapping runs the CD-Quest instrument end to end."
+          onTap={() => handleNavigate("workshop-cdquest")}
+        />
       </section>
     </main>
   );
