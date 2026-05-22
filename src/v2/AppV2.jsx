@@ -8,8 +8,7 @@ import MyProgress from "./screens/MyProgress.jsx";
 import ContextProfile from "./screens/ContextProfile.jsx";
 import TriggerProfile from "./screens/TriggerProfile.jsx";
 import BiasProfile from "./screens/BiasProfile.jsx";
-import InstrumentRunner from "./screens/InstrumentRunner.jsx";
-import CDQUEST, { score as cdquestScore } from "./lib/instruments/cdquest.js";
+import Library from "./screens/Library.jsx";
 
 /**
  * AppV2 — root of the v2 frontend.
@@ -70,7 +69,6 @@ export default function AppV2() {
             if (target === "context-profile") setScreen("context-profile");
             else if (target === "trigger-profile") setScreen("trigger-profile");
             else if (target === "bias-profile") setScreen("bias-profile");
-            else if (target === "workshop-cdquest") setScreen("workshop-cdquest"); // TEMP (5b): replaced by Library→Workshop entry in 5c
           }}
         />
       </div>
@@ -104,17 +102,10 @@ export default function AppV2() {
     );
   }
 
-  if (screen === "workshop-cdquest") {
+  if (screen === "library") {
     return (
       <div className="sf-v2">
-        {/* TEMPORARY route — device-testing the Step 5b runner before the
-            real Library→Workshop entry ships in 5c. The runner is generic;
-            this just hands it the CD-Quest definition + its scorer. */}
-        <InstrumentRunner
-          instrument={CDQUEST}
-          scoreFn={cdquestScore}
-          onExit={() => setScreen("my-progress")}
-        />
+        <Library onExit={() => setScreen("home")} />
       </div>
     );
   }
@@ -124,10 +115,12 @@ export default function AppV2() {
       <Home
         onBeginSession={() => setScreen("spine")}
         onNavigate={(target) => {
-          // Phase 5: 'progress' routes to the MyProgress landing.
-          // Library / FAQ / Settings / Crisis-Resources stay no-op
-          // until their own sub-items ship.
+          // Phase 5: 'progress' routes to the MyProgress landing,
+          // 'library' to the Library (Workshop section live; curated
+          // knowledge cards join later). FAQ / Settings / Crisis-Resources
+          // stay no-op until their own sub-items ship.
           if (target === "progress") setScreen("my-progress");
+          else if (target === "library") setScreen("library");
         }}
       />
     </div>
