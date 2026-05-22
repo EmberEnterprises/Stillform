@@ -2,7 +2,7 @@
 
 **ARA Embers LLC · research drafts · started May 20, 2026**
 
-> **STATUS: RESEARCH DRAFTS FOR ARLIN'S REVIEW — NOTHING LOCKED.** This doc accumulates 1–2 page briefs on candidate Workshop instruments, done as a catalog-research pass BEFORE deep adaptation of any single instrument. The purpose is to map the full Workshop (domain × mechanism type × response shape × result frame) so cross-cutting architecture can be locked from the complete picture, not from one instrument. Each brief is a draft. No scope is locked here. Instrument #1 (MCQ-30) is already fully spec'd in `STILLFORM_WORKSHOP_MCQ30_SPEC.md`; this doc covers the rest of the catalog.
+> **STATUS (updated May 21, 2026): ARCHITECTURE LOCKED — the briefs are the research record behind it, not open questions.** This doc began as a catalog-research pass (1–2 page briefs on candidate Workshop instruments) done BEFORE deep adaptation, to map the full Workshop so cross-cutting architecture could be locked from the complete picture rather than from one instrument. **That architecture is now locked:** the three-surface model (pattern-work · capacities · optional profile) in the synthesis at the end of this doc, and all 7 instrument specs are locked (`STILLFORM_WORKSHOP_*_SPEC.md`). Read the briefs below as the reasoning that informed the lock — do NOT reopen them as undecided. The locked synthesis + `Stillform_Master_Todo.md` are the authoritative scope.
 
 > Adaptation discipline (same as MCQ-30): verbatim items from any instrument are NEVER reproduced. Stillform's items are original adaptations faithful to each subscale's construct, in Stillform's voice. Fidelity is to the construct, not the wording.
 
