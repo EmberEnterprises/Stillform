@@ -35,8 +35,9 @@ export const RESPONSE = Object.freeze({
 });
 
 // Eight subscales. `standard` = higher-is-more-capacity (folded into the overall
-// Sense read). The two adaptive subscales (not_distracting / not_worrying) and
-// trusting get their own framing and are excluded from the overall.
+// Sense read). The two adaptive subscales (not_distracting / not_worrying) are
+// excluded from the overall; Trusting IS in the overall (standard) but also
+// carries its own note framing (low Trusting is never a failing).
 export const SUBSCALES = Object.freeze({
   noticing: Object.freeze({ id: "noticing", label: "Noticing", standard: true }),
   not_distracting: Object.freeze({ id: "not_distracting", label: "Not-Distracting", standard: false }),

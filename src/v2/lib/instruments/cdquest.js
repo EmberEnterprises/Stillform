@@ -74,7 +74,7 @@ const ITEMS = Object.freeze([
 
 // ---------------------------------------------------------------------------
 // The instrument definition (the shape the generic runner consumes).
-// `name`/`subtitle` are provisional Workshop copy — refine in Step 5c.
+// `name`/`subtitle` are the final Workshop copy (Step 5j, May 23, 2026).
 // ---------------------------------------------------------------------------
 
 export const CDQUEST = Object.freeze({

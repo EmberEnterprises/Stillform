@@ -79,7 +79,7 @@ export const BIAS_PROFILE_CHIPS = Object.freeze([
     label: "Filling in the why",
     spine: "mind-reading",
     type: "distortion",
-    info: `Someone goes quiet, doesn't reply, gives a look — and your system fills in the why with no data, usually the worst one. The not-knowing is the loud part. Watch-listed, Stillform catches the gap between what you saw and what you assumed, and leaves the why open until there's something real to fill it with.`,
+    info: `Someone goes quiet, doesn't reply, gives a look — and your system fills in the why with no data, usually the worst one. The not-knowing is the loud part. Watch-listed, Stillform catches the gap between what you saw and what you assumed, and leaves the why open until there's something real to fill it with. The opposite muscle — actually reading where someone's coming from — is what the Seeing Others check (Perspective Taking) builds.`,
   },
   {
     id: "d_overgeneralization",
@@ -160,6 +160,11 @@ export const BIAS_PROFILE_CHIPS = Object.freeze([
     type: "metacognitive",
     info: `The belief that you should be able to control which thoughts show up — and that the wrong ones mean something's wrong with you. So you fight the thought, which keeps it loud. Watch-listed, Stillform helps you let a thought be there without it being a command or a verdict: control the response, not the arrival.`,
   },
+  // RESERVED / not proposed. MCQ-30's CSC subscale is surfaced as a quality read
+  // (loop vs structure — see mcq30.js CSC_READ + MCQ30 spec §5/§6), NOT a watch-list
+  // chip: pathologizing structured self-observation would contradict the practice
+  // itself. Kept for a possible future "looping" watch-list option; today no
+  // instrument proposes it. (Step 5j, May 23, 2026.)
   {
     id: "m_csc",
     label: "Inward-attention quality",
