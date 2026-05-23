@@ -4,6 +4,7 @@ import MonoLabel from "../components/MonoLabel.jsx";
 import InstrumentRunner from "./InstrumentRunner.jsx";
 import CDQUEST, { score as cdquestScore } from "../lib/instruments/cdquest.js";
 import SRIS, { score as srisScore } from "../lib/instruments/sris.js";
+import ERQ, { score as erqScore } from "../lib/instruments/erq.js";
 
 /**
  * Library — the curated-knowledge surface, reached from the Home footer.
@@ -31,6 +32,7 @@ import SRIS, { score as srisScore } from "../lib/instruments/sris.js";
 const INSTRUMENTS = [
   { id: "cdquest", instrument: CDQUEST, scoreFn: cdquestScore },
   { id: "sris", instrument: SRIS, scoreFn: srisScore },
+  { id: "erq", instrument: ERQ, scoreFn: erqScore },
 ];
 
 export default function Library({ onExit }) {

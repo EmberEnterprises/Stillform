@@ -506,6 +506,7 @@ function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMark
    mirror + AI context) but are deliberately not shown as a scorecard here. */
 function CapacityResult({ instrument, result, onDone }) {
   const reading = result.reading || {};
+  const notes = Array.isArray(result.notes) ? result.notes : [];
   return (
     <>
       <EditorialBlock
@@ -515,6 +516,20 @@ function CapacityResult({ instrument, result, onDone }) {
         body={reading.body || ""}
         rule
       />
+      {notes.length > 0 && (
+        <div style={{ marginTop: "var(--sf-space-32)" }}>
+          {notes.map((note, i) => (
+            <div key={i} style={{ marginBottom: "var(--sf-space-24)" }}>
+              {note.title && (
+                <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+                  {note.title}
+                </MonoLabel>
+              )}
+              <p style={gentleBodyStyle}>{note.body}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <p style={{ ...gentleBodyStyle, marginTop: "var(--sf-space-24)" }}>
         No score, no grade — this is a starting line. Take it again down the road and the shift is
         the data; it shows up in your growth mirror.
