@@ -99,6 +99,12 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="Recurring shapes your thinking takes — the patterns you've put on a watch list for the Reframe AI to notice and help loosen over time."
           onTap={() => handleNavigate("bias-profile")}
         />
+
+        <ProgressEntry
+          title="Growth mirror"
+          description="The four capacities Stillform trains — Sense, Settle, Seeing yourself, Seeing others — reflected back as you do the work."
+          onTap={() => handleNavigate("capacities-mirror")}
+        />
       </section>
     </main>
   );

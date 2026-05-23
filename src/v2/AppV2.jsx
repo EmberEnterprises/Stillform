@@ -8,6 +8,7 @@ import MyProgress from "./screens/MyProgress.jsx";
 import ContextProfile from "./screens/ContextProfile.jsx";
 import TriggerProfile from "./screens/TriggerProfile.jsx";
 import BiasProfile from "./screens/BiasProfile.jsx";
+import CapacitiesMirror from "./screens/CapacitiesMirror.jsx";
 import Library from "./screens/Library.jsx";
 
 /**
@@ -69,6 +70,7 @@ export default function AppV2() {
             if (target === "context-profile") setScreen("context-profile");
             else if (target === "trigger-profile") setScreen("trigger-profile");
             else if (target === "bias-profile") setScreen("bias-profile");
+            else if (target === "capacities-mirror") setScreen("capacities-mirror");
           }}
         />
       </div>
@@ -98,6 +100,14 @@ export default function AppV2() {
     return (
       <div className="sf-v2">
         <BiasProfile onExit={() => setScreen("my-progress")} />
+      </div>
+    );
+  }
+
+  if (screen === "capacities-mirror") {
+    return (
+      <div className="sf-v2">
+        <CapacitiesMirror onExit={() => setScreen("my-progress")} />
       </div>
     );
   }
