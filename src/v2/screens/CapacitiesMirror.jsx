@@ -66,32 +66,50 @@ export default function CapacitiesMirror({ onExit }) {
       />
 
       <div style={{ marginTop: "var(--sf-space-32)" }}>
-        {summary.map(({ capacity, taken, takeCount, first, latest }) => (
-          <div
-            key={capacity.id}
-            style={{ padding: "var(--sf-space-20) 0", borderBottom: "0.5px solid var(--sf-border-quiet)" }}
-          >
-            <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
-              {capacity.loopLayer}
-            </MonoLabel>
+        {summary.map(({ capacity, taken, takeCount, first, latest }) => {
+          // Reflect the read back — not just that a take happened. reading.{title,body}
+          // per the capacity result contract; guarded (results may be null). Once
+          // measured, the user's own read supersedes the generic framing.
+          const lr = latest?.results?.reading;
+          const fr = first?.results?.reading;
+          const moved = takeCount > 1 && fr?.key && lr?.key && fr.key !== lr.key;
+          const measureLine =
+            takeCount <= 1
+              ? `Measured ${formatDate(latest.takenAt)}`
+              : moved
+              ? `Measured ${takeCount}× · the read has moved since ${formatDate(first.takenAt)}`
+              : `Measured ${takeCount}× · consistent since ${formatDate(first.takenAt)}`;
+          return (
+            <div
+              key={capacity.id}
+              style={{ padding: "var(--sf-space-20) 0", borderBottom: "0.5px solid var(--sf-border-quiet)" }}
+            >
+              <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+                {capacity.loopLayer}
+              </MonoLabel>
 
-            <p style={titleStyle}>{capacity.label}</p>
-            <p style={framingStyle}>{CAPACITY_FRAMING[capacity.id]}</p>
+              <p style={titleStyle}>{capacity.label}</p>
 
-            {taken ? (
-              <p style={measureStyle}>
-                Measured {takeCount}{takeCount === 1 ? " time" : " times"}
-                {first && latest && first !== latest
-                  ? ` · baseline ${formatDate(first.takenAt)} → latest ${formatDate(latest.takenAt)}`
-                  : latest
-                  ? ` · ${formatDate(latest.takenAt)}`
-                  : ""}
-              </p>
-            ) : (
-              <p style={emptyStyle}>Not yet measured — its Workshop check arrives with the practice.</p>
-            )}
-          </div>
-        ))}
+              {taken && lr?.body ? (
+                <>
+                  {lr.title && <p style={readingTitleStyle}>{lr.title}</p>}
+                  <p style={readingBodyStyle}>{lr.body}</p>
+                  <p style={measureStyle}>{measureLine}</p>
+                </>
+              ) : taken ? (
+                <>
+                  <p style={framingStyle}>{CAPACITY_FRAMING[capacity.id]}</p>
+                  <p style={measureStyle}>Measured {takeCount}×</p>
+                </>
+              ) : (
+                <>
+                  <p style={framingStyle}>{CAPACITY_FRAMING[capacity.id]}</p>
+                  <p style={emptyStyle}>Not yet measured — its Workshop check arrives with the practice.</p>
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {!anyMeasured && (
@@ -132,6 +150,23 @@ const framingStyle = {
   fontSize: "15px",
   lineHeight: 1.5,
   color: "var(--sf-text-faint)",
+  margin: 0,
+};
+
+const readingTitleStyle = {
+  fontFamily: "var(--sf-font-serif)",
+  fontSize: "16px",
+  fontWeight: 400,
+  color: "var(--sf-text-cream)",
+  lineHeight: 1.4,
+  margin: "0 0 var(--sf-space-8)",
+};
+
+const readingBodyStyle = {
+  fontFamily: "var(--sf-font-serif)",
+  fontSize: "15px",
+  lineHeight: 1.55,
+  color: "var(--sf-text-quiet)",
   margin: 0,
 };
 
