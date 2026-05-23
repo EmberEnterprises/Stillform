@@ -152,15 +152,16 @@ The reworked items ask not "do you monitor your thinking" (Stillform's whole pra
 
 ## 7 · BIAS PROFILE CHIP MAPPING
 
-Each subscale maps to one chip in the metacognitive-beliefs pattern-work strand. Five chips from this one instrument (working labels; final naming in the Bias Profile catalog pass):
+The four belief subscales each map to one chip in the metacognitive-beliefs pattern-work strand:
 
-- *Worry-as-engine* (POS)
-- *Mind-as-mercy* (NEG)
-- *Memory-distrust* (CC)
-- *Mind-as-discipline* (NC)
-- *Inward-attention quality* (CSC — generative vs looping)
+- *Worry-as-engine* (POS) → `m_pos`
+- *Mind-as-mercy* (NEG) → `m_neg`
+- *Memory-distrust* (CC) → `m_cc`
+- *Mind-as-discipline* (NC) → `m_nc`
 
-A chip is proposed for the watch list when the user endorses its subscale (rings true / sometimes on ≥4 of 6 items). The user confirms before any chip lands — AI never adds to the diagnostic stack without consent (per Principle C, concierge layer).
+A belief chip is proposed for the watch list when the user endorses its subscale (rings true / sometimes on ≥4 of 6 items). The user confirms before any chip lands — AI never adds to the diagnostic stack without consent (per Principle C, concierge layer).
+
+**CSC does NOT propose a chip** (reconciled in build, May 23, 2026 — Step 5j). Per §5/§6, CSC is surfaced as a *quality read* (looping vs structure), never a dysfunction to watch-list — proposing it would pathologize structured self-observation, which is the practice itself. A reserved chip `m_csc` ("Inward-attention quality") is kept in the catalog for a possible future "looping" watch-list option, but no instrument proposes it today. (Earlier drafts of this section listed five chips; that was the inconsistency this note resolves — code, catalog, and spec now agree.)
 
 ---
 
