@@ -300,6 +300,25 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
  * above so the alternation reads as conversation without resorting to
  * chat-bubble aesthetics.
  * -------------------------------------------------------------------- */
+
+/* Strip inline markdown emphasis (*, _, `, ** , __) from AI-authored text
+   before display. The model occasionally reaches for emphasis; in this
+   editorial serif UI it renders as raw asterisks/underscores around a word —
+   which sets that word (often a belief, like a user's God) apart and reads as
+   the AI holding it at arm's length. FRAMING LAW: the user's words and beliefs
+   are met plainly, never editorialized. Paired markers only; lone punctuation
+   and the user's own quotation marks are left untouched. User turns are never
+   passed through this. */
+function stripInlineMarkdown(s) {
+  if (typeof s !== "string") return s;
+  return s
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/_(.+?)_/g, "$1")
+    .replace(/`(.+?)`/g, "$1");
+}
+
 function Turn({ role, text, question }) {
   if (role === "user") {
     return (
@@ -335,7 +354,7 @@ function Turn({ role, text, question }) {
           whiteSpace: "pre-wrap",
         }}
       >
-        {text}
+        {stripInlineMarkdown(text)}
       </p>
       {question ? (
         <p
@@ -348,7 +367,7 @@ function Turn({ role, text, question }) {
             fontStyle: "italic",
           }}
         >
-          {question}
+          {stripInlineMarkdown(question)}
         </p>
       ) : null}
     </div>
