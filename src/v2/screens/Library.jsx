@@ -6,6 +6,7 @@ import CDQUEST, { score as cdquestScore } from "../lib/instruments/cdquest.js";
 import SRIS, { score as srisScore } from "../lib/instruments/sris.js";
 import ERQ, { score as erqScore } from "../lib/instruments/erq.js";
 import MAIA2, { score as maia2Score } from "../lib/instruments/maia2.js";
+import IRI, { score as iriScore } from "../lib/instruments/iri.js";
 
 /**
  * Library — the curated-knowledge surface, reached from the Home footer.
@@ -35,6 +36,7 @@ const INSTRUMENTS = [
   { id: "sris", instrument: SRIS, scoreFn: srisScore },
   { id: "erq", instrument: ERQ, scoreFn: erqScore },
   { id: "maia2", instrument: MAIA2, scoreFn: maia2Score },
+  { id: "iri", instrument: IRI, scoreFn: iriScore },
 ];
 
 export default function Library({ onExit }) {
