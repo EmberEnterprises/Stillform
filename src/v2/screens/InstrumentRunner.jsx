@@ -5,6 +5,7 @@ import MonoLabel from "../components/MonoLabel.jsx";
 import InfoModal from "../components/InfoModal.jsx";
 import { addChipToWatchList, isOnWatchList } from "../lib/biasProfile.js";
 import { getChipById } from "../lib/biasChips.js";
+import { recordInstrumentResult } from "../lib/capacitiesProfile.js";
 
 /**
  * InstrumentRunner — the generic Workshop take-flow runner.
@@ -63,8 +64,12 @@ export default function InstrumentRunner({ instrument, scoreFn, onExit }) {
   };
 
   // ── items ──────────────────────────────────────────────────────────────
-  const setResponse = (itemId, patch) =>
-    setResponses((prev) => ({ ...prev, [itemId]: { ...prev[itemId], ...patch } }));
+  // Replace semantics: each item's stored value is model-shaped (an object for
+  // the two-part model, a scalar for capacity). Each item renderer owns its
+  // own shape and merging.
+  const currentItem = instrument.items[itemIndex];
+  const setItemResponse = (value) =>
+    setResponses((prev) => ({ ...prev, [currentItem.id]: value }));
 
   const goNext = () => {
     if (itemIndex < instrument.items.length - 1) {
@@ -72,10 +77,22 @@ export default function InstrumentRunner({ instrument, scoreFn, onExit }) {
     } else {
       const scored = scoreFn(responses);
       setResult(scored);
-      fire("Workshop Instrument Completed", {
-        instrument: instrument.id,
-        endorsed: scored.proposedChips.length,
-      });
+      if (instrument.surface === "capacities") {
+        // Record the take to the growth mirror — a private baseline, not a chip.
+        recordInstrumentResult({
+          instrumentId: scored.instrumentId || instrument.id,
+          results: scored,
+        });
+        fire("Workshop Instrument Completed", {
+          instrument: instrument.id,
+          reading: scored.reading?.key,
+        });
+      } else {
+        fire("Workshop Instrument Completed", {
+          instrument: instrument.id,
+          endorsed: scored.proposedChips?.length ?? 0,
+        });
+      }
       setPhase("result");
     }
   };
@@ -130,8 +147,8 @@ export default function InstrumentRunner({ instrument, scoreFn, onExit }) {
         <ItemStep
           instrument={instrument}
           index={itemIndex}
-          response={responses[instrument.items[itemIndex].id] || {}}
-          onSetResponse={(patch) => setResponse(instrument.items[itemIndex].id, patch)}
+          response={responses[currentItem.id]}
+          onSetResponse={setItemResponse}
           onNext={goNext}
           onBack={goBack}
         />
@@ -164,20 +181,43 @@ export default function InstrumentRunner({ instrument, scoreFn, onExit }) {
 /* ───────────────────────────────────────────────────────────────────────── */
 
 function ItemStep({ instrument, index, response, onSetResponse, onNext, onBack }) {
-  const item = instrument.items[index];
-  const total = instrument.items.length;
-
-  // Reuse seam: only the two-part frequency×grip model is built. A future
-  // instrument with a different model should fail loud here, not silently
-  // render an empty step.
-  if (instrument.responseModel !== "two-part-freq-grip") {
-    throw new Error(
-      `InstrumentRunner: unsupported responseModel "${instrument.responseModel}"`
+  const model = instrument.responseModel;
+  if (model === "two-part-freq-grip") {
+    return (
+      <TwoPartItem
+        instrument={instrument}
+        index={index}
+        response={response}
+        onSetResponse={onSetResponse}
+        onNext={onNext}
+        onBack={onBack}
+      />
     );
   }
+  if (model === "capacity-likert-4") {
+    return (
+      <CapacityItem
+        instrument={instrument}
+        index={index}
+        value={response}
+        onSetValue={onSetResponse}
+        onNext={onNext}
+        onBack={onBack}
+      />
+    );
+  }
+  // A future instrument with an unbuilt model fails loud, not silent.
+  throw new Error(`InstrumentRunner: unsupported responseModel "${model}"`);
+}
 
-  const freq = response.frequency;
-  const grip = response.intensity;
+/* Two-part frequency × grip item (CD-Quest). Owns its own object merge. */
+function TwoPartItem({ instrument, index, response, onSetResponse, onNext, onBack }) {
+  const item = instrument.items[index];
+  const total = instrument.items.length;
+  const r = response || {};
+
+  const freq = r.frequency;
+  const grip = r.intensity;
   const freqChosen = freq != null;
   const needsGrip = freqChosen && freq > 0;
   const canAdvance = freq === 0 || (needsGrip && grip != null);
@@ -221,7 +261,7 @@ function ItemStep({ instrument, index, response, onSetResponse, onNext, onBack }
               onSetResponse(
                 opt.value === 0
                   ? { frequency: 0, intensity: null } // "Didn't" clears any grip
-                  : { frequency: opt.value }
+                  : { ...r, frequency: opt.value }
               )
             }
           />
@@ -243,7 +283,7 @@ function ItemStep({ instrument, index, response, onSetResponse, onNext, onBack }
                 key={opt.value}
                 label={opt.label}
                 selected={grip === opt.value}
-                onClick={() => onSetResponse({ intensity: opt.value })}
+                onClick={() => onSetResponse({ ...r, intensity: opt.value })}
               />
             ))}
           </div>
@@ -267,6 +307,52 @@ function ItemStep({ instrument, index, response, onSetResponse, onNext, onBack }
         <div style={{ flex: 1 }} />
         <Button variant="primary" onClick={onNext} disabled={!canAdvance}>
           {index < total - 1 ? "Next" : "See what's running"}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+/* Capacity four-point item (SRIS + later ERQ/MAIA-2/IRI). One single-select
+   rating per item; stores a scalar 0..3 (replace semantics). */
+function CapacityItem({ instrument, index, value, onSetValue, onNext, onBack }) {
+  const item = instrument.items[index];
+  const total = instrument.items.length;
+  const canAdvance = value != null;
+
+  return (
+    <>
+      <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-24)" }}>
+        {index + 1} / {total}
+      </MonoLabel>
+
+      <p style={{ fontFamily: "var(--sf-font-serif)", fontSize: "20px", lineHeight: 1.45, color: "var(--sf-text-primary)", margin: "0 0 var(--sf-space-32)" }}>
+        {item.text}
+      </p>
+
+      <MonoLabel size="xs" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
+        {instrument.response.prompt}
+      </MonoLabel>
+      <div style={{ marginBottom: "var(--sf-space-24)" }}>
+        {instrument.response.options.map((opt) => (
+          <OptionButton
+            key={opt.value}
+            label={opt.label}
+            selected={value === opt.value}
+            onClick={() => onSetValue(opt.value)}
+          />
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: "var(--sf-space-12)", alignItems: "center", marginTop: "var(--sf-space-16)" }}>
+        {index > 0 && (
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            Back
+          </Button>
+        )}
+        <div style={{ flex: 1 }} />
+        <Button variant="primary" onClick={onNext} disabled={!canAdvance}>
+          {index < total - 1 ? "Next" : "See where it sits"}
         </Button>
       </div>
     </>
@@ -308,8 +394,11 @@ function OptionButton({ label, selected, onClick }) {
 /* ───────────────────────────────────────────────────────────────────────── */
 
 function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMarkLived, onDone }) {
-  // Reuse seam: only the pattern-work dysfunction frame is built (the surface
-  // CD-Quest feeds). Capacities/profile frames build with their instruments.
+  // Capacities surface — the growth-mirror frame (SRIS + later ERQ/MAIA-2/IRI).
+  if (instrument.surface === "capacities") {
+    return <CapacityResult instrument={instrument} result={result} onDone={onDone} />;
+  }
+  // Reuse seam: only the pattern-work dysfunction frame is built beyond that.
   if (instrument.surface !== "pattern-work") {
     throw new Error(
       `InstrumentRunner: unsupported result surface "${instrument.surface}"`
@@ -401,6 +490,35 @@ function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMark
         </p>
       )}
 
+      <div style={{ marginTop: "var(--sf-space-32)" }}>
+        <Button variant="secondary" fullWidth onClick={onDone}>
+          Done
+        </Button>
+      </div>
+    </>
+  );
+}
+
+/* CapacityResult — the growth-mirror frame. Relationship-first per SRIS spec
+   §5–6: shows the RELATIONSHIP reading, never two standalone high/low scores
+   (the documented #1 risk). No numbers, no grade; the path forward is the
+   practice itself. The per-factor levels live in the recorded result (for the
+   mirror + AI context) but are deliberately not shown as a scorecard here. */
+function CapacityResult({ instrument, result, onDone }) {
+  const reading = result.reading || {};
+  return (
+    <>
+      <EditorialBlock
+        label={`${instrument.name} · where it sits`}
+        headline={reading.title || "Where it sits"}
+        headlineSize="md"
+        body={reading.body || ""}
+        rule
+      />
+      <p style={{ ...gentleBodyStyle, marginTop: "var(--sf-space-24)" }}>
+        No score, no grade — this is a starting line. Take it again down the road and the shift is
+        the data; it shows up in your growth mirror.
+      </p>
       <div style={{ marginTop: "var(--sf-space-32)" }}>
         <Button variant="secondary" fullWidth onClick={onDone}>
           Done

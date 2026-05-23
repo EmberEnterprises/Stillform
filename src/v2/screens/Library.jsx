@@ -3,6 +3,7 @@ import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import InstrumentRunner from "./InstrumentRunner.jsx";
 import CDQUEST, { score as cdquestScore } from "../lib/instruments/cdquest.js";
+import SRIS, { score as srisScore } from "../lib/instruments/sris.js";
 
 /**
  * Library — the curated-knowledge surface, reached from the Home footer.
@@ -29,6 +30,7 @@ import CDQUEST, { score as cdquestScore } from "../lib/instruments/cdquest.js";
  */
 const INSTRUMENTS = [
   { id: "cdquest", instrument: CDQUEST, scoreFn: cdquestScore },
+  { id: "sris", instrument: SRIS, scoreFn: srisScore },
 ];
 
 export default function Library({ onExit }) {
