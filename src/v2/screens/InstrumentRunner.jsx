@@ -194,7 +194,10 @@ function ItemStep({ instrument, index, response, onSetResponse, onNext, onBack }
       />
     );
   }
-  if (model === "capacity-likert-4") {
+  // capacity-likert-4 (capacities) and single-select-4 (MCQ-30 pattern-work)
+  // share the same single 4-point renderer; they differ only in scale labels,
+  // which the renderer reads from the instrument/item.
+  if (model === "capacity-likert-4" || model === "single-select-4") {
     return (
       <CapacityItem
         instrument={instrument}
@@ -313,12 +316,17 @@ function TwoPartItem({ instrument, index, response, onSetResponse, onNext, onBac
   );
 }
 
-/* Capacity four-point item (SRIS + later ERQ/MAIA-2/IRI). One single-select
-   rating per item; stores a scalar 0..3 (replace semantics). */
+/* Single 4-point item, single-select (capacities: SRIS/ERQ/MAIA-2/IRI; and
+   MCQ-30 pattern-work). Stores one value per item (replace semantics). Options
+   and prompt come from the item when it overrides them (e.g. MCQ-30's CSC
+   direction scale), else from the instrument default. */
 function CapacityItem({ instrument, index, value, onSetValue, onNext, onBack }) {
   const item = instrument.items[index];
   const total = instrument.items.length;
   const canAdvance = value != null;
+  const opts = item.options || instrument.response.options;
+  const prompt = item.prompt !== undefined ? item.prompt : instrument.response.prompt;
+  const finishLabel = instrument.finishLabel || "See where it sits";
 
   return (
     <>
@@ -330,11 +338,13 @@ function CapacityItem({ instrument, index, value, onSetValue, onNext, onBack }) 
         {item.text}
       </p>
 
-      <MonoLabel size="xs" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
-        {instrument.response.prompt}
-      </MonoLabel>
+      {prompt ? (
+        <MonoLabel size="xs" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
+          {prompt}
+        </MonoLabel>
+      ) : null}
       <div style={{ marginBottom: "var(--sf-space-24)" }}>
-        {instrument.response.options.map((opt) => (
+        {opts.map((opt) => (
           <OptionButton
             key={opt.value}
             label={opt.label}
@@ -352,7 +362,7 @@ function CapacityItem({ instrument, index, value, onSetValue, onNext, onBack }) 
         )}
         <div style={{ flex: 1 }} />
         <Button variant="primary" onClick={onNext} disabled={!canAdvance}>
-          {index < total - 1 ? "Next" : "See where it sits"}
+          {index < total - 1 ? "Next" : finishLabel}
         </Button>
       </div>
     </>
@@ -415,13 +425,27 @@ function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMark
 
   const nothingRunning = proposed.length === 0 && light.length === 0 && reclaimed.length === 0;
 
+  // Framing copy is configurable per instrument — CD-Quest's weekly-distortion
+  // copy is the default; MCQ-30 supplies belief-inventory copy. Per-chip rows
+  // use each chip's own definition, so only the section framing varies.
+  const rc = instrument.resultCopy || {};
+  const headline = rc.headline || "Here's what showed up";
+  const introBody =
+    rc.body ||
+    "No scores, no verdict — just the shapes your thinking took this week, and what you can do with each one. Add the ones that ring true to your watch list; leave the rest.";
+  const sectionLabel = rc.sectionLabel || "Showed up this week";
+  const nothingCopy =
+    rc.nothing ||
+    "Nothing ran with much grip this week. This isn't a clean bill — it just reports what's running, and right now it's quiet. The map's here whenever a pattern shows up.";
+  const notes = Array.isArray(result.notes) ? result.notes : [];
+
   return (
     <>
       <EditorialBlock
         label={`${instrument.name} · what's running`}
-        headline="Here's what showed up"
+        headline={headline}
         headlineSize="md"
-        body="No scores, no verdict — just the shapes your thinking took this week, and what you can do with each one. Add the ones that ring true to your watch list; leave the rest."
+        body={introBody}
         rule
       />
 
@@ -429,7 +453,7 @@ function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMark
       {proposed.length > 0 && (
         <div style={{ marginTop: "var(--sf-space-32)" }}>
           <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
-            Showed up this week
+            {sectionLabel}
           </MonoLabel>
           {proposed.map((chip) => (
             <ProposedRow
@@ -485,9 +509,24 @@ function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMark
       {/* All quiet — honest, not a clean bill */}
       {nothingRunning && (
         <p style={{ ...gentleBodyStyle, marginTop: "var(--sf-space-32)" }}>
-          Nothing ran with much grip this week. This isn't a clean bill — it just reports what's
-          running, and right now it's quiet. The map's here whenever a pattern shows up.
+          {nothingCopy}
         </p>
+      )}
+
+      {/* Quality read (e.g. MCQ-30's CSC) — an observation, never a chip. */}
+      {notes.length > 0 && (
+        <div style={{ marginTop: "var(--sf-space-32)" }}>
+          {notes.map((note, i) => (
+            <div key={i} style={{ marginBottom: "var(--sf-space-24)" }}>
+              {note.title && (
+                <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+                  {note.title}
+                </MonoLabel>
+              )}
+              <p style={gentleBodyStyle}>{note.body}</p>
+            </div>
+          ))}
+        </div>
       )}
 
       <div style={{ marginTop: "var(--sf-space-32)" }}>
