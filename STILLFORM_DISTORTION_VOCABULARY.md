@@ -56,7 +56,7 @@ The distortion strand is one of two pattern-work strands. Keep these distinct:
 
 ## WHERE THIS IS USED + ALIGNMENT NOTES
 
-- **reframe.js (build-time alignment, with Arlin's go):** the in-session pattern-handling guidance already uses loop-voice for #2, #5, #8, #13, #15. At Bias Profile build, extend to the full 15 using the phrasing seeds above, and align the free-form `distortion` output field to emit the canonical clinical-spine name (machine-side, for chip mapping) while the user-facing `reframe` text stays loop-voice. Distortion field = spine name (internal); user never sees the clinical label as a verdict.
+- **reframe.js — ✅ ALIGNED to this list (May 23, 2026, `c982ffb`; Step 6b):** a shared `DISTORTION_VOCABULARY` contextPart now carries all 15 (loop-voice seeds toward the user, extended from the original #2/#5/#8/#13/#15), and the `distortion` output field emits the canonical clinical-spine name (machine-side, for chip mapping) while the user-facing `reframe` text stays loop-voice. Distortion field = spine name (internal); user never sees the clinical label as a verdict.
 - **CD-Quest Workshop adaptation:** the 15 above are the items. Original Stillform-voiced item text (never CD-Quest verbatim). Teach-recognize register may name the clinical spine as psychoeducation. Preserve CD-Quest's intensity rating = the precision self-report (per catalog brief #2).
 - **Pattern-work chips:** chip label = the Stillform loop-name; chip maps internally to the clinical spine; chip definition can teach the recognizable name. Five metacognitive-belief chips (MCQ-30) + these distortion chips populate the pattern-work strand together.
 
