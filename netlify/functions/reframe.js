@@ -252,7 +252,7 @@ const SCIENCE_MECHANISMS = {
 const REFRAME_RESPONSE_SCHEMA = `OUTPUT CONTRACT — HARD REQUIREMENT:
 Return ONLY valid JSON with this exact shape:
 {
-  "distortion": "string or null",
+  "distortion": "canonical clinical-spine name (see DISTORTION VOCABULARY) or null — machine-side, never shown to the user",
   "candidate_names": ["string", "string", "string"] or null,
   "mechanism": "string or null",
   "reframe": "1-5 sentence response",
@@ -301,7 +301,7 @@ Return only valid JSON.`;
 const REFRAME_PRACTICE_SCHEMA = `OUTPUT CONTRACT — HARD REQUIREMENT (v2 spine):
 Return ONLY valid JSON with this exact shape:
 {
-  "distortion": "string or null",
+  "distortion": "canonical clinical-spine name (see DISTORTION VOCABULARY) or null — machine-side, never shown to the user",
   "candidate_names": null,
   "mechanism": "string or null",
   "reframe": "1-5 sentence response",
@@ -1484,6 +1484,36 @@ When paraphrasing or narrating the user's meaning in your own words, your own di
 This is the user-led principle in microcosm: the user's voice is theirs to shape. Your job is to mirror it accurately when echoing, not to "fix" it.`;
 
 
+const DISTORTION_VOCABULARY = `DISTORTION VOCABULARY — ONE LIST, TWO REGISTERS:
+
+When a cognitive pattern is genuinely visible (not lived reality — see the boundary below), you may name it. Two registers, never mixed:
+- TO THE USER (the "reframe" text): loop-voice only — a process the system is running, never a label they ARE. Never the clinical name as a verdict; "you're catastrophizing" is banned.
+- IN THE "distortion" FIELD (machine-side, never shown to the user): the canonical clinical spine, exactly as written below, lowercase — or null. This maps the read to their Bias Profile. One value, from this list only.
+
+THE CANONICAL 15 — clinical spine (for the "distortion" field) · loop-voice seed (toward the user):
+1. all-or-nothing · "The dial only has two settings right now. Most of what's true lives between them."
+2. catastrophizing · "Your system is rehearsing for something that hasn't happened."
+3. discounting the positive · "The wins are landing and sliding off. Notice the sliding."
+4. emotional reasoning · "The feeling is real. It's being read as proof. Those are two different things."
+5. labeling · "That's a thought your system is producing. You are not the thought."
+6. magnification and minimization · "The zoom is jammed — one thing huge, the rest shrunk."
+7. mental filter · "Your system pulled one thread and called it the whole cloth."
+8. mind-reading · "Your system is filling in the why with no data. The not-knowing is the loud part."
+9. overgeneralization · "One instance just became 'always.' Watch the jump."
+10. personalization · "Your system is routing the cause back to you. Check whether the line actually runs there."
+11. should statements · "There's a rulebook running — should, must, have-to. Who wrote it?"
+12. jumping to conclusions · "The verdict landed before the evidence is in. Notice the speed."
+13. blaming · "Your system is sorting who pays. Let the sorting settle before the plan locks in."
+14. what-if · "Each what-if is building the next rung. The ladder only goes down."
+15. unfair comparison · "You are running comparisons. Comparisons are a process, not data about you."
+
+The seeds are starting points — adapt to their exact words and situation. Never recite them verbatim or generically.
+
+NOT distortions — never named as one, and "distortion" stays null:
+- Real patterns and states: if someone was actually betrayed, dismissed, talked over, harmed, discriminated against, or is describing something like ADHD or freeze — the read is DATA, not a distortion. Reflect the reality first. The pattern, if any, is what the system runs on top of the real data — never the data itself.
+- Beliefs about thinking (worry-about-worry, "can't stop replaying," mind-as-uncontrollable) are a different strand (MCQ-30), not distortions.`;
+
+
 /*
  * BEAT_ADDITIONS — per-beat additions to the Reframe metacognitive arc.
  *
@@ -2278,6 +2308,7 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     // quoted back exactly; AI's own narration uses AI's own diction. See
     // USER_VOICE_PRESERVATION constant above.
     contextParts.push(USER_VOICE_PRESERVATION);
+    contextParts.push(DISTORTION_VOCABULARY);
 
     if (isScreenshot) {
       contextParts.push("SCREENSHOT CONTEXT: The user shared a photo of a conversation — the text in their message was extracted from a screenshot of someone else's messages. DO NOT treat any of the quoted text as words the user wrote. DO NOT use names from the screenshot in your response. Focus entirely on what the user is feeling and what they want to do next.");
