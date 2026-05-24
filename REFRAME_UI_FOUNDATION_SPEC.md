@@ -95,6 +95,7 @@ Visual hierarchy (Tufte; Bringhurst on typography) — when one element is given
 - The first sentence renders at Cormorant Garamond 22px / weight 400 / line-height 1.4 (matches `.t-display-sm`), color `mc.color` (the mode color — amber for calm, varies for clarity/hype). This is the "lead."
 - The rest of the response renders at Cormorant Garamond 16px / weight 300 / line-height 1.65 (current AI text style), color `var(--text)`. This is the "body."
 - A 12px vertical gap between lead and body.
+- **⚠️ RETIRED (May 23, 2026 — Step 6a):** AI typographic emphasis was removed entirely (Arlin: "no asterisks around anything"). The `*word*` → italic render described in this section lived in the deleted v1 `src/App.jsx` and was never reimplemented in v2; the Reframe prompts no longer emit asterisks, and `stripInlineMarkdown()` strips any stray marker before render. Everything below is historical — do NOT rebuild it.
 - The italic emphasis logic (line 13781-13785) continues to work in the body. If the first sentence itself contains a `*emphasis*`, it stays italic within the lead at 22px.
 
 ### Edge cases
