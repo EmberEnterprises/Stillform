@@ -2,6 +2,33 @@ import React, { useState, useRef, useEffect } from "react";
 import EditorialBlock from "../../components/EditorialBlock.jsx";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
+import InfoModal from "../../components/InfoModal.jsx";
+import { getChipDefinition } from "../../lib/chipDefinitions.js";
+
+/** InfoDot — the quiet ⓘ affordance next to a chip label. Matches the
+ *  InstrumentRunner / BiasProfile treatment exactly; local copy per the
+ *  existing pattern (DRY extraction is a flagged future cleanup). */
+function InfoDot({ onClick, label }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`What is ${label}?`}
+      style={{
+        background: "transparent",
+        border: "none",
+        color: "var(--sf-text-faint)",
+        fontSize: "13px",
+        lineHeight: 1,
+        cursor: "pointer",
+        padding: "4px",
+        WebkitTapHighlightColor: "transparent",
+      }}
+    >
+      ⓘ
+    </button>
+  );
+}
 
 /**
  * Notice — the first step of the spine.
@@ -61,6 +88,7 @@ export default function Notice({ config, onContinue, onExit }) {
 
   const [text, setText] = useState("");
   const [selectedChip, setSelectedChip] = useState(null);
+  const [infoChip, setInfoChip] = useState(null);
   const textareaRef = useRef(null);
 
   // Focus the textarea on mount — the practice starts when the user can write.
@@ -154,19 +182,28 @@ export default function Notice({ config, onContinue, onExit }) {
           </MonoLabel>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
             {chips.map((chip) => (
-              <button
-                key={chip.id}
-                type="button"
-                className="sf-chip"
-                aria-selected={selectedChip === chip.id ? "true" : "false"}
-                onClick={() => handleChipTap(chip.id, chip.label)}
-              >
-                {chip.label}
-              </button>
+              <span key={chip.id} style={{ display: "inline-flex", alignItems: "center" }}>
+                <button
+                  type="button"
+                  className="sf-chip"
+                  aria-selected={selectedChip === chip.id ? "true" : "false"}
+                  onClick={() => handleChipTap(chip.id, chip.label)}
+                >
+                  {chip.label}
+                </button>
+                <InfoDot onClick={() => setInfoChip(chip)} label={chip.label} />
+              </span>
             ))}
           </div>
         </div>
       ) : null}
+
+      <InfoModal
+        open={!!infoChip}
+        title={infoChip?.label}
+        body={infoChip ? getChipDefinition(infoChip.id) : ""}
+        onClose={() => setInfoChip(null)}
+      />
 
       <div
         className="sf-fade-enter sf-fade-enter--delay-3"
