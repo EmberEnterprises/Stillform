@@ -10,6 +10,7 @@ import TriggerProfile from "./screens/TriggerProfile.jsx";
 import BiasProfile from "./screens/BiasProfile.jsx";
 import CapacitiesMirror from "./screens/CapacitiesMirror.jsx";
 import RiskProfileMirror from "./screens/RiskProfileMirror.jsx";
+import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
 import Library from "./screens/Library.jsx";
 
 /**
@@ -73,6 +74,7 @@ export default function AppV2() {
             else if (target === "bias-profile") setScreen("bias-profile");
             else if (target === "capacities-mirror") setScreen("capacities-mirror");
             else if (target === "risk-profile") setScreen("risk-profile");
+            else if (target === "prediction-mirror") setScreen("prediction-mirror");
           }}
         />
       </div>
@@ -118,6 +120,14 @@ export default function AppV2() {
     return (
       <div className="sf-v2">
         <RiskProfileMirror onExit={() => setScreen("my-progress")} />
+      </div>
+    );
+  }
+
+  if (screen === "prediction-mirror") {
+    return (
+      <div className="sf-v2">
+        <PredictionErrorMirror onExit={() => setScreen("my-progress")} />
       </div>
     );
   }

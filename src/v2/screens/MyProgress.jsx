@@ -111,6 +111,12 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="Where you take risk and where you hold back, across the parts of a life — a value-neutral picture of your shape, nothing to fix."
           onTap={() => handleNavigate("risk-profile")}
         />
+
+        <ProgressEntry
+          title="What Didn't Come True"
+          description="What you were sure would go wrong that didn't — the disconfirmations your mind otherwise forgets to count."
+          onTap={() => handleNavigate("prediction-mirror")}
+        />
       </section>
     </main>
   );
