@@ -105,6 +105,12 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="The four capacities Stillform trains — Sense, Settle, Seeing yourself, Seeing others — reflected back as you do the work."
           onTap={() => handleNavigate("capacities-mirror")}
         />
+
+        <ProgressEntry
+          title="Where You Lean"
+          description="Where you take risk and where you hold back, across the parts of a life — a value-neutral picture of your shape, nothing to fix."
+          onTap={() => handleNavigate("risk-profile")}
+        />
       </section>
     </main>
   );
