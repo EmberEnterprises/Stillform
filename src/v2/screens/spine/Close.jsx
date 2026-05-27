@@ -4,6 +4,7 @@ import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
 import BreathingSession from "../../components/BreathingSession.jsx";
 import { getSessionCount } from "../../lib/sessions.js";
+import { recordPredictionError } from "../../lib/predictionErrors.js";
 
 /**
  * Close — the closing step of the spine.
@@ -61,6 +62,9 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
   const textareaRef = useRef(null);
   const microCreditFiredRef = useRef(false);
   const breathingOfferShownRef = useRef(false);
+  // EOD-only: optional prediction-error catch (Precision Framework §4/§5 #1).
+  const [peText, setPeText] = useState("");
+  const [peMarked, setPeMarked] = useState(false);
 
   // Phase 4 #6: micro-credit derivation. Read current session count ONCE
   // at mount — the count reflects sessions completed BEFORE this one
@@ -120,6 +124,20 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
         /* setSelectionRange isn't always supported */
       }
     });
+  };
+
+  // EOD-only: mark a disconfirmation to the prediction-error log. Optional —
+  // never gates closing the day. The act of logging the "didn't come true" is
+  // itself the intervention (framework §4 — the most-missed update signal).
+  const handleMarkPredictionError = () => {
+    const t = peText.trim();
+    if (!t) return;
+    if (recordPredictionError({ text: t })) {
+      setPeMarked(true);
+      try {
+        window.plausible?.("Prediction Error Marked", { props: { beat: beat || "unknown" } });
+      } catch { /* analytics non-fatal */ }
+    }
   };
 
   // Phase 4 #7: primary action depends on whether breathing is offered.
@@ -271,6 +289,44 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
           >
             ↩ Anchor on what surfaced
           </button>
+        </div>
+      ) : null}
+
+      {beat === "eod" ? (
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-2"
+          style={{ marginTop: "var(--sf-space-32)" }}
+        >
+          {peMarked ? (
+            <MonoLabel size="xs" tone="faint" style={{ display: "block" }}>
+              Marked — the kind of thing the mind forgets to count.
+            </MonoLabel>
+          ) : (
+            <>
+              <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
+                Optional — anything you were braced for today that didn't happen?
+              </MonoLabel>
+              <textarea
+                className="sf-textarea"
+                value={peText}
+                onChange={(e) => setPeText(e.target.value)}
+                placeholder="What you expected that didn't come…"
+                rows={2}
+                aria-label="Mark something you were braced for that didn't happen"
+              />
+              <div style={{ marginTop: "var(--sf-space-12)" }}>
+                <button
+                  type="button"
+                  onClick={handleMarkPredictionError}
+                  disabled={!peText.trim()}
+                  className="sf-link-quiet"
+                  style={!peText.trim() ? { opacity: 0.4, cursor: "default" } : undefined}
+                >
+                  Mark it ›
+                </button>
+              </div>
+            </>
+          )}
         </div>
       ) : null}
 
