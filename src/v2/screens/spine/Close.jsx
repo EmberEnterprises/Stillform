@@ -5,6 +5,7 @@ import MonoLabel from "../../components/MonoLabel.jsx";
 import BreathingSession from "../../components/BreathingSession.jsx";
 import { getSessionCount } from "../../lib/sessions.js";
 import { recordPredictionError } from "../../lib/predictionErrors.js";
+import { getPendingPredictions, recordOutcome } from "../../lib/predictionLog.js";
 
 /**
  * Close — the closing step of the spine.
@@ -65,6 +66,15 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
   // EOD-only: optional prediction-error catch (Precision Framework §4/§5 #1).
   const [peText, setPeText] = useState("");
   const [peMarked, setPeMarked] = useState(false);
+  // EOD-only: outcome capture for previously-logged predictions
+  // (Precision Framework §5 #2 — What You Bet On). Lazy-init at mount —
+  // the pending list reflects what was logged earlier today + prior days.
+  // Outcome text tracked per-id; on successful recordOutcome the entry
+  // is removed from the local pending list (re-fetch unnecessary).
+  const [pendingPredictions, setPendingPredictions] = useState(() => {
+    try { return getPendingPredictions(); } catch { return []; }
+  });
+  const [outcomeTexts, setOutcomeTexts] = useState({});
 
   // Phase 4 #6: micro-credit derivation. Read current session count ONCE
   // at mount — the count reflects sessions completed BEFORE this one
@@ -138,6 +148,45 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
         window.plausible?.("Prediction Error Marked", { props: { beat: beat || "unknown" } });
       } catch { /* analytics non-fatal */ }
     }
+  };
+
+  // EOD-only: mark outcome for a pending prediction (Precision Framework §5 #2).
+  // Outcome is free text (user's own words) — the gap between stated confidence
+  // and what actually happened IS the data, per framework. Removes entry from
+  // local pending list on success; clears its outcome text. Fail-silent on
+  // storage error (recordOutcome returns null and we stay in the pending state).
+  const handleMarkOutcome = (id) => {
+    const t = (outcomeTexts[id] || "").trim();
+    if (!t) return;
+    const updated = recordOutcome(id, { outcome: t });
+    if (updated) {
+      setPendingPredictions((prev) => prev.filter((p) => p.id !== id));
+      setOutcomeTexts((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      try {
+        window.plausible?.("Prediction Outcome Marked", { props: { beat: beat || "unknown" } });
+      } catch { /* analytics non-fatal */ }
+    }
+  };
+
+  // Plain-language relative-date helper for pending predictions. Falls back
+  // to empty string on any parse failure — display layer should handle "".
+  const relativeDays = (iso) => {
+    if (!iso) return "";
+    try {
+      const then = new Date(iso);
+      const now = new Date();
+      const thenDay = new Date(then.getFullYear(), then.getMonth(), then.getDate()).getTime();
+      const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const diffDays = Math.round((nowDay - thenDay) / msPerDay);
+      if (diffDays <= 0) return "earlier today";
+      if (diffDays === 1) return "yesterday";
+      return `${diffDays} days ago`;
+    } catch { return ""; }
   };
 
   // Phase 4 #7: primary action depends on whether breathing is offered.
@@ -327,6 +376,77 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
               </div>
             </>
           )}
+        </div>
+      ) : null}
+
+      {beat === "eod" && pendingPredictions.length > 0 ? (
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-2"
+          style={{ marginTop: "var(--sf-space-32)" }}
+        >
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
+            Pending — what happened?
+          </MonoLabel>
+          {pendingPredictions.map((p) => {
+            const oText = outcomeTexts[p.id] || "";
+            const canMark = oText.trim().length > 0;
+            return (
+              <div
+                key={p.id}
+                style={{
+                  marginBottom: "var(--sf-space-24)",
+                  paddingBottom: "var(--sf-space-16)",
+                  borderBottom: "1px solid var(--sf-hairline)",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: "var(--sf-text-quiet)",
+                    fontFamily: "var(--sf-font-sans)",
+                    fontSize: "13px",
+                    lineHeight: 1.55,
+                    fontStyle: "italic",
+                  }}
+                >
+                  &ldquo;{p.text}&rdquo;
+                </p>
+                <p
+                  style={{
+                    margin: "var(--sf-space-4) 0 var(--sf-space-12) 0",
+                    color: "var(--sf-text-quiet)",
+                    fontFamily: "var(--sf-font-sans)",
+                    fontSize: "12px",
+                    lineHeight: 1.55,
+                    opacity: 0.7,
+                  }}
+                >
+                  You were {p.confidence}% sure — {relativeDays(p.loggedAt)}
+                </p>
+                <textarea
+                  className="sf-textarea"
+                  value={oText}
+                  onChange={(e) =>
+                    setOutcomeTexts((prev) => ({ ...prev, [p.id]: e.target.value }))
+                  }
+                  placeholder="What actually happened…"
+                  rows={2}
+                  aria-label={`Mark outcome for the prediction "${p.text}"`}
+                />
+                <div style={{ marginTop: "var(--sf-space-8)" }}>
+                  <button
+                    type="button"
+                    onClick={() => handleMarkOutcome(p.id)}
+                    disabled={!canMark}
+                    className="sf-link-quiet"
+                    style={!canMark ? { opacity: 0.4, cursor: "default" } : undefined}
+                  >
+                    Mark outcome ›
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : null}
 
