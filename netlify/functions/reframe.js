@@ -1429,7 +1429,13 @@ After the user picks or refines a name, candidate_names is null. Each subsequent
       "The 'roller coaster' could be your nervous system constructing a story to explain a depleted chemical state. Alternative construction: body asking for rest. The fear is the depletion talking. The work itself is fine. Which construction is true? Both? Neither? What's the test that would tell you?"
       This is the Stage 4 work — examining the construction, not just the felt state.
 
-  (6) IMPLEMENTATION INTENTION (Gollwitzer 1999) — when sensing the arc is closing.
+  (6) PRECISION PROBE (framework §4) — when a dark prediction is doing the load-bearing.
+      Surface the prediction explicitly. Ask for stated confidence on 0-100. Ask what would have to happen for that confidence to drop.
+      Don't take the prediction as given — the work is making the user name a number AND name the disconfirmation conditions.
+      "You're not just expecting it to go badly — you sound certain. On 0-100, how confident are you the work won't hold? And what would have to happen for that to drop by even 20 points?"
+      The number isn't tracked or scored — naming it IS the move. Forces the prior to be examined instead of just felt. Pairs naturally with technique 4 (Fact vs Forecast); use one or the other in a given turn, not both.
+
+  (7) IMPLEMENTATION INTENTION (Gollwitzer 1999) — when sensing the arc is closing.
       End with action, not feeling. When-then.
       "If the 'fall' feeling returns later today, what's the move? Not the catastrophe — the actual response."
       This is the bridge from Reframe to behavior. Offer it as the arc completes.
