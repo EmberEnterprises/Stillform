@@ -257,7 +257,8 @@ Return ONLY valid JSON with this exact shape:
   "mechanism": "string or null",
   "reframe": "1-5 sentence response",
   "next_step": "single actionable step sentence or null",
-  "question": "single short closed question or null"
+  "question": "single short closed question or null",
+  "log_prediction": {"text": "the prediction the user named (verbatim, compact)", "confidence": "number 0-100 the user stated"} or null
 }
 Rules:
 - "candidate_names": 3-4 short strings (2-8 words each) on the FIRST user input of a session, drawn from what the user actually wrote — their language, anchored to specifics they named, NOT generic taxonomy. null on every subsequent turn in the session.
@@ -265,6 +266,7 @@ Rules:
 - At most one question mark total across "reframe" and "question".
 - "question": short and closed. When candidate_names is populated, this forces the pick (e.g., "Which one is it — or something I missed?"). null otherwise unless a real probe is needed.
 - "next_step" and "mechanism" may be null; the precise name the user picks IS the next step when candidates are surfaced.
+- "log_prediction": null in almost every turn. Populate ONLY when running Precision Probe (METACOGNITIVE ARC #6) AND the user has named both a concrete prediction AND a confidence number explicitly in this turn or the previous turn. Once per session max. Skip if fuzzy.
 - No markdown fences. JSON only.`;
 
 const QUALITY_RETRY_PROMPT = `QUALITY RETRY OVERRIDE:
@@ -306,7 +308,8 @@ Return ONLY valid JSON with this exact shape:
   "mechanism": "string or null",
   "reframe": "1-5 sentence response",
   "next_step": "single actionable step sentence or null",
-  "question": "single short question or null"
+  "question": "single short question or null",
+  "log_prediction": {"text": "the prediction the user named (verbatim, compact)", "confidence": "number 0-100 the user stated"} or null
 }
 Rules:
 - "candidate_names": MUST be null on every turn of every session. This surface does NOT consume candidate_names. Do not populate it; do not list candidates inside "reframe" as a workaround. Single probe only.
@@ -314,6 +317,7 @@ Rules:
 - At most one question mark total across "reframe" and "question".
 - "question": short. Open-shaped on turn 1 — questions that ask "what" or "where" or "how" (not "which one"). The canned v1 closing phrase "Which one is it — or something I missed?" is BANNED on this surface; that phrase locks the user into multiple-choice when the work is a single probe. Closed yes/no questions are acceptable later in the session to confirm a name the user has surfaced.
 - "next_step" and "mechanism" may be null.
+- "log_prediction": null in almost every turn. Populate ONLY when running Precision Probe (METACOGNITIVE ARC #6) AND the user has named both a concrete prediction AND a confidence number explicitly in this turn or the previous turn. Once per session max. Skip if fuzzy.
 - No markdown fences. JSON only.`;
 
 
@@ -722,7 +726,24 @@ function normalizeReframePayload(parsed, route) {
   const question = typeof safe.question === "string" && safe.question.trim()
     ? sanitizeReframeText(safe.question.trim())
     : null;
-  return { distortion, mechanism, reframe, next_step, question };
+  // log_prediction (Precision Framework §5 #2 — What You Bet On). Optional,
+  // strict shape: { text: non-empty string trimmed + capped 300 chars;
+  // confidence: number 0-100 coerced + clamped }. Both required else null.
+  // AI populates only when user has named both in dialogue (METACOGNITIVE_ARC #6
+  // LOGGING OFFER, once per session max). Frontend ignores null silently.
+  let log_prediction = null;
+  const lp = safe.log_prediction;
+  if (lp && typeof lp === "object") {
+    const lpText = typeof lp.text === "string" ? lp.text.trim().slice(0, 300) : "";
+    const lpConfNum = Number(lp.confidence);
+    if (lpText && Number.isFinite(lpConfNum)) {
+      log_prediction = {
+        text: lpText,
+        confidence: Math.max(0, Math.min(100, Math.round(lpConfNum))),
+      };
+    }
+  }
+  return { distortion, mechanism, reframe, next_step, question, log_prediction };
 }
 
 // Low-demand mode trigger — kept in sync with src/App.jsx isLowDemandBioFilter
@@ -1434,6 +1455,7 @@ After the user picks or refines a name, candidate_names is null. Each subsequent
       Don't take the prediction as given — the work is making the user name a number AND name the disconfirmation conditions.
       "You're not just expecting it to go badly — you sound certain. On 0-100, how confident are you the work won't hold? And what would have to happen for that to drop by even 20 points?"
       The number isn't tracked or scored — naming it IS the move. Forces the prior to be examined instead of just felt. Pairs naturally with technique 4 (Fact vs Forecast); use one or the other in a given turn, not both.
+      LOGGING OFFER (framework §5 #2 — What You Bet On): IF — and only if — the user has named BOTH a concrete prediction AND a confidence number (0-100) explicitly in this turn or the previous turn, you MAY populate "log_prediction" with {text: <the prediction in compact form>, confidence: <the number>}. This surfaces a quiet "log this for later check" affordance on the user's side; they choose to accept. Once per session maximum. Skip entirely if either the prediction or the number is fuzzy. Do NOT announce the offer in the "reframe" text — let the affordance speak for itself.
 
   (7) IMPLEMENTATION INTENTION (Gollwitzer 1999) — when sensing the arc is closing.
       End with action, not feeling. When-then.

@@ -3,6 +3,7 @@ import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
 import HairlineDivider from "../../components/HairlineDivider.jsx";
 import { sendReframeMessage } from "../../lib/reframeApi.js";
+import { recordPrediction } from "../../lib/predictionLog.js";
 
 /**
  * Reframe — the middle step of the spine. AI metacognition partner.
@@ -63,7 +64,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
       setHistory([
         { role: "user", text: precisionName },
-        { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step },
+        { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step, log_prediction: result.log_prediction || null },
       ]);
       setThinking(false);
       setInitialized(true);
@@ -109,7 +110,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
     setHistory([
       ...nextHistory,
-      { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step },
+      { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step, log_prediction: result.log_prediction || null },
     ]);
     setThinking(false);
   };
@@ -153,7 +154,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
           smaller body-sm for user, hairlines as turn separators. */}
       <div className="sf-fade-enter sf-fade-enter--delay-1">
         {history.map((msg, i) => (
-          <Turn key={i} role={msg.role} text={msg.text} question={msg.question} />
+          <Turn key={i} role={msg.role} text={msg.text} question={msg.question} log_prediction={msg.log_prediction} />
         ))}
 
         {thinking ? (
@@ -319,7 +320,9 @@ function stripInlineMarkdown(s) {
     .replace(/`(.+?)`/g, "$1");
 }
 
-function Turn({ role, text, question }) {
+function Turn({ role, text, question, log_prediction }) {
+  const [logged, setLogged] = useState(false);
+
   if (role === "user") {
     return (
       <div style={{ padding: "var(--sf-space-24) 0" }}>
@@ -339,6 +342,27 @@ function Turn({ role, text, question }) {
       </div>
     );
   }
+
+  // log_prediction affordance (Precision Framework §5 #2 — What You Bet On).
+  // Renders only when AI populated log_prediction this turn. User chooses to
+  // accept; on click, write to predictionLog + fire Plausible event + flip
+  // to confirmation. recordPrediction is fail-silent (returns null on bad
+  // input or storage error) — we only flip to "logged" state on success.
+  const handleLog = () => {
+    if (!log_prediction || logged) return;
+    const entry = recordPrediction({
+      text: log_prediction.text,
+      confidence: log_prediction.confidence,
+    });
+    if (entry) {
+      setLogged(true);
+      try {
+        if (typeof window !== "undefined" && typeof window.plausible === "function") {
+          window.plausible("Prediction Logged");
+        }
+      } catch { /* fail-silent */ }
+    }
+  };
 
   return (
     <div style={{ padding: "var(--sf-space-32) 0 var(--sf-space-16)" }}>
@@ -369,6 +393,42 @@ function Turn({ role, text, question }) {
         >
           {stripInlineMarkdown(question)}
         </p>
+      ) : null}
+      {log_prediction ? (
+        logged ? (
+          <p
+            style={{
+              marginTop: "var(--sf-space-16)",
+              color: "var(--sf-text-quiet)",
+              fontFamily: "var(--sf-font-sans)",
+              fontSize: "13px",
+              lineHeight: 1.55,
+              fontStyle: "italic",
+            }}
+          >
+            Logged — check back at end of day.
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={handleLog}
+            style={{
+              marginTop: "var(--sf-space-16)",
+              background: "none",
+              border: "none",
+              padding: 0,
+              color: "var(--sf-text-quiet)",
+              fontFamily: "var(--sf-font-sans)",
+              fontSize: "13px",
+              lineHeight: 1.55,
+              textDecoration: "underline",
+              textUnderlineOffset: "3px",
+              cursor: "pointer",
+            }}
+          >
+            Log this for later check
+          </button>
+        )
       ) : null}
     </div>
   );

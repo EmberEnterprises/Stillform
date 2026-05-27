@@ -70,7 +70,7 @@ export function routeMode(feelState, input = "") {
  *   Today's named thread entries (Phase 4 #4). Only EOD beat uses this
  *   — backend injects as context so AI can help user distill what
  *   landed across the day. Null/empty for non-EOD beats.
- * @returns {Promise<{reframe: string, question?: string, next_step?: string, error?: string, crisisDetected?: boolean}>}
+ * @returns {Promise<{reframe: string, question?: string, next_step?: string, log_prediction?: {text:string,confidence:number}|null, error?: string, crisisDetected?: boolean}>}
  */
 export async function sendReframeMessage({ input, history = [], feelState = null, beat = null, todayThread = null }) {
   const install_id = getOrCreateInstallId();
@@ -129,10 +129,23 @@ export async function sendReframeMessage({ input, history = [], feelState = null
       return { reframe: "", error: "Empty response. Try again." };
     }
 
+    // log_prediction (Precision Framework §5 #2 — What You Bet On). Server
+    // already shape-validated; defensive check before exposing to UI.
+    let logPrediction = null;
+    const lp = data && data.log_prediction;
+    if (
+      lp && typeof lp === "object" &&
+      typeof lp.text === "string" && lp.text.length > 0 &&
+      typeof lp.confidence === "number" && Number.isFinite(lp.confidence)
+    ) {
+      logPrediction = { text: lp.text, confidence: lp.confidence };
+    }
+
     return {
       reframe: text,
       question: data && typeof data.question === "string" ? data.question : undefined,
       next_step: data && typeof data.next_step === "string" ? data.next_step : undefined,
+      log_prediction: logPrediction,
       crisisDetected: !!(data && data.crisisDetected),
     };
   } catch (err) {
