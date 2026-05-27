@@ -117,6 +117,12 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="What you were sure would go wrong that didn't — the disconfirmations your mind otherwise forgets to count."
           onTap={() => handleNavigate("prediction-mirror")}
         />
+
+        <ProgressEntry
+          title="What You Bet On"
+          description="What you were sure of, next to what actually happened. The gap is the data."
+          onTap={() => handleNavigate("what-you-bet-on")}
+        />
       </section>
     </main>
   );

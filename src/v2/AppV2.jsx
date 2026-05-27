@@ -11,6 +11,7 @@ import BiasProfile from "./screens/BiasProfile.jsx";
 import CapacitiesMirror from "./screens/CapacitiesMirror.jsx";
 import RiskProfileMirror from "./screens/RiskProfileMirror.jsx";
 import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
+import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
 import Library from "./screens/Library.jsx";
 
 /**
@@ -75,6 +76,7 @@ export default function AppV2() {
             else if (target === "capacities-mirror") setScreen("capacities-mirror");
             else if (target === "risk-profile") setScreen("risk-profile");
             else if (target === "prediction-mirror") setScreen("prediction-mirror");
+            else if (target === "what-you-bet-on") setScreen("what-you-bet-on");
           }}
         />
       </div>
@@ -128,6 +130,14 @@ export default function AppV2() {
     return (
       <div className="sf-v2">
         <PredictionErrorMirror onExit={() => setScreen("my-progress")} />
+      </div>
+    );
+  }
+
+  if (screen === "what-you-bet-on") {
+    return (
+      <div className="sf-v2">
+        <WhatYouBetOnMirror onExit={() => setScreen("my-progress")} />
       </div>
     );
   }
