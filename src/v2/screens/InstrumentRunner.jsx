@@ -6,6 +6,7 @@ import InfoModal from "../components/InfoModal.jsx";
 import { addChipToWatchList, isOnWatchList } from "../lib/biasProfile.js";
 import { getChipById } from "../lib/biasChips.js";
 import { recordInstrumentResult } from "../lib/capacitiesProfile.js";
+import { recordRiskProfile } from "../lib/riskProfile.js";
 
 /**
  * InstrumentRunner — the generic Workshop take-flow runner.
@@ -87,6 +88,11 @@ export default function InstrumentRunner({ instrument, scoreFn, onExit }) {
           instrument: instrument.id,
           reading: scored.reading?.key,
         });
+      } else if (instrument.surface === "profile") {
+        // Record to the risk-profile store — a private self-portrait, not a
+        // chip and not the capacities growth mirror (spec §5/§9).
+        recordRiskProfile({ results: scored });
+        fire("Workshop Instrument Completed", { instrument: instrument.id });
       } else {
         fire("Workshop Instrument Completed", {
           instrument: instrument.id,
@@ -408,6 +414,10 @@ function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMark
   if (instrument.surface === "capacities") {
     return <CapacityResult instrument={instrument} result={result} onDone={onDone} />;
   }
+  // Profile surface — the value-neutral self-portrait frame (DOSPERT, §3/§5).
+  if (instrument.surface === "profile") {
+    return <ProfileResult instrument={instrument} result={result} onDone={onDone} />;
+  }
   // Reuse seam: only the pattern-work dysfunction frame is built beyond that.
   if (instrument.surface !== "pattern-work") {
     throw new Error(
@@ -572,6 +582,78 @@ function CapacityResult({ instrument, result, onDone }) {
       <p style={{ ...gentleBodyStyle, marginTop: "var(--sf-space-24)" }}>
         No score, no grade — this is a starting line. Take it again down the road and the shift is
         the data; it shows up in your growth mirror.
+      </p>
+      <div style={{ marginTop: "var(--sf-space-32)" }}>
+        <Button variant="secondary" fullWidth onClick={onDone}>
+          Done
+        </Button>
+      </div>
+    </>
+  );
+}
+
+/* ProfileResult — the value-neutral PROFILE frame (DOSPERT, spec §3/§5). The
+   third result template. NOT the pattern-work "here's a problem" tone and NOT
+   the capacities "skill to grow" tone — a mirror, no prescription. Leads with
+   the SPREAD (the reading), then the plain domain-by-domain shape. No scores,
+   no good/bad. notes[] (the optional §5 precision note) renders only if the
+   score function emits one — off by default. */
+function ProfileResult({ instrument, result, onDone }) {
+  const reading = result.reading || {};
+  const domains = Array.isArray(result.domains) ? result.domains : [];
+  const notes = Array.isArray(result.notes) ? result.notes : [];
+  return (
+    <>
+      <EditorialBlock
+        label={`${instrument.name} · your shape`}
+        headline={reading.title || "Where you lean"}
+        headlineSize="md"
+        body={reading.body || ""}
+        rule
+      />
+
+      {domains.length > 0 && (
+        <div style={{ marginTop: "var(--sf-space-32)" }}>
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
+            Across the domains
+          </MonoLabel>
+          {domains.map((d) => (
+            <div
+              key={d.id}
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                justifyContent: "space-between",
+                gap: "var(--sf-space-16)",
+                padding: "var(--sf-space-16) 0",
+                borderBottom: "0.5px solid var(--sf-border-quiet)",
+              }}
+            >
+              <span style={chipLabelStyle}>{d.label}</span>
+              <span style={{ ...gentleBodyStyle, textAlign: "right", flexShrink: 0 }}>{d.leanLabel}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {notes.length > 0 && (
+        <div style={{ marginTop: "var(--sf-space-32)" }}>
+          {notes.map((note, i) => (
+            <div key={i} style={{ marginBottom: "var(--sf-space-24)" }}>
+              {note.title && (
+                <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+                  {note.title}
+                </MonoLabel>
+              )}
+              <p style={gentleBodyStyle}>{note.body}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p style={{ ...gentleBodyStyle, marginTop: "var(--sf-space-24)" }}>
+        No score, nothing to fix — just your shape. Risk shape holds fairly steady; take it again
+        sometime and it's less "have you grown" than "has anything shifted."
       </p>
       <div style={{ marginTop: "var(--sf-space-32)" }}>
         <Button variant="secondary" fullWidth onClick={onDone}>

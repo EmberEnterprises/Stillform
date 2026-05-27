@@ -8,6 +8,7 @@ import ERQ, { score as erqScore } from "../lib/instruments/erq.js";
 import MAIA2, { score as maia2Score } from "../lib/instruments/maia2.js";
 import IRI, { score as iriScore } from "../lib/instruments/iri.js";
 import MCQ30, { score as mcq30Score } from "../lib/instruments/mcq30.js";
+import DOSPERT, { score as dospertScore } from "../lib/instruments/dospert.js";
 
 /**
  * Library — the curated-knowledge surface, reached from the Home footer.
@@ -39,6 +40,7 @@ const INSTRUMENTS = [
   { id: "maia2", instrument: MAIA2, scoreFn: maia2Score },
   { id: "iri", instrument: IRI, scoreFn: iriScore },
   { id: "mcq30", instrument: MCQ30, scoreFn: mcq30Score },
+  { id: "dospert", instrument: DOSPERT, scoreFn: dospertScore },
 ];
 
 export default function Library({ onExit }) {
