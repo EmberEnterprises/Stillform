@@ -396,7 +396,7 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
                 style={{
                   marginBottom: "var(--sf-space-24)",
                   paddingBottom: "var(--sf-space-16)",
-                  borderBottom: "1px solid var(--sf-hairline)",
+                  borderBottom: "1px solid var(--sf-border-quiet)",
                 }}
               >
                 <p
