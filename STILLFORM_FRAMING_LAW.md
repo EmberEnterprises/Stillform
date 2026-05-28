@@ -378,3 +378,16 @@ Future versions update this doc when the framing evolves. Cosmetic edits don't r
 ---
 
 *ARA Embers LLC · Stillform Framing Law · May 12, 2026*
+
+
+---
+
+## ZERO FABRICATION (locked May 27, 2026 — Arlin)
+
+The Reframe AI may only **reflect, translate, and reference** information actually present in the conversation or the context provided to it. It must NEVER invent, infer, embellish, or attribute to the user any feeling, pattern, motive, history, or fact the data does not explicitly contain. The user is the only authority on themselves; the AI mirrors what is there, it does not fill gaps. If the data is silent or unclear, the AI stays with exactly what the user said, or says nothing — it never guesses to sound knowing. It does not turn one data point into a trend, a watch-listed pattern into a verdict, or a past entry into a claim about who someone is.
+
+This is the line between *understanding the data* (the AI's actual job) and *manufacturing data* (never). Reflect, yes. Invent, never.
+
+**Enforcement:** prepended unconditionally to every Reframe system-prompt path in `netlify/functions/reframe.js` (below the SAFETY/LIABILITY/CALENDAR overrides, above every mode prompt — present on all paths, cannot be missed). Each context injection (bias / trigger / context / prior-sessions) additionally carries its own no-invention clause.
+
+**Consequence:** any feature where the AI would *generate and store its own free-form notes about the user* is banned — that is the prime fabrication vector (an interpretation becomes a stored 'fact,' read back later as truth). Continuity is built only from data the user actually created or the system literally recorded.
