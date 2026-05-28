@@ -22,6 +22,12 @@
   --sf-border-hairline:  rgba(255, 255, 255, 0.06);
   --sf-border-emphasis:  rgba(255, 255, 255, 0.10);
   --sf-border-printed:   rgba(255, 255, 255, 0.04);
+  /* --sf-border-quiet: the standard subtle divider — used 20+ times across the
+     diagnostic stack (BiasProfile, TriggerProfile, the mirrors) + spine. Defined
+     May 27 2026: it was referenced everywhere but never declared, so it had been
+     rendering via the currentColor fallback. 0.08 sits between hairline (0.06)
+     and emphasis (0.10) — a quiet but present line. Tune here if needed. */
+  --sf-border-quiet:     rgba(255, 255, 255, 0.08);
 
   /* ---------------------------------------------------------------------
    * ACCENT — antiqued metallic, NOT wellness amber.
@@ -90,6 +96,26 @@
   --sf-font-serif:  "Cormorant Garamond", "EB Garamond", Georgia, serif;
   --sf-font-sans:   "DM Sans", "Inter", system-ui, -apple-system, sans-serif;
   --sf-font-mono:   "IBM Plex Mono", "JetBrains Mono", "Menlo", monospace;
+
+  /* ---------------------------------------------------------------------
+   * PREVIOUSLY-UNDECLARED TOKENS — referenced across shipped screens
+   * (Today, SmartScreen, SelfReframe, BreathingSession, InfoModal,
+   * InstrumentRunner, BreatheOverlay) but never declared, so they had been
+   * rendering via inherited / fallback values. Declared May 27 2026 to
+   * remove the fragile fallback reliance. surface-raised + display-md are
+   * the EXACT inline fallbacks already present in code (zero visual change);
+   * the rest are system-consistent values — tune any here if a screen reads
+   * wrong on device.
+   * ------------------------------------------------------------------ */
+  --sf-font-display:    var(--sf-font-serif);          /* display face = the editorial serif */
+  --sf-weight-light:    300;
+  --sf-leading-display: 1.15;                          /* headings */
+  --sf-leading-body:    1.55;                          /* body copy — matches inline usage */
+  --sf-text-display-md: 28px;                          /* EXACT — from var(…, 28px) fallback in code */
+  --sf-text-display-sm: 22px;                          /* between body-md and display-md */
+  --sf-text-body-md:    16px;                          /* base body size */
+  --sf-text-secondary:  rgba(232, 234, 240, 0.80);     /* between primary (~1.0) and quiet (0.62) */
+  --sf-surface-raised:  rgba(184, 134, 43, 0.08);      /* EXACT — from var(…, rgba(184,134,43,0.08)) fallback */
 }
 
 /* ---------------------------------------------------------------------

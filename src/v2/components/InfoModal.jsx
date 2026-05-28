@@ -69,7 +69,7 @@ export default function InfoModal({ open, title, body, onClose }) {
           maxHeight: "80vh",
           overflowY: "auto",
           padding: "var(--sf-space-32, 32px)",
-          // Was var(--sf-ground) — that variable doesn't exist, so background
+          // Was --sf-ground — that variable doesn't exist, so background
           // fell back to transparent and the page bled through. The actual
           // defined variables are --sf-ground-deep / --sf-ground-elev / --sf-ground-elev-2.
           // Using ground-elev (#111114) so the card sits visually ABOVE the

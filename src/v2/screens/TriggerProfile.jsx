@@ -153,7 +153,7 @@ export default function TriggerProfile({ onExit }) {
               width: "100%",
               padding: "12px 14px",
               marginBottom: "var(--sf-space-16)",
-              background: "var(--sf-ground)",
+              background: "var(--sf-ground-elev)",
               border: "0.5px solid var(--sf-border-quiet)",
               borderRadius: "var(--sf-r-default)",
               color: "var(--sf-text-primary)",
@@ -258,7 +258,7 @@ function CategoryChipGroup({ value, onChange }) {
             onClick={() => onChange(cat)}
             style={{
               padding: "8px 14px",
-              background: selected ? "var(--sf-ground)" : "transparent",
+              background: selected ? "var(--sf-ground-elev)" : "transparent",
               border: selected
                 ? "0.5px solid var(--sf-accent-line, rgba(184, 134, 43, 0.45))"
                 : "0.5px solid var(--sf-border-quiet)",

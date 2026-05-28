@@ -131,7 +131,7 @@ const framingStyle = {
 };
 
 const entryRowStyle = {
-  padding: "var(--sf-space-20) 0",
+  padding: "var(--sf-space-16) 0",
   borderBottom: "0.5px solid var(--sf-border-quiet)",
 };
 

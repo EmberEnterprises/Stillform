@@ -82,7 +82,7 @@ export default function CapacitiesMirror({ onExit }) {
           return (
             <div
               key={capacity.id}
-              style={{ padding: "var(--sf-space-20) 0", borderBottom: "0.5px solid var(--sf-border-quiet)" }}
+              style={{ padding: "var(--sf-space-24) 0", borderBottom: "0.5px solid var(--sf-border-quiet)" }}
             >
               <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
                 {capacity.loopLayer}
