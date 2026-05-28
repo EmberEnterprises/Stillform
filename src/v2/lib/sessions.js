@@ -150,6 +150,51 @@ export function getRecentSessions(n = 10) {
 }
 
 /**
+ * Format recent sessions into a continuity string for the Reframe AI.
+ *
+ * AI Context Reconnection Wave 3 (May 27, 2026). Sessions persist what the
+ * user named, the frame that surfaced, and their takeaway — genuine
+ * multi-day continuity, and the only persisted session *content* in this
+ * build. This feeds the AI a "what they've worked through before" read so it
+ * can recognize recurring threads across days. The framing (reference
+ * sparingly, never re-litigate) lives in the backend injection. Sessions with
+ * no content (metadata-only) are skipped. Fields are capped to keep the AI
+ * context window bounded. Fail-silent → null.
+ *
+ * @param {number} [n=8]  most recent sessions to consider
+ * @returns {string|null}  formatted lines, or null if none carry content
+ */
+export function formatRecentSessionsForAI(n = 8) {
+  try {
+    const recent = getRecentSessions(n);
+    if (!recent.length) return null;
+    const now = Date.now();
+    const lines = [];
+    for (const sess of recent) {
+      if (!sess) continue;
+      const name = typeof sess.precisionName === "string" ? sess.precisionName.trim() : "";
+      const frame = typeof sess.surfacedFrame === "string" ? sess.surfacedFrame.trim() : "";
+      const takeaway = typeof sess.takeaway === "string" ? sess.takeaway.trim() : "";
+      if (!name && !frame && !takeaway) continue; // metadata-only session
+      let when = "recently";
+      const t = sess.timestamp ? new Date(sess.timestamp).getTime() : NaN;
+      if (Number.isFinite(t)) {
+        const days = Math.floor((now - t) / 86400000);
+        when = days <= 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
+      }
+      const parts = [];
+      if (name) parts.push(`named "${name.slice(0, 80)}"`);
+      if (frame) parts.push(`frame that surfaced: ${frame.slice(0, 120)}`);
+      if (takeaway) parts.push(`takeaway: ${takeaway.slice(0, 120)}`);
+      lines.push(`- ${when}: ${parts.join("; ")}`);
+    }
+    return lines.length ? lines.join("\n") : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Distinct days the user has practiced. For Trajectory's "days active"
  * stat. Distinct date-keys across the session store.
  *
