@@ -8,6 +8,7 @@ import {
   addChipToWatchList,
   removeChipFromWatchList,
   isOnWatchList,
+  patternConfidence,
 } from "../lib/biasProfile.js";
 import { BIAS_CHIP_TYPES, chipsByType } from "../lib/biasChips.js";
 
@@ -191,6 +192,10 @@ function WatchRow({
   onConfirmRemove,
   onCancelRemove,
 }) {
+  // 5.11(d): provisional → emerging → confirmed, by how many distinct days the
+  // AI has detected this pattern recurring. Reflect-not-score; accent only when
+  // confirmed (recurring across sessions).
+  const { tier } = patternConfidence({ encounterCount });
   return (
     <div
       style={{
@@ -219,6 +224,21 @@ function WatchRow({
           {chip.label}
         </span>
         <InfoDot onClick={onInfo} label={chip.label} />
+        <span
+          style={{
+            marginLeft: "auto",
+            fontFamily: "var(--sf-font-mono)",
+            fontSize: "10px",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color:
+              tier === "confirmed"
+                ? "var(--sf-accent, #B8862B)"
+                : "var(--sf-text-faint)",
+          }}
+        >
+          {tier === "confirmed" ? "Confirmed" : tier === "emerging" ? "Emerging" : "Provisional"}
+        </span>
       </div>
 
       <div
