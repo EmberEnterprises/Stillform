@@ -673,12 +673,10 @@ function ProposedRow({ chip, added, onInfo, onAdd, onMarkLived }) {
     <div style={{ padding: "var(--sf-space-16) 0", borderBottom: "0.5px solid var(--sf-border-quiet)" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sf-space-8)", marginBottom: "var(--sf-space-8)" }}>
         <span style={chipLabelStyle}>{chip.label}</span>
-        <InfoDot onClick={onInfo} label={chip.label} />
       </div>
 
       <p style={gentleBodyStyle}>
-        One of the patterns the distortion map names. On your watch list, the Reframe AI flags it
-        when it shows up — and the practice can loosen its grip over time.
+        {chip.info}
       </p>
 
       {added ? (
