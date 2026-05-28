@@ -106,7 +106,7 @@ export function isOnWatchList(chipId) {
  * @param {{ chipId: string, source?: string }} input
  * @returns {object|null} the watch-list entry, or null on invalid chip
  */
-export function addChipToWatchList({ chipId, source } = {}) {
+export function addChipToWatchList({ chipId, source, state } = {}) {
   if (!isValidChipId(chipId)) return null;
   const validSource = BIAS_WATCH_SOURCES.includes(source) ? source : "manual";
 
@@ -121,6 +121,12 @@ export function addChipToWatchList({ chipId, source } = {}) {
     lastSeen: now,
     encounterCount: 0,
     source: validSource,
+    // 5.11 (b): the self-reported state at take-time, so a pattern added on a
+    // depleted day carries that context (provisional vs. trait). null if the
+    // user didn't flag a state. encounterCount above is the behavioral-
+    // confirmation counter the AI increments as the pattern recurs in real
+    // sessions (5.11 d) — repetition in practice, not retakes, is the proof.
+    addedUnderState: typeof state === "string" && state ? state : null,
   };
   profile.watchList.push(entry);
   saveBiasProfile(profile);

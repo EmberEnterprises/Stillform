@@ -106,9 +106,9 @@ export default function InstrumentRunner({ instrument, scoreFn, onExit }) {
   const goBack = () => setItemIndex((i) => Math.max(0, i - 1));
 
   // ── result actions ───────────────────────────────────────────────────────
-  const addChip = (chipId) => {
-    addChipToWatchList({ chipId, source: "workshop" });
-    fire("Workshop Chip Added", { instrument: instrument.id, chip: chipId });
+  const addChip = (chipId, state) => {
+    addChipToWatchList({ chipId, source: "workshop", state });
+    fire("Workshop Chip Added", { instrument: instrument.id, chip: chipId, state: state || "unspecified" });
     setTick((t) => t + 1);
   };
 
@@ -410,6 +410,9 @@ function OptionButton({ label, selected, onClick }) {
 /* ───────────────────────────────────────────────────────────────────────── */
 
 function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMarkLived, onDone }) {
+  // 5.11 (b): state self-reported at end of take, weighed before add-to-watch-list.
+  // Declared before the surface early-returns to satisfy the rules of hooks.
+  const [takeState, setTakeState] = useState(null);
   // Capacities surface — the growth-mirror frame (SRIS + later ERQ/MAIA-2/IRI).
   if (instrument.surface === "capacities") {
     return <CapacityResult instrument={instrument} result={result} onDone={onDone} />;
@@ -459,6 +462,11 @@ function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMark
         rule
       />
 
+      {/* 5.11 (b): state consideration — weighed before deciding what to track */}
+      {proposed.length > 0 && (
+        <StateConsideration value={takeState} onChange={setTakeState} />
+      )}
+
       {/* Endorsed — proposed for the watch list */}
       {proposed.length > 0 && (
         <div style={{ marginTop: "var(--sf-space-32)" }}>
@@ -470,8 +478,8 @@ function ResultView({ instrument, result, livedExperience, onInfo, onAdd, onMark
               key={chip.id}
               chip={chip}
               added={isOnWatchList(chip.id)}
-              onInfo={() => onInfo(chip)}
-              onAdd={() => onAdd(chip.id)}
+              takeState={takeState}
+              onAdd={() => onAdd(chip.id, takeState)}
               onMarkLived={() => onMarkLived(chip.id)}
             />
           ))}
@@ -668,7 +676,7 @@ function ProfileResult({ instrument, result, onDone }) {
  * ProposedRow — an endorsed pattern: named in loop-voice, with the path
  * forward (add to watch list) AND the lived-experience exit (this was real).
  */
-function ProposedRow({ chip, added, onInfo, onAdd, onMarkLived }) {
+function ProposedRow({ chip, added, takeState, onAdd, onMarkLived }) {
   return (
     <div style={{ padding: "var(--sf-space-16) 0", borderBottom: "0.5px solid var(--sf-border-quiet)" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sf-space-8)", marginBottom: "var(--sf-space-8)" }}>
@@ -677,6 +685,10 @@ function ProposedRow({ chip, added, onInfo, onAdd, onMarkLived }) {
 
       <p style={gentleBodyStyle}>
         {chip.info}
+      </p>
+
+      <p style={provisionalStyle}>
+        {takeStateProvisionalCopy(takeState)}
       </p>
 
       {added ? (
@@ -694,6 +706,95 @@ function ProposedRow({ chip, added, onInfo, onAdd, onMarkLived }) {
     </div>
   );
 }
+
+/**
+ * 5.11 (b/c): take-time state — a snapshot of how the user was running when they
+ * answered. State inflates distortion endorsement (poor sleep / stress / illness),
+ * so a pattern flagged on a depleted day may be the day, not the trait. Captured
+ * at the END of a take, weighed BEFORE the add-to-watch-list decision. Not a
+ * score, not a gate — a consideration. The selected state then qualifies each
+ * proposal's copy (clear → steadier ground; depleted → more provisional).
+ */
+const TAKE_STATE_OPTIONS = [
+  { id: "clear", label: "Rested and clear", phrase: "rested and clear" },
+  { id: "tired", label: "Tired or run-down", phrase: "tired or run-down" },
+  { id: "stressed", label: "Stressed or activated", phrase: "stressed or activated" },
+  { id: "off", label: "Off — unwell, in pain, or hormonal", phrase: "off" },
+];
+
+function takeStatePhrase(id) {
+  const opt = TAKE_STATE_OPTIONS.find((o) => o.id === id);
+  return opt ? opt.phrase : "";
+}
+
+/** The provisional framing on each proposed pattern, modulated by take-state. */
+function takeStateProvisionalCopy(takeState) {
+  if (takeState === "clear") {
+    return "You were rested and clear when you took this, so the read sits on steadier ground — but one take is still a snapshot. Add it if it holds beyond today.";
+  }
+  if (takeState) {
+    return `You flagged being ${takeStatePhrase(takeState)} when you took this — a pattern named on a rough day can be the day, not the trait. Add it only if it rings true beyond today.`;
+  }
+  return "One take is a snapshot, not a pattern. Add it if it rings true beyond today — not just right now.";
+}
+
+/** StateConsideration — the end-of-take "how were you running?" reflection. */
+function StateConsideration({ value, onChange }) {
+  return (
+    <div style={{ marginTop: "var(--sf-space-32)" }}>
+      <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+        Before you decide what to track
+      </MonoLabel>
+      <p style={{ ...gentleBodyStyle, marginBottom: "var(--sf-space-16)" }}>
+        How were you running when you took this? A pattern that surfaces on a
+        depleted day might be the state, not a fixed trait — worth weighing
+        before you add anything below.
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
+        {TAKE_STATE_OPTIONS.map((opt) => {
+          const selected = value === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onChange(selected ? null : opt.id)}
+              aria-pressed={selected}
+              style={selected ? { ...stateChipStyle, ...stateChipSelectedStyle } : stateChipStyle}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const provisionalStyle = {
+  marginTop: "var(--sf-space-8)",
+  color: "var(--sf-text-faint)",
+  fontFamily: "var(--sf-font-sans)",
+  fontSize: "12px",
+  lineHeight: 1.55,
+  fontStyle: "italic",
+};
+
+const stateChipStyle = {
+  padding: "var(--sf-space-8) var(--sf-space-12)",
+  borderRadius: "999px",
+  border: "0.5px solid var(--sf-border-quiet)",
+  background: "transparent",
+  color: "var(--sf-text-quiet)",
+  fontFamily: "var(--sf-font-sans)",
+  fontSize: "13px",
+  cursor: "pointer",
+  WebkitTapHighlightColor: "transparent",
+};
+
+const stateChipSelectedStyle = {
+  borderColor: "var(--sf-accent, #B8862B)",
+  color: "var(--sf-text-primary)",
+};
 
 /** InfoDot — the quiet ⓘ affordance next to a chip label. */
 function InfoDot({ onClick, label }) {
