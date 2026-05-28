@@ -17,14 +17,18 @@
  *     ...telemetry
  *   }
  *
- * Phase 2 audit context: v2 sends minimal context (input, history,
- * feelState, install_id). Backend handles missing context gracefully.
- * Full context wiring (Trigger Profile, Bias Profile, Signal Profile,
- * Bio-filter, journal history, session count for invisible-leveling)
- * lands in Phase 3 with the Progress surfaces.
+ * AI Context Reconnection (May 27, 2026): the backend has always consumed
+ * the full context stack; the client stopped sending it after the rebuild
+ * ("Phase 2 minimal context"). Wave 1 wired below — Bias Profile, Trigger
+ * Profile, session count (invisible leveling). Wave 2 pending — journal
+ * history, Context Profile (needs backend), check-in/EOD, AI session notes.
+ * Signal Profile + bio-filter have no source module in this build.
  */
 
 import { getOrCreateInstallId } from "./identity.js";
+import { formatBiasProfileForAI } from "./biasProfile.js";
+import { formatTriggerProfileForAI } from "./triggerProfile.js";
+import { getSessionCount } from "./sessions.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
 
@@ -80,6 +84,15 @@ export async function sendReframeMessage({ input, history = [], feelState = null
 
   const mode = routeMode(feelState, input);
 
+  // AI Context Reconnection — Wave 1 (May 27, 2026): gather persistent
+  // context from device stores here so the backend (which has always
+  // consumed these) actually receives them. Caller needs no change. All
+  // null/empty-safe; the backend skips falsy values (empty watch list /
+  // no triggers / 0 sessions inject nothing).
+  const biasProfile = formatBiasProfileForAI();
+  const triggerProfile = formatTriggerProfileForAI();
+  const sessionCount = getSessionCount();
+
   try {
     const response = await fetch(REFRAME_API_URL, {
       method: "POST",
@@ -101,11 +114,11 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         // Phase 2 minimal context. These all default safely on the backend.
         bioFilter: null,
         signalProfile: null,
-        biasProfile: null,
-        triggerProfile: null,
+        biasProfile,
+        triggerProfile,
         checkinContext: null,
         eodContext: null,
-        sessionCount: 0,
+        sessionCount,
         priorModeContext: null,
         priorToolContext: null,
         journalContext: null,
