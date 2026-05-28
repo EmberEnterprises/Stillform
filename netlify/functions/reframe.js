@@ -1693,6 +1693,7 @@ exports.handler = async function(event) {
       biasProfile = null,
       userFlaggedPatterns = null,
       triggerProfile = null,
+      contextProfile = null,
       deferredCalibration = null,
       priorToolContext = null,
       practiceEntryContext = null,
@@ -2444,6 +2445,7 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (signalProfile) contextParts.push(`USER'S BODY SIGNAL PROFILE: ${signalProfile}. When they describe physical sensations, cross-reference these known signals. If their description matches their profile, name it directly: "That sounds like your [jaw/chest/etc] response — you've mapped this before." This is high-value recognition. Use it sparingly but confidently.`);
     if (biasProfile) contextParts.push(`USER'S IDENTIFIED PROCESSING PATTERNS: ${biasProfile}. Watch for these patterns in what they write. If you see one running, surface it as observation without judgment: "Your system is doing the [pattern] thing right now — you have already mapped this one." Only surface it when you are confident it is present. Do not force it. The user observes; you do not diagnose.`);
     if (userFlaggedPatterns) contextParts.push(userFlaggedPatterns);
+    if (contextProfile) contextParts.push(contextProfile);
     if (triggerProfile) contextParts.push(`${triggerProfile}. These are specific people, contexts, or moments the user has named as load-bearing — not categories, instances. If their current message names one of these by clear reference (the person, the meeting, the situation), recognize it directly: "This is [trigger] again." That recognition lands as continuity. Do NOT volunteer a trigger they did not raise; do NOT fabricate connections; do NOT moralize about why it shows up. The list is for orientation, not interrogation. If a high-encounter trigger has not surfaced in a while and the user seems off, you may ask gently: "Has [trigger] been quiet, or just out of frame?" Once per session, max.`);
     if (priorToolContext) contextParts.push(priorToolContext);
     if (practiceEntryContext) contextParts.push(practiceEntryContext);

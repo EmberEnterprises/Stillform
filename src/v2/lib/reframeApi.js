@@ -29,6 +29,7 @@ import { getOrCreateInstallId } from "./identity.js";
 import { formatBiasProfileForAI } from "./biasProfile.js";
 import { formatTriggerProfileForAI } from "./triggerProfile.js";
 import { getSessionCount } from "./sessions.js";
+import { formatContextProfileForAI } from "./contextProfile.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
 
@@ -92,6 +93,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   const biasProfile = formatBiasProfileForAI();
   const triggerProfile = formatTriggerProfileForAI();
   const sessionCount = getSessionCount();
+  const contextProfile = formatContextProfileForAI();
 
   try {
     const response = await fetch(REFRAME_API_URL, {
@@ -116,6 +118,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         signalProfile: null,
         biasProfile,
         triggerProfile,
+        contextProfile,
         checkinContext: null,
         eodContext: null,
         sessionCount,
