@@ -4,6 +4,7 @@ import MonoLabel from "../../components/MonoLabel.jsx";
 import HairlineDivider from "../../components/HairlineDivider.jsx";
 import { sendReframeMessage } from "../../lib/reframeApi.js";
 import { recordPrediction } from "../../lib/predictionLog.js";
+import { noteAiPatternDetection } from "../../lib/biasProfile.js";
 
 /**
  * Reframe — the middle step of the spine. AI metacognition partner.
@@ -62,6 +63,11 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
         return;
       }
 
+      // 5.11(d): record the AI's machine-side pattern read against the watch
+      // list — counts only patterns the user already tracks, per-day deduped,
+      // fail-silent. Governed by ZERO FABRICATION (genuine confident reads only).
+      if (result.distortion) noteAiPatternDetection(result.distortion);
+
       setHistory([
         { role: "user", text: precisionName },
         { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step, log_prediction: result.log_prediction || null },
@@ -107,6 +113,8 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
       setThinking(false);
       return;
     }
+
+    if (result.distortion) noteAiPatternDetection(result.distortion); // 5.11(d)
 
     setHistory([
       ...nextHistory,

@@ -170,6 +170,70 @@ export function incrementChipEncounter(chipId) {
 }
 
 /**
+ * 5.11(d) — AI behavioral confirmation. Record an AI-detected pattern
+ * occurrence against the watch list.
+ *
+ * Called from Reframe when the AI's machine-side `distortion` read (a clinical
+ * spine) is present. We translate that spine to a watch-listed chip and, IF
+ * the user already tracks it, count the occurrence. Governed by ZERO
+ * FABRICATION: this only ever fires on the AI's genuine, confidence-gated read
+ * of a pattern the user themselves flagged — never an invented or auto-added
+ * pattern (a spine with no matching watch-list entry does nothing).
+ *
+ * Dedupe is per distinct DAY (a pattern already counted today is not counted
+ * again), so encounterCount approximates how many separate days the pattern
+ * has recurred — recurrence over time, not depth in one sitting. That is the
+ * behavioral evidence that moves a pattern from provisional toward confirmed.
+ *
+ * @param {string} spine  the AI's clinical-spine read (matches chip.spine)
+ * @returns {object|null}  the updated entry if counted, else null
+ */
+export function noteAiPatternDetection(spine) {
+  if (!spine || typeof spine !== "string") return null;
+  const target = spine.trim().toLowerCase();
+  if (!target) return null;
+  const profile = getBiasProfile();
+  const idx = profile.watchList.findIndex((e) => {
+    const chip = getChipById(e.chipId);
+    return chip && typeof chip.spine === "string" && chip.spine.toLowerCase() === target;
+  });
+  if (idx === -1) return null; // not a pattern the user tracks → do nothing
+  const entry = profile.watchList[idx];
+  // Per-day dedupe: a pattern already counted today is not counted again.
+  const todayKey = new Date().toDateString();
+  if (entry.lastSeen && new Date(entry.lastSeen).toDateString() === todayKey) return null;
+  profile.watchList[idx] = {
+    ...entry,
+    encounterCount: (entry.encounterCount || 0) + 1,
+    lastSeen: new Date().toISOString(),
+  };
+  saveBiasProfile(profile);
+  return profile.watchList[idx];
+}
+
+/**
+ * Number of distinct days the AI must detect a pattern before it reads as
+ * confirmed (recurring across sessions, not a one-off).
+ */
+export const PATTERN_CONFIRMED_DAYS = 3;
+
+/**
+ * Confidence tier for a watch-list entry, derived from how many distinct days
+ * the AI has detected the pattern recurring (encounterCount). Plain language,
+ * no scores — the watch list reflects, it does not grade.
+ *
+ * @param {{ encounterCount?: number }} entry
+ * @returns {{ tier: "provisional"|"emerging"|"confirmed", count: number }}
+ */
+export function patternConfidence(entry) {
+  const count = (entry && entry.encounterCount) || 0;
+  let tier = "provisional";
+  if (count >= PATTERN_CONFIRMED_DAYS) tier = "confirmed";
+  else if (count >= 1) tier = "emerging";
+  return { tier, count };
+}
+
+/**
  * Join the watch list with catalog data, sorted by encounterCount desc
  * then lastSeen desc (most load-bearing patterns first). Each item
  * carries the full chip (label/spine/info/type) plus the user's

@@ -164,6 +164,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
       question: data && typeof data.question === "string" ? data.question : undefined,
       next_step: data && typeof data.next_step === "string" ? data.next_step : undefined,
       log_prediction: logPrediction,
+      distortion: data && typeof data.distortion === "string" ? data.distortion : null,
       crisisDetected: !!(data && data.crisisDetected),
     };
   } catch (err) {
