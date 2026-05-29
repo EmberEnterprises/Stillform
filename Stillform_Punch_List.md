@@ -52,6 +52,7 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [x] 7a Pre-event Brief client API — preEventBriefApi.js (`f3b9a28`)
 - [x] 7b+7d Pre-event Brief surface + My Progress entry (`1a03bf1`) — DEFAULTS, for on-screen review
 - [x] 7c Rehearsal — new rehearsal.js backend + rehearsalApi + PreEventBrief integration (`7cae25e`)
+- [x] 8a subscription status client (`098fdfa`) + 8b value-framing paywall surface (`df57bcd`) — DEFAULT COPY, review at ?paywall=1
 
 ### Ship-gate sweep (11-item, this session's changes)
 1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
@@ -87,6 +88,9 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [ ] 7 Rehearsal: from the brief, "Rehearse it ›" returns 2-3 if-they-say / you pairs (operator voice); Run it again / Back to brief / I'm ready work
 - [ ] 7 Rehearsal crisis: a crisis-worded event returns the redirect, not exchanges
 - [ ] 7 DEPLOY NOTE: rehearsal.js is a NEW backend function — refresh twice after deploy (function + SW)
+- [ ] 8 Paywall framing (?paywall=1): the frame reads as Stillform — a metacognition practice that sharpens thinking — NOT a regulation/wellness/calm pitch. Plans render, annual preselected, 'Not now' returns home
+- [ ] 8 Paywall checkout: until the LS URLs are set, Start shows 'almost ready' — not a dead link
+- [ ] 8 DECISIONS PENDING ARLIN: (1) timing — 3 days/3 sessions vs post-calibration (8c, her flagged fork); (2) does the framing copy land, or reshape it; (3) the LS hosted-checkout URLs + variant ids (8d) to drop into subscriptionApi.js CHECKOUT_URLS
 
 ### Pending
 - [ ] **Netlify trigger + publish** — deploys this session's stack; refresh twice (function + SW)
