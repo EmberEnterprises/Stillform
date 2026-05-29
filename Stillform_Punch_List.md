@@ -53,6 +53,7 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [x] 7b+7d Pre-event Brief surface + My Progress entry (`1a03bf1`) — DEFAULTS, for on-screen review
 - [x] 7c Rehearsal — new rehearsal.js backend + rehearsalApi + PreEventBrief integration (`7cae25e`)
 - [x] 8a subscription status client (`098fdfa`) + 8b value-framing paywall surface (`df57bcd`) — DEFAULT COPY, review at ?paywall=1
+- [x] 8c timing + gating (fail-open, 3-session default, flippable knobs) — gating.js + AppV2 gate on session start
 
 ### Ship-gate sweep (11-item, this session's changes)
 1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
@@ -90,7 +91,9 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [ ] 7 DEPLOY NOTE: rehearsal.js is a NEW backend function — refresh twice after deploy (function + SW)
 - [ ] 8 Paywall framing (?paywall=1): the frame reads as Stillform — a metacognition practice that sharpens thinking — NOT a regulation/wellness/calm pitch. Plans render, annual preselected, 'Not now' returns home
 - [ ] 8 Paywall checkout: until the LS URLs are set, Start shows 'almost ready' — not a dead link
-- [ ] 8 DECISIONS PENDING ARLIN: (1) timing — 3 days/3 sessions vs post-calibration (8c, her flagged fork); (2) does the framing copy land, or reshape it; (3) the LS hosted-checkout URLs + variant ids (8d) to drop into subscriptionApi.js CHECKOUT_URLS
+- [ ] 8 ⚠️ DEPLOY WARNING (8c is LIVE on next deploy): non-subscribed users past 3 real sessions — INCLUDING testers — hit the paywall on session start. Quick Breathe stays free. If it disrupts UAT: set GATING_ENABLED=false (master off) or raise FREE_SESSION_LIMIT in src/v2/lib/gating.js.
+- [ ] 8 SEE-IT after deploy: do 3 sessions on a non-subscribed device → 4th session-start shows the paywall; subscribed device never does; Quick Breathe never gated
+- [ ] 8 REMAINING FOR ARLIN: drop the LS checkout URLs into subscriptionApi.js CHECKOUT_URLS (8d) to complete a purchase; assess framing copy + the 3-session timing on screen
 
 ### Pending
 - [ ] **Netlify trigger + publish** — deploys this session's stack; refresh twice (function + SW)
