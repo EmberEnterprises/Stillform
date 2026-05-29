@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./tokens.css";
 import "./components.css";
 import Home from "./screens/Home.jsx";
@@ -15,6 +15,8 @@ import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
 import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
 import Paywall from "./screens/Paywall.jsx";
+import { shouldGate } from "./lib/gating.js";
+import { refreshSubscriptionStatus } from "./lib/subscriptionApi.js";
 
 /**
  * AppV2 — root of the v2 frontend.
@@ -51,6 +53,14 @@ export default function AppV2() {
   // My Progress). Set right before routing to "spine", consumed by Spine at
   // mount, cleared on exit. Null for the normal time-routed home session.
   const [spineBeat, setSpineBeat] = useState(null);
+
+  // Phase 8c: warm the subscription-status cache once on mount so the gate
+  // decision (shouldGate) has a resolved status to read. Fail-open: until
+  // this lands, shouldGate returns false (no wall), so a slow/failed fetch
+  // never blocks a session.
+  useEffect(() => {
+    refreshSubscriptionStatus();
+  }, []);
 
   if (screen === "verify") {
     return (
@@ -198,6 +208,13 @@ export default function AppV2() {
           // Normal session = the time-routed beat. Clear any stale forced
           // beat so a prior post-event launch can't leak into this one.
           setSpineBeat(null);
+          // Phase 8c: gate the practice after the free limit (fail-open —
+          // shouldGate only returns true when confidently past-limit AND
+          // confirmed not-subscribed). Quick Breathe stays free regardless.
+          if (shouldGate()) {
+            setScreen("paywall");
+            return;
+          }
           setScreen("spine");
         }}
         onNavigate={(target) => {

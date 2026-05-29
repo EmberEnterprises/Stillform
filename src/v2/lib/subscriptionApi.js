@@ -98,3 +98,27 @@ export async function getSubscriptionStatus() {
     return { isSubscribed: false, status: null, error: "Couldn't reach the network." };
   }
 }
+
+// --- Cached status (Phase 8c gating) -------------------------------------
+// The gating layer needs a synchronous read, but status is fetched async.
+// We cache the last CLEANLY-RESOLVED status. On error the prior cache is left
+// intact — a blip never downgrades a known subscriber to "unknown" (fail-open).
+
+let _cachedSub = null; // { isSubscribed: boolean, resolved: true } | null
+
+/** Last cleanly-resolved subscription status, or null if never resolved. */
+export function getCachedSubscription() {
+  return _cachedSub;
+}
+
+/**
+ * Fetch status and update the cache. On a clean response the cache is set; on
+ * error the previous cache is preserved. Returns the cache.
+ */
+export async function refreshSubscriptionStatus() {
+  const res = await getSubscriptionStatus();
+  if (!res.error) {
+    _cachedSub = { isSubscribed: res.isSubscribed, resolved: true };
+  }
+  return _cachedSub;
+}
