@@ -79,6 +79,11 @@ export default function MyProgress({ onExit, onNavigate }) {
           the one deliberate manual beat. Routes via AppV2's forcedBeat. */}
       <section style={{ marginTop: "var(--sf-space-16)", marginBottom: "var(--sf-space-32)" }}>
         <ProgressEntry
+          title="Prep for something coming up"
+          description="A meeting, a call, a room you're about to walk into. A brief to carry in — what to hold, what to watch, how to land after."
+          onTap={() => handleNavigate("pre-event-brief")}
+        />
+        <ProgressEntry
           title="Break down something that just happened"
           description="A meeting, a call, a moment — while it's fresh. What worked, what didn't, what to keep for next time."
           onTap={() => handleNavigate("post-event")}

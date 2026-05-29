@@ -13,6 +13,7 @@ import RiskProfileMirror from "./screens/RiskProfileMirror.jsx";
 import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
 import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
 import Library from "./screens/Library.jsx";
+import PreEventBrief from "./screens/PreEventBrief.jsx";
 
 /**
  * AppV2 — root of the v2 frontend.
@@ -93,6 +94,9 @@ export default function AppV2() {
               setSpineBeat("post-event");
               setScreen("spine");
             }
+            // Phase 7d: Pre-event Brief — its own standalone artifact screen
+            // (not a beat). Manual entry now; calendar-driven entry is Phase 9.
+            else if (target === "pre-event-brief") setScreen("pre-event-brief");
           }}
         />
       </div>
@@ -162,6 +166,17 @@ export default function AppV2() {
     return (
       <div className="sf-v2">
         <Library onExit={() => setScreen("home")} />
+      </div>
+    );
+  }
+
+  if (screen === "pre-event-brief") {
+    return (
+      <div className="sf-v2">
+        <PreEventBrief
+          onDone={() => setScreen("home")}
+          onExit={() => setScreen("my-progress")}
+        />
       </div>
     );
   }
