@@ -21,6 +21,8 @@
  *     selectedChip:      string|null,  // optional chip from Notice
  *     takeaway:          string|null,  // USER'S named takeaway from Close (Phase 3.5 #2 — formerly the AI's final reframe; now the user's own naming)
  *     surfacedFrame:     string|null,  // what was surfaced before Close (AI's last reply OR SelfReframe's last answer). Preserved for Mirror / Library / Pattern Disruption downstream surfaces. (Phase 3.5 #2)
+ *     nextMove:          string|null,  // PCE.1 — implementation intention named at Close ("next time X, I do Y" — Gollwitzer). The forward rep.
+ *     lockIn:            string|null,  // PCE.1 — forward commitment locked in at Close (Bandura mastery). With nextMove, this is "the frame you landed on" that PCE.2 reactivates on a recurring trigger.
  *     mode:              "calm"|"clarity"|"hype"|"self",
  *     selfMode:          boolean,
  *     conversationLength: number,   // turns in the Reframe step
@@ -78,6 +80,8 @@ export function saveSession(session) {
       selectedChip: typeof session.selectedChip === "string" ? session.selectedChip : null,
       takeaway: typeof session.takeaway === "string" ? session.takeaway.trim() : null,
       surfacedFrame: typeof session.surfacedFrame === "string" ? session.surfacedFrame.trim() : null,
+      nextMove: typeof session.nextMove === "string" ? session.nextMove.trim() : null,
+      lockIn: typeof session.lockIn === "string" ? session.lockIn.trim() : null,
       mode: typeof session.mode === "string" ? session.mode : "calm",
       selfMode: !!session.selfMode,
       conversationLength: typeof session.conversationLength === "number" ? session.conversationLength : 0,
@@ -175,7 +179,9 @@ export function formatRecentSessionsForAI(n = 8) {
       const name = typeof sess.precisionName === "string" ? sess.precisionName.trim() : "";
       const frame = typeof sess.surfacedFrame === "string" ? sess.surfacedFrame.trim() : "";
       const takeaway = typeof sess.takeaway === "string" ? sess.takeaway.trim() : "";
-      if (!name && !frame && !takeaway) continue; // metadata-only session
+      const nextMove = typeof sess.nextMove === "string" ? sess.nextMove.trim() : "";
+      const lockIn = typeof sess.lockIn === "string" ? sess.lockIn.trim() : "";
+      if (!name && !frame && !takeaway && !nextMove && !lockIn) continue; // metadata-only session
       let when = "recently";
       const t = sess.timestamp ? new Date(sess.timestamp).getTime() : NaN;
       if (Number.isFinite(t)) {
@@ -186,6 +192,8 @@ export function formatRecentSessionsForAI(n = 8) {
       if (name) parts.push(`named "${name.slice(0, 80)}"`);
       if (frame) parts.push(`frame that surfaced: ${frame.slice(0, 120)}`);
       if (takeaway) parts.push(`takeaway: ${takeaway.slice(0, 120)}`);
+      if (nextMove) parts.push(`next move they set: ${nextMove.slice(0, 120)}`);
+      if (lockIn) parts.push(`locked in: ${lockIn.slice(0, 120)}`);
       lines.push(`- ${when}: ${parts.join("; ")}`);
     }
     return lines.length ? lines.join("\n") : null;
