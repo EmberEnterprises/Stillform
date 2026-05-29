@@ -326,6 +326,21 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 
 ---
 
+## Post-Event Reflection (After-Action Review)
+
+**What it does:** A manual 5th beat for the moment right after something happens — a meeting, a call, a confrontation, a win. Names what just happened, then runs a three-part post-mortem: what worked, what didn't, what to keep — closing with one carry-forward move for next time.
+
+**The science:** Structured reflection after an event measurably improves how you perform the next one — but only when it's structured. Reviewing both what worked and what didn't (not just the failures) produces more learning than dwelling on either alone, and stating the lesson as a concrete "next time X, I do Y" is what makes it transfer. Doing it while the episode is fresh, before memory smooths it over, is part of why it works.
+
+**Who says so:**
+- Tannenbaum & Cerasoli (2013) — meta-analysis: structured debriefs / after-action reviews improve individual and team performance by roughly a quarter — *Human Factors*
+- Ellis & Davidi (2005) — after-event reviews covering both successes and failures produce more learning than failure-only reviews — *Journal of Applied Psychology*
+- Gollwitzer (1999) — implementation intentions ("if X, then Y") are what carry a lesson into the next instance — *American Psychologist*
+
+**If they push back:** "It's not replaying it to feel bad. It's pulling the one thing worth keeping while it's still sharp — so the next one goes better."
+
+---
+
 ## End of Day Check-In (Reflective Close)
 
 **What it does:** After 6 PM, three taps: energy vs morning, composure held, one word for the day. AI uses it as context next morning.
