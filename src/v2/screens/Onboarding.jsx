@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import Button from "../components/Button.jsx";
 
@@ -20,6 +20,15 @@ import Button from "../components/Button.jsx";
  */
 export default function Onboarding({ onComplete }) {
   const [step, setStep] = useState("frame"); // frame → how
+
+  useEffect(() => {
+    try { window.plausible?.("Onboarding Started"); } catch { /* non-fatal */ }
+  }, []);
+
+  const finish = () => {
+    try { window.plausible?.("Onboarding Completed"); } catch { /* non-fatal */ }
+    onComplete();
+  };
 
   if (step === "frame") {
     return (
@@ -51,7 +60,7 @@ export default function Onboarding({ onComplete }) {
         />
       </div>
       <div className="sf-fade-enter sf-fade-enter--delay-2" style={{ marginTop: "var(--sf-space-48)", display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}>
-        <Button variant="primary" onClick={onComplete}>Begin</Button>
+        <Button variant="primary" onClick={finish}>Begin</Button>
         <button type="button" onClick={() => setStep("frame")} className="sf-link-quiet">Back ›</button>
       </div>
     </main>
