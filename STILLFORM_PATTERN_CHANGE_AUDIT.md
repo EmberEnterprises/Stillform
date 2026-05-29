@@ -110,6 +110,41 @@ PCE.1 (the lock-in/next-move IS the frame it resurfaces) — hence the order.
   underneath a pattern) stays with a person over time; Stillform is the complement that's
   present each rep, between sessions. Never positioned as treatment.
 
+## The degradation layer (added May 28 — Arlin)
+
+A distinct concern from shifting the pattern: protecting the user's *analysis itself* from
+degrading — the tired over-analysis that tips from productive metacognition into
+rumination, and specifically the signature where analysis curdles from the situation onto
+a **self-verdict** ("I've always lived in someone's shadow"). Recognizing a pattern is
+worthless if the recognizing IS the loop.
+
+**Largely already built, distributed (verified vs reframe.js + Science Sheet):**
+- *Detection:* loop-language match (reframe.js `loopPattern` ~L595) + CLARITY-mode AI
+  rumination recognition ("you are running this through again — what is the running
+  doing?" ~L1119).
+- *Interruption (CAS / DMN):* breathing routes, somatic interrupt, Quick Breathe pill,
+  acupressure — all framed as Cognitive Attentional Syndrome interruption; DMN suppression
+  ("you can't ruminate and count 4-4-8-2"). Science Sheet §242 / §423.
+- *Structural bound:* every session closes at a takeaway — Hitchcock et al. 2024
+  meta-control: open-ended introspection IS the rumination failure mode; bounded analysis
+  is the correction (reframe.js ~L948 / L1090).
+- *AI behavior:* instructed not to feed the loop, not to reach conclusions while spiraling
+  (~L1147–1150).
+- Science fully cited: Wells MCT / detached mindfulness, Hitchcock 2024 meta-control,
+  Brewer 2011 DMN, CAS interruption.
+
+**The gap — complete it, don't build from scratch:**
+1. It isn't a *named, deliberate* layer — it's distributed and implicit. Make it one so it
+   reliably fires.
+2. The specific degradation Arlin lived isn't caught as its own signal: analysis tipping
+   into a self-verdict ("I've always…") and tired over-analysis past usefulness (not the
+   classic "can't stop" spiral language). The AI should catch the analysis→self-sentence
+   tip, name it as the tired loop's output — never validate the verdict (framing law) —
+   and redirect out of analysis (to body / to close). Cross-session fatigue detection
+   (depletion, time-of-day, repeated re-opens) is concierge territory (Phase 5/9).
+
+→ tracked as PCE.3.
+
 ## Process (per the v1-scar rule)
 
 Each step: lock scope in repo → commit doc → build → verify (node --check / build green) →
