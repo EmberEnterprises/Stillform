@@ -232,14 +232,51 @@ const WIND_DOWN_CONFIG = {
   },
 };
 
-// Registry keyed by beat string. Future variants (post-event in Phase 6,
-// Reset in Phase 6) register here with the same shape — no infrastructure
-// changes elsewhere.
+const POST_EVENT_CONFIG = {
+  beat: "post-event",
+  notice: {
+    shape: "standard",
+    headline: "What just happened?",
+    body: "Name it while it's fresh.",
+    placeholder: "The meeting, the call, the moment — what happened and how it left you…",
+    // Full spectrum, like main: an event just happened and it can leave any
+    // state — a win as much as a hit. Post-event is NOT only for the rough
+    // ones (framing law). Positive states lead the list by design.
+    chips: ALL_CHIPS.slice(),
+  },
+  reframe: {
+    minTurns: 1,
+    contextExtras: {
+      // Post-event is a SINGLE episode, not a day's accumulation — no
+      // today-thread include (that's EOD's integrative move). The just-
+      // named episode is the whole material; the post-mortem framing lives
+      // server-side in BEAT_ADDITIONS["post-event"].
+      includeTodayThread: false,
+    },
+  },
+  close: {
+    headline: "Logged.",
+    body: "What you keep from this is yours to carry into the next one.",
+    takeawayPlaceholder: "What you take from this…",
+    // Deep Regulate — integrative down-regulation after working an episode.
+    breathingOffer: "deep-regulate",
+    // Post-event is MANUAL and repeatable — not a once-daily beat. No daily
+    // completion flag (unlike morning / eod / wind-down), so it never
+    // advances the time-router or blocks re-entry.
+    completionFlag: null,
+    completionShape: null,
+  },
+};
+
+// Registry keyed by beat string. post-event (Phase 6.4) registers here with
+// the same shape — no infrastructure changes elsewhere. (Reset ships as its
+// own self-contained screen, not a beat config — see spine/Reset.jsx.)
 const CONFIGS = {
   main: MAIN_CONFIG,
   morning: MORNING_CONFIG,
   eod: EOD_CONFIG,
   "wind-down": WIND_DOWN_CONFIG,
+  "post-event": POST_EVENT_CONFIG,
 };
 
 /**

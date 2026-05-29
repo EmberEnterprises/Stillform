@@ -78,15 +78,23 @@ export function getCurrentBeat(now = new Date()) {
 }
 
 /**
- * For tests / debug overrides via ?beat= URL param.
+ * For tests / debug overrides via ?beat= URL param. "post-event" is also
+ * the manual-entry beat (Phase 6.4) — it never comes from the time-router
+ * (getCurrentBeat), only from an explicit override / manual launch.
  *
- * @returns {"morning" | "main" | "eod" | "wind-down" | null}
+ * @returns {"morning" | "main" | "eod" | "wind-down" | "post-event" | null}
  */
 export function getBeatOverride() {
   try {
     const params = new URLSearchParams(window.location.search);
     const beat = params.get("beat");
-    if (beat === "morning" || beat === "main" || beat === "eod" || beat === "wind-down") {
+    if (
+      beat === "morning" ||
+      beat === "main" ||
+      beat === "eod" ||
+      beat === "wind-down" ||
+      beat === "post-event"
+    ) {
       return beat;
     }
   } catch {
