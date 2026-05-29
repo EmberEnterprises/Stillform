@@ -73,6 +73,18 @@ export default function MyProgress({ onExit, onNavigate }) {
         rule
       />
 
+      {/* Phase 6.4c: post-event reflection — a manual ACTION (launch a
+          post-event session), set apart from the diagnostic mirrors below
+          so it reads as "do this now," not "view this." Off-home per canon;
+          the one deliberate manual beat. Routes via AppV2's forcedBeat. */}
+      <section style={{ marginTop: "var(--sf-space-16)", marginBottom: "var(--sf-space-32)" }}>
+        <ProgressEntry
+          title="Break down something that just happened"
+          description="A meeting, a call, a moment — while it's fresh. What worked, what didn't, what to keep for next time."
+          onTap={() => handleNavigate("post-event")}
+        />
+      </section>
+
       <section style={{ marginTop: "var(--sf-space-16)" }}>
         <MonoLabel
           size="xs"

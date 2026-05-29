@@ -44,6 +44,10 @@ function pickInitialScreen() {
 
 export default function AppV2() {
   const [screen, setScreen] = useState(pickInitialScreen);
+  // Phase 6.4c: one-shot forced beat for a manual launch (post-event from
+  // My Progress). Set right before routing to "spine", consumed by Spine at
+  // mount, cleared on exit. Null for the normal time-routed home session.
+  const [spineBeat, setSpineBeat] = useState(null);
 
   if (screen === "verify") {
     return (
@@ -56,7 +60,13 @@ export default function AppV2() {
   if (screen === "spine") {
     return (
       <div className="sf-v2">
-        <Spine onExit={() => setScreen("home")} />
+        <Spine
+          forcedBeat={spineBeat}
+          onExit={() => {
+            setSpineBeat(null);
+            setScreen("home");
+          }}
+        />
       </div>
     );
   }
@@ -77,6 +87,12 @@ export default function AppV2() {
             else if (target === "risk-profile") setScreen("risk-profile");
             else if (target === "prediction-mirror") setScreen("prediction-mirror");
             else if (target === "what-you-bet-on") setScreen("what-you-bet-on");
+            // Phase 6.4c: post-event reflection — launch the spine in the
+            // post-event beat (one-shot). The one manual, deliberate beat.
+            else if (target === "post-event") {
+              setSpineBeat("post-event");
+              setScreen("spine");
+            }
           }}
         />
       </div>
@@ -153,7 +169,12 @@ export default function AppV2() {
   return (
     <div className="sf-v2">
       <Home
-        onBeginSession={() => setScreen("spine")}
+        onBeginSession={() => {
+          // Normal session = the time-routed beat. Clear any stale forced
+          // beat so a prior post-event launch can't leak into this one.
+          setSpineBeat(null);
+          setScreen("spine");
+        }}
         onNavigate={(target) => {
           // Phase 5: 'progress' routes to the MyProgress landing,
           // 'library' to the Library (Workshop section live; curated

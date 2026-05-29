@@ -46,13 +46,16 @@ import { routeMode } from "../lib/reframeApi.js";
  *
  * @param {function(): void} onExit  Called when user exits or returns home.
  */
-export default function Spine({ onExit }) {
+export default function Spine({ onExit, forcedBeat = null }) {
   // Phase 4 #2 (locked May 16, 2026): beat is locked at session mount.
   // A session belongs to the beat it started in, even if it crosses a
   // beat boundary mid-flow (e.g., user starts at 8:59pm in main beat and
   // finishes at 9:01pm in wind-down — stays a main-beat session).
   // Lazy useState init guarantees one read at mount, never per-render.
-  const [beat] = useState(() => getBeatOverride() || getCurrentBeat());
+  // Phase 6.4c: a one-shot forcedBeat (manual launch — e.g. post-event from
+  // My Progress) wins; then the ?beat= debug override; then the time-router.
+  // AppV2 clears forcedBeat on exit, so it never makes a normal session sticky.
+  const [beat] = useState(() => forcedBeat || getBeatOverride() || getCurrentBeat());
   // Resolve the variant config once from the locked beat. Pure object,
   // no per-render cost; passed to spine surfaces (Notice now; Reframe /
   // Close in later #6–#7 steps).
