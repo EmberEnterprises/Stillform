@@ -57,7 +57,7 @@ import { getPendingPredictions, recordOutcome } from "../../lib/predictionLog.js
  */
 const MIN_TAKEAWAY_LEN = 4;
 
-export default function Close({ surfacedFrame, breathingOffer = null, beat = null, onReturnHome }) {
+export default function Close({ surfacedFrame, breathingOffer = null, beat = null, onReturnHome, onWantScript = null }) {
   const [step, setStep] = useState("compose");
   const [text, setText] = useState("");
   // PCE.1: structured close — forward implementation intention + lock-in.
@@ -219,6 +219,16 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
     }
   };
 
+  // Phase 6.5c ride-out: optional Scripts hand-off. Quiet, never blocks the
+  // close. Seeds the script "situation" from the takeaway the user just named
+  // so they don't retype it. Surfaced on the next-move beat (everyone reaches
+  // it). The parent (Spine) opens the Scripts surface.
+  const handleWantScript = () => {
+    if (typeof onWantScript === "function") {
+      onWantScript(trimmed || surfacedFrame || "");
+    }
+  };
+
   // Compose → the structured forward close. Always advances to the next-move
   // beat; both forward beats are skippable from there.
   const handlePrimary = () => {
@@ -374,6 +384,16 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
             Skip this ›
           </button>
         </div>
+        {onWantScript && (
+          <div
+            className="sf-fade-enter sf-fade-enter--delay-3"
+            style={{ marginTop: "var(--sf-space-24)" }}
+          >
+            <button type="button" onClick={handleWantScript} className="sf-link-quiet">
+              Need the words for it? ›
+            </button>
+          </div>
+        )}
       </main>
     );
   }

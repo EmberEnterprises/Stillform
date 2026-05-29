@@ -5,6 +5,7 @@ import SelfReframe from "./spine/SelfReframe.jsx";
 import Close from "./spine/Close.jsx";
 import MoveCard from "./spine/MoveCard.jsx";
 import Reset from "./spine/Reset.jsx";
+import Scripts from "./spine/Scripts.jsx";
 import WindDown from "./spine/WindDown.jsx";
 import { saveSession } from "../lib/sessions.js";
 import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
@@ -86,6 +87,9 @@ export default function Spine({ onExit, forcedBeat = null }) {
   // last user answer). Passed to Close where the user can anchor on it,
   // edit it, or write something entirely their own. Not the user's takeaway.
   const [surfacedFrame, setSurfacedFrame] = useState(null);
+  // Phase 6.5c: the seed (a takeaway/frame string) handed to the Scripts
+  // surface when the user takes the "Need the words for it?" ride-out at Close.
+  const [scriptSeed, setScriptSeed] = useState(null);
   const [conversationLength, setConversationLength] = useState(0);
 
   const handleNoticeContinue = (text, chip, opts = {}) => {
@@ -354,6 +358,16 @@ export default function Spine({ onExit, forcedBeat = null }) {
     );
   }
 
+  if (step === "scripts") {
+    return (
+      <Scripts
+        seed={scriptSeed}
+        onDone={onExit}
+        onExit={onExit}
+      />
+    );
+  }
+
   // step === "close"
   return (
     <Close
@@ -361,6 +375,10 @@ export default function Spine({ onExit, forcedBeat = null }) {
       breathingOffer={config?.close?.breathingOffer || null}
       beat={beat}
       onReturnHome={handleCloseReturn}
+      onWantScript={(seed) => {
+        setScriptSeed(seed);
+        setStep("scripts");
+      }}
     />
   );
 }
