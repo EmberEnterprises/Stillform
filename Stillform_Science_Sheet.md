@@ -326,6 +326,23 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 
 ---
 
+## Pre-Event Brief (+ Rehearsal)
+
+**What it does:** Before a hard event, generates a four-part brief — the body state you're walking in with, what's load-bearing about this specific event, if-then moves for it, and the recovery move after — then optionally rehearses 2-3 likely moments of the exchange with a say-ready line for each.
+
+**The science:** Naming a forecast pressure in advance lowers its grip; pre-committing a response as "if X, then Y" roughly halves the cognitive cost of producing it under load; and pre-planning the downregulation after a stressor buys back capacity. Rehearsing likely moments before they happen — behavioral and mental rehearsal — measurably improves performance on the real thing, because the response is already partly built when the moment arrives.
+
+**Who says so:**
+- Barrett (2017) — granular bio labeling (the Hardware read) — constructed emotion theory
+- Heider (1958) / Lazarus (1991) — anticipatory appraisal; naming a forecast lowers its capture power
+- Gollwitzer (1999) — implementation intentions ("if X, then Y") cut the cost of acting under load
+- Sheppes & Gross (2011) — anticipatory / pre-planned regulation buys back capacity after the event
+- Driskell, Copper & Moran (1994) — meta-analysis: mental rehearsal improves subsequent performance
+
+**If they push back:** "It's not scripting your life. It's walking in having already thought once about the moment — so you're not deciding it cold while it's happening."
+
+---
+
 ## Post-Event Reflection (After-Action Review)
 
 **What it does:** A manual 5th beat for the moment right after something happens — a meeting, a call, a confrontation, a win. Names what just happened, then runs a three-part post-mortem: what worked, what didn't, what to keep — closing with one carry-forward move for next time.
