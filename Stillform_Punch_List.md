@@ -58,6 +58,12 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [x] 10b how-it-works beat — Onboarding.jsx now a frame → how → in flow
 - [x] Error boundary (Phase 12, pulled forward) — ErrorBoundary.jsx wraps AppV2; render crashes show a calm reload fallback, not a white screen
 
+**F·S·F / Layer-0 audit — May 28 (retroactive sweep of today's builds, at Arlin's request):**
+- 8a/8b/8c, 10a/10b, error boundary — all run against STILLFORM_FRAMING_LAW (Layer 0) + Science + Flow + the 11-item gate (recorded inline in Completed Archive). Framing: all PASS — the paywall + intro copy were audited line-by-line vs the banned list (zero regulate/calm/wellness; composure framed as felt-outcome; §291 stated).
+- §291 VERIFIED IN CODE: Quick Breathe opens BreatheOverlay from Home via local state, independent of the gated onBeginSession — the free valve is not behind the wall.
+- Gap found + CLOSED: onboarding fired no Plausible → added Onboarding Started/Completed (`af9d5be`).
+- Open flags (not framing fails): prices hardcoded vs the deferred $19.99 question; Privacy/Terms must cover billing + Health/Sleep/Calendar before those ship; FAQ billing entry pending the FAQ screen.
+
 ### Ship-gate sweep (11-item, this session's changes)
 1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
 2. Tutorial — N/A (no tutorial/onboarding system in v2)

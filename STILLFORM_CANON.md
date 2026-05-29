@@ -468,4 +468,28 @@ Future versions update this doc when framing or operating rules evolve. Cosmetic
 
 ---
 
+## Onboarding & Calibration — locked May 28, 2026
+
+The onboarding front door was greenfield in v2 (no first-run existed). From the May 28 design session with Arlin:
+
+**Governing principle — burden vs. revelation, not light vs. heavy.** Onboarding is LOW-BURDEN (little friction) and HIGH-REVELATION (the user walks out having learned something true about themselves they couldn't name a minute ago). Depth lives in the insight, not the input. Not Liven-style (workbooks / CBT intake = high burden, therapy shape); not a trivial one-tap setup (low revelation, can't carry a premium price). The revelation IS the product in miniature — the first metacognitive hit; the "it already sees me" feeling is what earns the price (you justify a premium by delivering a piece of the value before the ask, not by explaining it).
+
+**Calibration = "the first rep."** The user PERFORMS metacognition once, on themselves, rather than being told what it is. Mechanic: each question takes their coarse answer and sharpens it one level in front of them; that coarse→precise jump IS metacognition, felt on their own material. Their provisional profile assembles visibly as they go.
+
+**Format:** multiple structured questions (a short roadmap); sentence-option answers, each an articulate first-person naming so it MODELS the language for a user whose mind blanks (they pick up cues on how to answer); plus "Other — say it your way" everywhere (typed answers give the AI the richest read). NOT a single open question (invites superficial throwaways); NOT a yes/no checkbox inventory (reads as clinical intake). **This SUPERSEDES the earlier "open naming question, not a checkbox inventory" note** — Arlin's superficiality + prestige-assessment reasoning overrode it.
+
+**Precise engine, provisional claim.** The mapping is rigorous and science-backed — not junk; it calculates a close-to-definite read. But what we TELL the user stays provisional ("a starting read that sharpens with use") — people change (especially through the practice), for honesty/liability, and because real verification happens over multiple uses + layers. Rigorous under the hood, honest in the claim. Never assert a verdict from a quiz.
+
+**Throughline — clearing noise to what they already know.** Calibration isn't extracting facts from a stranger; it helps the user cut through noise (outside judgment, distortion) to self-knowledge they already have. Voice assumes "you already know who you are — the noise just makes it hard to hear." Affirmation is evidence-based self-recognition (e.g., an Anchor beat: "what's gotten you through before — you've used it; the noise makes it easy to forget"), never hollow praise. Care shows through the precision of the reflection, not declared warmth.
+
+**Pre-builds provisional v0 of the existing profiles:** Trigger, Signal (where it lands), distortion lean (Bias), state baseline (Bio-filter), Anchor (what carries them). Practice + the AI-mediation approval queue confirm/revise over sessions. CANNOT be quizzed, stays emergent: prediction-calibration, What-You-Bet-On, capacities.
+
+**Integrations & concierge are CORE, introduced after the revelation.** Health / Sleep / Calendar permissions come AFTER the calibration revelation (trust earned → ask lands as an upgrade), each transparent + benefit-framed + individually consented (privacy/store rules). The concierge (proactive, signal-aware reach at the right moment) is a LOAD-BEARING PILLAR, not optional: the neuroplastic outcome requires repetition, and the concierge removes the friction of returning + catches the moments that matter so the practice continues — the only way it works. Genuine help, never gamified/engagement-bait (consistent with the dopamine-awareness concern). Integrations are framed as the concierge's setup. Implementation reality: integrations + concierge are NATIVE (Phase 9); onboarding introduces/sets up now, live mechanics land with the native build, copy promises only what the build keeps when.
+
+**Personalization = one page** (after integrations, skippable): name (optional), check-in time, reminders. Light prefs — calibration carries the weight.
+
+**Flow order:** Frame → How it works → Calibration (the first rep) → Integrations (concierge setup) → Personalization → first session.
+
+---
+
 *ARA Embers LLC · Stillform Canon · May 14, 2026*
