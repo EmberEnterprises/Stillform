@@ -42,6 +42,8 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [x] 6.2a MoveRunner (`25fb5f2`)
 - [x] 6.2b + 6.2c quick-move flow — select.js + MoveCard + Notice fork + Spine routing (`384adfe`)
 - [x] 6.2d move history + telemetry (`bd58663`)
+- [x] 6.3a Reset urge-surf component (`baa7c96`)
+- [x] 6.3b Reset entry + routing — Notice second fork + Spine reset step + Reset→Move cross-route (`9837908`)
 
 ### Ship-gate sweep (11-item, this session's changes)
 1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
@@ -50,7 +52,7 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 4. Transfer doc — done via Completed Archive (the canonical shipped log; transfer doc §2 points there by design)
 5. Plausible — done (Move Started / Completed / Ended Early)
 6. Privacy — no new data category (local usage history, same class as session history; existing local-data language covers it)
-7. Science sheet — covered (move-sequence science already documented; the flow adds none)
+7. Science sheet — done (6.3 added an Urge-Surfing entry: Marlatt / Bowen MBRP / Lieberman; 6.2 move-sequence science already documented)
 8. AI prompts — done (PCE.2 + PCE.3 reframe.js changes, logged)
 9. Promo — N/A this session
 10. Punch list — this section
@@ -62,6 +64,9 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [ ] PCE.1: Reframe close shows next-move + lock-in (both skippable); session saved with them
 - [ ] PCE.2: on a repeated thread, the AI surfaces the real prior frame ("last time you landed on X")
 - [ ] PCE.3: a self-verdict ("I've always…") is not validated — named as the loop, redirected to body/close
+- [ ] 6.3 Reset: Notice "Reset an urge ›" → name → watch ~22s → act-or-don't (both exit clean, nothing scored)
+- [ ] 6.3 Reset cross-route: "Do a move instead ›" lands in the Move card
+- [ ] Quick move still works unchanged (no 6.2 regression from the second fork)
 
 ### Pending
 - [ ] **Netlify trigger + publish** — deploys this session's stack; refresh twice (function + SW)

@@ -297,6 +297,21 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 ---
 
 
+## Urge-Surfing (Reset Surface)
+
+**What it does:** A ~30-second flow for an acute compulsion pull (scroll, check, scratch, the text you want to send): name the pull → watch it ~20 seconds without acting → decide, act or don't. Both choices exit the same way; nothing is scored.
+
+**The science:** An urge is a wave, not a command — it rises, peaks, and subsides on its own, usually within minutes, whether or not you act. Watching it with interoceptive attention instead of acting lets it crest and pass, and weakens the urge→action link over repetitions. Naming the pull first is affect labeling, which dampens the limbic response and restores some prefrontal access. The act-or-don't is left to the user deliberately — agency, not a test; being told "don't" tends to strengthen an urge.
+
+**Who says so:**
+- Marlatt & Gordon (1985); Marlatt & Donovan (2005) — urge surfing; riding the urge as a wave rather than suppressing it or acting on it — relapse-prevention literature
+- Bowen et al. (2014) — mindfulness-based relapse prevention lowers craving reactivity — *JAMA Psychiatry*
+- Lieberman et al. (2007) — affect labeling ("name it") dampens amygdala response — *Psychological Science*
+
+**If they push back:** "It's not white-knuckling. You watch the urge instead of obeying it — and it passes on its own. Acting or not is still your call."
+
+---
+
 ## Ghost Echo (Past Resilience)
 
 **What it does:** Faint text on Pulse screens showing a past successful session — "Apr 3 — you shifted +2.4 in 2m 30s."
