@@ -4,6 +4,7 @@ import MonoLabel from "../components/MonoLabel.jsx";
 import Button from "../components/Button.jsx";
 import BreathingSession from "../components/BreathingSession.jsx";
 import { generatePreEventBrief } from "../lib/preEventBriefApi.js";
+import { generateRehearsal } from "../lib/rehearsalApi.js";
 
 /**
  * PreEventBrief — the before-the-event artifact (Phase 7b).
@@ -46,6 +47,23 @@ const SECTION_TEXT = {
 
 const FIELD_LABEL = { display: "block", marginBottom: "var(--sf-space-8)" };
 
+const REHEARSE_THEY = {
+  fontFamily: "var(--sf-font-sans)",
+  fontSize: "15px",
+  lineHeight: 1.5,
+  color: "var(--sf-text-secondary)",
+  fontStyle: "italic",
+  margin: 0,
+};
+
+const REHEARSE_YOU = {
+  fontFamily: "var(--sf-font-serif)",
+  fontSize: "18px",
+  lineHeight: 1.45,
+  color: "var(--sf-text-primary)",
+  margin: 0,
+};
+
 export default function PreEventBrief({ seed = "", onDone, onExit }) {
   const [phase, setPhase] = useState("input"); // input | generating | brief | breathing | error
   const [eventTitle, setEventTitle] = useState(typeof seed === "string" ? seed : "");
@@ -53,6 +71,8 @@ export default function PreEventBrief({ seed = "", onDone, onExit }) {
   const [eventDescription, setEventDescription] = useState("");
   const [brief, setBrief] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [rehearsal, setRehearsal] = useState(null); // { exchanges, note, crisis }
+  const [rehearsalError, setRehearsalError] = useState("");
 
   const canGenerate = eventTitle.trim().length > 0;
 
@@ -73,6 +93,34 @@ export default function PreEventBrief({ seed = "", onDone, onExit }) {
     } catch {
       setErrorMsg("Couldn't reach the network. Try again.");
       setPhase("error");
+    }
+  };
+
+  const rehearse = async () => {
+    setPhase("rehearsing");
+    setRehearsalError("");
+    const situationText = [eventTitle.trim(), eventDescription.trim()].filter(Boolean).join(" — ");
+    try {
+      const res = await generateRehearsal({
+        situation: situationText || eventTitle.trim(),
+        context: eventDescription,
+      });
+      if (res.crisis) {
+        setRehearsal({ exchanges: [], note: res.note, crisis: true });
+        setPhase("rehearsal");
+        return;
+      }
+      if (res.error || res.exchanges.length === 0) {
+        setRehearsalError(res.error || "Couldn't draft that. Try again.");
+        setPhase("rehearsal");
+        return;
+      }
+      setRehearsal({ exchanges: res.exchanges, note: res.note, crisis: false });
+      setPhase("rehearsal");
+      try { window.plausible?.("Rehearsal Generated", { props: { count: res.exchanges.length } }); } catch { /* non-fatal */ }
+    } catch {
+      setRehearsalError("Couldn't reach the network. Try again.");
+      setPhase("rehearsal");
     }
   };
 
@@ -184,6 +232,110 @@ export default function PreEventBrief({ seed = "", onDone, onExit }) {
     );
   }
 
+  // ---- REHEARSING ----
+  if (phase === "rehearsing") {
+    return (
+      <main className="sf-page sf-page--hero">
+        <div className="sf-fade-enter" style={{ marginTop: "var(--sf-space-64)" }}>
+          <MonoLabel size="xs" tone="faint">Running it forward…</MonoLabel>
+        </div>
+      </main>
+    );
+  }
+
+  // ---- REHEARSAL (crisis | error | result) ----
+  if (phase === "rehearsal") {
+    if (rehearsal && rehearsal.crisis) {
+      return (
+        <main className="sf-page sf-page--hero">
+          <div className="sf-fade-enter">
+            <EditorialBlock
+              label="Rehearsal"
+              headline="This one's bigger than a rehearsal."
+              headlineSize="lg"
+              body={
+                rehearsal.note ||
+                "What you're describing sounds beyond what rehearsal can hold. Stillform has a Crisis Resources screen in Settings, or call 988 (US Suicide & Crisis Lifeline). The conversation can wait until you're safe."
+              }
+            />
+          </div>
+          <div className="sf-fade-enter sf-fade-enter--delay-2" style={{ marginTop: "var(--sf-space-48)" }}>
+            <Button variant="primary" onClick={onDone}>Okay</Button>
+          </div>
+        </main>
+      );
+    }
+
+    if (rehearsalError) {
+      return (
+        <main className="sf-page sf-page--hero">
+          <div className="sf-fade-enter">
+            <EditorialBlock label="Rehearsal" headline="Didn't come through." headlineSize="lg" body={rehearsalError} />
+          </div>
+          <div
+            className="sf-fade-enter sf-fade-enter--delay-2"
+            style={{ marginTop: "var(--sf-space-48)", display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}
+          >
+            <Button variant="primary" onClick={rehearse}>Try again</Button>
+            <button type="button" onClick={() => setPhase("brief")} className="sf-link-quiet">Back to brief ›</button>
+          </div>
+        </main>
+      );
+    }
+
+    return (
+      <main className="sf-page sf-page--hero">
+        <div className="sf-fade-enter">
+          <EditorialBlock
+            label="Rehearsal"
+            headline="Run it forward."
+            headlineSize="md"
+            body={
+              rehearsal && rehearsal.note
+                ? rehearsal.note
+                : "A few moments you might hit — and a line for each. Practice the ones that feel live."
+            }
+          />
+        </div>
+
+        <div style={{ marginTop: "var(--sf-space-32)" }}>
+          {rehearsal &&
+            rehearsal.exchanges.map((ex, i) => (
+              <div
+                key={i}
+                className={`sf-fade-enter sf-fade-enter--delay-${Math.min(i + 1, 3)}`}
+                style={{ marginTop: i === 0 ? 0 : "var(--sf-space-32)" }}
+              >
+                <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+                  If they say
+                </MonoLabel>
+                <p style={REHEARSE_THEY}>{ex.they}</p>
+                <MonoLabel size="xs" tone="faint" style={{ display: "block", margin: "var(--sf-space-16) 0 var(--sf-space-8)" }}>
+                  You
+                </MonoLabel>
+                <p style={REHEARSE_YOU}>{ex.you}</p>
+              </div>
+            ))}
+        </div>
+
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-3"
+          style={{
+            marginTop: "var(--sf-space-48)",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: "var(--sf-space-16)",
+          }}
+        >
+          <Button variant="primary" onClick={onDone}>I'm ready</Button>
+          <button type="button" onClick={rehearse} className="sf-link-quiet">Run it again ›</button>
+          <button type="button" onClick={() => setPhase("brief")} className="sf-link-quiet">Back to brief ›</button>
+        </div>
+      </main>
+    );
+  }
+
   // ---- ERROR ----
   if (phase === "error") {
     return (
@@ -244,6 +396,9 @@ export default function PreEventBrief({ seed = "", onDone, onExit }) {
         <Button variant="primary" onClick={() => setPhase("breathing")}>
           One breath before you go in
         </Button>
+        <button type="button" onClick={rehearse} className="sf-link-quiet">
+          Rehearse it ›
+        </button>
         <button type="button" onClick={onDone} className="sf-link-quiet">
           I'm ready ›
         </button>
