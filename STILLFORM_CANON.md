@@ -247,6 +247,7 @@ No recommendation without all three. The standing requirement runs in parallel w
 
 ## 10 · OPERATING RULES (locked decisions)
 
+- **Full integrity, no 80% shortcut (locked May 28, 2026).** 100% completeness on every build AND every audit/thinking pass — never the high-value-80%-and-call-it-done speed shortcut. Run the complete protocol (all layers), not just the highest-risk one. If something is not fully done, say so plainly and finish it — never present a partial pass as comprehensive. Verify against the real code/docs; don't assert; correct your own claims on inspection. This is the line between Stillform and "another app."
 - **Nothing is post-launch.** Every promised feature ships at launch — launch is max attention; deferred features don't get the lens. NEVER use "post-launch," "future commit," "later," "deferred," "next phase" framing in code, commits, or scope. If infrastructure is needed, build it OR ship via alternative path. Enhancements to launch-complete features = fine. Deferring promised features = not.
 - **Composure is a marketable felt outcome, NEVER the product headline.** Headline framing = self-mastery / metacognition. Composure shows up in testimonials, screenshots, what users say. Not in the positioning sentence.
 - **Spine integration is the architecture.** Every practice surface through Notice → Reframe → Close. No parallel entry points to practice. Move and Scripts live behind Support Sheet.
