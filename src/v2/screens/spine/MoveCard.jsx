@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MoveRunner from "../../components/MoveRunner.jsx";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
 import { selectMoveForNotice } from "../../lib/moveCard/select.js";
+import { recordMoveRun, getRecentMoveIds } from "../../lib/moveCard/history.js";
 
 /**
  * MoveCard — the quick-move flow (Phase 6.2c).
@@ -26,12 +27,36 @@ import { selectMoveForNotice } from "../../lib/moveCard/select.js";
  * @param {function} props.onDone  exit (reset was enough, or ended early)
  */
 export default function MoveCard({ chip = null, onKeepGoing, onDone }) {
-  // Select once at mount — a re-render shouldn't reshuffle mid-move.
-  const [sequence] = useState(() => selectMoveForNotice({ chip }));
+  // Select once at mount — a re-render shouldn't reshuffle mid-move. Recent
+  // moves are excluded so the quick-move doesn't hand back the same sequence
+  // two times running (6.2d).
+  const [sequence] = useState(() => selectMoveForNotice({ chip, recentMoveIds: getRecentMoveIds() }));
   const [done, setDone] = useState(false);
+
+  // 6.2d: "Move Started" telemetry — once on mount, before any early return
+  // so the hook order stays stable.
+  useEffect(() => {
+    try {
+      window.plausible?.("Move Started", { props: { sequence: sequence?.id || "unknown" } });
+    } catch { /* analytics non-fatal */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const exit = () => { if (typeof onDone === "function") onDone(); };
   const keepGoing = () => { if (typeof onKeepGoing === "function") onKeepGoing(); };
+
+  // 6.2d: record each run (history, not a score — selection reads it to avoid
+  // repeats) + fire telemetry. Complete → reflection; ended early → exit.
+  const handleComplete = (run) => {
+    recordMoveRun({ sequenceId: run?.sequenceId || sequence?.id || null, durationMs: run?.durationMs || 0, completed: true, sourceState: chip || null });
+    try { window.plausible?.("Move Completed", { props: { sequence: run?.sequenceId || sequence?.id || "unknown" } }); } catch { /* non-fatal */ }
+    setDone(true);
+  };
+  const handleEndedEarly = (run) => {
+    recordMoveRun({ sequenceId: run?.sequenceId || sequence?.id || null, durationMs: run?.durationMs || 0, completed: false, sourceState: chip || null });
+    try { window.plausible?.("Move Ended Early", { props: { sequence: run?.sequenceId || sequence?.id || "unknown", steps_completed: run?.stepsCompleted ?? 0 } }); } catch { /* non-fatal */ }
+    exit();
+  };
 
   // Selection always returns a sequence; this guard is belt-and-suspenders.
   if (!sequence) {
@@ -43,8 +68,8 @@ export default function MoveCard({ chip = null, onKeepGoing, onDone }) {
     return (
       <MoveRunner
         sequence={sequence}
-        onComplete={() => setDone(true)}
-        onExit={exit}
+        onComplete={handleComplete}
+        onExit={handleEndedEarly}
       />
     );
   }
