@@ -514,6 +514,12 @@ This is the architectural floor under Principle C. Every AI surface ships with a
   - **Built on:** Capacitor + HealthKit / Health Connect / push / haptics / biometric lock / Wear OS bridge / iOS WidgetKit / Android App Widgets
 
 - **10** — Onboarding + calibration redo
+  - **GROUND-TRUTH (May 28 2026): v2 has NO onboarding / first-run gate at all** — a brand-new user lands straight on Home with no intro, no framing, no guided calibration (the profile screens exist but only as diagnostic-stack entries, not a first-run flow). This is the front-door gap behind the UAT "what even is this" reaction. Greenfield in v2. **Proposed structure (locked May 28):**
+    - **10a — Intro (front-door frame).** First-run welcome that frames the practice (metacognition → sharper thinking / better decisions / deeper self-understanding; composure as felt outcome) — law-bound, purely positive (NO define-by-negation). The missing frame before anything is asked. + first-run gate (`stillform_onboarded`) so it shows once; `?onboard=1` review hook. **✅ BUILT — DEFAULT COPY for on-screen review.**
+    - **10b — How it works.** One screen on the session loop: notice → name what your mind is doing, precisely → carry a takeaway. [pending]
+    - **10c — Guided calibration.** Run the existing profile screens (signal / bias / trigger / context) as a coherent first-run sequence instead of scattered diagnostic entries ("calibration redo"). [pending — needs an audit of the current calibration entry]
+    - **10d — Hand into first session.** [pending]
+  - DEFAULT COPY throughout for Arlin to assess on screen; doc-first structure locked before build.
 
 - **11** — Translations
   - **Launch set (per Apr 27 lock):** English baseline + Spanish + Brazilian Portuguese + Armenian. Specialist clinical translator approach maintained — science-grounded prompts cannot go generic for the first impression to affluence audience.

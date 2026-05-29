@@ -15,6 +15,8 @@ import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
 import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
 import Paywall from "./screens/Paywall.jsx";
+import Onboarding from "./screens/Onboarding.jsx";
+import { isOnboarded, setOnboarded } from "./lib/onboarding.js";
 import { shouldGate } from "./lib/gating.js";
 import { refreshSubscriptionStatus } from "./lib/subscriptionApi.js";
 
@@ -41,9 +43,12 @@ function pickInitialScreen() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("verify") === "1") return "verify";
     if (params.get("paywall") === "1") return "paywall";
+    if (params.get("onboard") === "1") return "onboarding";
   } catch {
     /* noop */
   }
+  // First-run: a brand-new device sees the intro before Home.
+  if (!isOnboarded()) return "onboarding";
   return "home";
 }
 
@@ -197,6 +202,19 @@ export default function AppV2() {
     return (
       <div className="sf-v2">
         <Paywall onClose={() => setScreen("home")} />
+      </div>
+    );
+  }
+
+  if (screen === "onboarding") {
+    return (
+      <div className="sf-v2">
+        <Onboarding
+          onComplete={() => {
+            setOnboarded();
+            setScreen("home");
+          }}
+        />
       </div>
     );
   }
