@@ -1,10 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import AppV2 from './v2/AppV2.jsx'
+import ErrorBoundary from './v2/components/ErrorBoundary.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AppV2 />
+    <ErrorBoundary>
+      <AppV2 />
+    </ErrorBoundary>
   </React.StrictMode>,
 )
 
