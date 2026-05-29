@@ -46,6 +46,7 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [x] 6.3b Reset entry + routing — Notice second fork + Spine reset step + Reset→Move cross-route (`9837908`)
 - [x] 6.4a post-event beat config + registration + beat.js allowlist (`b827269`)
 - [x] 6.4b post-event AI post-mortem addition — BEAT_ADDITIONS (`b827269`)
+- [x] 6.4c post-event manual entry — My Progress affordance + Spine forcedBeat + AppV2 launch (`a935844`)
 
 ### Ship-gate sweep (11-item, this session's changes)
 1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
@@ -72,6 +73,7 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [ ] 6.4 post-event: open `?beat=post-event` → Notice reads "What just happened?" with full-spectrum chips
 - [ ] 6.4 post-event Reframe: AI runs the post-mortem (what worked / what didn't / what to keep), single-episode, operator voice — and does NOT pull the day's thread (that's EOD)
 - [ ] 6.4 post-event Close: "Logged." carry-forward; re-entry works (no daily completion flag blocking it)
+- [ ] 6.4 real path: Home → Progress → "Break down something that just happened" launches the post-event beat; a normal Home session is unaffected (still time-routed)
 
 ### Pending
 - [ ] **Netlify trigger + publish** — deploys this session's stack; refresh twice (function + SW)
