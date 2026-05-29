@@ -55,6 +55,7 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [x] 8a subscription status client (`098fdfa`) + 8b value-framing paywall surface (`df57bcd`) — DEFAULT COPY, review at ?paywall=1
 - [x] 8c timing + gating (fail-open, 3-session default, flippable knobs) — gating.js + AppV2 gate on session start
 - [x] 10a onboarding intro / front-door frame + first-run gate — onboarding.js + Onboarding.jsx + AppV2 routing (review at ?onboard=1)
+- [x] 10b how-it-works beat — Onboarding.jsx now a frame → how → in flow
 
 ### Ship-gate sweep (11-item, this session's changes)
 1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
