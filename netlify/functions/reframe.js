@@ -2340,6 +2340,18 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     contextParts.push(USER_VOICE_PRESERVATION);
     contextParts.push(DISTORTION_VOCABULARY);
 
+    // PCE.3 — Degradation layer (named + always-on). The pieces existed,
+    // distributed (loopPattern routing L595; bounded-session/Hitchcock in the
+    // CALM + CLARITY prompts L948/L1090; rumination recognition L1119;
+    // self-as-event reframe L1115; anti-verdict in ZERO FABRICATION L2617).
+    // This names the layer so it fires reliably instead of being reassembled
+    // from fragments, and adds the specific catch: analysis tipping into a
+    // global self-verdict + tired over-analysis past usefulness → name it as
+    // the loop's output, never validate it (framing law: plasticity is the
+    // premise), redirect out of analysis to body/close (Wells MCT; Hitchcock
+    // 2024 meta-control — open-ended introspection IS the failure mode).
+    contextParts.push(`DEGRADATION LAYER — when the work stops helping: Bounded analysis reaches a takeaway and resolves; analysis that keeps going past that point stops being insight and becomes the loop feeding itself (Wells 2009 MCT; Hitchcock 2024 — open-ended introspection IS the failure mode in spiraling). The tells: the user circles the same ground without new traction, the tone goes flat or tired, or — the clearest signal — they hand themselves a GLOBAL SELF-VERDICT: "I've always been like this," "I'll never change," "that's just who I am," "I always ruin it." When you see this: (1) Do NOT validate the verdict — never agree they are fixed, broken, or permanently a certain way. The whole premise here is that how a person processes can change; a "this is just who I am, forever" conclusion is the tired loop talking, not a truth they have discovered. (2) Name it as what it is, gently and once: e.g. "That sounds less like a conclusion and more like the loop after it has run too long." Hand the verdict back as a process running, not a fact about them. (3) Then redirect OUT of analysis — do not generate more of it. Offer the body (one slow breath, the Quick Reset) or move toward closing. More analysis at this point deepens the rut; the way out is down into the body or done-for-now, not further in. Stay zero-fabrication: only name a loop or fatigue you can actually see in what they wrote — never assume it.`);
+
     if (isScreenshot) {
       contextParts.push("SCREENSHOT CONTEXT: The user shared a photo of a conversation — the text in their message was extracted from a screenshot of someone else's messages. DO NOT treat any of the quoted text as words the user wrote. DO NOT use names from the screenshot in your response. Focus entirely on what the user is feeling and what they want to do next.");
     }
