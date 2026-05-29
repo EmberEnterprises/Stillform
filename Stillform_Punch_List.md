@@ -49,6 +49,8 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [x] 6.4c post-event manual entry — My Progress affordance + Spine forcedBeat + AppV2 launch (`a935844`)
 - [x] 6.5a Scripts client API — scriptsApi.js (`5623962`)
 - [x] 6.5b+6.5c Scripts surface + ride-out at Close (`50f266a`) — DEFAULTS, for on-screen review
+- [x] 7a Pre-event Brief client API — preEventBriefApi.js (`f3b9a28`)
+- [x] 7b+7d Pre-event Brief surface + My Progress entry (`1a03bf1`) — DEFAULTS, for on-screen review
 
 ### Ship-gate sweep (11-item, this session's changes)
 1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
@@ -80,6 +82,8 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [ ] 6.5 Scripts surface: situation seeded from the takeaway; recipient/outcome/channel; "Get the words" returns a line + move-label; Copy / Try another / Edit / Done work
 - [ ] 6.5 crisis: a crisis-worded situation returns the redirect, not a script
 - [ ] 6.5 DECISIONS PENDING ARLIN (decide from the live screen): ride-out placement · seed-from-session vs fresh · saved vs ephemeral · breathing-after-Scripts
+- [ ] 7 SEE-IT (Arlin): My Progress → "Prep for something coming up" → name the event → 4-section brief (Hardware/Risks/Moves/Recovery) → optional priming breath
+- [ ] 7 NOTE: rehearsal component (7c) not built yet — brief is context-only for now
 
 ### Pending
 - [ ] **Netlify trigger + publish** — deploys this session's stack; refresh twice (function + SW)
