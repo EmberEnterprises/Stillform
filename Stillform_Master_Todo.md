@@ -530,7 +530,7 @@ This is the architectural floor under Principle C. Every AI surface ships with a
   - Settings: daily reminder, audio toggles, screen-light mode, reduced motion, biometric lock, cloud sync settings
   - Crisis resources / 988
   - Privacy policy / Terms
-  - Error boundary
+  - Error boundary ✅ BUILT (pulled forward) — src/v2/components/ErrorBoundary.jsx wraps AppV2; calm fallback + reload; catches render crashes so the app never white-screens
   - FAQ
   - Launch mechanics (Lemon Squeezy live verify, TestFlight, Apple Store submission)
   - **Post-launch enhancements:** Monthly digest, CFM revisit, low-priority integrations (Weather, possibly Voice)
