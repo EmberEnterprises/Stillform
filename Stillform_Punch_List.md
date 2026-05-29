@@ -31,6 +31,43 @@
 
 ---
 
+## MAY 28, 2026 SESSION — All work logged
+
+Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-move flow). Full detail + commit hashes in `Stillform_Completed_Archive.md` (May 28 entry). **Deploy is MANUAL** — Arlin triggers + publishes; reframe.js changed (PCE.2 + PCE.3), so refresh twice.
+
+### Code shipped (committed + pushed to main, deploy pending)
+- [x] PCE.1 structured close — next-move + lock-in (`f07d0ed` + `9f329fb`)
+- [x] PCE.2 reconsolidation loop — reframe.js (`6f06433`)
+- [x] PCE.3 degradation layer + self-verdict catch — reframe.js (`27a8681`)
+- [x] 6.2a MoveRunner (`25fb5f2`)
+- [x] 6.2b + 6.2c quick-move flow — select.js + MoveCard + Notice fork + Spine routing (`384adfe`)
+- [x] 6.2d move history + telemetry (`bd58663`)
+
+### Ship-gate sweep (11-item, this session's changes)
+1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
+2. Tutorial — N/A (no tutorial/onboarding system in v2)
+3. FAQ — PENDING the FAQ screen (not built in v2 yet); add a quick-move entry when it ships
+4. Transfer doc — done via Completed Archive (the canonical shipped log; transfer doc §2 points there by design)
+5. Plausible — done (Move Started / Completed / Ended Early)
+6. Privacy — no new data category (local usage history, same class as session history; existing local-data language covers it)
+7. Science sheet — covered (move-sequence science already documented; the flow adds none)
+8. AI prompts — done (PCE.2 + PCE.3 reframe.js changes, logged)
+9. Promo — N/A this session
+10. Punch list — this section
+11. Emotion coverage — N/A (not touching Pulse/chips balance)
+
+### To verify on live site (after Arlin deploys)
+- [ ] Quick move: Notice "Quick move ›" → runs a sequence → reflection → "Keep going ›" lands in Reframe (if something was named) or Notice; "Done for now" exits
+- [ ] Quick move with nothing typed yet (ungated entry) works
+- [ ] PCE.1: Reframe close shows next-move + lock-in (both skippable); session saved with them
+- [ ] PCE.2: on a repeated thread, the AI surfaces the real prior frame ("last time you landed on X")
+- [ ] PCE.3: a self-verdict ("I've always…") is not validated — named as the loop, redirected to body/close
+
+### Pending
+- [ ] **Netlify trigger + publish** — deploys this session's stack; refresh twice (function + SW)
+
+---
+
 ## MAY 2, 2026 SESSION — All work logged
 
 ### Code commits shipped May 2 (5 corpus shipment commits + 1 bug fix)

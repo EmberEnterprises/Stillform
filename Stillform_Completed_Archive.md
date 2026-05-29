@@ -4,6 +4,24 @@ Items removed from `Stillform_Master_Todo.md` during the May 6, 2026 refactor an
 
 ---
 
+## Completed — May 28, 2026 (Pattern-Change Engine + Quick-move flow)
+
+Long autonomous session. **Deploy pending — Arlin triggers Netlify (manual, two-step); reframe.js changed, so refresh twice for the function + service worker.** Recurring theme: the repo ran ahead of the working context several times (work built earlier in-session, dropped from compaction summaries, surfaced as uncommitted or already-committed) — each was verified fresh against spec before building, so nothing was duplicated. Reading-before-writing is what kept it clean.
+
+**Pattern-Change Engine — the noticing→changing conversion half (ran before Phase 6.2):**
+- **PCE.1 — Structured Reframe close** (`f07d0ed` UI/wiring + `9f329fb` persistence). After the takeaway, the close gains next-move (Gollwitzer implementation intention, free text, skippable) → lock-in (Bandura, one-tap commit, skippable); both persisted to the session record + surfaced to the AI. UI/wiring was built earlier in-session but sitting uncommitted — verified + recovered.
+- **PCE.2 — Reconsolidation loop** (`6f06433`). reframe.js gains a gated reactivate-and-update instruction: on a recurring thread with a real prior frame, the AI brings back "last time you landed on X — does that still hold?" and updates it rather than starting cold (Ecker/Schiller/Lane). Gated on a real frame being present; zero-fabrication, reflect-don't-score. No client change (frames already flow via formatRecentSessionsForAI).
+- **PCE.3 — Degradation layer** (`27a8681`). Named, always-on reframe.js block unifying the distributed loop-handling + adding the self-verdict catch: analysis tipping into "I've always… / I'll never change / that's just who I am" or tired over-analysis past usefulness → never validate the verdict (framing law: plasticity is the premise), name it as the loop's output, redirect to body/close (Wells MCT; Hitchcock 2024).
+
+**Phase 6.2 — Support Sheet · Move card (first live tool):**
+- **6.2a — MoveRunner** (`25fb5f2`). Timed Move-card sequence player, models BreathingSession; prompt text + per-prompt countdown + progress bar, End early; decoupled (onComplete/onExit).
+- **6.2b + 6.2c** (`384adfe`, built earlier in-session, verified fresh). `select.js` (chip→feelState deterministic selection, never null) + `MoveCard.jsx` (selection → runner → ungamified dual-exit reflection) + Notice "Quick move ›" ungated fork + Spine `move` routing. Handoff = dual exit ("Keep going ›" → reframe-if-named-else-notice / "Done for now" → exit); body-first → cognitive, per the Apr 27 breathe-and-ground precedent.
+- **6.2d — History + telemetry** (`bd58663`). `stillform_move_card_history` (plain v2 store; the v1 SYNC/SECURE_KEYS registries are N/A by the v2 convention); selection excludes recent ids (no back-to-back repeat); Plausible Move Started / Completed / Ended Early. History, not a score.
+
+**Ship-checklist notes (v2 reality):** Tutorial — N/A (no tutorial/onboarding system exists in v2). FAQ — the FAQ screen isn't built in v2 yet (planned, "joins later" per AppV2); quick-move FAQ entry tracked as pending that screen. Privacy — no new data category (local usage history, same class as session history; covered by existing local-data language). Science — the move sequences' science is already in database.js + Science Sheet (Porges / Levine / Sokolov / Lieberman / Kross / Wells); the flow adds no new science. AI prompts — PCE.2 + PCE.3 changed reframe.js prompts (logged above). Plausible — events added.
+
+---
+
 ## Completed — May 14, 2026 (late evening session)
 
 Long-session Claude · Arlin called the session done at the end due to Claude degradation (fabrication, over-stripping, inversion of stated direction). Transfer prompt written for next session. PRs landed during this session:
