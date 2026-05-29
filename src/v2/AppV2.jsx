@@ -14,6 +14,7 @@ import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
 import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
 import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
+import Paywall from "./screens/Paywall.jsx";
 
 /**
  * AppV2 — root of the v2 frontend.
@@ -37,6 +38,7 @@ function pickInitialScreen() {
   try {
     const params = new URLSearchParams(window.location.search);
     if (params.get("verify") === "1") return "verify";
+    if (params.get("paywall") === "1") return "paywall";
   } catch {
     /* noop */
   }
@@ -177,6 +179,14 @@ export default function AppV2() {
           onDone={() => setScreen("home")}
           onExit={() => setScreen("my-progress")}
         />
+      </div>
+    );
+  }
+
+  if (screen === "paywall") {
+    return (
+      <div className="sf-v2">
+        <Paywall onClose={() => setScreen("home")} />
       </div>
     );
   }

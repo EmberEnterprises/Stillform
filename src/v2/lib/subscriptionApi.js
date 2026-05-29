@@ -19,6 +19,55 @@ import { getOrCreateInstallId } from "./identity.js";
 const SUBSCRIPTION_STATUS_URL = "/.netlify/functions/subscription-status";
 
 /**
+ * Lemon Squeezy hosted-checkout URLs (LIVE). Arlin fills these from the LS
+ * dashboard (each plan's Share → checkout link) — one per variant. Until
+ * they're set, the paywall CTA surfaces an "almost ready" state instead of a
+ * dead link, so the surface is reviewable now and goes live the moment the
+ * URLs land here (no other code change needed).
+ */
+const CHECKOUT_URLS = {
+  monthly: "",
+  annual: "",
+};
+
+/**
+ * Build the full checkout URL for a variant, with custom data attached so the
+ * webhook can match the purchase back to this device (SUBSCRIPTION_SETUP §4).
+ * Returns null if the variant's URL isn't configured yet.
+ *
+ * @param {"monthly"|"annual"} variant
+ * @returns {string|null}
+ */
+export function getCheckoutUrl(variant) {
+  const base = CHECKOUT_URLS[variant] || "";
+  if (!base) return null;
+  const installId = getOrCreateInstallId();
+  const params = new URLSearchParams();
+  if (installId) params.set("checkout[custom][install_id]", installId);
+  params.set("checkout[custom][variant]", variant);
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}${params.toString()}`;
+}
+
+/**
+ * Send the user to Lemon Squeezy checkout for a variant. No-ops with an error
+ * code if the variant's URL isn't configured yet.
+ *
+ * @param {"monthly"|"annual"} variant
+ * @returns {{ok: boolean, error: string|null}}
+ */
+export function startCheckout(variant) {
+  const url = getCheckoutUrl(variant);
+  if (!url) return { ok: false, error: "not_configured" };
+  try {
+    window.location.href = url;
+    return { ok: true, error: null };
+  } catch {
+    return { ok: false, error: "navigation_failed" };
+  }
+}
+
+/**
  * Fetch current subscription status for this device.
  *
  * @returns {Promise<{isSubscribed: boolean, status: string|null, error: string|null}>}
