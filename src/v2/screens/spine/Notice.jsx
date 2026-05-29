@@ -152,6 +152,13 @@ export default function Notice({ config, onContinue, onExit }) {
     onContinue(text.trim(), selectedChip, { quickMove: true });
   };
 
+  const handleReset = () => {
+    // Ungated, same as quick move: the urge-surf is for the acute pull
+    // (scroll / check / scratch / send it) — a moment you reach for before
+    // anything is named. The Support Sheet's second tool (Phase 6.3).
+    onContinue(text.trim(), selectedChip, { reset: true });
+  };
+
   return (
     <main className="sf-page sf-page--hero">
       <div className="sf-fade-enter">
@@ -268,6 +275,22 @@ export default function Notice({ config, onContinue, onExit }) {
           className="sf-link-quiet"
         >
           Quick move ›
+        </button>
+      </div>
+
+      {/* Reset an urge — urge-surf for an acute compulsion pull. Ungated,
+          like quick move; the Support Sheet's second tool (Phase 6.3). Can
+          cross-route to a Move from inside the flow. */}
+      <div
+        className="sf-fade-enter sf-fade-enter--delay-3"
+        style={{ marginTop: "var(--sf-space-12)" }}
+      >
+        <button
+          type="button"
+          onClick={handleReset}
+          className="sf-link-quiet"
+        >
+          Reset an urge ›
         </button>
       </div>
     </main>

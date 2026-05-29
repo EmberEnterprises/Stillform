@@ -4,6 +4,7 @@ import Reframe from "./spine/Reframe.jsx";
 import SelfReframe from "./spine/SelfReframe.jsx";
 import Close from "./spine/Close.jsx";
 import MoveCard from "./spine/MoveCard.jsx";
+import Reset from "./spine/Reset.jsx";
 import WindDown from "./spine/WindDown.jsx";
 import { saveSession } from "../lib/sessions.js";
 import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
@@ -91,6 +92,11 @@ export default function Spine({ onExit }) {
     // Carry text/chip so "Keep going" can resume; route to the move step.
     if (opts.quickMove) {
       setStep("move");
+      return;
+    }
+    // Reset fork (Phase 6.3b): urge-surf for an acute compulsion pull.
+    if (opts.reset) {
+      setStep("reset");
       return;
     }
     if (opts.selfMode) setSelfMode(true);
@@ -298,6 +304,18 @@ export default function Spine({ onExit }) {
         chip={selectedChip}
         onKeepGoing={() => setStep(precisionName && precisionName.trim() ? "reframe" : "notice")}
         onDone={onExit}
+      />
+    );
+  }
+
+  // Phase 6.3b: reset step — urge-surf. Name → watch → act-or-don't (neutral,
+  // never scored). onDoMove cross-routes to the Move card; both exits leave.
+  if (step === "reset") {
+    return (
+      <Reset
+        onDone={onExit}
+        onExit={onExit}
+        onDoMove={() => setStep("move")}
       />
     );
   }
