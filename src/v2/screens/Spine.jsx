@@ -104,7 +104,15 @@ export default function Spine({ onExit }) {
   // Phase 3.5 #2: persistence point. Called when the user has named what
   // landed in Close and tapped Return home. Persists session + thread,
   // then exits the spine.
-  const handleCloseReturn = (userTakeaway) => {
+  const handleCloseReturn = (closePayload) => {
+    // PCE.1: Close now returns { takeaway, nextMove, lockIn }. Tolerate a
+    // bare string for safety (any older/edge caller) so persistence never
+    // breaks on shape.
+    const payload =
+      closePayload && typeof closePayload === "object"
+        ? closePayload
+        : { takeaway: closePayload, nextMove: null, lockIn: null };
+
     // Phase 4 #2: use the beat locked at mount (not re-read fresh here),
     // so the session record matches the variant the user actually
     // experienced if they crossed a beat boundary mid-flow.
@@ -112,11 +120,14 @@ export default function Spine({ onExit }) {
 
     // The session is now committed. takeaway = USER's named takeaway;
     // surfacedFrame = what was surfaced during reframe (preserved for
-    // downstream Mirror / Library / Pattern Disruption surfaces).
+    // downstream Mirror / Library / Pattern Disruption surfaces);
+    // nextMove + lockIn = PCE.1 forward frame (fuel for PCE.2 reconsolidation).
     saveSession({
       precisionName,
       selectedChip,
-      takeaway: userTakeaway,
+      takeaway: payload.takeaway,
+      nextMove: payload.nextMove,
+      lockIn: payload.lockIn,
       surfacedFrame,
       mode,
       selfMode,

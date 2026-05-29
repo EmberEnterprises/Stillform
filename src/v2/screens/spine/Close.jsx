@@ -60,6 +60,9 @@ const MIN_TAKEAWAY_LEN = 4;
 export default function Close({ surfacedFrame, breathingOffer = null, beat = null, onReturnHome }) {
   const [step, setStep] = useState("compose");
   const [text, setText] = useState("");
+  // PCE.1: structured close — forward implementation intention + lock-in.
+  const [nextMove, setNextMove] = useState("");
+  const [lockedIn, setLockedIn] = useState(false);
   const textareaRef = useRef(null);
   const microCreditFiredRef = useRef(false);
   const breathingOfferShownRef = useRef(false);
@@ -189,15 +192,62 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
     } catch { return ""; }
   };
 
-  // Phase 4 #7: primary action depends on whether breathing is offered.
-  // With offer → advance to breathing-offer step. Without → onReturnHome.
-  const handlePrimary = () => {
-    if (!canReturn) return;
+  // PCE.1: the close payload — takeaway + the forward implementation
+  // intention (nextMove) + whether they locked it in. Together nextMove +
+  // lockIn are "the frame you landed on" that PCE.2's reconsolidation loop
+  // reactivates when the same trigger recurs.
+  const buildClosePayload = (lockInOverride) => ({
+    takeaway: trimmed,
+    nextMove: nextMove.trim() || null,
+    lockIn:
+      lockInOverride !== undefined
+        ? lockInOverride
+        : lockedIn
+        ? nextMove.trim() || null
+        : null,
+  });
+
+  // The breathing offer (if configured) sits AFTER the forward beats.
+  // Terminal calls in the breathing handlers rebuild the payload from state
+  // (flushed by then); the direct-return path takes an explicit
+  // lockInOverride so a just-tapped lock-in isn't lost to async state.
+  const proceedToBreathOrReturn = (lockInOverride) => {
     if (breathingOffer && resolveBreathingPattern(breathingOffer)) {
       setStep("breathing-offer");
     } else {
-      onReturnHome(trimmed);
+      onReturnHome(buildClosePayload(lockInOverride));
     }
+  };
+
+  // Compose → the structured forward close. Always advances to the next-move
+  // beat; both forward beats are skippable from there.
+  const handlePrimary = () => {
+    if (!canReturn) return;
+    setStep("next-move");
+  };
+
+  // Next-move beat (Gollwitzer implementation intention). With a move named →
+  // lock-in beat; skipped → straight on (no lock-in to commit).
+  const handleNextMoveContinue = () => {
+    if (nextMove.trim()) {
+      setStep("lock-in");
+    } else {
+      proceedToBreathOrReturn(null);
+    }
+  };
+  const handleNextMoveSkip = () => {
+    setNextMove("");
+    proceedToBreathOrReturn(null);
+  };
+
+  // Lock-in beat (Bandura mastery). A one-tap commitment, not a score. The
+  // override carries the lock-in past async state on the direct-return path.
+  const handleLockIn = () => {
+    setLockedIn(true);
+    proceedToBreathOrReturn(nextMove.trim() || null);
+  };
+  const handleLockInSkip = () => {
+    proceedToBreathOrReturn(null);
   };
 
   const handleStartBreathing = () => {
@@ -215,11 +265,11 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
         props: { beat: beat || "unknown", pattern: breathingOffer },
       });
     } catch { /* non-fatal */ }
-    onReturnHome(trimmed);
+    onReturnHome(buildClosePayload());
   };
 
-  const handleBreathingComplete = () => { onReturnHome(trimmed); };
-  const handleBreathingEndEarly = () => { onReturnHome(trimmed); };
+  const handleBreathingComplete = () => { onReturnHome(buildClosePayload()); };
+  const handleBreathingEndEarly = () => { onReturnHome(buildClosePayload()); };
 
   // ---------------- Render ----------------
 
@@ -268,6 +318,94 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
             className="sf-link-quiet"
           >
             Skip to home ›
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // PCE.1: next-move beat — the implementation intention (Gollwitzer 1999).
+  if (step === "next-move") {
+    const advancesToLockIn = !!nextMove.trim();
+    const primaryLabel = advancesToLockIn
+      ? "Continue"
+      : breathingOffer && resolveBreathingPattern(breathingOffer)
+      ? "Continue"
+      : "Return home";
+    return (
+      <main className="sf-page sf-page--hero">
+        <div className="sf-fade-enter">
+          <EditorialBlock
+            label="Close"
+            headline="Your next move."
+            headlineSize="lg"
+            body="One concrete move for the next time this comes up. Small and specific beats sweeping."
+            labelInfoTitle="Why this step"
+            labelInfoBody="Naming a specific 'next time X, I'll do Y' before you leave is an implementation intention — it pre-commits the response so it's available under load instead of being decided in the moment. This is the bridge from understanding a pattern to acting differently inside it (Gollwitzer 1999)."
+          />
+        </div>
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-1"
+          style={{ marginTop: "var(--sf-space-48)" }}
+        >
+          <textarea
+            className="sf-textarea"
+            value={nextMove}
+            onChange={(e) => setNextMove(e.target.value)}
+            placeholder="Next time this comes up, I'll…"
+            rows={3}
+            aria-label="Name your next move"
+            autoFocus
+          />
+        </div>
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-3"
+          style={{
+            marginTop: "var(--sf-space-48)",
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--sf-space-16)",
+          }}
+        >
+          <Button variant="primary" onClick={handleNextMoveContinue}>
+            {primaryLabel}
+          </Button>
+          <button type="button" onClick={handleNextMoveSkip} className="sf-link-quiet">
+            Skip this ›
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // PCE.1: lock-in beat — a one-tap commitment (Bandura 1977). Not a score.
+  if (step === "lock-in") {
+    return (
+      <main className="sf-page sf-page--hero">
+        <div className="sf-fade-enter">
+          <EditorialBlock
+            label="Close"
+            headline="Lock it in."
+            headlineSize="lg"
+            body={`"${nextMove.trim()}"`}
+            labelInfoTitle="Why this step"
+            labelInfoBody="Committing to a chosen response — not just naming it — strengthens the belief that you can carry it out, which is the strongest predictor of whether you actually will (Bandura 1977, self-efficacy). One tap. No score, no streak."
+          />
+        </div>
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-3"
+          style={{
+            marginTop: "var(--sf-space-48)",
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--sf-space-16)",
+          }}
+        >
+          <Button variant="primary" onClick={handleLockIn}>
+            Lock it in
+          </Button>
+          <button type="button" onClick={handleLockInSkip} className="sf-link-quiet">
+            Not yet ›
           </button>
         </div>
       </main>
@@ -464,9 +602,7 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
               : undefined
           }
         >
-          {breathingOffer && resolveBreathingPattern(breathingOffer)
-            ? "Continue"
-            : "Return home"}
+          Continue
         </Button>
       </div>
     </main>
