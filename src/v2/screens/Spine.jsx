@@ -3,6 +3,7 @@ import Notice from "./spine/Notice.jsx";
 import Reframe from "./spine/Reframe.jsx";
 import SelfReframe from "./spine/SelfReframe.jsx";
 import Close from "./spine/Close.jsx";
+import MoveCard from "./spine/MoveCard.jsx";
 import WindDown from "./spine/WindDown.jsx";
 import { saveSession } from "../lib/sessions.js";
 import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
@@ -86,6 +87,12 @@ export default function Spine({ onExit }) {
   const handleNoticeContinue = (text, chip, opts = {}) => {
     setPrecisionName(text);
     setSelectedChip(chip);
+    // Quick-move fork (Phase 6.2c): a body-first reset before the spine.
+    // Carry text/chip so "Keep going" can resume; route to the move step.
+    if (opts.quickMove) {
+      setStep("move");
+      return;
+    }
     if (opts.selfMode) setSelfMode(true);
     setStep("reframe");
   };
@@ -279,6 +286,20 @@ export default function Spine({ onExit }) {
   // standard spine. Wind-down doesn't use Notice / Reframe / Close.
   if (beat === "wind-down") {
     return <WindDown onReturnHome={handleWindDownReturn} />;
+  }
+
+  // Phase 6.2c: quick-move step. The reset runs, then MoveCard offers the
+  // handoff — "Keep going" lands in Reframe if they had already named
+  // something, else back to Notice to name it first (body-first → cognitive);
+  // "Done for now" exits.
+  if (step === "move") {
+    return (
+      <MoveCard
+        chip={selectedChip}
+        onKeepGoing={() => setStep(precisionName && precisionName.trim() ? "reframe" : "notice")}
+        onDone={onExit}
+      />
+    );
   }
 
   if (step === "notice") {

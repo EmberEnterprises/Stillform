@@ -144,6 +144,14 @@ export default function Notice({ config, onContinue, onExit }) {
     onContinue(text.trim(), selectedChip, { selfMode: true });
   };
 
+  const handleQuickMove = () => {
+    // Ungated on purpose: the quick move is the one path a user can take
+    // before they've named anything — body first, then the thinking.
+    // Whatever they've typed / selected so far is carried so "Keep going"
+    // can resume the spine afterward.
+    onContinue(text.trim(), selectedChip, { quickMove: true });
+  };
+
   return (
     <main className="sf-page sf-page--hero">
       <div className="sf-fade-enter">
@@ -243,6 +251,23 @@ export default function Notice({ config, onContinue, onExit }) {
           className="sf-link-quiet"
         >
           Or self-led ›
+        </button>
+      </div>
+
+      {/* Quick move — body-first reset. Ungated (works before naming) because
+          its whole purpose is the moment you can't think yet; "Keep going"
+          afterward returns to the naming. The Support Sheet's first surfaced
+          tool (Phase 6.2). */}
+      <div
+        className="sf-fade-enter sf-fade-enter--delay-3"
+        style={{ marginTop: "var(--sf-space-12)" }}
+      >
+        <button
+          type="button"
+          onClick={handleQuickMove}
+          className="sf-link-quiet"
+        >
+          Quick move ›
         </button>
       </div>
     </main>
