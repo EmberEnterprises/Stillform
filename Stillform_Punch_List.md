@@ -54,6 +54,7 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [x] 7c Rehearsal — new rehearsal.js backend + rehearsalApi + PreEventBrief integration (`7cae25e`)
 - [x] 8a subscription status client (`098fdfa`) + 8b value-framing paywall surface (`df57bcd`) — DEFAULT COPY, review at ?paywall=1
 - [x] 8c timing + gating (fail-open, 3-session default, flippable knobs) — gating.js + AppV2 gate on session start
+- [x] 10a onboarding intro / front-door frame + first-run gate — onboarding.js + Onboarding.jsx + AppV2 routing (review at ?onboard=1)
 
 ### Ship-gate sweep (11-item, this session's changes)
 1. UAT dropdown — N/A (no v2 UAT-dropdown surface located)
@@ -94,6 +95,8 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - [ ] 8 ⚠️ DEPLOY WARNING (8c is LIVE on next deploy): non-subscribed users past 3 real sessions — INCLUDING testers — hit the paywall on session start. Quick Breathe stays free. If it disrupts UAT: set GATING_ENABLED=false (master off) or raise FREE_SESSION_LIMIT in src/v2/lib/gating.js.
 - [ ] 8 SEE-IT after deploy: do 3 sessions on a non-subscribed device → 4th session-start shows the paywall; subscribed device never does; Quick Breathe never gated
 - [ ] 8 REMAINING FOR ARLIN: drop the LS checkout URLs into subscriptionApi.js CHECKOUT_URLS (8d) to complete a purchase; assess framing copy + the 3-session timing on screen
+- [ ] 10 SEE-IT: ?onboard=1 (or a fresh device) shows the framed intro — reads as Stillform (a metacognition practice that sharpens thinking), NOT a wellness/calm welcome; Begin → Home; shows once (doesn't reappear on reload)
+- [ ] 10 PENDING: 10b how-it-works screen, 10c guided calibration (needs an audit of the current calibration entry + Arlin's flow steer), 10d hand into first session
 
 ### Pending
 - [ ] **Netlify trigger + publish** — deploys this session's stack; refresh twice (function + SW)
