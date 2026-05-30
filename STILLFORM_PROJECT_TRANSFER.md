@@ -136,7 +136,7 @@ The current build state is too dynamic to mirror in this transfer doc. Pull `Sti
 - Hosting: Netlify. **Deploys are MANUAL.** Arlin triggers AND publishes (two-step). Claude pushes to GitHub only.
 - GitHub: `EmberEnterprises/Stillform`. Branch `main`. Feature branches per CANON.
 - AI: GPT-4o via `netlify/functions/reframe.js`.
-- Cloud sync: Supabase, AES-256 encrypted, three-table schema (user_data, backups, user_profiles).
+- Cloud sync: Supabase, AES-256 encrypted, three-table schema (user_data, backups, user_profiles). ⚠️ **NOT wired in the live frontend (May 30 2026 audit) — no Supabase client, no sync, no encryption; data is plain `localStorage`, device-only. Describes intended design, not current reality. See Punch List "VERIFIED CODE AUDIT."**
 - Payments: Lemon Squeezy LIVE.
 - Pricing: $14.99/mo or $9.99/mo annual ($119.88/yr).
 
