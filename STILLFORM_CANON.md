@@ -248,6 +248,7 @@ No recommendation without all three. The standing requirement runs in parallel w
 ## 10 · OPERATING RULES (locked decisions)
 
 - **Full integrity, no 80% shortcut (locked May 28, 2026).** 100% completeness on every build AND every audit/thinking pass — never the high-value-80%-and-call-it-done speed shortcut. Run the complete protocol (all layers), not just the highest-risk one. If something is not fully done, say so plainly and finish it — never present a partial pass as comprehensive. Verify against the real code/docs; don't assert; correct your own claims on inspection. This is the line between Stillform and "another app."
+- **Doc accuracy is absolute (locked May 30, 2026).** Every Stillform doc must ALWAYS be 100% accurate — a doc that claims something the code doesn't do is worse than no doc, because it makes Arlin trust a lie. Never mark anything "RESOLVED / shipped / done" without verifying it against the live code first. When a doc claim is found false or stale, correct the claim itself at its source — not just add a warning banner elsewhere. Doc-vs-reality drift is a defect to fix immediately, not flag and leave. (This rule was born from the May 17 v1 deletion leaving a trail of false "resolved" tags; re-baselined May 30.)
 - **Nothing is post-launch.** Every promised feature ships at launch — launch is max attention; deferred features don't get the lens. NEVER use "post-launch," "future commit," "later," "deferred," "next phase" framing in code, commits, or scope. If infrastructure is needed, build it OR ship via alternative path. Enhancements to launch-complete features = fine. Deferring promised features = not.
 - **Composure is a marketable felt outcome, NEVER the product headline.** Headline framing = self-mastery / metacognition. Composure shows up in testimonials, screenshots, what users say. Not in the positioning sentence.
 - **Spine integration is the architecture.** Every practice surface through Notice → Reframe → Close. No parallel entry points to practice. Move and Scripts live behind Support Sheet.
@@ -349,7 +350,7 @@ Token in user memory edits is STALE; always use the URL-extracted one.
 
 **AI:** OpenAI GPT-4o via Netlify function `netlify/functions/reframe.js`. Single substrate. System prompts: `CALM_SYSTEM`, `CLARITY_SYSTEM`, `HYPE_SYSTEM`. Cross-cutting constants layered on top: `METACOGNITIVE_ARC`, `USER_VOICE_PRESERVATION`, `BEAT_ADDITIONS`, `LOW-DEMAND OVERRIDE`, `SAFETY OVERRIDE`, `LIABILITY GUARD`. Verify by name (`grep -n "const CALM_SYSTEM"` etc.) before editing — line numbers drift.
 
-**Cloud sync:** Supabase (three-table schema with RLS + AES-256 encryption).
+**Cloud sync:** Supabase (three-table schema with RLS + AES-256 encryption). ⚠️ **NOT WIRED IN THE LIVE FRONTEND as of May 30 2026** — a verified code audit found no Supabase client, no sync, and no encryption layer in `src/v2/`; user practice data is currently stored in PLAIN `localStorage`, device-only, with no cloud backup. This line describes the intended/backend design, not current reality. Wiring it (and honoring the encrypted-backup-before-update non-negotiable) is outstanding work. See `Stillform_Punch_List.md` → "VERIFIED CODE AUDIT (May 29)."
 
 **Analytics:** Plausible.
 
