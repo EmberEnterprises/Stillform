@@ -40,7 +40,7 @@ Every Netlify function in `netlify/functions/` is the source of truth for its ca
 - `subscription-*` — LemonSqueezy
 - `organization-*` — B2B foundation (privacy wall enforced at three layers)
 
-Supabase schema, RLS, encrypted storage shapes — all stable.
+Supabase schema + RLS exist as backend design. ⚠️ **NOT wired in the live frontend (May 30 2026 audit):** no Supabase client, no sync, no encryption — user data is plain `localStorage`, device-only. "Encrypted storage" describes intended design, not current reality.
 
 ## Current phase
 
