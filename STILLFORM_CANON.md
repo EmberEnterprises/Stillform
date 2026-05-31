@@ -58,7 +58,7 @@ NOT for: people in active distress seeking immediate relief, people with clinica
 
 ---
 
-## 4 · EMOTIONAL HONESTY (v2 — added May 13, 2026)
+## 4 · EMOTIONAL HONESTY (added May 13, 2026)
 
 **Metacognition is not the bypassing of emotion to reach action.** Felt experience — grief, vent, exhaustion, anger, presence with what is — IS the cognitive material being practiced on, not friction to clear. The practice makes room for the user to sit with what is, not just label and move it. Self-mastery is clear-eyed AND emotionally honest. Sentimentality and robotic stoicism are both drift.
 
@@ -248,8 +248,7 @@ No recommendation without all three. The standing requirement runs in parallel w
 ## 10 · OPERATING RULES (locked decisions)
 
 - **Full integrity, no 80% shortcut (locked May 28, 2026).** 100% completeness on every build AND every audit/thinking pass — never the high-value-80%-and-call-it-done speed shortcut. Run the complete protocol (all layers), not just the highest-risk one. If something is not fully done, say so plainly and finish it — never present a partial pass as comprehensive. Verify against the real code/docs; don't assert; correct your own claims on inspection. This is the line between Stillform and "another app."
-- **Doc accuracy is absolute (locked May 30, 2026).** Every Stillform doc must ALWAYS be 100% accurate — a doc that claims something the code doesn't do is worse than no doc, because it makes Arlin trust a lie. Never mark anything "RESOLVED / shipped / done" without verifying it against the live code first. When a doc claim is found false or stale, correct the claim itself at its source — not just add a warning banner elsewhere. Doc-vs-reality drift is a defect to fix immediately, not flag and leave. (This rule was born from the May 17 v1 deletion leaving a trail of false "resolved" tags; re-baselined May 30.)
-- **OPERATING REALITY — Stillform is mid front-end rebuild (state as of May 30, 2026).** The v1 front end (`src/App.jsx`) was deleted May 17; the **backend was retained** (Netlify functions, Supabase tables, the organization/B2B cluster, the subscription stack). The front end is being **rebuilt from scratch in `src/v2/`**, surface by surface — the phase roadmap IS that rebuild. THEREFORE: a front-end surface absent from the live app (Settings, encryption-at-rest wiring, share, the B2B UI, cognitive measurement, the Mirror, etc.) is **rebuild backlog — not lost work, not a regression, not something that got reversed.** Read every "absent / NOT in live build / SUPERSEDED / missing" flag across these docs as "not yet rebuilt; backend retained," and do NOT sound alarms about the normal in-progress state of a rebuild.
+- **Doc accuracy is absolute (locked May 30, 2026).** Every Stillform doc must ALWAYS be 100% accurate — a doc that claims something the code doesn't do is worse than no doc, because it makes Arlin trust a lie. Never mark anything "RESOLVED / shipped / done" without verifying it against the live code first. When a doc claim is found false or stale, correct the claim itself at its source — not just add a warning banner elsewhere. Doc-vs-reality drift is a defect to fix immediately, not flag and leave.
 - **Nothing is post-launch.** Every promised feature ships at launch — launch is max attention; deferred features don't get the lens. NEVER use "post-launch," "future commit," "later," "deferred," "next phase" framing in code, commits, or scope. If infrastructure is needed, build it OR ship via alternative path. Enhancements to launch-complete features = fine. Deferring promised features = not.
 - **Composure is a marketable felt outcome, NEVER the product headline.** Headline framing = self-mastery / metacognition. Composure shows up in testimonials, screenshots, what users say. Not in the positioning sentence.
 - **Spine integration is the architecture.** Every practice surface through Notice → Reframe → Close. No parallel entry points to practice. Move and Scripts live behind Support Sheet.
@@ -366,7 +365,6 @@ Token in user memory edits is STALE; always use the URL-extracted one.
 - `src/v2/lib/contextProfile.js` + `triggerProfile.js` — diagnostic stack data layers
 - `src/v2/lib/smartScreen.js` — home composition logic
 
-**Legacy note:** Prior frontend at `src/App.jsx` was deleted in commit `237167b` (Phase A, May 17, 2026). Never read it, port from it, or use it as a pattern source. Stillform is just Stillform.
 
 **GitHub API pattern for large operations:** write JSON payload to temp file via Python, pass via `-d @{tmpfile}` to curl. Use git low-level API (blobs/trees/commits) to bypass 409 conflicts when contents API fails.
 
@@ -474,7 +472,7 @@ Future versions update this doc when framing or operating rules evolve. Cosmetic
 
 ## Onboarding & Calibration — locked May 28, 2026
 
-The onboarding front door was greenfield in v2 (no first-run existed). From the May 28 design session with Arlin:
+The onboarding front door was built greenfield (no first-run existed). From the May 28 design session with Arlin:
 
 **Governing principle — burden vs. revelation, not light vs. heavy.** Onboarding is LOW-BURDEN (little friction) and HIGH-REVELATION (the user walks out having learned something true about themselves they couldn't name a minute ago). Depth lives in the insight, not the input. Not Liven-style (workbooks / CBT intake = high burden, therapy shape); not a trivial one-tap setup (low revelation, can't carry a premium price). The revelation IS the product in miniature — the first metacognitive hit; the "it already sees me" feeling is what earns the price (you justify a premium by delivering a piece of the value before the ask, not by explaining it).
 
