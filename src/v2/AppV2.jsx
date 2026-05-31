@@ -16,6 +16,7 @@ import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
 import Paywall from "./screens/Paywall.jsx";
 import Onboarding from "./screens/Onboarding.jsx";
+import Settings from "./screens/Settings.jsx";
 import { isOnboarded, setOnboarded } from "./lib/onboarding.js";
 import { shouldGate } from "./lib/gating.js";
 import { refreshSubscriptionStatus } from "./lib/subscriptionApi.js";
@@ -219,6 +220,14 @@ export default function AppV2() {
     );
   }
 
+  if (screen === "settings") {
+    return (
+      <div className="sf-v2">
+        <Settings onExit={() => setScreen("home")} />
+      </div>
+    );
+  }
+
   return (
     <div className="sf-v2">
       <Home
@@ -238,10 +247,11 @@ export default function AppV2() {
         onNavigate={(target) => {
           // Phase 5: 'progress' routes to the MyProgress landing,
           // 'library' to the Library (Workshop section live; curated
-          // knowledge cards join later). FAQ / Settings / Crisis-Resources
-          // stay no-op until their own sub-items ship.
+          // knowledge cards join later). 'settings' to the Settings surface.
+          // FAQ / Crisis-Resources stay no-op until their own sub-items ship.
           if (target === "progress") setScreen("my-progress");
           else if (target === "library") setScreen("library");
+          else if (target === "settings") setScreen("settings");
         }}
       />
     </div>
