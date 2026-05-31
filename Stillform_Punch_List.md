@@ -80,11 +80,11 @@ Audited the "outside-the-phases" items against the ACTUAL live frontend (`src/v2
 **NOT YET REBUILT in the live front end (verified) — rebuild backlog, not losses:**
 - **Encrypted storage + cloud backup/sync — NOT present.** No Supabase client, no `createClient`, no sync, no CryptoStore/SecureStore. Live lib files use PLAIN `localStorage`. → practice data is unencrypted + device-only + no cloud backup. Directly contradicts the locked non-negotiable (encrypted cloud backup before updates). BIGGEST finding (one final storage-layer pass recommended to be 100%, but the read is strong).
 - **Cognitive Function Measurement — gone.** No function_check/appendFunctionCheck in live code; the "moonshot" Phase-0 storage lived in the old front end; it's on the rebuild backlog (needs rebuilding in the new front end).
-- **Settings surface — never built.** No Settings screen file.
+- **Settings surface — v1 BUILT May 30 2026** (`src/v2/screens/Settings.jsx`, wired in AppV2 via HomeFooter): subscription status + refresh, read-only on-device data summary, local clear-data (confirm-gated, preserves `install_id`), privacy/contact links. Fuller spec sections (auth, sync, integrations, toggles, FAQ) still backlog. [audit line was: never built]
 - **Share-into-Reframe (`?share=`) — not rebuilt.**
 - **Restore-purchase-by-email — no `subscription-lookup-by-email` fn, no flow.**
 - **Auto-sync / restore-on-open — not present.**
-**BACKEND READY, FRONTEND MISSING:** `account-delete.js` exists but NO Settings UI + NO delete-data-only split. (Also present, outside scope: a full B2B `organization` backend cluster.)
+**BACKEND READY, FRONTEND MISSING:** `account-delete.js` exists; Settings UI now built (v1, May 30) but does a LOCAL device wipe only — server account-delete still NOT wired (it needs an authed Supabase user this build doesn't have yet). (Also present, outside scope: a full B2B `organization` backend cluster.)
 **PARTIAL — AI safety guardrails:** client receives `crisisDetected` (reframeApi.js L168) but Plausible crisis/liability telemetry (C2), image-upload validation (C3), voiceRepair (C4), crisis→safety-surface routing (C5) not found client-side.
 **NON-CODE (Arlin/external):** Supabase Site URL = localhost:3000 (dashboard → https://stillformapp.com, or fresh signups can't confirm email); Termly ToS billing answer + business phone line (legal).
 **PRESENT/REAL:** rich backend (reframe, todays-brief, pre-event-brief, rehearsal, scripts, eod-artifact, move-card-select, infer-trigger, pattern-enrichment, calendar-screenshot-extract, subscription status/portal/webhook/link-account, account-delete, organization cluster, health, metrics, uat-feedback); frontend spine + Move card + Close; `security-smoke.mjs`.
