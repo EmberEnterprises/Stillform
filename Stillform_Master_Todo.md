@@ -532,7 +532,10 @@ This is the architectural floor under Principle C. Every AI surface ships with a
   - **Dynamic conversation layer** handled at runtime by GPT-4o native multilingual support — no translation step needed for the Reframe conversation itself; translation work is only the static layers above.
 
 - **12+** — Settings + Launch mechanics
-  - Settings: daily reminder, audio toggles, screen-light mode, reduced motion, biometric lock, cloud sync settings
+  - **Settings surface — REBUILD IN PROGRESS (scope locked May 30 2026).** Full spec: `SETTINGS_REWRITE_SPEC.md` (predates the rebuild — design direction only; re-walk each section against v2 before it lands).
+    - **v1 (backed-by-real-capability baseline — building now):** (1) Access — subscription status + "refresh from server" via `subscriptionApi` (install-id based, NO auth needed); (2) read-only data summary from existing localStorage; (3) "Clear all data from this device" — destructive, confirm-gated; wipes `stillform_*` keys EXCEPT `stillform_install_id` (so a paid subscription isn't stranded). This is a LOCAL wipe, NOT server account deletion. (4) Privacy + contact links (`public/privacy.html` + ARAembersllc@proton.me). Entry point already exists: HomeFooter "Settings" → `onNavigate("settings")` (wire in AppV2).
+    - **DEFERRED until their features rebuild — do NOT promise in UI before they work:** account auth / sign-in-create (no Supabase auth wired); cloud sync / "Sync now" / "encrypted before upload" (not wired); server account deletion (`account-delete.js` exists but needs an authed bearer token — wire when auth lands); integrations calendar/health (native, Phase 9); re-run calibration (10c not built); FAQ button (FAQ screen not built); theme / AI-tone / accessibility toggles (verify v2 logic exists before exposing); biometric lock (native-shell only).
+  - Original (pre-rebuild) note: daily reminder, audio toggles, screen-light mode, reduced motion, biometric lock, cloud sync settings
   - Crisis resources / 988
   - Privacy policy / Terms
   - Error boundary ✅ BUILT (pulled forward) — src/v2/components/ErrorBoundary.jsx wraps AppV2; calm fallback + reload; catches render crashes so the app never white-screens
