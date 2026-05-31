@@ -81,14 +81,14 @@ The largest RCT (n=400) found no difference between coherent breathing and place
 ### AI Effects Are Temporary Without Ongoing Use
 Meta-analysis: chatbot improvements peak at 8 weeks, disappear at 3 months. Same as therapy — effects fade without continued practice. The morning/evening check-in structure isn't just a feature, it's the mechanism that prevents decay.
 
-**Status:** Daily check-in framed as essential. AI memory implemented via cloud sync (Supabase three-table schema). Check-in flow shipped Apr 27.
+**Status:** Daily check-in framed as essential. AI memory implemented via cloud sync (Supabase three-table schema). ⚠️ NOT WIRED in the live build (verified absent May 30 2026 — plain localStorage, no encryption/sync; was v1, deleted; see CANON). Check-in flow shipped Apr 27.
 
 ### Retention Is THE Battle
 30-day retention for mental health apps: 3.3%. 77% of users abandon after one use. Gamification doesn't help and may hurt. What DOES help: reminders, human contact (or simulated), personalization that deepens.
 
 **Status:** 
 - Neuro voice — Web Speech API on web shipped, native voice pending
-- AI memory — shipped via cloud sync (Supabase)
+- AI memory — was shipped via cloud sync in v1; ⚠️ NOT WIRED in the live build (verified absent May 30 2026 — plain localStorage, no encryption/sync; was v1, deleted; see CANON).
 - Morning/evening check-in — shipped Apr 27
 - Three-category data feed (visible practice tracking, not state tracking) — shipped Apr 30
 - Push notifications via Capacitor — infrastructure shipped, contextual nudge logic pending
@@ -183,7 +183,7 @@ People with real lived experience — trauma, hardship, different cultures, diff
 
 ### Research Partnership (AFTER infrastructure)
 
-**When to pursue:** Infrastructure gates have been met (cloud sync shipped Apr 15, push notifications shipped via Capacitor, check-in flow shipped Apr 27, post-rating verified). Remaining gate is 4-6 weeks of real user data after launch.
+**When to pursue:** Infrastructure gates have been met (cloud sync shipped Apr 15 in v1; ⚠️ NOT WIRED in the live build (verified absent May 30 2026 — plain localStorage, no encryption/sync; was v1, deleted; see CANON)., push notifications shipped via Capacitor, check-in flow shipped Apr 27, post-rating verified). Remaining gate is 4-6 weeks of real user data after launch.
 
 **Why not now:** Researcher would evaluate without longitudinal data. They'd judge the prototype, not the product.
 

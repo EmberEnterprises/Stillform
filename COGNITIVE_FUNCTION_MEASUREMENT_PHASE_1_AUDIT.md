@@ -12,7 +12,7 @@ This is not a re-spec. The spec is good. This is the decision layer Phase 1 need
 
 ## Status of Phase 0 (already shipped)
 
-`stillform_function_checks` storage key, `FUNCTION_CHECK_CANDIDATES` enum (AFFECT_LABELING, INTEROCEPTIVE_LATENCY, COGNITIVE_DEFUSION), helpers `appendFunctionCheck`, `getLatestFunctionCheck`, `getFunctionCheckTrend`. Schema versioned (`v: 1`), 200-record cap, registered for cloud sync. No UI, no stimulus libraries, no surfacing logic — those are Phase 1.
+⚠️ [NOTE: the entire Cognitive Function Measurement layer is NOT in the live build as of May 30 2026 — verified absent; it lived in deleted v1. The below describes intended/v1 design.] `stillform_function_checks` storage key, `FUNCTION_CHECK_CANDIDATES` enum (AFFECT_LABELING, INTEROCEPTIVE_LATENCY, COGNITIVE_DEFUSION), helpers `appendFunctionCheck`, `getLatestFunctionCheck`, `getFunctionCheckTrend`. Schema versioned (`v: 1`), 200-record cap, registered for cloud sync. No UI, no stimulus libraries, no surfacing logic — those are Phase 1.
 
 The stored record shape is locked:
 ```js

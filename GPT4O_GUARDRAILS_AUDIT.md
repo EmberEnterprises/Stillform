@@ -284,7 +284,7 @@ Classifications:
 **Classification:** CORRECTS (UI integration). Voice-aesthetic constraint, not safety, but real.
 **Action:** None.
 
-### C1 — AES-256 client-side encryption (Path A complete May 8)
+### C1 — AES-256 client-side encryption — ⚠️ NOT IN LIVE BUILD (verified absent May 30 2026; was Path A in deleted v1)
 **Substrate default:** OpenAI does not encrypt user data on the user's device — that's not OpenAI's responsibility. Stillform encrypts at rest in localStorage so other browser tabs/extensions/services on the user's device can't read it.
 **Classification:** ENVELOPE — substrate-level concern, addressed elsewhere.
 **Action:** None. Verified May 8.

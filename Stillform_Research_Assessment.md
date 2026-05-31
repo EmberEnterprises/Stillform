@@ -144,7 +144,7 @@ A consistent pattern across breathing, chatbot, and app research: immediate effe
 
 2. **Single point of failure.** One developer (AI-assisted). One codebase. No native apps yet. No backup infrastructure.
 
-3. **Privacy model is honor-system.** localStorage + client-side encryption. No server-side verification. No HIPAA compliance (not required, but users may assume it).
+3. **Privacy model is honor-system.** localStorage; client-side encryption described here is ⚠️ NOT WIRED in the live build (verified absent May 30 2026 — plain localStorage, no encryption/sync; was v1, deleted; see CANON). No server-side verification. No HIPAA compliance (not required, but users may assume it).
 
 4. **AI dependency risk.** If users rely on the AI instead of developing internal regulation skills, the app becomes a crutch, not scaffolding.
 

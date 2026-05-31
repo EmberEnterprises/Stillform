@@ -187,7 +187,7 @@ After `saveSession` commits in Reframe (`src/App.jsx:9379`), if the user wrote �
 
 Symmetry note (Operating Rule 8): both processing types reach Reframe — thought-first direct, body-first after Breathe → Ground. Same close screen serves both. No asymmetry to flag.
 
-- **Privacy boundary I'm naming:** the Reframe message history sits in encrypted local storage. It is **NOT** parsed for label suggestions. The user types the label. Suggestion-from-conversation is out of scope unless Arlin explicitly asks for it (open call below). This stays brand-aligned: Stillform observes what the user gives it, doesn't read their conversations to infer.
+- **Privacy boundary I'm naming:** the Reframe message history sits in local storage ⚠️ [encryption/cross-device-sync NOT in live build as of May 30 2026 — plain localStorage; the feature flow audited here is still valid, only this storage detail is stale; see CANON]. It is **NOT** parsed for label suggestions. The user types the label. Suggestion-from-conversation is out of scope unless Arlin explicitly asks for it (open call below). This stays brand-aligned: Stillform observes what the user gives it, doesn't read their conversations to infer.
 
 ### 3d. Mirror sheet — Trigger Profile section
 **Status:** completes the architecture's "Mirror at home (3 layers visible)" claim from §4.

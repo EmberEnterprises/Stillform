@@ -62,7 +62,7 @@ Two precedents to model from. Both shipped, both validate the pattern.
 **EOD artifact (Build #10, commit `843d66a`):**
 - Backend `netlify/functions/eod-artifact.js` (commit `4c36283`)
 - Frontend helper `generateEodArtifact(eodSnapshot)` fires fire-and-forget POST after `saveEod`
-- Persists to `stillform_eod_artifacts` (SECURE_KEYS encrypted at rest, SYNC_KEYS for cross-device)
+- Persists to `stillform_eod_artifacts` (SECURE_KEYS encrypted at rest, SYNC_KEYS for cross-device) ⚠️ [encryption/cross-device-sync NOT in live build as of May 30 2026 — plain localStorage; the feature flow audited here is still valid, only this storage detail is stale; see CANON]
 - Replaces same-day record on re-fire
 - AI-down → no artifact persisted, no fallback template (operator-tier voice rubric forbids generic filler)
 - Display surface deferred — vocabulary persists, design call after a few days of real data

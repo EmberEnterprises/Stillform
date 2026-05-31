@@ -325,7 +325,7 @@ The concierge is not a tab. It's structural behavior distributed across every ex
 - **Anticipation:** Bio-filter state and feel-state are pre-populated from morning check-in (the user doesn't re-enter what they already entered).
 - **Quiet logistics:** AI receives full context (bio-filter, calendar, recent triggers, journal history, signal profile, named-moves library) silently. User just types or speaks.
 - **Removal:** Quick Breathe pill is always available without leaving current screen (the one persistent surface).
-- **Discretion:** Sessions are encrypted at rest. Privacy guarantee renders quietly on the screen header ("Your data is encrypted").
+- **Discretion:** Sessions are encrypted at rest. ⚠️ NOT WIRED in the live build (verified absent May 30 2026 — plain localStorage, no encryption/sync; was v1, deleted; see CANON). (Verified: no encryption AND no "data is encrypted" UI claim currently render — the header described here does not exist in the live app.) Privacy guarantee renders quietly on the screen header ("Your data is encrypted").
 
 ### 3.3 EOD review (after work, mentally active)
 

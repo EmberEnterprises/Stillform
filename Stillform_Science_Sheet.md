@@ -156,7 +156,7 @@ The Russell circumplex gives the chip system data integrity: every chip selectio
 - **Category B (Persistent state)** — pre and post in the same quadrant, OR same chip selected. The user did the work; the state didn't shift this session. Sometimes the work is the holding, not the shifting. Per Hayes (ACT) and Kabat-Zinn — sustained acceptance under unresolved state IS the practice. Not failure.
 - **Category C (Concerning shift)** — two paths: (1) per-session: post-state is Distant (hypoarousal as session result is a signal). (2) Pattern-based: ≥5 sustained Flat or ≥5 sustained HAN in 14-day window. Pattern-based catches what single sessions miss — the user whose individual sessions look fine but whose 14-day window shows a concerning trajectory.
 
-The classifier is a pure function: same inputs always produce same output. Easy to test, easy to audit. Per-user encrypted on-device; never sees a server. Aggregate-anonymous Plausible event fires with 4 props (category, subcategory, tool, mode) — zero user identifiers, zero chip values, zero free text.
+The classifier is a pure function: same inputs always produce same output. Easy to test, easy to audit. Per-user on-device, never sees a server. ⚠️ NOT WIRED in the live build (verified absent May 30 2026 — plain localStorage, no encryption/sync; was v1, deleted; see CANON). Aggregate-anonymous Plausible event fires with 4 props (category, subcategory, tool, mode) — zero user identifiers, zero chip values, zero free text.
 
 **Why this matters:** Stillform doesn't tell the user how they're doing. The user tells Stillform via the chip they picked. The classifier reads what the user said (twice — entry and close) and surfaces the pattern over time. The user owns the data; Stillform reflects it back.
 

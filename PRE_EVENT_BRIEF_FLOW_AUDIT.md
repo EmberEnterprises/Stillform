@@ -160,7 +160,7 @@ Layer 5 phone gate after 7d: schedule a fake calendar event 32 minutes out, wait
 
 **Risk: notification reliability on iOS.** Capacitor `LocalNotifications` already ships and is exercised by the existing pre-meeting flow — risk is bounded by that flow's existing reliability. No new infrastructure.
 
-**Risk: AI-generated content for a specific named person.** Brief may name people from Trigger Profile. Privacy posture same as Today's Brief — data lives in encrypted Trigger Profile, AI sees it via standard payload, no third-party transmission outside the OpenAI API call.
+**Risk: AI-generated content for a specific named person.** Brief may name people from Trigger Profile. Privacy posture same as Today's Brief — data lives in the Trigger Profile ⚠️ [encryption/cross-device-sync NOT in live build as of May 30 2026 — plain localStorage; the feature flow audited here is still valid, only this storage detail is stale; see CANON], AI sees it via standard payload, no third-party transmission outside the OpenAI API call.
 
 **Risk: brief generates but user never opens the notification.** Audit default A prevents wasted compute — generation happens AT tap, not at notification fire.
 
