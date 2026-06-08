@@ -6,6 +6,34 @@
 
 ---
 
+## V1→CURRENT AUDIT — FINALIZED + REBUILD DECISIONS (June 2, 2026, with Arlin)
+
+Full re-audit of every v1-referenced item against live `src/v2/` + functions (verified against code, not trusting old tags).
+
+**LIVE — verified present (completed history → to be archived in Phase 2):** EOD artifact, Trigger Profile, Today's Brief, Move card, Pre-event Brief, My Progress, Self-reframe, Quick-Breathe, Reframe (tone/modes), Crisis routing, Plausible, ARIA, ErrorBoundary recovery, Settings, FAQ.
+
+**ABSENT — verified (grep matched concepts, not live features):** Mirror wiring (`setMirrorObservation` 0 callers — strip dark), Roadmap full-screen (no screen file), Cloud sync (no Supabase client in frontend), Bio-filter capture (survives only as move-card tags), Pattern Disruption Layer (only a comment in MoveRunner).
+
+**DECISION (Arlin, June 2): REBUILD ALL absent items — nothing archived as dead.** Forward backlog:
+- Cloud backup/sync — the real data-safety non-negotiable (needs architecture + cost scoping)
+- Translations / i18n — 4 launch languages (English, Spanish, Brazilian Portuguese, Armenian)
+- Watch companion — pre-launch priority (needs Arlin's Mac)
+- Cognitive Function Measurement — pending Arlin's fresh design pass
+- Mirror wiring — needs Arlin's trigger/cost/default call
+- Pattern Disruption Layer — REBUILD re-conceived as **metacognitive pattern-awareness** (noticing one's own thinking patterns), NOT the v1 emotional-interrupt; do not port v1 framing
+- Practice Signals (function-check cadence + screen)
+- Premium sound packs (one-time-purchase add-on)
+- Share-to-Reframe (`?share=` handler)
+- Contrast + text-size toggle (accessibility)
+- State-to-Statement labels
+- Roadmap full-screen
+
+**Set aside (not dead, not active backlog):** Bio-filter capture stays dropped (Arlin's prior friction call). Encryption-at-rest set aside in favor of cloud backup.
+
+**Phase 2 (next):** strip v1 narrative + the 89 stale `App.jsx` "shipped" tags from the Master Todo; move completed/historical build-detail to the Archive; leave the Master Todo a clean forward roadmap of the backlog above.
+
+---
+
 ## SHIP MODE — ACCOMMODATING CURRENT APP STAGE
 
 - **Live now (must verify now):** implemented and expected in production app behavior.
