@@ -28,7 +28,7 @@ Stillform does not market neuroplasticity. It uses the science to design the pra
 
 ### Three neuroscience mechanisms grounding existing features (added Apr 28)
 
-**Memory reconsolidation** grounds repeated Reframe on recurring triggers. The user is not just rehearsing a different response — the memory of the trigger itself is updating because it is being recalled in an activated state and paired with a new interpretive frame. Ecker, Ticic & Hulley (2012); Schiller et al. (2010); Lane et al. (2015).
+**Memory reconsolidation** also grounds the Pattern Lifecycle ("gone quiet"): pattern change is observable as reduced recurrence across continued practice (full evidence rules in `STILLFORM_PATTERN_LIFECYCLE_SPEC.md` — sessions + elapsed time both required; absence alone proves nothing). **Memory reconsolidation** grounds repeated Reframe on recurring triggers. The user is not just rehearsing a different response — the memory of the trigger itself is updating because it is being recalled in an activated state and paired with a new interpretive frame. Ecker, Ticic & Hulley (2012); Schiller et al. (2010); Lane et al. (2015).
 
 **Predictive processing / interoceptive inference** grounds the bio-filter. Naming "depleted" or "in pain" updates the brain's internal prediction about whether the next sensation should be read as danger or as tired. Seth (2013); Barrett & Simmons (2015).
 

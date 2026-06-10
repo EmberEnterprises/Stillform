@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
@@ -35,6 +35,17 @@ export default function BiasProfile({ onExit }) {
   const [infoChip, setInfoChip] = useState(null); // chip whose ⓘ is open
 
   const refresh = () => setWatchList(getWatchListChips());
+
+  // 5.12 — telemetry: note when a user sees a gone-quiet pattern (once per
+  // mount; analytics non-fatal). Event name per spec §8.
+  useEffect(() => {
+    try {
+      const anyRetired = getWatchListChips().some(
+        (e) => patternConfidence({ encounterCount: e.encounterCount, lastSeen: e.lastSeen }).tier === "retired"
+      );
+      if (anyRetired) window.plausible?.("Pattern Gone Quiet Viewed");
+    } catch { /* analytics non-fatal */ }
+  }, []);
 
   const handleAdd = (chipId) => {
     addChipToWatchList({ chipId, source: "manual" });

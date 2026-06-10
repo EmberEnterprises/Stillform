@@ -115,6 +115,10 @@ const ITEMS = [
   },
   {
     id: "cost",
+    q: "What does \u201cgone quiet\u201d mean on my watch list?",
+    a: "A pattern you watch is confirmed when it keeps showing up in your sessions. If it then stops appearing across continued practice \u2014 real sessions, over weeks \u2014 it moves to \u201cgone quiet.\u201d That\u2019s observed change, not a cure claim: it reflects your sessions, and if the pattern shows up again it simply moves back. That\u2019s information, not a setback.",
+  },
+  {
     q: "What does it cost?",
     a: (
       <>

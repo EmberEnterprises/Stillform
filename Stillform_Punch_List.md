@@ -6,6 +6,12 @@
 
 ---
 
+## 5.12 PATTERN LIFECYCLE ("Gone Quiet") — BUILT (June 2, 2026)
+
+Spec locked v1.0 (Arlin same day: looser thresholds 5 sess/14d · 10 sess/30d with two-week integrity floor; manual re-add allowed; My Progress line yes). Built L1–L4 + checklist: derived states (no migration), Self-Mode excluded from detection-active counting (zero-fab), quietEpisodes internal, watch-list 'Gone quiet' section + badges, MyProgress quiet line, FAQ entry, Science Sheet pointer, Plausible view event. 18/18 harness + build green. **Live-test (Arlin, post-deploy):** needs a seeded/aged watch-list entry to see quiet states — fresh installs show none (honest absence). Copy/names renameable on screen.
+
+---
+
 ## V1→CURRENT AUDIT — FINALIZED + REBUILD DECISIONS (June 2, 2026, with Arlin)
 
 Full re-audit of every v1-referenced item against live `src/v2/` + functions (verified against code, not trusting old tags).

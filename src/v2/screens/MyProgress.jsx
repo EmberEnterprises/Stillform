@@ -1,6 +1,7 @@
 import React from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
+import { getBiasProfile, patternConfidence } from "../lib/biasProfile.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -89,6 +90,35 @@ export default function MyProgress({ onExit, onNavigate }) {
           onTap={() => handleNavigate("post-event")}
         />
       </section>
+
+      {/* 5.12 L4 — one quiet line when >=1 watched pattern has retired
+          ("gone quiet"). Derived live; reflect-not-score; renders nothing
+          otherwise (honest absence — spec v1.0 §5). */}
+      {(() => {
+        let retiredCount = 0;
+        try {
+          retiredCount = getBiasProfile().watchList.filter(
+            (e) => patternConfidence({ encounterCount: e.encounterCount, lastSeen: e.lastSeen }).tier === "retired"
+          ).length;
+        } catch { retiredCount = 0; }
+        if (retiredCount < 1) return null;
+        return (
+          <div
+            style={{
+              fontFamily: "var(--sf-font-serif)",
+              fontStyle: "italic",
+              fontSize: "15px",
+              lineHeight: 1.5,
+              color: "var(--sf-text-secondary)",
+              marginBottom: "var(--sf-space-24)",
+            }}
+          >
+            {retiredCount === 1
+              ? "1 pattern has gone quiet since you started watching it."
+              : `${retiredCount} patterns have gone quiet since you started watching them.`}
+          </div>
+        );
+      })()}
 
       <section style={{ marginTop: "var(--sf-space-16)" }}>
         <MonoLabel
