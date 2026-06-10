@@ -1,5 +1,5 @@
 # STILLFORM PATTERN LIFECYCLE SPEC — "Gone Quiet"
-**ARA Embers LLC · Draft v0.1 · June 2, 2026 · Status: FOR ARLIN'S REVIEW (not locked)**
+**ARA Embers LLC · v1.0 LOCKED · June 2, 2026 (Arlin's review same day)**
 
 Extends the shipped 5.11(d) behavioral-confirmation lifecycle with its missing half:
 patterns that stop appearing. Makes the product's core promise — neuroplastic change —
@@ -48,9 +48,9 @@ New states (computed, not stored — derived at read time):
   pattern re-activates (internal only — honesty about recurrence, never displayed
   as failure).
 
-Tunable defaults (⚠️ flagged, same convention as the 1.5 instrument cut):
-QUIET_MIN_SESSIONS = 8 · QUIET_MIN_DAYS = 21 · RETIRED_MIN_SESSIONS = 16 ·
-RETIRED_MIN_DAYS = 45.
+**LOCKED (Arlin, June 2 — "looser, show progress sooner"), with the integrity floor held (no claim below two weeks; 5.11 state-vs-trait):**
+QUIET_MIN_SESSIONS = 5 · QUIET_MIN_DAYS = 14 · RETIRED_MIN_SESSIONS = 10 ·
+RETIRED_MIN_DAYS = 30. (Original draft 8/21 · 16/45; still tunable in testing.)
 
 **Why sessions AND days:** sessions guarantee detection opportunity existed
 (ZERO FABRICATION); days guarantee it isn't depth-in-one-week (5.11 state-vs-trait).
@@ -111,11 +111,11 @@ Each step build-green + committed separately; ship checklist swept at L3/L4
 (FAQ entry, Science Sheet pointer to reconsolidation refs, Plausible event
 "Pattern Retired Viewed", transfer doc, punch list).
 
-## 9 · OPEN QUESTIONS FOR ARLIN
+## 9 · DECISIONS (LOCKED — Arlin, June 2, 2026)
 
-1. Display names: "going quiet" / "gone quiet" — keep, or other loop-voice?
-2. Thresholds (8/21 · 16/45) — feel right as defaults to tune in testing?
-3. Should a retired pattern's chip remain re-addable to active manually, or is
-   re-activation AI-evidence-only? (Default drafted: manual re-add allowed —
-   user is the authority.)
-4. My Progress line: want it, or keep retirement watch-list-only at first?
+1. Display names: "going quiet" / "gone quiet" stand as defaults (display-only;
+   renameable on screen review).
+2. Thresholds: LOOSER — 5 sess/14 d quieting · 10 sess/30 d retired (integrity
+   floor: never below two weeks for the first claim).
+3. Manual re-add to active: ALLOWED — the user is the authority.
+4. My Progress line: YES.
