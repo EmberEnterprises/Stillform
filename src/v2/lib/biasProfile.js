@@ -30,6 +30,7 @@
  */
 
 import { isValidChipId, getChipById } from "./biasChips.js";
+import { getSessions } from "./sessions.js";
 
 const STORAGE_KEY = "stillform_v2_bias_profile";
 
@@ -202,10 +203,16 @@ export function noteAiPatternDetection(spine) {
   // Per-day dedupe: a pattern already counted today is not counted again.
   const todayKey = new Date().toDateString();
   if (entry.lastSeen && new Date(entry.lastSeen).toDateString() === todayKey) return null;
+  // 5.12 (L2) — if this pattern had derived-state RETIRED ("gone quiet") at
+  // the moment of re-detection, record the quiet episode before lastSeen
+  // moves. Internal-only honesty about recurrence — never displayed as
+  // failure; re-activation is information, not a setback (spec §6).
+  const wasRetired = patternConfidence(entry).tier === "retired";
   profile.watchList[idx] = {
     ...entry,
     encounterCount: (entry.encounterCount || 0) + 1,
     lastSeen: new Date().toISOString(),
+    quietEpisodes: (entry.quietEpisodes || 0) + (wasRetired ? 1 : 0),
   };
   saveBiasProfile(profile);
   return profile.watchList[idx];
@@ -217,20 +224,84 @@ export function noteAiPatternDetection(spine) {
  */
 export const PATTERN_CONFIRMED_DAYS = 3;
 
+/*
+ * 5.12 — Pattern Lifecycle ("Gone Quiet"). Locked thresholds (spec v1.0,
+ * Arlin June 2 2026 — "looser, show progress sooner", integrity floor =
+ * never below two weeks for the first claim):
+ *   quieting: ≥5 detection-active sessions AND ≥14 days since lastSeen
+ *   retired:  ≥10 detection-active sessions AND ≥30 days since lastSeen
+ * Both axes required (ZERO FABRICATION): sessions guarantee the AI had real
+ * opportunities to detect; days guarantee it isn't depth-in-one-week (the
+ * 5.11 state-vs-trait rule in reverse). A lapsed user accrues neither —
+ * their patterns simply hold state, honestly.
+ */
+export const QUIET_MIN_SESSIONS = 5;
+export const QUIET_MIN_DAYS = 14;
+export const RETIRED_MIN_SESSIONS = 10;
+export const RETIRED_MIN_DAYS = 30;
+
+/**
+ * Count sessions since an ISO timestamp in which AI detection was ACTIVE.
+ * Self Mode sessions are excluded — they run with zero AI, so they are not
+ * detection opportunities and counting them would fabricate quiet evidence.
+ *
+ * @param {string} sinceIso  ISO timestamp (typically entry.lastSeen)
+ * @param {Array<object>} [sessionsArg]  injectable for testing; defaults to the store
+ * @returns {number}
+ */
+export function countDetectionActiveSessionsSince(sinceIso, sessionsArg) {
+  if (!sinceIso) return 0;
+  const sinceMs = new Date(sinceIso).getTime();
+  if (!Number.isFinite(sinceMs)) return 0;
+  const sessions = Array.isArray(sessionsArg) ? sessionsArg : getSessions();
+  return sessions.filter((s) => {
+    if (!s || s.selfMode === true || s.mode === "self") return false;
+    const t = new Date(s.timestamp || 0).getTime();
+    return Number.isFinite(t) && t > sinceMs;
+  }).length;
+}
+
 /**
  * Confidence tier for a watch-list entry, derived from how many distinct days
- * the AI has detected the pattern recurring (encounterCount). Plain language,
- * no scores — the watch list reflects, it does not grade.
+ * the AI has detected the pattern recurring (encounterCount), extended (5.12)
+ * with the leaving half of the lifecycle. Plain language, no scores — the
+ * watch list reflects, it does not grade.
  *
- * @param {{ encounterCount?: number }} entry
- * @returns {{ tier: "provisional"|"emerging"|"confirmed", count: number }}
+ * Derived at read time — nothing stored, no migration:
+ *   provisional → emerging → confirmed   (shipped 5.11d, unchanged)
+ *   confirmed → quieting → retired       (5.12: confirmed entries whose spine
+ *     has NOT been detected across continued detection-active practice)
+ * Re-detection at any point updates lastSeen via noteAiPatternDetection,
+ * which restarts the quiet clock — derived state returns to confirmed
+ * automatically.
+ *
+ * @param {{ encounterCount?: number, lastSeen?: string }} entry
+ * @param {Array<object>} [sessionsArg]  injectable for testing
+ * @returns {{ tier: "provisional"|"emerging"|"confirmed"|"quieting"|"retired",
+ *             count: number,
+ *             quiet: { sessionsSince: number, daysSince: number } | null }}
  */
-export function patternConfidence(entry) {
+export function patternConfidence(entry, sessionsArg) {
   const count = (entry && entry.encounterCount) || 0;
   let tier = "provisional";
   if (count >= PATTERN_CONFIRMED_DAYS) tier = "confirmed";
   else if (count >= 1) tier = "emerging";
-  return { tier, count };
+
+  // 5.12 — only a CONFIRMED pattern can go quiet (a provisional flag that
+  // never recurred was never established as a pattern; nothing to retire).
+  if (tier !== "confirmed" || !entry || !entry.lastSeen) {
+    return { tier, count, quiet: null };
+  }
+  const lastMs = new Date(entry.lastSeen).getTime();
+  if (!Number.isFinite(lastMs)) return { tier, count, quiet: null };
+  const daysSince = Math.floor((Date.now() - lastMs) / 86400000);
+  const sessionsSince = countDetectionActiveSessionsSince(entry.lastSeen, sessionsArg);
+  if (sessionsSince >= RETIRED_MIN_SESSIONS && daysSince >= RETIRED_MIN_DAYS) {
+    tier = "retired";
+  } else if (sessionsSince >= QUIET_MIN_SESSIONS && daysSince >= QUIET_MIN_DAYS) {
+    tier = "quieting";
+  }
+  return { tier, count, quiet: { sessionsSince, daysSince } };
 }
 
 /**
