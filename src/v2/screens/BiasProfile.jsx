@@ -109,16 +109,17 @@ export default function BiasProfile({ onExit }) {
           Add a pattern below when one rings true.
         </div>
       ) : (
-        <div style={{ marginBottom: "var(--sf-space-32)" }}>
-          <MonoLabel
-            size="xs"
-            tone="faint"
-            style={{ display: "block", marginBottom: "var(--sf-space-16)" }}
-          >
-            Watching ({watchList.length})
-          </MonoLabel>
-
-          {watchList.map(({ chip, encounterCount, addedAt, lastSeen }) => (
+        (() => {
+          // 5.12 — retired ("gone quiet") entries move to their own section
+          // below the active working set: present, honored, never deleted
+          // (removal stays the user's manual act; spec §5).
+          const active = watchList.filter(
+            (e) => patternConfidence({ encounterCount: e.encounterCount, lastSeen: e.lastSeen }).tier !== "retired"
+          );
+          const retired = watchList.filter(
+            (e) => patternConfidence({ encounterCount: e.encounterCount, lastSeen: e.lastSeen }).tier === "retired"
+          );
+          const renderRow = ({ chip, encounterCount, addedAt, lastSeen }) => (
             <WatchRow
               key={chip.id}
               chip={chip}
@@ -131,8 +132,50 @@ export default function BiasProfile({ onExit }) {
               onConfirmRemove={() => handleRemove(chip.id)}
               onCancelRemove={() => setConfirmRemoveId(null)}
             />
-          ))}
-        </div>
+          );
+          return (
+            <div style={{ marginBottom: "var(--sf-space-32)" }}>
+              {active.length > 0 && (
+                <>
+                  <MonoLabel
+                    size="xs"
+                    tone="faint"
+                    style={{ display: "block", marginBottom: "var(--sf-space-16)" }}
+                  >
+                    Watching ({active.length})
+                  </MonoLabel>
+                  {active.map(renderRow)}
+                </>
+              )}
+              {retired.length > 0 && (
+                <div style={{ marginTop: "var(--sf-space-32)" }}>
+                  <MonoLabel
+                    size="xs"
+                    tone="faint"
+                    style={{ display: "block", marginBottom: "var(--sf-space-8)" }}
+                  >
+                    Gone quiet ({retired.length})
+                  </MonoLabel>
+                  <div
+                    style={{
+                      fontFamily: "var(--sf-font-serif)",
+                      fontStyle: "italic",
+                      fontSize: "14px",
+                      lineHeight: 1.5,
+                      color: "var(--sf-text-faint)",
+                      marginBottom: "var(--sf-space-12)",
+                    }}
+                  >
+                    Patterns that have stopped showing up across your sessions.
+                    You did that work. If one shows up again, it moves back on
+                    its own — that&apos;s information, not a setback.
+                  </div>
+                  {retired.map(renderRow)}
+                </div>
+              )}
+            </div>
+          );
+        })()
       )}
 
       {/* ── Catalog: browse + add, grouped by type ── */}
@@ -192,10 +235,23 @@ function WatchRow({
   onConfirmRemove,
   onCancelRemove,
 }) {
-  // 5.11(d): provisional → emerging → confirmed, by how many distinct days the
-  // AI has detected this pattern recurring. Reflect-not-score; accent only when
-  // confirmed (recurring across sessions).
-  const { tier } = patternConfidence({ encounterCount });
+  // 5.11(d) + 5.12: provisional → emerging → confirmed → quieting → retired.
+  // Quiet states derive from lastSeen + continued detection-active practice
+  // (spec v1.0). Reflect-not-score; accent only when confirmed (the active,
+  // recurring pattern); quiet states read calm — the "Gone quiet" section
+  // placement carries the honor, not a louder badge.
+  const { tier, quiet } = patternConfidence({ encounterCount, lastSeen });
+  const TIER_LABEL = {
+    provisional: "Provisional",
+    emerging: "Emerging",
+    confirmed: "Confirmed",
+    quieting: "Going quiet",
+    retired: "Gone quiet",
+  };
+  const quietMonth =
+    tier === "retired" && lastSeen
+      ? new Date(lastSeen).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+      : null;
   return (
     <div
       style={{
@@ -237,7 +293,7 @@ function WatchRow({
                 : "var(--sf-text-faint)",
           }}
         >
-          {tier === "confirmed" ? "Confirmed" : tier === "emerging" ? "Emerging" : "Provisional"}
+          {TIER_LABEL[tier] || "Provisional"}
         </span>
       </div>
 
@@ -250,8 +306,11 @@ function WatchRow({
           marginBottom: "var(--sf-space-12)",
         }}
       >
-        {formatEncounterCount(encounterCount)} ·{" "}
-        {formatSeen(lastSeen, addedAt, encounterCount)}
+        {tier === "retired" && quietMonth
+          ? `Gone quiet in your sessions since ${quietMonth}`
+          : tier === "quieting" && quiet
+            ? `${quiet.sessionsSince} sessions since this last showed up`
+            : `${formatEncounterCount(encounterCount)} · ${formatSeen(lastSeen, addedAt, encounterCount)}`}
       </div>
 
       {isConfirmingRemove ? (
