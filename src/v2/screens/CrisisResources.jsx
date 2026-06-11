@@ -78,6 +78,64 @@ export default function CrisisResources({ onExit }) {
         </div>
       </div>
 
+
+      <div style={CARD}>
+        <MonoLabel size="xs" tone="faint">CALL · 24/7 · BRAZIL</MonoLabel>
+        <h2 style={H2}>CVV — Centro de Valorização da Vida</h2>
+        <p style={NOTE}>Gratuito e sigiloso. Emergência: SAMU 192.</p>
+        <div style={{ ...ROW, marginTop: "var(--sf-space-12)" }}>
+          <a href="tel:188" style={ACTION} aria-label="Ligar 188 agora">
+            Ligar 188
+          </a>
+          <a
+            href="https://www.cvv.org.br"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={ACTION}
+            aria-label="Chat CVV"
+          >
+            Chat — cvv.org.br
+          </a>
+        </div>
+      </div>
+
+      <div style={CARD}>
+        <MonoLabel size="xs" tone="faint">CALL · 24/7 · SPAIN</MonoLabel>
+        <h2 style={H2}>Línea 024 — atención a la conducta suicida</h2>
+        <p style={NOTE}>Gratuita y confidencial. Emergencias: 112.</p>
+        <div style={{ ...ROW, marginTop: "var(--sf-space-12)" }}>
+          <a href="tel:024" style={ACTION} aria-label="Llamar al 024 ahora">
+            Llamar 024
+          </a>
+        </div>
+      </div>
+
+      <div style={CARD}>
+        <MonoLabel size="xs" tone="faint">ARMENIA</MonoLabel>
+        <h2 style={H2}>Շտապ օգնություն · Emergency 112</h2>
+        <p style={NOTE}>
+          Crisis lines for Armenia are listed in the directory below.
+          {/* Deliberate: no hardcoded Armenian hotline — the only numbers found
+              came from stale aggregator lists, and an unverified number on a
+              crisis screen is worse than a directory. Add one only when a
+              current line is verified (Arlin may know a live local resource). */}
+        </p>
+        <div style={{ ...ROW, marginTop: "var(--sf-space-12)" }}>
+          <a href="tel:112" style={ACTION} aria-label="Call 112 now">
+            Call 112
+          </a>
+          <a
+            href="https://findahelpline.com/countries/am"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={ACTION}
+            aria-label="Armenia helpline directory"
+          >
+            Armenia lines
+          </a>
+        </div>
+      </div>
+
       <div style={CARD}>
         <MonoLabel size="xs" tone="faint">IMMEDIATE DANGER</MonoLabel>
         <h2 style={H2}>Emergency services</h2>
