@@ -33,6 +33,8 @@
  *   Bad:  "Let's begin your morning check-in now."
  */
 
+import { getSmartFloorPrompt } from "./smartPromptFloor.js";
+
 const AI_ACTIVE_PROMPT_URL = "/.netlify/functions/active-prompt";
 const CACHE_KEY = "stillform_v2_active_prompt_cache";
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min
@@ -106,6 +108,11 @@ const FALLBACK_PROMPTS = {
  * @returns {{headline: string, body: string, actionLabel: string|null, source: "fallback"}}
  */
 export function getFallbackActivePrompt(beat, threadLength) {
+  // M4 smart floor: deterministic pattern-aware line from local stores
+  // (zero AI cost; date-gated; yields null most days by design).
+  const smart = getSmartFloorPrompt(beat, threadLength);
+  if (smart) return smart;
+
   if (beat === "main") {
     const variant = threadLength > 0 ? FALLBACK_PROMPTS.main_underway : FALLBACK_PROMPTS.main_fresh;
     return { ...variant, source: "fallback" };
