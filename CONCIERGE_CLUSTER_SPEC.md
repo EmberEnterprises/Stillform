@@ -42,7 +42,7 @@ calls/mo; every-3rd-close ≈ proportional to practice volume; home-open w/ 24h 
 ≈ ≤30/mo but spends on idle opens. All trivial vs. the $14.99 default price; cadence is
 a feel decision more than a cost one.
 
-## ARLIN'S DECISIONS (blocking M3; M1–M2 buildable now)
+## ARLIN'S DECISIONS — RESOLVED June 2 (see header)
 1. **Trigger cadence:** EOD completion only · every 3rd session close · home-open with
    24h cooldown.
 2. **Queue placement:** tap the Mirror strip opens the queue · a My Progress section ·

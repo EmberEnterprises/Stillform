@@ -7,7 +7,7 @@
 
 **There is ONE Stillform — one app, one URL. `src/main.jsx` renders it directly (`<AppV2 />`): no version check, no toggle, no version parameter. The old `src/App.jsx` was deleted (`237167b`, May 17 2026) — there is no second app, and there is no second website. The bare `stillformapp.com` IS the app and the only URL to use. The only URL params that do anything are `?beat=morning|main|eod|wind-down` (forces a beat for testing) and `?verify=1` (primitives audit) — neither is a version. `src/v2/` is purely an internal folder name left over from an old migration, NOT a product version — never surface "v2" to anyone, and ignore any version-style URL param in stale notes or old commit messages; it is dead and does nothing. Backend stable — Supabase, 28 Netlify functions, LemonSqueezy.**
 
-**🧭 CONCIERGE CLUSTER — SPEC DRAFTED June 2 2026 (`STILLFORM_CONCIERGE_CLUSTER_SPEC.md` v0.1), awaiting Arlin's 3 decisions (mediation cadence/cost, queue placement, mirror feed confirm).** The felt-intelligence build: L3 deterministic smart-prompt floor (zero-AI) → L1 Mirror wiring (piggyback on eod/todays-brief, ≈$0) → L2 AI Mediation client (wires the existing propose_update backend + approval queue). Closes "I don't see a concierge in the app" (Arlin, June 2).
+**🧭 CONCIERGE CLUSTER — ✅ BUILT June 2 2026 (M1–M3: Mirror writer + Mediation client + all-three trigger gate; decisions resolved same day — all-three cadence / both placements / 5-session floor; spec v1.0 locked; M5 anchors+growth-baseline targets + M4 smart-prompt floor remain).
 
 **Doc hygiene:** stale old-frontend pointers were stripped and re-baselined June 2 2026 (full audit trail: `Stillform_Punch_List.md` → V1→CURRENT AUDIT; shipped history: `Stillform_Completed_Archive.md`). Absent surfaces are rebuild backlog — backend retained.
 
@@ -132,7 +132,7 @@ This is the architectural floor under Principle C. Every AI surface ships with a
   - Reframe conversation runs 2–4 turn arc: each turn does different metacognitive work, no repetition of user input as options
   - Test typo case → matches decided policy
 
-- **4** ⏳ NEXT — Beat-aware spine variants + achievement credits + breathing routing (scope locked May 16, 2026)
+- **4** ✅ SHIPPED (May 2026; variant config + all four beats live, see entries below) — Beat-aware spine variants + achievement credits + breathing routing (scope locked May 16, 2026)
 
   **Why this exists:** the spine currently runs identical Notice → Reframe → Close for all four beats. SmartScreen home routes by beat correctly, but the spine itself is beat-blind — same opening, same chips, same AI behavior, same close. Without beat-aware variants, morning check-in doesn't feel different from noon reframe doesn't feel different from EOD close — defeating the purpose of having beats. Phase 4 makes the spine respond to the beat it's entered from.
 
@@ -379,7 +379,7 @@ This is the architectural floor under Principle C. Every AI surface ships with a
 
   **Phase 5 sub-item #3 — Trigger Profile editor:** ✅ shipped `1822869` — data layer (`src/v2/lib/triggerProfile.js`, storage key `stillform_v2_trigger_profile`, 7 helpers including `formatTriggerProfileForAI` with plural-aware count labels and encounterCount-desc + lastSeen-desc sort, frozen 7-category enum exported: work / relational / financial / health / cross-cultural / current-events / other, case-insensitive dedup, plain localStorage fail-silent) + editor UI (`src/v2/screens/TriggerProfile.jsx`, follows ContextProfile architectural pattern but with CategoryChipGroup component — 7-chip wrap-friendly radio-group with accent treatment on selected; no description field; header copy distinguishes triggers as "events that happen TO you" vs contexts as "conditions you're in"; lastSeen verb is "fired" not "seen" matching event semantics) + routing (AppV2 adds `trigger-profile` screen state; MyProgress landing adds Trigger Profile entry below Context Profile). Build clean.
 
-  **Phase 5 sub-item #4 — Bias Profile + Workshop:** ⏳ IN PROGRESS — spec/research phase, not yet built. This is the largest diagnostic-stack sub-item, with a watch-list editor, AI-driven excavation mechanisms, AND the Workshop layer (adapted psychometric instruments). Per Arlin (May 17): "this is huge, not a small feature, very important" — and the Workshop becomes its own evolving channel alongside AI personality + Reframe. Decided to build to completion, not defer pieces ("nothing is post-launch").
+  **Phase 5 sub-item #4 — Bias Profile + Workshop:** ✅ SHIPPED (all 7 instruments + runner + Bias Profile live; statuses in entries below; this header was stale).
 
     **★ ARCHITECTURE LOCKED (Arlin's call, May 20, 2026):** The four-domain bias model is RETIRED. After the full Workshop catalog research pass (8 instruments, `STILLFORM_WORKSHOP_CATALOG_RESEARCH.md`), the evidence showed instruments don't sort into four bias domains — they sort by function. The Bias Profile is now THREE surfaces:
     1. **Pattern-work** (the actual dysfunction/"bias" work) — CD-Quest (cognitive distortions) + MCQ-30 (metacognitive beliefs). Dysfunction-pattern result frame. This is the watch-list-driven excavation layer.
