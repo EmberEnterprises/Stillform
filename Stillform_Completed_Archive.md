@@ -2,6 +2,395 @@
 
 Items removed from `Stillform_Master_Todo.md` during the May 6, 2026 refactor and items completed in earlier sessions. Source of truth for *what shipped when*. Chronological, newest first.
 
+
+# ARCHIVED FROM MASTER TODO — June 2 2026 cleanup (historical snapshots, moved verbatim)
+
+## 📍 CURRENT STATE — May 15, 2026
+
+**Where the build is right now.** Read this section first before assuming anything from compaction summaries or memory — those go stale.
+
+**Shipped in last 24 hours (PRs #102–117, May 14–15):**
+- Journey enrichment Phases 1–5 — morning, EOD, and wind-down beats embedded INSIDE the main hero card; current-state artifacts surfaced; since-baseline sparkline.
+- Journey Phase 6 (a–f) — full AI-mediated artifact lifecycle: storage foundation → backend `propose_update` mode + client transport + post-EOD trigger + approval UI → hero card discovery notification → audit history viewer → manual edit audit hooks across all three artifacts (trigger profile / anchors / growth baseline).
+
+**End state of the artifact lifecycle:** every mutation across the app — manual edit, calibration seed, retroactive seed, AI-mediated proposal approval — records an audit entry. AI proposals carry reasoning verbatim + evidence references. Approval queue lives in My Progress; change history viewer below it. Discovery notification surfaces pending proposals on the journey hero card.
+
+**Testing readiness (next-week target):** Phases 1–6 are testing-ready. To see proposal generation, a tester must complete ≥3 reframes and ≥2 EODs (insufficient-signal guardrail). Proposals fire fire-and-forget after EOD save. No manual on-demand refresh (deliberately — keeps the rhythm aligned with the natural review moment).
+
+**Known limitations carrying into testing (not blocking):**
+- Subscription page lacks framing — UAT feedback from Arlin's father-in-law (see section below). Note for later, not focus.
+- Methods + side panel + Library content — these are entire workstreams not yet started. Architecture conversation captured them; build pending.
+
+**Operating rule:** Netlify deploys are MANUAL. Arlin triggers from the Netlify UI; Claude does not push to deploy. Phone-gate after deploy.
+
+---
+
+
+## ✅ ADDRESSED — Home architecture Journey enrichment (May 15, 2026)
+
+PR #93 had shipped a Skip ↑ pattern that inverted the architecture (morning check-in as a parallel surface to a separate "real" hero card). The May 15 Journey enrichment sequence rebuilt this as ONE continuous transitional surface:
+
+- **Phase 1 (PR #102)** — Morning check-in teaser embedded INSIDE the main hero card; gate extended to include "morning" beat.
+- **Phase 2 (PR #103)** — EOD teaser embedded INSIDE the main hero card; gate extended to include "eod" beat.
+- **Phase 3 (PR #105 + #108 hotfix)** — Wind-down beat moved INSIDE the main hero card (was previously a separate standalone Bedtime IIFE below). Wind-down threshold shifted from 22:00 to 21:00 to align with bedtime window. Hotfix #108 gated Begin session ternary so it doesn't render alongside bedtime content. CANON §10 (no review content within ~2h sleep) honored. Original standalone Bedtime IIFE wrapped `{false &&}` for rollback.
+- **Phase 4 (PR #106)** — Current-state artifacts (anchors / triggers watched / capacity baseline) surfaced as quiet rows on the hero card during morning/main/EOD beats. Read-only display; user can have multiple anchors/triggers but the journey surfaces a compact summary. Empty state = block doesn't render. NOTE: PR #100 placed Trigger Profile + Habit Anchors + Capacity Baseline EDITORS in My Progress; those edit surfaces now coexist with the AI-mediation flow (Phase 6) as dual-access during testing. Decision on whether to remove the editor surfaces deferred until tester signal arrives.
+- **Phase 5 (PR #107)** — Since-baseline cumulative-sessions sparkline added inside the Phase 4 block, under the "Stage N · grown M" row. Inline SVG, 200x40. Gated on baseline existence + ≥3 days elapsed + non-zero growth. Custom date scoping + 30-day attribution overlay deferred to future iterations.
+- **Phase 6a (PR #111)** — AI mediation **storage foundation**. New helpers (`getProposals`, `addProposal`, `approveProposal`, `rejectProposal`, `getArtifactHistory`, `appendArtifactHistoryEntry`). 4 new keys registered (SYNC + SECURE + keysToRemove): `stillform_ai_proposals`, `stillform_trigger_profile_history`, `stillform_anchors_history`, `stillform_growth_baseline_history`. Caps: decided proposals bounded to 50, per-artifact history bounded to 100.
+- **Phase 6b (PR #112)** — AI mediation **pipeline end-to-end**. Backend `propose_update` mode in `reframe.js` (gpt-4o, 0-3 proposals per call, reasoning + evidence verbatim). Hard guardrails: `queue_full` (5+ pending) and `insufficient_signal` (<3 reframes + 2 EODs) both return empty arrays. Client `requestAIProposals()` helper gathers context + posts + calls `addProposal` for each. Wired to fire fire-and-forget post-EOD in saveEod. Approval UI section at top of My Progress: per-pending card with operation/target/preview/reasoning/evidence/approve+reject, optional rejection-reason input, recent decisions collapsible below. Approval routes to artifact helpers + records audit history with proposal lineage.
+- **Phase 6c (PR #113)** — AI proposals **discovery notification** on the Journey hero card. Standalone tappable row above the Phase 4 artifact block. Renders only when pending proposals exist; tap navigates to My Progress. Standalone because proposals can predate confirmed artifacts. Skipped during wind-down beat per CANON §10. Closes the discovery gap — without this row, the pipeline would be functionally invisible (proposals would generate post-EOD with no surfacing on home).
+- **Phase 6d (PR #115)** — **Artifact change history viewer** in My Progress. Reads `getArtifactHistory` across all three targets, merges chronologically newest-first, surfaces AI reasoning verbatim per change. Collapsible; renders only when ≥1 entry exists; shows 30 most recent. Closes the "why does my profile say this?" gap.
+- **Phase 6e (PR #116)** — **Trigger profile manual edits now record audit.** Extended `addTrigger` / `updateTrigger` / `deleteTrigger` with optional `historyMeta` parameter — helpers now ALWAYS record audit (manual default; AI-proposal lineage when meta passed). Added no-op guard on update.
+- **Phase 6f (PR #117)** — **Anchors + baseline manual audit gap closed.** New `saveGrowthBaseline` module helper records audit on every write; 5 baseline call sites refactored. Extended `persistAnchors` with diff-based audit recording (compares prev/next arrays by id). Fixed latent bug: AI-mediated anchor changes previously left React state stale (localStorage updated but `anchors` array in `habitAnchorsState` wasn't refreshed until next mount). All three target helpers now self-record audit; explicit `appendArtifactHistoryEntry` calls in `applyApprovedProposal` removed (would double-record).
+
+**The journey is now ONE continuous surface that transitions between beats.** Morning, EOD, wind-down all render WITHIN the main hero card. Surfaces no longer compete on home. Phase 6 closes the artifact-lifecycle loop end-to-end: AI proposes based on real evidence → user approves with full reasoning shown → change applies via existing artifact helpers → audit trail records the lineage. Every artifact mutation across the app — manual or AI-mediated — appears in the change history viewer.
+
+What's still pending in this architecture arc:
+- **AI mediation polish (deferred — not testing-blocking).** Honest flags carrying into testing:
+  - Proposal trigger fires only after EOD save. Testers who don't complete EODs won't see any proposals. Test plan should ensure 2+ EODs.
+  - Insufficient-signal guardrail requires 3+ reframes AND 2+ EODs before any proposal generates. New testers won't see proposals until day 2–3 of real use.
+  - No manual "refresh AI insights" trigger — testers can't generate proposals on demand. Deliberate: the post-EOD trigger keeps rhythm aligned with the natural review moment.
+- **Methods + side panel** — user-AI co-authored protocols for classes of situation (project, relationship, etc.); plus side panel for granular named-things list + Methods entry. Location TBD. Substantial separate workstream.
+- **Library** (external curated knowledge — human behavior, neuroscience, ethics, etc.) — content sourcing is substantial separate workstream.
+
+---
+
+
+## 🛠️ ARCHIVED — Original NEEDS REVISIT note (May 14, 2026 late evening, superseded May 15)
+
+PR #93 shipped a `Skip ↑` button on the morning check-in that collapses it back to the strip teaser, AND made the main hero card render alongside the collapsed check-in. **This inverts the actual architecture.** The morning check-in is *part of* the main card / journey arc — it's the morning beat of the spine, not a parallel surface the user dismisses to reveal a separate "real" hero.
+
+Per Arlin's late-evening correction: the journey is *one continuous transitional surface* with beats (morning check-in → main rep → EOD wrap → wind-down). The home should render the *current beat* as the focal surface, with the check-in integrated INTO the main card, not adjacent to it.
+
+What stays from PR #93:
+- The `Skip ↑` collapse affordance itself is fine — a user with limited time can skip the morning beat. The bug is what renders next.
+- My Progress stat panel restored to home: stays. That's correct per earlier direction.
+
+What needs redoing:
+- The widened main-hero gate (`currentBeat === 'main' || (currentBeat === 'morning' && !ciOpen)`) — revert or reconceive. Skipped check-in shouldn't auto-reveal a different hero card; it should leave the morning beat's surface present (perhaps in a minimal state, or transitioning toward the main beat's content as part of the same arc).
+- The relationship between morning beat and main beat needs to be ONE arc, not two surfaces to choose between.
+
+This is the kind of integration work Arlin has been pushing for since the May 14 home conversations: surfaces don't compete on home; the journey transitions between beats. PR #93 violated that.
+
+---
+
+
+## 🗂️ FULL MASTER TODO AUDIT-PASS — May 8 late session
+
+**Layer 0 verification of every unchecked item against actual code state, prompted by Arlin direction:** *"please complete full audit on all the items on the to do and once the pass. build everything on your own."*
+
+**Method:** read each unchecked item's claim, verify against current code state (file contents + git history), classify into one of five buckets, build everything in bucket B autonomously, document everything else with explicit reason.
+
+**Ship results from this audit-pass arc:**
+- Line 139 EOD Plausible telemetry → SHIPPED `7e299cd`
+- Line 938 apple-touch-icon → SHIPPED `0406792`
+- Line 950 Header sizing 18→16px → SHIPPED `c96b57e`
+- Line 906 FAQ completeness (12 new entries from science sheet) → SHIPPED `6f056f1`
+- Line 904 Tutorial completeness → RESOLVED via science sheet (philosophy-orientation is correct; body strings are LOCKED per `docs/COPY_LOCKS.md`, no autonomous change)
+
+**Critical Layer 0 catch (Arlin direction, May 8 late session):** I was running audits without reading `Stillform_Science_Sheet.md` (700 lines, the canonical voice and science anchor) or `docs/COPY_LOCKS.md` (the protected-copy manifest enforced by `scripts/ship-preflight.mjs`). Both are mandatory Layer 0 reads. The science sheet's "If they push back" lines ARE the FAQ voice template; the COPY_LOCKS manifest is what prevents autonomous changes from drifting protected user-facing copy. Reading both unlocked the FAQ build (Arlin-voice content shippable autonomously when sourced from the science sheet) and resolved tutorial completeness (the page titles + footer + opening lines are LOCKED, preflight enforces them — voice changes require explicit Arlin approval per the lock manifest). **Recording for future context-pickups: BEFORE any audit, read `Stillform_Science_Sheet.md` AND `docs/COPY_LOCKS.md` AND `STILLFORM_AUDIT_PHILOSOPHY.md`.**
+
+**Bucket A — Already shipped, master todo flag was stale (no rebuild needed):**
+- Line 875 Engagement Architecture Engine 2 — every surface SHIPPED this session arc; flag updated with full commit ledger
+- Line 796 Info button discipline pass — SHIPPED via 4 commits this session (see entry inline)
+- Several earlier items already had `[x]` per prior verifications (service worker, ARIA labels, IndexedDB clear, AI prompt CBT→MCT, "What Shifted" caption)
+
+**Bucket B — Pure code work, no design dependency, BUILT autonomously this pass:**
+- Line 139 EOD telemetry (concrete spec, ~6 line ask, audit pre-deploy gate) ✓
+- Line 938 apple-touch-icon (deterministic resize of approved iOS source) ✓
+- Line 950 Header sizing (Arlin's call recorded with magnitude judgment → 16px conservative pick) ✓
+
+**Bucket C — Needs Arlin's design call / voice approval / spec sign-off (NOT built):**
+- Line 794 My Progress redesign — substantial spec, "read before scoping"
+- Line 795 Self Mode redesign — explicit "Pending Arlin's spec sign-off before code change"
+- Line 806 Narrative spine connectivity layer — largest UX gap, Arlin direction needed
+- Line 839 Voice consistency audit — voice judgment, not infrastructure
+- Line 866 Onboarding redesign — sequenced last by Arlin direction May 4
+- Line 868 Low-Demand Phase 3 Reframe — explicit "Awaiting Arlin's call before code wiring"
+- Line 870 Premium sound packs — monetization pricing decision needed
+- Line 890 Cognitive Function Measurement redo — needs different design pass after revert
+- Line 904 Tutorial completeness — design call (feature-tour vs philosophy-orientation)
+- Line 906 FAQ completeness — content/voice work, needs Arlin
+- Line 908 Language picker — i18n is post-launch (line 957)
+- Line 1024 Contextual push notification logic — open question on gate dependency
+
+**Bucket D — Phone-test only / requires Arlin's device or accounts (NOT built):**
+- Line 138 Phone-tap verification of EOD save flow — Layer 5 gate, needs device
+- Line 892 UI flow walks (8 walks recommended) — phone observation, not code
+- Line 940 Native integration validation pass — needs physical devices
+- Line 1011 DST manual test — needs phone, on a DST night
+
+**Bucket E — Environment/account-blocked (NOT built):**
+- Line 865 Google Play Console setup — Arlin's account, $25 fee
+- Line 919 TestFlight — blocked on Arlin's iPhone access
+- Line 923 Reddit launch post — Arlin's posting decision
+- Line 929 User outcome check after 10 sessions — needs deployed users
+- Line 931 Research partnership outreach — Arlin's email
+- Line 932 KetaRevive doctor contact — Arlin's relationship
+- Line 934 Android launcher icon set — needs design source asset Arlin would provide
+- Line 936 iOS launcher icon set incomplete — same source asset dependency
+- Line 1019-1023 Native build steps — Android Studio + Xcode locally
+- Line 1025 HRV/Health Connect/HealthKit — post-launch milestone, multi-session work
+
+**Bucket F — Acceptable-as-is per audit / out of safe scope (NOT built):**
+- Line 998 Subscription URL param trust window — flagged as "Acceptable design"; stronger fix needs server-side signed param via Lemon Squeezy + Bobby
+- Line 1009 useEffect cleanup audit — would require per-effect verification across 47 effects; blind fixes risk regression
+- Line 1010 Chip touch target sizes (44px iOS HIG) — broad layout change without phone verification; Arlin's "Adult users won't notice" flag in audit
+- Line 1012 Cloud-corruption ErrorBoundary fallback — covers "<5% of error scenarios" per audit; touching backups path is high-risk
+- Line 1013 GitHub PAT rotation — Arlin's identity, can't rotate her account
+
+**Conclusion:** Across 48 unchecked items: 3 buildable autonomously (all shipped this pass), ~12 need Arlin direction, ~4 need phone, ~10 need her accounts/devices/relationships, ~5 are acceptable-as-is or out of safe scope, and the remainder are stale-flagged items where the actual ship state is complete (now corrected). **The autonomous build queue is closed.** Further code work requires either (a) Arlin's call on a Bucket C item, (b) phone-test findings from Bucket D, or (c) explicit override of an audit defer recommendation.
+
+---
+
+- ✅ **Build #7 Pre-event Brief — Layer 0.6 flow audit complete** (May 8 night, `36be569`). Engine 2 application-layer Build #7 unblocked from "no code without audit" gate (was blocked on Today's Brief architecture being settled — now is, `87ecfdf` shipped 3a-3d May 8). Audit doc `PRE_EVENT_BRIEF_FLOW_AUDIT.md` (~270 lines) follows same template as Today's Brief / Move card audits. §1 ground truth: spec §3.2 lines 128-130 verbatim ("Same shape as Today's Brief, scoped to a specific calendar trigger. Fires 30 minutes before. User has it on their phone walking into the room."); inventory of substantial existing infrastructure to leverage (`stillform_calendar_events` array shape, `stillform_calendar_consent` gate, pre-meeting `LocalNotifications` already firing at 30min/15min with notif IDs 8800-8803, Today's Brief precedent, `formatTriggerProfileForAI` helper); explicit list of what does NOT exist (event-keyed storage, notification-tap → brief route, Trigger Profile match detection). §2 architectural choice A/B/C — audit defaults to **A (on-demand at notification tap)** for cancellation safety + state freshness + no wasted compute on cancelled events. §3 5-surface set: 7a backend, 7b frontend helpers, 7c notification update, 7d display screen, **7e Trigger Profile match detection (DEFERRED post-launch).** §4 Layer 1.2 science: same Barrett/Heider-Lazarus/Gollwitzer/Sheppes-Gross stack as Today's Brief shifted to event scope. §5 boundaries (NOT a calendar replacement, NOT meeting prep, NOT event-canceller, NOT Reframe replacement, NOT Move card replacement, NOT a notification spammer). §6 8 open calls for Arlin all defaulted. §7 build scope: ~700 lines across 4 active phases load-bearing first. §8 risks + mitigations including the explicit anti-pattern that Pre-event Brief NEVER tells user to skip / leave / avoid an event — that prohibition is in the system prompt's NEVER DO list.
+- ✅ **Build #7 Phase 7a — Pre-event Brief Netlify function backend** (May 8 night, `1e3a121`). New file `netlify/functions/pre-event-brief.js` (340 lines) modeled exactly on `todays-brief.js` (`be4f23d`). Shared shape: same CORS allowlist, same origin enforcement, same 12s abort timeout, same `gpt-4o` + `response_format: json_object`, same 4-key JSON schema (`hardware`/`risks`/`moves`/`recovery`), same per-section 280-char clamp, same no-fallback policy on AI failure. Differences: (1) **Input scoped to ONE event** — `eventTitle` (required, 120 chars), `eventStart` (40 chars), `eventDescription` (400 chars) plus the same state-context payload (bio-filter, tension, outcome focus, profiles, stage, recent practice, yesterday's EOD); (2) **Rate limit raised to 10/min per IP** (vs Today's Brief's 5/min) because user can plausibly have multiple flagged events in a day; (3) **System prompt narrows every section to THIS specific event in 30 minutes** — Hardware = state right now (not the day arc), Risks = what's load-bearing about THIS event (with explicit Trigger Profile match instruction "If event is with someone in Trigger Profile, name it directly"), Moves = if-then for THIS event (walking-in / specific-moments framing), Recovery = downregulation FROM this event (not the whole day); (4) **Anti-pattern list adds explicit prohibition** "Maybe consider rescheduling..." — Pre-event Brief NEVER frames event-cancellation as a move, regardless of distress signals (audit §5 boundary, prompt enforcement). Per-section examples specifically illustrate event-scoped voice. Voice rubric matched verbatim across the family (EOD artifact + Today's Brief + Pre-event Brief): prestige-operator declarative, second person, WHOOP/Bloomberg/Amex tone, no advice / platitudes / therapy-coded language / questions. Thin-data rule explicit. Safety guidance: distress softens pace but voice stays prestige-operator. Build green. Ship preflight passes. **Phase 7a testable via curl after deploy** — POST sample payload verifies shape and voice without needing 7b/7c/7d frontend wiring.
+- ✅ **Build #7 Phase 7b — Pre-event Brief frontend helpers + storage layer** (May 8 night, `665f32f`). Mirrors Today's Brief helper pattern at `src/App.jsx` line ~3678, immediately after `generateTodaysBrief` — adjacency intentional for code-reading parallel to other module-level brief helpers. New constants and helpers: `PRE_EVENT_BRIEF_API_URL` (Capacitor-aware), `PRE_EVENT_BRIEFS_STORAGE_KEY = "stillform_pre_event_briefs"`, `PRE_EVENT_BRIEFS_MAX_ITEMS = 60` (~2 weeks at 4-5 events/day), `buildPreEventBriefKey(event)` (composite "title|start" key — handles the audit §6 call 6 default for cache invalidation: rescheduled events get fresh briefs as the new key generates new entry, old key orphans and trims at MAX_ITEMS), `getPreEventBriefs()` (newest-first by generatedAt), `getPreEventBriefForEvent(event)` (composite-key lookup), `appendPreEventBrief(record)` (replaces same-key on re-fire), `buildPreEventBriefPayload(event)` (assembles event details + same state context Today's Brief uses), `generatePreEventBrief(event)` (fire-and-forget POST, persists on success only). Profile-formatting logic mirrors the Reframe API call IIFE pattern at line ~10030+ so the AI receives identical context shape across surfaces. `TimeKeeper.daysAgoMs()` used for the 7-day session-count cutoff per the same Layer 5 preflight pattern that caught Today's Brief 3b's raw ms-math bug. Storage key joins SECURE_KEYS (encrypted at rest, parallel to journal/profiles/eod_artifacts/todays_briefs/move_card_history), SYNC_KEYS (cross-device — briefs follow the user phone↔web), and `keysToRemove` (delete-all path) — all three memberships added in this commit. Build green. Ship preflight passes (54 SYNC_KEYS, 21 SECURE_KEYS scanned).
+- ✅ **Build #7 Phase 7c+7d — Pre-event Brief notification routing + display screen** (May 8 night, `12ca244`). **Pre-event Brief now end-to-end live. Build #7 capture stack: 7a backend + 7b frontend helpers + 7c notification routing + 7d display screen = COMPLETE.** (7e Trigger Profile match detection remains DEFERRED post-launch per audit recommendation.) Shipped 7c+7d as a single commit because they are coupled — the route is meaningless without the destination, the destination is unreachable without the route. **7c (notification body + route)**: pre-meeting notifications at `App.jsx` ~5942-5962 (firstMins=30, secondMins=15) updated from "Open Reframe to prepare" + `extra: { screen: "reframe", eventTitle }` to (first) "Tap for your pre-event brief" / (second) "Your pre-event brief is ready" + `extra: { screen: "pre-event-brief", eventTitle, eventStart }` (ISO). The `localNotificationActionPerformed` handler at ~16799 was extended with a new branch reading `extra.screen === "pre-event-brief"` that sets `preEventBriefTarget` to `{title, start}` from the extra fields, calls `setScreen("pre-event-brief")`, and fires `Pre-Event Brief Tapped` Plausible event with `surface: "pre-meeting-notification"`. **7d (display screen)**: new component-local state `preEventBriefTarget` and `preEventBriefPollTick` declared alongside Today's Brief's `ciSaved`/`todaysBriefPollTick`. New useEffect alongside the Today's Brief 3d poll: on `preEventBriefTarget` change, checks `getPreEventBriefForEvent` first (if cached, skip generation per audit's caching default), otherwise fires `generatePreEventBrief` fire-and-forget + `Pre-Event Brief Generated` Plausible event, then starts the same 1.5s tick poll-loop (8 ticks / 12s ceiling matching backend timeout) so the screen re-reads storage as the brief lands. New screen branch `screen === "pre-event-brief"` renders the same 4-section operator-tier card as Today's Brief 3d display, with event title as the header (DM Sans 500) and event time in muted below. Three render states: brief present (full 4-section card with hairline separators) / in-flight placeholder ("Brief generating…") / silent-fail (no brief section, just header + Done — audit §6 call 6 default). Close button (top-left) and Done button (bottom) both clear `preEventBriefTarget` and call `goHomeSafely()`. QBPill and MoveCardPill hide envelopes extended to also hide on pre-event-brief screen for clean reading. **Layer 5 phone gate after deploy:** schedule fake calendar event 32min out, wait for notification, tap from lock screen, verify brief screen opens with correct event header, verify "Brief generating…" replaced by 4-section brief within ~5-8s, verify the four sections read prestige-operator scoped to THIS event. Build green. Ship preflight passes (54 SYNC_KEYS, 21 SECURE_KEYS).
+
+**SHIPPED — Audit philosophy v1.3 + audit-driven fixes (May 7-8 night session):**
+
+- ✅ **Audit philosophy v1.3** (`f32ac5a`). Added Prime Directive in all caps at top: "EVERYTHING NEEDS TO HAVE INTEGRITY IN EVERY ASPECT OF WHAT WE DO. NO FLUFF. NO FABRICATION. NO PATCHES. NO ASSUMPTIONS. NO DRIFT." Added Layer 0.6 (flow ground truth before designing user-facing surfaces), Layer 2.36 (synthetic tests must verify against actual helper implementations), Layer 2.37 (field-name verification before persisting code), Layer 2.38 (regex-guard completeness). Documented failure classes 11-15.
+- ✅ **TimeKeeper bypass migration** (`02ffb61`). Five existing call sites + Phase 0 helper at line 3540 used `Date.now() - (X * 24 * 60 * 60 * 1000)` form which the preflight regex's literal-multiplier requirement missed. All 13 instances migrated to `TimeKeeper.daysAgoMs(...)`. Two new preflight regex variants added (paren-wrapped + bare variable). Layer 2.38 enforces.
+- ✅ **Phase 1 Body Scan field-name bugs** (`4daec9f`). My handler read `sameDay.tensionByArea` but actual helper field is `tension`; read `h.tensionByArea` but actual is `bodyScanTension`. Both reads always evaluated undefined → morning→post delta NEVER fired, trend context NEVER fired in production. Tests passed because I mocked helpers to match my buggy assumption — Layer 2.36 violation. 8 references corrected with source-of-truth comments.
+- ✅ **Stale-read bug in tension helpers** (`fc39da7`). `getMorningTensionHistory` and `getBodyScanTensionHistory` read via `secureRead` but write paths (`appendDailyLoopHistory`, `setSessionsInStorage`) use raw `localStorage.setItem`. SecureCache primes once at boot from localStorage; subsequent raw writes don't update SecureCache. So `secureRead` returned boot-time snapshot, missing all current-session writes. Both helpers aligned to read via `readArrayFromStorage` matching the write path. Same fix applied to `getEodHistory`, `_s2LongestSustainedCheckinRun`, `getSignalDivergence`, and one inline render site. Pattern enforced via `// SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match` markers.
+- ✅ **SECURE_KEYS preflight guard** (`1f49ddb`). New `scripts/check-secure-keys-raw-read.mjs` scans for `localStorage.getItem` on any SECURE_KEYS-listed key. Allow-list mechanism via inline `SECURE-KEYS-ALLOW` marker. Wired into `npm run ship:preflight`. 17 encrypted keys scanned; no unsafe raw reads. Layer 2.38 enforces.
+- ✅ **`buildPatternEnrichmentContext` profile reads** (also in `fc39da7`). Was reading `signalProfile`/`biasProfile` via raw `localStorage.getItem`. These keys ARE written via `secureWrite`, so raw reads returned the encrypted envelope `{ __enc: true, ... }` — AI pattern-enrichment call received garbage instead of profile context. Fixed to `secureRead`.
+- ✅ **`getComposureTrend` schema mismatch** (also in `fc39da7`). Counted `strong/mostly/rough` but real chip-picker schema (line 19532) is `solid/mixed/rough` with legacy `mostly` fallback. The `strong` bucket never incremented anywhere in the codebase. Solid + Mixed (the two most-common picks) silently dropped. Schema rewritten to match reality. (Note: helper has zero callers currently — fix is correctness for future use.)
+- ✅ **Self-revert of `1f49ddb` overshoot + Layer 2.39** (`c0113d7`). Earlier in the same audit pass, `1f49ddb` over-corrected by converting `getEodHistory` and `_s2LongestSustainedCheckinRun` from raw `localStorage` reads to `secureRead` — but the WRITE paths for those keys still go through raw `localStorage.setItem` (`appendDailyLoopHistory`). After `1f49ddb`, those reads returned boot-time SecureCache snapshots, missing today's writes entirely. `c0113d7` reverted those reads to `readArrayFromStorage` matching the write path, AND fixed two more pre-existing stale-read bugs found by the same sweep (`getSignalDivergence` and the My Progress sessions reader). Each corrected read now carries an explicit `// SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match` marker. **Layer 2.39 added to audit philosophy:** "For any read of persisted data, does the read path actually match the write path?" Failure class 15 documented (read-write path mismatch on persisted data).
+
+**ARCHITECTURAL DEBT — RESOLVED May 8, 2026 (Path A migration, commit `9badb72`):**
+
+Earlier audit-night entry flagged that `stillform_eod_history`, `stillform_checkin_history`, `stillform_sessions`, and `stillform_loop_nudge_events` were in SECURE_KEYS but their write paths used raw `localStorage.setItem` — meaning the encryption-at-rest claim was not actually realized for these 4 of 17 keys. **Path A migration on May 8 closed this gap.** All 4 write paths migrated to `secureWrite` (or to a SECURE-membership-branching wrapper for `appendDailyLoopHistory`); all corresponding reads migrated to `secureRead` aligned with new write path; existing-user migration handled by `primeSecureCache`'s plaintext fallback (same code path that migrated the other 13 SECURE_KEYS in earlier launches). Sweep tool (`scripts/audits/sweep-secure-keys-storage-paths.mjs`) reports 0 mismatches across all 17 keys. Privacy claim at `src/App.jsx:8648` ("Data is encrypted at rest in localStorage — not readable by other services") now matches reality. Failure class 15 still documented in audit philosophy v1.3 as a pattern to watch for; the specific architectural debt entry that originally lived here is closed.
+
+**FOLLOW-UPS — Build #10 EOD artifact (tracked May 8, post-ship per Operating Rule 5):**
+
+These were named in the post-ship audit retrospective on commit `843d66a`. Tracked here so they don't drift. Order is by priority, not strict dependency.
+
+- [ ] **Phone-tap verification of EOD save flow before next deploy.** The `saveEod` refactor at `src/App.jsx` ~20369 consolidated the `{date, energy, composure, word, morningEnergy}` literal that was being constructed twice into a single `eodSnapshot`. Field-equivalent by inspection, ship preflight green, but never tapped end-to-end on device. Layer 5 gate per audit philosophy. **Action:** open EOD card, fill once, confirm `stillform_eod_today` writes, `stillform_eod_history` appends a record, and `stillform_eod_artifacts` populates with a 2-sentence record. If artifact appears with the right voice → wiring confirmed. If artifact silently absent → check Network tab for the `/.netlify/functions/eod-artifact` POST status. Verification snippet on request.
+- [x] **Plausible telemetry — `EOD Artifact Generated` + `EOD Artifact Generation Failed` — SHIPPED `7e299cd` May 8 night.** Two events fired from `generateEodArtifact` success/failure branches, all wrapped in try/catch so Plausible failures never block the user-visible flow. Success props: `length` (artifact char count). Failure props: `reason` ∈ {`http-{status}`, `empty-artifact`, `timeout`, `network`} for AI-down rate + failure-mode shape. Same telemetry shape as Today's Brief / Pre-event Brief / Move card events from this session. Pre-deploy gate satisfied — events fire from day one of the deploy.
+- [ ] **Re-fire cost on EOD update — accept or gate.** Each "tap to update" at the EOD card → re-save burns one OpenAI call (5/min server-side rate limit cap). Not a security issue, but a cost line worth a deliberate decision rather than a quiet drift. Two options: (a) accept and document as expected behavior since update implies the day's truth changed; (b) gate so re-fire only generates a new artifact if the underlying snapshot meaningfully changed (new sessions added since last fire, energy/composure actually changed, etc.). Not blocking; flag for design call when display surface ships.
+- [ ] **`EOD_ARTIFACTS_MAX_ITEMS = 90` revisit.** Arbitrary cap; heavy users practicing for a year lose oldest entries silently. Defer to display-surface design pass — once we know real artifact byte size in production we can lift the cap, tier it (dense recent + monthly digest beyond), or accept. Track here so it doesn't disappear.
+- [ ] **EOD artifact display surface — design call deferred (engagement architecture §9 Q5 open).** Vocabulary now persists; no UI surfaces it yet. Three candidates flagged for review when ready: (a) section in My Progress, (b) dedicated "Vocabulary" full screen, (c) both — surface card on My Progress + full screen for archive. Pillar 2 (spine + voice) work may make this answer obvious; vocabulary reads as connective tissue between days. Re-queue when narrative spine work begins.
+
+**Still pending Arlin sign-off on:**
+1. ~~The 5 stage definitions~~ — naming locked May 7, definitions shipped Phase 0
+2. Trigger Profile onboarding flow — Build #2 Phase 2 UI design (Layer 0.6 audit required first)
+3. ~~Mirror surface placement~~ — shipped
+4. Achievement threshold (one number per close, ranking logic) — Build #5 ships one credit per close, ranking is implicit by category match in dispatcher
+5. Other open questions in §8 of the spec
+
+**Pre-existing limitation flagged:**
+- `scoreState()` only handles 6 of 10 post-rate chips. Settled/stuck/distant/unsure silently drop the "+N" delta in Reframe credit headlines. Same constraint applies in `saveSession`'s delta computation. Fix requires product judgment on where each chip falls on the 1-5 Reactive→Composed scale — pending Arlin direction.
+
+**Related research item — Self Mode redesign (decision item 5):** NOT absorbed into this architecture. Stays distinct. Full research + design proposal in **SELF_MODE_REDESIGN_RESEARCH.md** (May 7). Concept proposal: "Past Self / Present Self" — Self Mode as the surface where the user's own cached data (Bias Profile, Signal Profile, saved Reframes, journal entries) becomes the in-the-moment intervention when AI is unavailable. ~4-6 builds, smaller than CFM Phase 1. Sequences AFTER engagement architecture stages + Trigger Profile, BEFORE Today's Brief / application layer. Single biggest design decision pending: does the "past self talks to present self" frame land for Arlin as the right concept.
+
+**Shipping order (load-bearing first), full table in spec §9:**
+Stage definitions → Trigger Profile → Today's Brief → Mirror surface → Achievement micro-credits → Roadmap screen → Pre-event Brief → Move card → Scripts → EOD artifact
+
+**Estimated scope:** 12-18 builds. Multi-session, each independently shippable.
+
+**Award-winning angle:** Stillform has better attribution data than Calm or Headspace — pre/post rates per session, function-level Practice Signals trends, Pattern Disruption catch timing, Body Scan tension trends per area, composure across bio-filter states. Whoop did this for physical recovery. Strava did it for running. Nobody has done it for nervous system regulation at this granularity. That's the differentiator, presented as proof of work, not gamification.
+
+---
+
+
+## 🗂️ MASTER TODO AUDIT-PASS — May 14 evening DELTA
+
+**Baseline:** Master Todo at commit `9783d94` (May 14, 11:26 UTC — Arlin-prompted verification-against-code update). The full re-classification (Buckets A–F) lives at lines 456–528 above; this is the DELTA: **17 PRs shipped between `9783d94` and HEAD `86d2a22`** that aren't reflected in the file's classifications above.
+
+**Method:** Walk each post-`9783d94` PR, identify which Master Todo items it addressed, classify remaining open queue against current HEAD.
+
+**Layer 2.37 discipline:** every PR number / commit SHA / line citation below was verified via `git log` and `git show` during this audit pass.
+
+### Ships since 9783d94 (chronological)
+
+| PR | SHA | Title | Maps to Master Todo |
+|----|-----|-------|---------------------|
+| #62 | `4a5d432` | fix · today's brief reachability | Engagement Architecture (line 391) — Today's Brief Build #3 surface defect; Layer 6.4 audit catch |
+| #63 | `8828221` | copy · splash + tutorial · Self Architecture | Bucket C copy/voice item closed — splash flash frame + tutorial close rephrased away from clinical-citation voice (per Arlin May 14 phone-test note) |
+| #64 | `a11b4ca` | feat · captivated morning · five moves | Engagement Architecture morning surface — captivated-loop sequence step A; addresses Arlin phone-test note "chips feel like a chore" |
+| #65 | `5274afc` | canon · v1.1 · two operating rules for integration era | CANON doc — locks ops rules as integration scope expands |
+| #66 | `fe37e70` | canon · v1.2 · concierge pillar + three-layer framework + silent-data filter | CANON doc — concierge as third pillar alongside metacognition + composure architecture |
+| #67 | `d1167fc` | feat · captivated EOD + bedtime wind-down | Engagement Architecture EOD surface — captivated-loop sequence step B |
+| #68 | `c25cd04` | feat · **B2B foundation · privacy wall** | NEW workstream — not in May 8 audit. B2B for launch (sequence step 1 of 3 foundation) |
+| #69 | `f8bcc66` | feat · B2B write endpoints · admin actions · audit chain | NEW — B2B foundation step 2 |
+| #70 | `dfb03dd` | feat · B2B admin UI + member affiliation + paywall bypass | NEW — B2B foundation step 3 |
+| #71 | `7cf3851` | feat · B2B Lemon Squeezy billing · webhook routing · admin billing UI | NEW — B2B billing wired |
+| #72 | `eb60cc3` | feat · B2B invite email delivery · Resend integration | NEW — B2B invite emails live |
+| #73 | `8a247a1` | docs · B2B procurement bundle · privacy addendum + DPA + IT guide + SOC 2 readiness | NEW — B2B procurement docs (4-doc bundle for enterprise buyers) |
+| #74 | `78f09eb` | feat · B2B SSO scaffolding · admin config UI + architecture doc | NEW — B2B SSO scaffold (full integration deferred to SOC 2 Type 2 per CANON) |
+| #75 | `d85fcf3` | feat · sequence step C · calendar decompression via ICS | NEW concierge workstream — calendar decompression universal path |
+| #76 | `8e7143e` | feat · sequence step E · calendar screenshot import via GPT-4o vision | NEW concierge workstream — calendar screenshot import |
+| #77 | `e36ed56` | audit · 19-scenario static refresh against HEAD 8e7143e · May 14 | AI stress testing protocol (line 931) — pre-deploy gate doc refreshed; 13 PASS / 6 UNCERTAIN → 16 PASS / 3 UNCERTAIN |
+| #78 | `86d2a22` | move card · library expanded to 22 sequences · pair-author DRAFT | Engagement Architecture Build #8 Phase 8a follow-up — starter library 10 → 22 sequences, within audit's 25–30 target band |
+
+### Net effect on bucket classification
+
+**Bucket A items added (already shipped, master todo flag may be stale):**
+- Engagement Architecture Build #3 (Today's Brief) surface reachability — defect closed by PR #62
+- Tutorial / splash voice drift — closed by PR #63 (Self Architecture rename)
+- Move card library expansion path — PR #78 brings it within audit-target band as DRAFT
+- AI regression static audit refresh — PR #77 closes May 8 concerns 1, 2, 3
+
+**Bucket B (autonomous build queue) — STILL CLOSED as of May 8 verdict:**
+The May 8 audit-pass concluded "The autonomous build queue is closed." Today's two Claude-led ships (PR #77 + PR #78) fit a narrower autonomous lane: **audit + draft-for-review work** that doesn't activate without Arlin's explicit go.
+- PR #77 is doc-only (audit refresh) — activates immediately on merge, no user-visible behavior change
+- PR #78 is DRAFT library expansion — same Phase 8a deploy gate, doesn't activate until Arlin reviews
+- Nothing else in the existing master todo open list moved into Bucket B since `9783d94`. The autonomous-build queue stays closed.
+
+**Bucket C (needs Arlin's design call) — UNCHANGED count, two items refined:**
+- "Voice consistency audit" (line 485, May 8) — partially actioned by PR #63 splash/tutorial rename. Full audit still pending.
+- "FAQ completeness" (line 491, May 8) — May 8 audit-pass noted FAQ shipped via `6f056f1` (12 new entries from science sheet). Stays closed.
+
+**New workstreams added since May 8 (not previously in any bucket):**
+
+1. **B2B at launch (PRs #68–#74).** 5 paths shipped per CANON: foundation + write endpoints + admin UI + Lemon Squeezy billing + invite email + SSO scaffold + procurement docs. Per memory: SOC 2 Type 2 is the launch gate ceiling for all 5 B2B paths.
+2. **Concierge / calendar integration (PRs #75–#76).** Step C (ICS decompression universal path) + Step E (screenshot import). New CANON v1.2 concierge pillar work. Steps A, B were the captivated-loop ships (#64, #67); step D is unshipped; step E shipped. Sequence does not appear to be alphabetical-strict but rather priority-ordered per Arlin's direction.
+3. **CANON consolidation (PRs #65–#66).** Two-rule update (v1.1) + concierge-pillar update (v1.2). Doc-only; locks operating rules for the integration era.
+
+### What's now reasonably close to deploy-ready
+
+The May 8 audit framed "deploy queue" — 15+ unshipped commits awaiting Arlin's Netlify deploy trigger. Since May 8, those have shipped to main (auto-merged on PR approval). Current deploy queue: **all post-`9783d94` PRs (#62–#78), 17 in total.** Same Netlify manual-trigger rule applies — Arlin's call.
+
+Specific deploy-ready surfaces awaiting her trigger:
+- Captivated morning + EOD + bedtime (PRs #62, #64, #67) — full engagement-loop sequence A→B
+- B2B foundation full stack (PRs #68–#74) — five paths plus procurement docs
+- Calendar decompression + screenshot import (PRs #75, #76)
+- Reframe AI prompt refinements (within `8e7143e` HEAD per PR #77 audit findings)
+- Move card library expansion (PR #78) — STAYS GATED on her library review, not deploy-ready
+
+### Items that have NOT moved since May 8 (still open in their stated buckets)
+
+Per spot-check of the May 8 Bucket C list (lines 481–493) against current HEAD:
+- **My Progress redesign** (line 482) — partial ship (Path A 4-section consolidation still not shipped per 9783d94 note); home-side dissolved into mono microtype line; screen-side redesign open
+- **Self Mode redesign** (line 483) — MetacognitionTool still 5-step at `src/App.jsx:16255`; pending Arlin spec sign-off
+- **Narrative spine connectivity layer** (line 484) — May 12 Spine Ship addressed Gaps 1–12 first cuts; second-cut depth work remains
+- **Voice consistency audit** (line 485) — partially actioned (PR #63), full audit still pending
+- **Onboarding redesign** (line 486) — sequenced last per Arlin direction; not started
+- **Low-Demand Phase 3 Reframe** (line 487) — 9783d94 noted "AI SIDE SHIPPED; UI strip still open." That partial-ship update stands at HEAD
+- **Premium sound packs** (line 488) — monetization pricing decision needed
+- **Cognitive Function Measurement** (line 489) — Phase 0 shipped; Phase 1 BLOCKED on 4 decisions in `COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md`
+- **Tutorial completeness** (line 490) — addressed in part by PR #63; design call for completeness scope still pending
+- **Language picker** (line 492) — i18n is post-launch; conflicts with new "Nothing is post-launch" CANON rule. **Decision flag for Arlin:** does the i18n deferral need re-litigation under the new CANON rule, or is this a documented exception?
+- **Contextual push notification logic** (line 493) — gate-dependency open question remains
+
+Per 9783d94 + the May 8 audit's "autonomous build queue is closed" verdict, **no new Bucket B candidates are unblocked.** Every Bucket C item remains gated on Arlin's design call / voice approval / spec sign-off.
+
+### Items the recent work surfaces as NEW concerns
+
+- **Concern 5 from PR #77** — Test 5 (composure when winning, stacking commitments) has bio-filter activation handling but no dedicated MCT move in HYPE_SYSTEM. Candidate move drafted in `AI_REGRESSION_STATIC_AUDIT_19.md`. Decision belongs to Arlin.
+- **Concerns 4 from PR #77** — mind-reading + manipulation-planning MCT moves still undrafted. Same posture.
+- **B2B paths require SOC 2 Type 2 launch gate** per CANON. SOC 2 Type 1 readiness shipped in PR #73 docs bundle. Type 2 is multi-month observation window and lives outside autonomous scope.
+- **Concierge sequence has unshipped step D.** Steps A, B, C, E shipped. Step D not yet started. Inventory check would surface what D was scoped as — flag for Arlin.
+- **Library i18n vs "nothing is post-launch" CANON rule.** Conflict surfaced above; needs Arlin's resolution.
+
+### Conclusion
+
+The May 8 audit-pass verdict ("autonomous build queue is closed") holds at HEAD. 17 PRs have shipped since `9783d94` covering three workstreams (engagement / captivated-loop, B2B foundation, concierge integration) plus AI-prompt refinement + Move card library expansion. None of those PRs unblock new Bucket B items.
+
+The autonomous lane remaining is **audit + draft-for-review** work, exemplified by today's PR #77 (audit doc refresh) and PR #78 (library DRAFT expansion). Anything beyond that requires either (a) Arlin's call on a Bucket C item, (b) phone-test findings from Bucket D, (c) account/device action from Bucket E, or (d) accepting the May 8 audit's defer recommendations.
+
+**Decisions for Arlin coming out of this delta:**
+1. Trigger Netlify deploy for queued PRs #62–#76 when ready (#77 is doc-only, no deploy needed; #78 stays gated)
+2. Review PR #78 library expansion against PATTERN_DISRUPTION_SPEC §4.2; accept/reject the 3 stretch sequences
+3. Address PR #77 open concerns 4 and 5 (mind-reading / manipulation-planning / stacking-commitments MCT moves) — voice decision
+4. Resolve i18n deferral vs "nothing is post-launch" CANON rule
+5. Inventory unshipped concierge sequence step D — what was it scoped as?
+
+---
+
+**Practice Signals revert (May 7, late session):** Builds #31, #32, #33, #34, #35, #36, #37, #46 (cognitive-defusion-score Netlify function only — pattern-enrichment.js stays for Pattern Disruption) **REVERTED.** Reason: AffectLabelingExercise rendered unconditionally on every screen (orphaned `)}` JSX text node visible on screen, "Done" button non-functional because state changes had no effect on a non-conditionally-rendered component, 9-chip vocabulary identical to existing app feel-state chips, stimuli asked user to label hypothetical scenarios which is not what affect labeling research measures, "0/12 — counted as not matched" hostile UX on skip-all path). All 35 pre-commit audits passed; none of them were behavior-level. The revert is documented in detail in this section.
+
+**What stayed (everything else from the batch):** Practice Signals revert is a clean removal — nothing else from the May 7 batch is affected. Pattern Disruption Layer + DisruptorTool work correctly (DisruptorTool moved from `src/practice-signals/` to `src/disruptor/`). Sync infrastructure, hardening, server-side AI, service worker, regression runner improvements — all intact and verified.
+
+**Status (May 7, post-deploy):** Original 6 commits pushed to origin/main (3c56952 → 9c6abed). Netlify deployed. AI regression re-run against production: **19/19 scenarios passed, all 3 liability scenarios redirected correctly.** Build #9 verified. Then post-deploy phone test surfaced Practice Signals render bleed → revert commit pending.
+
+Original commit chain on origin/main (newest first):
+1. `9c6abed` — docs: engagement architecture + Self Mode research + Path A consolidation + AI regression artifacts
+2. `eb5b9e7` — chore: re-enable service worker — cache-versioned, network-first HTML (build #29)
+3. `fa23cc5` — feat+fix: App.jsx — sync infra, self-fixes, hardening, Practice Signals + Pattern Disruption integration (~30 builds)
+4. `774152e` — feat: practice-signals — stimulus libraries + exercise components + Disruptor (builds #32, #33, #36, #38)
+5. `4f22ce8` — fix: server-side AI — liability redirects, payload caps, voice corrections + new functions (builds #9, #21, #22, #37, #46)
+6. `1f7fc65` — chore: scripts — preflight tightening + sync key validator + regression runner (builds #11, #12, #19, #44)
++ `6deb48f` — docs: post-deploy AI regression verification
+
+**Pending revert commit:** `revert: Practice Signals — entire feature removed`
+
+**Audit gap that allowed this:** my 35-item pre-commit checklist was 100% code-hygiene level (banned phrases, sync key parity, build green, encryption boundaries, useEffect cleanup, etc.). NONE of them were behavior-level. Specifically missing:
+- Render gating audit — verify each new component renders ONLY when intended
+- End-to-end user flow walkthrough — actually traverse entry → exercise → exit
+- Empty/skip-all visual check — what does the worst-case user path look like?
+- Brand voice audit on results screens — "0/12 counted as not matched" violates Stillform brand
+- UI coherence audit — does new UI fit existing visual system or layer parallel to it?
+- Phone screenshot before commit — visual review on actual target environment
+
+`npm run build` accepts syntactically balanced JSX even when the rendering logic is broken. ship-preflight, check-sync-keys, check-undefined-components are all syntactic, not behavioral. False confidence to push.
+
+**Practice Signals as a feature:** removed from launch entirely pending fundamental rework. The redundancy with existing feel-state chips and the science mismatch (Lieberman 2007 affect labeling measures FIRST-PERSON CURRENT STATE, not labeling of hypothetical scenarios) need real design work before any re-attempt. Self Mode redesign research doc captures the framing principles that should govern any Practice Signals rebuild.
+
+**Bundle size after revert:** 619kB (down from broken-state 647kB). The pre-batch baseline was 588kB; net delta from the May 7 batch is now +31kB (+5%) for Pattern Disruption + sync infra + hardening + service worker — proportional to actual shipped feature value.
+
+Review path: `git log` or open in editor. Each item carries a "May 7, 2026" comment block in code at the line ranges listed.
+
+| # | Item | App.jsx line | Source todo entry |
+|---|------|------|-------------------|
+| 1 | 🪧 QBPill clamp on mount + resize listener | ~12872 | line 328 |
+| 2 | 🎚️ Tone dropdown affordance bump | ~9326 | line 383 |
+| 3 | 🪞 Bio-filter status line + inline edit at Reframe entry | ~10905 | line 362 |
+| 4 | 🌅 Morning mood chip row + writer fix + feelState seeding | ~13418, 16703, 16797 | line 337 |
+| 5 | 🌗 Splash wordmark split treatment | ~15384 | line 388 |
+| 6 | 🔄 Auto-launch sync — cloud data + subscription recheck | ~13298 | line 301 |
+| 7 | 🎯 Low-demand close redesign — Reframe + Body Scan parallel | ~5187, 5283, 5320, 5640, 5715, 7994, 8982 | line 393 |
+| 8 | 🏠 Footer-logo home link (small additive, not in original todo) | ~20410 | additive |
+| 9 | 🛡️ Liability-redirect fix in reframe.js — Options A + B (skip intent validator on liabilityGuard, add proper fallback templates) | netlify/functions/reframe.js ~650, 689, 1618, 1639 | surfaced by May 7 regression run |
+| 10 | 📊 Plausible event for `Reframe Deterministic Fallback Triggered` — production observability | src/App.jsx ~8451 | observability gap surfaced by May 7 regression |
+| 11 | 🧪 Regression runner improvements — surface `FALLBACK_FIRED` + `INTENT_FAIL_RECOVERED` tags, exit non-zero on silent fallback fires, exclude crisis from `TOO_LONG` noise | scripts/run-ai-regression.mjs | tooling improvement from May 7 finding |
+| 12 | 🚧 Ship-preflight protection for items 9 — must-match checks on `liability_redirect_*` templates and `hasLiabilityGuard` parameter | scripts/ship-preflight.mjs | regression protection |
+| 13 | 🔁 Cross-device sync gap — added `stillform_checkin_today` + `stillform_bio_filter` to `SYNC_KEYS` so morning state and active hardware state carry across phone/tablet/desktop same-day. Bio-filter specifically drives LOW-DEMAND OVERRIDE; without sync, multi-device users got wrong-cohort AI responses | src/App.jsx ~6820 | gap surfaced while auditing build #4 |
+| 14 | 🐛 Self-fix on build #4 — morning mood seeded `stillform_feelstate` as a plain string but the reader expects the day-keyed `{value, day}` schema. Silently failed for 7 of 10 chips (the regex fallback only recovered anxious/angry/excited). Schema corrected | src/App.jsx ~16880 | caught while auditing today's diff |
+| 15 | 🧹 Self-cleanup on build #3 — bio-filter inline-edit clear path inlined `secureWrite` directly to `stillform_bio_filter`, bypassing the canonical `setActiveBioFilter()` setter (file comment at line 2150 explicitly bans direct access). Replaced with the canonical setter | src/App.jsx ~11178 | caught while auditing today's diff |
+| 16 | 🏷️ Bio-filter `off-baseline` label added to `BIO_FILTER_LABELS` — was rendering raw token in status line at Reframe entry for users who took the morning "Something's off" path | src/App.jsx ~11034 | caught while auditing build #3 |
+| 17 | 🔁 Cross-device sync round 2 — added 4 more user-facing keys to SYNC_KEYS: `_eod_today` (parallel to morning), `_outcome_focus` (drives recommended protocol), `_grounding_data` (user-generated content), `_calibration_deferred` (onboarding state) | src/App.jsx ~6820 | second sync-key audit pass |
+| 18 | 🔁 Cross-device sync round 3 — added `_feelstate` to SYNC_KEYS. Earlier held; on reflection sync only runs at launch/refresh, not constantly, so intra-day conflict risk is narrow vs the cross-device AI-context benefit | src/App.jsx ~6820 | reconsidered after round 2 audit |
+| 19 | 🛡️ SYNC_KEYS typo guard — new `scripts/check-sync-keys.mjs` validator that flags any SYNC_KEYS entry with no quoted reference elsewhere. Wired into `ship-preflight`. Catches the bug class where a typo'd key silently breaks sync for users — invisible to build, lint, runtime | scripts/check-sync-keys.mjs (new), scripts/ship-preflight.mjs | preventive, surfaced after rounds 2-3 of additions |
+| 20 | 🗝️ IndexedDB device key + overflow blob wipe on delete-account — added `CryptoStore.deleteKey()` and `SecureStore.clear()`, both wired into the delete-account flow. Forensic deletion completeness on shared devices | src/App.jsx ~7196, ~7271, ~20251 | punch list line 547 |
+| 21 | ✍️ Four "not therapy / not a patient / therapy padding / pre-game not therapy" framings in reframe.js rewritten as positive — per Stillform rule "never define it by what it isn't" | netlify/functions/reframe.js ~798, ~805, ~1024, ~1031 | punch list line 549 |
+| 22 | ✂️ AI payload size cap — `priorModeContext` (250 char per message) and `sessionNotes` (200 char per note) now truncate. Prevents heavy users 6+ months in from blowing token limits | src/App.jsx ~8403, ~8420 | punch list line 552 |
+| 23 | 🏷️ State-to-Statement labels renamed — buttons now "Convert to message" / "Hide message draft", section header "Make it sendable". Distinguishes observation (What Shifted) from sendable conversion | src/App.jsx ~8970, ~8980 | punch list line 550 |
+| 24 | ♿ Info-icon ARIA labels — 18 of the ⓘ buttons now have `aria-label` from their modal title. Screen readers no longer announce them as "ⓘ" | src/App.jsx (multiple) | punch list line 546 partial |
+| 25 | ♿ Chip aria-pressed — 10 toggle chip patterns (bio-filter drawer + 9 others) gained `aria-pressed={isActive}` so screen readers announce selection state | src/App.jsx (multiple) | punch list line 546 partial |
+| 26 | 🛡️ ErrorBoundary "Clear local data & restart" recovery path — covers crash loops caused by corrupted localStorage. Wipes stillform_* keys but preserves auth so cloud sync restores on next launch | src/App.jsx ~24 | punch list line 556 |
+| 27 | 🧹 Scroll-into-view useEffect cleanup — `messages`-deps useEffect was firing setTimeout without storing or clearing. Rapid message changes stacked timers; unmount during pending fired on stale refs | src/App.jsx ~8111 | punch list line 553 |
+| 28 | 🔧 Processing primer threshold extracted to `PROCESSING_PRIMER_DECAY_THRESHOLD` constant. Was inline magic number `5` at render site; now alongside other tunable thresholds (LOOP_NUDGE_*) so future adjustment is one-number change instead of grep | src/App.jsx ~1719, ~18222 | master todo line 410 |
+| 29 | 🔌 Service worker re-enabled — replaced kill-switch sw.js with cache-versioned worker. Network-first for HTML, cache-first for `/assets/*` (Vite-hashed bundles), network-only for `/.netlify/*`, stale-while-revalidate for fonts/icons. CACHE_VERSION = `stillform-v1-2026-05-07` (manual bump for future cache breaks). Old caches cleared on activate. Restores PWA install + offline access without the stale-asset failure mode that triggered the kill-switch | public/sw.js (new), index.html ~120-145 | decision item 6 (risk accepted) |
+| 30 | 👆 Chip touch target bumps — surgical regex sweep raised 16 chip paddings (4-5px vertical → 10px vertical) across affect/feel/bio-filter chip rows. Touch height ~26px → ~36-40px, closer to iOS HIG 44pt. Visual impact minimal (chips slightly taller); accessibility improves meaningfully on small screens | src/App.jsx (16 sites) | decision item 8 |
+| 31 | 🧠 Practice Signals cadence helpers — `shouldOfferFunctionCheck(candidate, sessionCount)` (5+ sessions OR 7 days, weekly cap) + `getSessionsSinceLastFunctionCheck(candidate)` per CFM Phase 1 audit Decision 4. Honest cadence: heavy users measured during high-engagement windows, low-engagement users still see the offer | src/App.jsx ~2569 | decision item 1 + 2 |
+| 32 | 📚 Practice Signals stimulus libraries (drafts) — 30 affect-labeling scenarios across 8 categories (work, social, parenting, health, financial, identity, positive, ambiguity) each mapped to primary + optional secondary chip; 15 cognitive-defusion thoughts across 11 categories. Includes `RATER_AGREEMENT` arrays for May 9 review pass. `getValidated*Stimuli()` filters to "yes" entries only when agreement data exists | src/practice-signals/affect-labeling-stimuli.js, src/practice-signals/cognitive-defusion-stimuli.js (both new) | decision item 2 |
+| 33 | 🎯 AffectLabelingExercise component — 12-trial flow: scenario flashes 1.5s, 9-chip row appears, latency captured (chipsShownAt → tap), accuracy = matches primary OR secondary, summary shows median latency + accuracy count. 8s response timeout per trial auto-skips. Saves via `appendFunctionCheck` with `candidate: "affect-labeling"`, `primaryMs: median latency`, `primaryCount: accurate count` | src/practice-signals/AffectLabelingExercise.jsx (new) | decision item 1 |
+| 34 | 🪞 Practice Signals dedicated screen — explainer + Take-a-check launcher (two cards: Affect labeling + Cognitive defusion, "Ready" badge from `shouldOfferFunctionCheck`) + Trends section (per-candidate first/latest with anti-Lumosity framing per CFM spec line 88) + disclaimer. Honest empty state. Routing array updated, `screen === "practice-signals"` allowed | src/App.jsx ~19075 + ~13975 | decision item 1 + 5 (CFM gets dedicated screen, not Self Mode) |
+| 35 | 🔗 Settings → Practice Signals link — entry point in More section, mirrors Privacy & Disclaimers pattern | src/App.jsx ~20558 | decision item 1 |
+| 36 | 🧠 CognitiveDefusionExercise component — single-thought 60s window, user types frames (Enter to commit), POSTs to `/.netlify/functions/cognitive-defusion-score`, displays scored summary. Saves with `primaryCount: distinctCount`. Error-recovery path on scoring failure | src/practice-signals/CognitiveDefusionExercise.jsx (new) | decision item 1 |
+| 37 | ☁️ Netlify scoring function `cognitive-defusion-score.js` — POST endpoint, 3-tier rubric (distinct/reworded/same) per CFM Decision 7, GPT-4o low-temp (0.2) with few-shot prompt, heuristic fallback for AI-down (conservative — defaults uncertain to "reworded" not "distinct" so trend doesn't inflate). Returns `{scores, distinctCount, rewordedCount, sameCount}`. CORS via `_httpSecurity.js` | netlify/functions/cognitive-defusion-score.js (new) | decision item 1 |
+| 38 | 🔍 Pattern Disruption Layer foundation — storage (`stillform_pattern_detections` + `stillform_disruptor_sessions`), 8 dimension constants (SAME_CHIP, SAME_BIO_FILTER, SAME_FEELSTATE, SAME_TENSION_AREA, SAME_DISTORTION, SAME_TOOL_PATH, SHIFT_NOT_LANDING, SAME_REFRAME_CONTEXT) + plain-language labels, deterministic detector counting repeats across 6 active dimensions in 14d/10sess window, two-strikes-and-drop state machine (active → dismissed_once → closed), `getActivePatternForSurfacing` honors 48h re-fire window per spec §3.2 Q2 | src/App.jsx ~2491 | decision item 4 |
+| 39 | 🔁 SYNC_KEYS round 4 — added `stillform_pattern_detections` + `stillform_disruptor_sessions`. Cross-device benefit: pattern caught on phone at 9am isn't re-fired on tablet at 11am as new instance | src/App.jsx ~6858 | decision item 4 |
+| 40 | 🧘 DisruptorTool component — 90-second somatic redirection sequence per spec §4 (locked science: attentional capture, somatic anchoring, brief duration). 8 prompts auto-advance (8-14s each, total ~82s): pressure (feet, hands), breath (nasal-mouth cycle, long exhale), temperature attention, posture (shoulders, jaw), open gaze. Pulsing focus ring CSS animation. Body-first compliant — no verbal input required (satisfies spec §2.3 Q6). Reflection screen: "That's what stepping out feels like." | src/practice-signals/DisruptorTool.jsx (new) | decision item 4 |
+| 41 | ⏰ Pattern Disruption detection useEffect — runs on mount with 24h surface throttle (`stillform_pattern_last_surfaced` localStorage key). Calls `runPatternDetection()` then `getActivePatternForSurfacing()`. If candidate found: marks surfaced, sets `surfacedPattern` state, fires Plausible "Pattern Disruption Surfaced" | src/App.jsx ~13967 | decision item 4 |
+| 42 | 🪧 Pattern prompt + disruptor overlay rendering — fixed-position modal with "I noticed something" + dimension label + count + "Step out" / "Not now" buttons. Accept → `markPatternAccepted` + `setDisruptorActive(true)`. Dismiss → `markPatternDismissed`. Disruptor active → full-screen overlay rendering DisruptorTool. onComplete → `appendDisruptorSession` + Plausible "Pattern Disruption Session" with dimension/duration/completed/pathway | src/App.jsx ~16205 | decision item 4 |
+| 43 | 🔬 Pattern Transparency screen + Settings link — `pattern-transparency` screen lists all 8 dimensions in plain language, "In flight" section showing ACTIVE + DISMISSED_ONCE detections with count, "History" section showing last 10 ACCEPTED/CLOSED detections, "Clear pattern history" button with confirmation. Spec §5 agency principle: user signed up for an AI-assisted metacognition practice; transparency is the deal | src/App.jsx ~19075 (new screen above practice-signals) + ~20558 (Settings link) | decision item 4 spec §5 |
+| 44 | 🛡️ check-undefined-components.mjs upgraded — script now recognizes ESM-imported PascalCase components (default + named imports). Was emitting false positives for AffectLabelingExercise / CognitiveDefusionExercise / DisruptorTool because it only scanned for local `function`/`const`/`class` declarations. Real-bug detection still works (it's the imports that were the gap, not the JSX scan) | scripts/check-undefined-components.mjs | preventive upgrade |
+| 45 | 🔔 Pattern Disruption push notification wiring — Capacitor LocalNotifications path. New `schedulePatternDisruptionNotification(pattern)` + `cancelPatternDisruptionNotifications()` helpers. Reserved ID range 9100-9109. Native-only; web users get nothing additional. Schedule-on-surface (covers no-response close), cancel-on-accept (handled), leave-on-dismiss (the canonical 24h nudge case). On every app open, cancel any pending pattern pushes since in-app surface takes precedence. Tap listener tracks Plausible "Pattern Push Tapped" with patternId for conversion analytics. Notification copy: "A pattern is in flight" / "There's something I noticed across your recent sessions. Open when you have 90 seconds." Observation framing, no dimension telegraphed (could be stale by tap), 90-second expectation set | src/App.jsx ~1683 (helpers), ~13862 (tap listener), ~13989 (cancel on app open), ~16234 (schedule on surface), ~16249 (cancel on accept) | follow-up to decision item 4 |
+| 46 | 🧠 AI-aware pattern enrichment — new `netlify/functions/pattern-enrichment.js` (GPT-4o, max 220 tokens, temp 0.4, observation-mode persona matching Reframe voice). Layered ABOVE deterministic detection per spec §4 Q4: AI runs only after pre-filter trips. Server-side pipeline: validation → API call → JSON parse → length cap 280 chars → brand-voice post-filter (banned phrases: "you should/need/must", "always/never", "it's okay", "I care", "therapy/treatment") → confidence clamp. Heuristic fallback at every failure point (no API key, API error, parse error, shape error, brand-voice violation, exception) — AI-down backup case stays working per spec. Client-side helpers: `buildPatternEnrichmentContext(pattern)` (trims to 6 most recent sessions + signal/bias profiles), `enrichPatternWithAI(pattern)` (fire-and-forget), `updatePatternReasoning(id, enrichment)` (persists `aiReasoning` + `aiConfidence` + `aiFallback` + `aiEnrichedAt` on the detection record so re-fires use cached version without second AI call). Wired into detection useEffect with id-equality guard against race where user dismissed before AI returned. Modal copy upgrades in place when reasoning lands; falls back to count-based observation when not. Pattern Transparency screen surfaces enriched reasoning on both in-flight and history entries. Plausible event "Pattern Enrichment Returned" with dimension/fallback/confidence | src/App.jsx ~2780-2880 (helpers), ~13990 (wiring), ~16276 (modal copy), ~19170 + ~19200 (transparency surface), netlify/functions/pattern-enrichment.js (new) | follow-up to decision item 4 spec §4 Q4 |
+| 47 | 🎚️ Pattern interrupts opt-out toggle in Settings — Schedule & Notifications section, sits below daily reminder. Default ON (`localStorage.getItem("stillform_pattern_push_enabled") !== "off"` — null/undefined/anything-but-"off" enables). Independent from daily-reminder toggle per agency principle (user can want one without the other). `schedulePatternDisruptionNotification` reads the gate before scheduling; localStorage-throw safe (private-browser mode falls through to default ON). Turning OFF cancels any pending pattern push immediately so a user who just dismissed in-app + flipped the toggle doesn't get pinged 24h later. Toggle adds `stillform_pattern_push_enabled` to SYNC_KEYS round 5 + UNENCRYPTED_SYNC_KEYS (it's a preference flag, not user data). aria-pressed + aria-label for screen readers. Plausible event "Pattern Push Toggle" with state. Subtitle copy clarifies: "The in-app prompt always surfaces regardless of this setting — this only controls the 24-hour follow-up notification." | src/App.jsx ~1690 (gate in scheduler), ~7448 (SYNC_KEYS round 5), ~7536 (UNENCRYPTED_SYNC_KEYS), ~20602 (toggle UI in Settings) | follow-up to decision item 4 (push wiring) |
+
+**Open question still pending:** "Additional morning chips" (line 406) — Arlin clarified May 7 the ask was check-in chips at Reframe entry; mood capture (build #4) carries through to "From this morning" row at Reframe entry, closing the gap without a separate Reframe surface. Mark ✅ resolved if Arlin agrees on review.
+
+**Verification gap on item #9:** the regression test runs against the *deployed* reframe.js, but the fix is local-only. Cannot verify from build container without Netlify deploy. Re-run regression after Arlin triggers deploy preview to confirm scenario #19 (legal redirect) now passes. See `AI_REGRESSION_RESULTS_MAY_7.md` "Verification path" section.
+
+After review: each item gets ✅ SHIPPED status update and full record moves to `Stillform_Completed_Archive.md`. Reverts (if any) handled commit-by-commit.
+
+---
+
+
 ---
 
 ## Completed — May 28, 2026 (Pattern-Change Engine + Quick-move flow)
