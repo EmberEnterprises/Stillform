@@ -18,6 +18,7 @@ import Paywall from "./screens/Paywall.jsx";
 import Onboarding from "./screens/Onboarding.jsx";
 import Settings from "./screens/Settings.jsx";
 import FAQ from "./screens/FAQ.jsx";
+import CrisisResources from "./screens/CrisisResources.jsx";
 import { isOnboarded, setOnboarded } from "./lib/onboarding.js";
 import { shouldGate } from "./lib/gating.js";
 import { refreshSubscriptionStatus } from "./lib/subscriptionApi.js";
@@ -229,6 +230,14 @@ export default function AppV2() {
     );
   }
 
+  if (screen === "crisis-resources") {
+    return (
+      <div className="sf-v2">
+        <CrisisResources onExit={() => setScreen("home")} />
+      </div>
+    );
+  }
+
   if (screen === "faq") {
     return (
       <div className="sf-v2">
@@ -257,11 +266,12 @@ export default function AppV2() {
           // Phase 5: 'progress' routes to the MyProgress landing,
           // 'library' to the Library (Workshop section live; curated
           // knowledge cards join later). 'settings' to the Settings surface.
-          // FAQ now routes to its screen; Crisis-Resources stays no-op until it ships.
+          // FAQ and Crisis-Resources route to their screens.
           if (target === "progress") setScreen("my-progress");
           else if (target === "library") setScreen("library");
           else if (target === "settings") setScreen("settings");
           else if (target === "faq") setScreen("faq");
+          else if (target === "crisis-resources") setScreen("crisis-resources");
         }}
       />
     </div>
