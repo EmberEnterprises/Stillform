@@ -20,8 +20,17 @@ import HairlineDivider from "../components/HairlineDivider.jsx";
  * crisis surface is invasive; views here are nobody's data point.
  *
  * Resources (US): 988 Suicide & Crisis Lifeline (call/text, 24/7, free,
- * confidential) · Crisis Text Line (text HOME to 741741) · 911 for
- * immediate danger. Outside the US: findahelpline.com directory.
+ * confidential; Spanish available) · Crisis Text Line (text HOME to 741741)
+ * · 911 for immediate danger.
+ * International (launch markets, each number web-verified June 2 2026 —
+ * zero-fabrication: numbers only ship verified, hours stated honestly):
+ *   Brazil — CVV 188 (24/7, free; emergency 192 SAMU)
+ *   Spain — 024 Ministry of Health line (24/7, free; emergency 112)
+ *   Mexico — Línea de la Vida 800 911 2000 (24/7, free; emergency 911)
+ *   Armenia — Emotional Support Hotline 0800 00 900 (Mon–Fri 09:00–18:00,
+ *     toll-free — NOT 24/7, stated as such; emergency 112 / 911)
+ * Text links are US-only: the only verified text lines. No sms: links are
+ * invented for call-only services. Everywhere else: findahelpline.com.
  *
  * @param {function(): void} onExit — back to home.
  */
@@ -85,8 +94,23 @@ export default function CrisisResources({ onExit }) {
 
       <HairlineDivider />
 
+      <div style={{ marginTop: "var(--sf-space-24)" }}>
+        <MonoLabel size="xs" tone="faint">OTHER COUNTRIES · CALL</MonoLabel>
+        {INTL.map((c) => (
+          <div key={c.country} style={{ ...CARD, marginTop: "var(--sf-space-12)" }}>
+            <MonoLabel size="xs" tone="faint">{c.caption}</MonoLabel>
+            <h2 style={H2}>{c.country} — {c.name}</h2>
+            <div style={ROW}>
+              <a href={`tel:${c.tel}`} style={ACTION} aria-label={`Call ${c.name} now`}>
+                Call {c.display}
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <p style={{ ...NOTE, marginTop: "var(--sf-space-16)" }}>
-        Outside the US:{" "}
+        Anywhere else:{" "}
         <a
           href="https://findahelpline.com"
           target="_blank"
@@ -203,3 +227,13 @@ const INLINE_LINK = {
   textDecorationColor: "var(--sf-border-emphasis)",
   textUnderlineOffset: "3px",
 };
+
+/* ---- verified international lines (launch markets) ----
+   Each entry web-verified June 2 2026. Hours stated honestly — Armenia's
+   line is NOT 24/7 and the caption says so. Call-only: no invented sms:. */
+const INTL = [
+  { country: "Brazil",  name: "CVV",                       tel: "188",        display: "188",          caption: "24/7 · FREE · EMERGENCY: 192" },
+  { country: "Spain",   name: "L\u00ednea 024",            tel: "024",        display: "024",          caption: "24/7 · FREE · EMERGENCY: 112" },
+  { country: "Mexico",  name: "L\u00ednea de la Vida",     tel: "8009112000", display: "800 911 2000", caption: "24/7 · FREE · EMERGENCY: 911" },
+  { country: "Armenia", name: "Emotional Support Hotline", tel: "080000900",  display: "0800 00 900",  caption: "MON\u2013FRI 09:00\u201318:00 · TOLL-FREE · EMERGENCY: 112" },
+];
