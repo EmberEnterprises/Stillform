@@ -68,6 +68,56 @@ export default function FAQ({ onExit }) {
  * DRAFT Q&A. Answers are JSX so contact/crisis links render inline.
  * Reviewed against the framing law and the live build before shipping.
  */
+// Style consts live ABOVE ITEMS deliberately: ITEMS is a module-level array
+// whose JSX evaluates at import time — referencing a const declared below it
+// is a TDZ crash in the production bundle (boot blank-screen, June 2 2026).
+
+const BACK_BTN = {
+  background: "transparent",
+  border: "none",
+  color: "var(--sf-text-faint)",
+  fontFamily: "var(--sf-font-mono)",
+  fontSize: "11px",
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  cursor: "pointer",
+  padding: "8px 0",
+  marginBottom: "var(--sf-space-24)",
+  WebkitTapHighlightColor: "transparent",
+};
+
+const SECTION = {
+  marginTop: "var(--sf-space-32)",
+  marginBottom: "var(--sf-space-32)",
+};
+
+const QUESTION = {
+  fontSize: "17px",
+  lineHeight: 1.4,
+  fontWeight: 600,
+  margin: "8px 0 12px",
+};
+
+const ANSWER = {
+  fontSize: "15px",
+  lineHeight: 1.55,
+  margin: 0,
+};
+
+const FAINT = {
+  color: "var(--sf-text-faint)",
+  fontSize: "13px",
+  lineHeight: 1.5,
+  margin: 0,
+};
+
+const LINK = {
+  color: "inherit",
+  textDecoration: "underline",
+  textUnderlineOffset: "3px",
+};
+
+
 const ITEMS = [
   {
     id: "what",
@@ -156,48 +206,3 @@ const ITEMS = [
     ),
   },
 ];
-
-const BACK_BTN = {
-  background: "transparent",
-  border: "none",
-  color: "var(--sf-text-faint)",
-  fontFamily: "var(--sf-font-mono)",
-  fontSize: "11px",
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  cursor: "pointer",
-  padding: "8px 0",
-  marginBottom: "var(--sf-space-24)",
-  WebkitTapHighlightColor: "transparent",
-};
-
-const SECTION = {
-  marginTop: "var(--sf-space-32)",
-  marginBottom: "var(--sf-space-32)",
-};
-
-const QUESTION = {
-  fontSize: "17px",
-  lineHeight: 1.4,
-  fontWeight: 600,
-  margin: "8px 0 12px",
-};
-
-const ANSWER = {
-  fontSize: "15px",
-  lineHeight: 1.55,
-  margin: 0,
-};
-
-const FAINT = {
-  color: "var(--sf-text-faint)",
-  fontSize: "13px",
-  lineHeight: 1.5,
-  margin: 0,
-};
-
-const LINK = {
-  color: "inherit",
-  textDecoration: "underline",
-  textUnderlineOffset: "3px",
-};

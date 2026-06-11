@@ -1,5 +1,9 @@
 import React, { useEffect } from "react";
-import MonoLabel from "./MonoLabel.jsx";
+// NOTE: deliberately NOT importing MonoLabel here. MonoLabel imports InfoModal
+// (for its ⓘ affordance), so importing MonoLabel back created a circular
+// dependency that crashed the production bundle at boot (TDZ: "Cannot access
+// before initialization" → blank screen, June 2 2026). The title below inlines
+// the exact MonoLabel size="xs"/tone="quiet" rendering instead.
 
 /**
  * InfoModal — quiet overlay for science-grounded info cards.
@@ -116,7 +120,7 @@ export default function InfoModal({ open, title, body, onClose }) {
 
         {title ? (
           <header style={{ marginBottom: "var(--sf-space-16)" }}>
-            <MonoLabel size="xs">{title}</MonoLabel>
+            <span className="sf-mono-xs" style={{ color: "var(--sf-text-quiet)" }}>{title}</span>
           </header>
         ) : null}
 
