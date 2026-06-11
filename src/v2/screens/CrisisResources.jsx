@@ -111,16 +111,30 @@ export default function CrisisResources({ onExit }) {
       </div>
 
       <div style={CARD}>
-        <MonoLabel size="xs" tone="faint">ARMENIA</MonoLabel>
-        <h2 style={H2}>Շտապ օգնություն · Emergency 112</h2>
+        <MonoLabel size="xs" tone="faint">CALL · 24/7 · MEXICO</MonoLabel>
+        <h2 style={H2}>Línea de la Vida</h2>
+        <p style={NOTE}>Gratuita y confidencial. Emergencias: 911.</p>
+        <div style={{ ...ROW, marginTop: "var(--sf-space-12)" }}>
+          <a href="tel:8009112000" style={ACTION} aria-label="Llamar 800 911 2000 ahora">
+            Llamar 800 911 2000
+          </a>
+        </div>
+      </div>
+
+      <div style={CARD}>
+        <MonoLabel size="xs" tone="faint">CALL · MON–FRI 09:00–18:00 · ARMENIA</MonoLabel>
+        <h2 style={H2}>Emotional Support Hotline</h2>
         <p style={NOTE}>
-          Crisis lines for Armenia are listed in the directory below.
-          {/* Deliberate: no hardcoded Armenian hotline — the only numbers found
-              came from stale aggregator lists, and an unverified number on a
-              crisis screen is worse than a directory. Add one only when a
-              current line is verified (Arlin may know a live local resource). */}
+          Toll-free, nationwide (MHAI · Yerevan Municipality). Not 24/7 —
+          outside hours, call 112 or use the directory below.
+          {/* Number verified June 2 2026: findahelpline (helpline-verified
+              Feb 26 2026) + mha.am + Armenian press (Dec 2025). Hours stated
+              honestly on-screen because the line is NOT 24/7. */}
         </p>
         <div style={{ ...ROW, marginTop: "var(--sf-space-12)" }}>
+          <a href="tel:080000900" style={ACTION} aria-label="Call 0800 00 900 now">
+            Call 0800 00 900
+          </a>
           <a href="tel:112" style={ACTION} aria-label="Call 112 now">
             Call 112
           </a>
@@ -151,21 +165,6 @@ export default function CrisisResources({ onExit }) {
       </div>
 
       <HairlineDivider />
-
-      <div style={{ marginTop: "var(--sf-space-24)" }}>
-        <MonoLabel size="xs" tone="faint">OTHER COUNTRIES · CALL</MonoLabel>
-        {INTL.map((c) => (
-          <div key={c.country} style={{ ...CARD, marginTop: "var(--sf-space-12)" }}>
-            <MonoLabel size="xs" tone="faint">{c.caption}</MonoLabel>
-            <h2 style={H2}>{c.country} — {c.name}</h2>
-            <div style={ROW}>
-              <a href={`tel:${c.tel}`} style={ACTION} aria-label={`Call ${c.name} now`}>
-                Call {c.display}
-              </a>
-            </div>
-          </div>
-        ))}
-      </div>
 
       <p style={{ ...NOTE, marginTop: "var(--sf-space-16)" }}>
         Anywhere else:{" "}
@@ -286,12 +285,6 @@ const INLINE_LINK = {
   textUnderlineOffset: "3px",
 };
 
-/* ---- verified international lines (launch markets) ----
-   Each entry web-verified June 2 2026. Hours stated honestly — Armenia's
-   line is NOT 24/7 and the caption says so. Call-only: no invented sms:. */
-const INTL = [
-  { country: "Brazil",  name: "CVV",                       tel: "188",        display: "188",          caption: "24/7 · FREE · EMERGENCY: 192" },
-  { country: "Spain",   name: "L\u00ednea 024",            tel: "024",        display: "024",          caption: "24/7 · FREE · EMERGENCY: 112" },
-  { country: "Mexico",  name: "L\u00ednea de la Vida",     tel: "8009112000", display: "800 911 2000", caption: "24/7 · FREE · EMERGENCY: 911" },
-  { country: "Armenia", name: "Emotional Support Hotline", tel: "080000900",  display: "0800 00 900",  caption: "MON\u2013FRI 09:00\u201318:00 · TOLL-FREE · EMERGENCY: 112" },
-];
+/* International lines live as full cards above — each number web-verified
+   June 2 2026 (Brazil CVV 188 · Spain 024 · Mexico 800 911 2000 · Armenia
+   0800 00 900, Mon–Fri 09:00–18:00 stated honestly on-screen). */
