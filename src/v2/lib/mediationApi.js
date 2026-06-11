@@ -28,6 +28,8 @@
  */
 
 import { getTriggerProfile, addTrigger, updateTrigger, deleteTrigger } from "./triggerProfile.js";
+import { formatAnchorsForAI, addAnchor, retireAnchor } from "./anchors.js";
+import { getGrowthBaseline, graduateBaseline } from "./growthBaseline.js";
 import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
 import { setMirrorObservation } from "./mirror.js";
 
@@ -126,6 +128,8 @@ export async function runMediation(reason = "manual") {
       body: JSON.stringify({
         mode: "propose_update",
         triggerProfile: getTriggerProfile(),
+        anchors: formatAnchorsForAI(),
+        growthBaseline: getGrowthBaseline(),
         recentReframes: formatRecentSessionsForAI(8),
         sessionCount,
         existingPendingTargets: [...pendingTargets, ...declined],
@@ -143,9 +147,9 @@ export async function runMediation(reason = "manual") {
   // not about finding something every time.
   writeLastRun({ at: new Date().toISOString(), sessionCount, reason });
 
-  // Proposals → queue (v1: trigger_profile only — the store that exists).
+  // Proposals → queue (M5: all three targets — their stores now exist).
   const incoming = (Array.isArray(data.proposals) ? data.proposals : [])
-    .filter((p) => p && p.target === "trigger_profile")
+    .filter((p) => p && ["trigger_profile", "anchors", "growth_baseline"].includes(p.target))
     .map((p) => ({
       id: `med_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       receivedAt: new Date().toISOString(),
@@ -184,15 +188,28 @@ export function approveProposal(id) {
   if (!p) return { applied: false };
   let applied = false;
   try {
-    if (p.operation === "add" && p.proposed?.label) {
-      addTrigger({ label: p.proposed.label, category: p.proposed.category });
-      applied = true;
-    } else if (p.operation === "update" && p.targetItemId && p.proposed) {
-      updateTrigger(p.targetItemId, p.proposed);
-      applied = true;
-    } else if (p.operation === "retire" && p.targetItemId) {
-      deleteTrigger(p.targetItemId);
-      applied = true;
+    if (p.target === "trigger_profile") {
+      if (p.operation === "add" && p.proposed?.label) {
+        addTrigger({ label: p.proposed.label, category: p.proposed.category });
+        applied = true;
+      } else if (p.operation === "update" && p.targetItemId && p.proposed) {
+        updateTrigger(p.targetItemId, p.proposed);
+        applied = true;
+      } else if (p.operation === "retire" && p.targetItemId) {
+        deleteTrigger(p.targetItemId);
+        applied = true;
+      }
+    } else if (p.target === "anchors") {
+      if (p.operation === "add" && p.proposed?.cue && p.proposed?.action) {
+        applied = !!addAnchor({ cue: p.proposed.cue, action: p.proposed.action, source: "mediation" });
+      } else if (p.operation === "retire" && p.targetItemId) {
+        applied = retireAnchor(p.targetItemId);
+      }
+    } else if (p.target === "growth_baseline" && p.operation === "graduate") {
+      applied = !!graduateBaseline({
+        newBaselineLabel: p.proposed?.newBaselineLabel,
+        evidenceSummary: p.proposed?.evidence_summary,
+      });
     }
   } catch { applied = false; }
   p.status = applied ? "approved" : "failed";

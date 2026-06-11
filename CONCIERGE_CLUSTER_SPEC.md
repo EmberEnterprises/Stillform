@@ -33,7 +33,8 @@ already there.
 ## Build order
 M1 `mediationApi.js` (caller + queue store + Mirror write) → M2 approval-queue UI →
 M3 trigger wiring per Arlin's cadence decision → M4 (follow-on, separate scope):
-deterministic smart-prompt floor.
+deterministic smart-prompt floor. **M5 DONE June 2** — anchors + growth_baseline stores built,
+mediation applies all three targets (proven: valid apply, invalid→failed, retire, graduate).
 
 ## Cost picture (honest)
 One propose_update call ≈ a few KB context + small completion ≈ on the order of a cent

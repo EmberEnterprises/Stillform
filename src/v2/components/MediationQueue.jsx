@@ -46,7 +46,16 @@ export default function MediationQueue({ inline = false, onClose }) {
         items.map((p) => (
           <div key={p.id} style={CARD}>
             <MonoLabel size="xs" tone="faint">{verb(p).toUpperCase()}</MonoLabel>
-            {p.proposed?.label ? <h3 style={H3}>{p.proposed.label}</h3> : null}
+            {(() => {
+              const title =
+                p.proposed?.label ||
+                (p.proposed?.cue && p.proposed?.action
+                  ? `${p.proposed.cue} \u2192 ${p.proposed.action}`
+                  : null) ||
+                p.proposed?.newBaselineLabel ||
+                null;
+              return title ? <h3 style={H3}>{title}</h3> : null;
+            })()}
             <p style={REASONING}>{p.reasoning}</p>
             {p.evidence?.length ? (
               <p style={EVIDENCE}>Based on {p.evidence.length} of your recent sessions.</p>
