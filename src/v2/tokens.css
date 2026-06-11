@@ -304,3 +304,23 @@ body:has(.sf-v2) {
 .sf-v2 :focus:not(:focus-visible) {
   outline: none;
 }
+
+/* ------------------------------------------------------------------ *
+ * ACCESSIBILITY OVERRIDES (Settings → Display; lib/a11y.js applies
+ * the data attributes). Token-level only: every component inherits.
+ * ------------------------------------------------------------------ */
+html[data-sf-contrast="high"] {
+  --sf-text-quiet:    rgba(232, 234, 240, 0.82);
+  --sf-text-faint:    rgba(232, 234, 240, 0.64);
+  --sf-border-hairline:  rgba(255, 255, 255, 0.16);
+  --sf-border-emphasis:  rgba(255, 255, 255, 0.26);
+  --sf-border-printed:   rgba(255, 255, 255, 0.12);
+  --sf-border-quiet:     rgba(255, 255, 255, 0.20);
+}
+
+/* Whole-UI scale bump. The codebase sizes in px; zoom scales uniformly
+ * and is supported in Chromium + WebKit + Firefox 126+ (every WebView
+ * this app ships in). */
+html[data-sf-textsize="large"] body {
+  zoom: 1.12;
+}

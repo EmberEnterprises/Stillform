@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./tokens.css";
 import "./components.css";
+import { applyA11y } from "./lib/a11y.js";
+
+// Display accessibility (contrast / text size) — apply persisted settings
+// before the tree paints. Module-level call is safe: reads localStorage,
+// sets <html> data attributes only.
+applyA11y();
 import Home from "./screens/Home.jsx";
 import Spine from "./screens/Spine.jsx";
 import FoundationVerify from "./screens/FoundationVerify.jsx";

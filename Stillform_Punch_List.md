@@ -30,7 +30,7 @@ Full re-audit of every v1-referenced item against live `src/v2/` + functions (ve
 - Practice Signals (function-check cadence + screen)
 - Premium sound packs (one-time-purchase add-on)
 - Share-to-Reframe (`?share=` handler)
-- Contrast + text-size toggle (accessibility)
+- ✅ Contrast + text-size toggle (accessibility) — BUILT June 2 (`lib/a11y.js` + tokens.css overrides + Settings DISPLAY section; proven headless: token flip, zoom 1.12, persists across reload)
 - State-to-Statement labels
 - Roadmap full-screen
 

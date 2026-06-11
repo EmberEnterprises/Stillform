@@ -4,6 +4,7 @@ import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import HairlineDivider from "../components/HairlineDivider.jsx";
 import { getSubscriptionStatus } from "../lib/subscriptionApi.js";
+import { getA11y, setA11y } from "../lib/a11y.js";
 
 /**
  * Settings — the user's setup surface.
@@ -43,6 +44,12 @@ export default function Settings({ onExit }) {
   const [confirmClear, setConfirmClear] = useState(false);
   const [cleared, setCleared] = useState(false);
   const [summary, setSummary] = useState(() => readDeviceSummary());
+  const [a11y, setA11yState] = useState(() => getA11y());
+
+  function toggleA11y(k, onVal) {
+    const next = setA11y(k, a11y[k] === onVal ? "default" : onVal);
+    setA11yState(next);
+  }
 
   useEffect(() => {
     let alive = true;
@@ -122,6 +129,36 @@ export default function Settings({ onExit }) {
       </section>
 
       <HairlineDivider />
+
+      {/* DISPLAY — accessibility (contrast / text size). Applies app-wide
+          instantly via lib/a11y.js token overrides; persists on-device. */}
+      <div style={SECTION}>
+        <MonoLabel size="xs" tone="faint">DISPLAY</MonoLabel>
+        <div style={ROW}>
+          <span style={{ color: "var(--sf-text-primary)" }}>High contrast</span>
+          <button
+            type="button"
+            onClick={() => toggleA11y("contrast", "high")}
+            style={a11y.contrast === "high" ? TOGGLE_ON : TOGGLE_OFF}
+            aria-pressed={a11y.contrast === "high"}
+            aria-label="Toggle high contrast"
+          >
+            {a11y.contrast === "high" ? "On" : "Off"}
+          </button>
+        </div>
+        <div style={ROW}>
+          <span style={{ color: "var(--sf-text-primary)" }}>Larger text</span>
+          <button
+            type="button"
+            onClick={() => toggleA11y("textSize", "large")}
+            style={a11y.textSize === "large" ? TOGGLE_ON : TOGGLE_OFF}
+            aria-pressed={a11y.textSize === "large"}
+            aria-label="Toggle larger text"
+          >
+            {a11y.textSize === "large" ? "On" : "Off"}
+          </button>
+        </div>
+      </div>
 
       {/* YOUR DATA — read-only summary of what's on this device */}
       <section style={SECTION}>
@@ -236,6 +273,29 @@ const ROW = {
   fontSize: "15px",
   lineHeight: 1.5,
   margin: "0 0 12px",
+};
+
+const TOGGLE_BASE = {
+  minWidth: "64px",
+  minHeight: "40px",
+  borderRadius: "var(--sf-radius-md, 12px)",
+  fontFamily: "var(--sf-font-mono)",
+  fontSize: "12px",
+  letterSpacing: "0.06em",
+  cursor: "pointer",
+  WebkitTapHighlightColor: "transparent",
+};
+const TOGGLE_ON = {
+  ...TOGGLE_BASE,
+  background: "var(--sf-text-primary)",
+  color: "var(--sf-ground-deep, #08080A)",
+  border: "0.5px solid var(--sf-text-primary)",
+};
+const TOGGLE_OFF = {
+  ...TOGGLE_BASE,
+  background: "transparent",
+  color: "var(--sf-text-quiet)",
+  border: "0.5px solid var(--sf-border-emphasis)",
 };
 
 const FAINT = {
