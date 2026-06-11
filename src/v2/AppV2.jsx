@@ -47,12 +47,36 @@ import { refreshSubscriptionStatus } from "./lib/subscriptionApi.js";
  *
  * Anchor: STILLFORM_CANON.md §architecture.
  */
+/**
+ * Share-to-Reframe (rebuilt June 2 2026): the Android share-intent layer
+ * deep-links into the app with ?share=<text>. Read once, sanitize, and
+ * consume (URL cleaned so a refresh doesn't re-trigger). Guards: first-run
+ * completion (not onboarded -> normal onboarding, share ignored) and the
+ * session gate (gated -> paywall, same as any session entry).
+ */
+function readShareText() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("share");
+    if (!raw) return null;
+    const t = String(raw).trim().slice(0, 500);
+    return t.length >= 2 ? t : null;
+  } catch {
+    return null;
+  }
+}
+const INITIAL_SHARE_TEXT = readShareText();
+if (INITIAL_SHARE_TEXT) {
+  try { window.history.replaceState({}, "", window.location.pathname); } catch { /* non-fatal */ }
+}
+
 function pickInitialScreen() {
   try {
     const params = new URLSearchParams(window.location.search);
     if (params.get("verify") === "1") return "verify";
     if (params.get("paywall") === "1") return "paywall";
     if (params.get("onboard") === "1") return "onboarding";
+    if (INITIAL_SHARE_TEXT && isOnboarded()) return shouldGate() ? "paywall" : "spine";
   } catch {
     /* noop */
   }
@@ -66,7 +90,11 @@ export default function AppV2() {
   // Phase 6.4c: one-shot forced beat for a manual launch (post-event from
   // My Progress). Set right before routing to "spine", consumed by Spine at
   // mount, cleared on exit. Null for the normal time-routed home session.
-  const [spineBeat, setSpineBeat] = useState(null);
+  const [spineBeat, setSpineBeat] = useState(
+    // Share entry always opens a MAIN session: shared text is in-the-moment
+    // material; landing it in wind-down's anchor flow would be wrong.
+    INITIAL_SHARE_TEXT ? "main" : null
+  );
 
   // Phase 8c: warm the subscription-status cache once on mount so the gate
   // decision (shouldGate) has a resolved status to read. Fail-open: until
@@ -89,6 +117,7 @@ export default function AppV2() {
       <div className="sf-v2">
         <Spine
           forcedBeat={spineBeat}
+          initialText={INITIAL_SHARE_TEXT || null}
           onExit={() => {
             setSpineBeat(null);
             setScreen("home");

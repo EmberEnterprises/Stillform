@@ -68,7 +68,7 @@ function InfoDot({ onClick, label }) {
  *   advances. opts.selfMode === true if user picked self-led path.
  * @param {function(): void} onExit  Called when user exits the spine.
  */
-export default function Notice({ config, onContinue, onExit }) {
+export default function Notice({ config, onContinue, onExit , initialText = null }) {
   // Resolve render values from config when present; fall back to main-
   // beat defaults otherwise. Backward-compatible — existing callers that
   // don't pass config get the same surface they always did.
@@ -86,7 +86,7 @@ export default function Notice({ config, onContinue, onExit }) {
   // Per-beat chip subset, or the full default if no config.
   const chips = config?.notice?.chips ?? DEFAULT_SCAFFOLDING_CHIPS;
 
-  const [text, setText] = useState("");
+  const [text, setText] = useState(() => (typeof initialText === "string" ? initialText : ""));
   const [selectedChip, setSelectedChip] = useState(null);
   const [infoChip, setInfoChip] = useState(null);
   const textareaRef = useRef(null);
