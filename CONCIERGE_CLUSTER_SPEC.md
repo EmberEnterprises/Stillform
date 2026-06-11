@@ -1,4 +1,6 @@
-# CONCIERGE CLUSTER — SCOPE (v0.1, June 2 2026, FOR ARLIN'S DECISIONS)
+# CONCIERGE CLUSTER — v1.0 LOCKED + BUILT (June 2 2026)
+
+**DECISIONS (Arlin, June 2):** cadence = ALL THREE (evaluated at the single home-mount gate: EOD-done-today · ≥3 closes since last run · 24h home-open; 2h burst-guard so triggers never stack) · queue = BOTH placements (Mirror tap-through overlay + My Progress inline section) · Mirror evidence floor = 5 sessions. **BUILT M1–M3 same session** — backend observation field, mediationApi.js, MediationQueue.jsx, SmartScreen gate + tap-through + hint, My Progress section. Proven in-browser: Mirror lights → tap opens queue → verbatim reasoning renders → Approve writes the trigger profile → status flips. v1 queues trigger_profile only (anchors/growth_baseline stores not yet rebuilt — M5).
 
 **Goal:** give the concierge layer its voice. The diagnostic stack (memory) is live;
 nothing surfaces it unprompted. This cluster wires the two dark surfaces that make the

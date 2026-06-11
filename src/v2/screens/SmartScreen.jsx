@@ -7,6 +7,8 @@ import { getActivePromptAsync, getFallbackActivePrompt } from "../lib/activeProm
 import { getMirrorObservation } from "../lib/mirror.js";
 import { getTrajectoryStats, formatTrajectoryLine } from "../lib/trajectory.js";
 import { getSessionCount } from "../lib/sessions.js";
+import { maybeRunMediation, getPendingProposals } from "../lib/mediationApi.js";
+import MediationQueue from "../components/MediationQueue.jsx";
 
 /**
  * SmartScreen — the v2 home, Phase 3.
@@ -65,6 +67,7 @@ export default function SmartScreen({ onBeginSession }) {
   const [thread, setThread] = useState(() => getTodayThread(beat));
   const [sessionCount, setSessionCount] = useState(() => getSessionCount());
   const [mirror, setMirror] = useState(() => getMirrorObservation());
+  const [showQueue, setShowQueue] = useState(false);
   const [trajectory, setTrajectory] = useState(() => getTrajectoryStats());
 
   // Active prompt starts with the synchronous fallback so the surface
@@ -77,6 +80,13 @@ export default function SmartScreen({ onBeginSession }) {
 
   // Re-read on tab focus so the home stays current when the user
   // returns from another tab or completes a session.
+  // Concierge gate (CONCIERGE_CLUSTER_SPEC v1.0): evaluate Arlin's three
+  // cadences at the single home-mount gate. Fire-and-forget — failure
+  // leaves the Mirror and queue unchanged; the practice never blocks.
+  useEffect(() => {
+    maybeRunMediation();
+  }, []);
+
   useEffect(() => {
     const refresh = () => {
       if (document.visibilityState !== "visible") return;
@@ -137,8 +147,12 @@ export default function SmartScreen({ onBeginSession }) {
         {showMirror ? (
           <section
             className="sf-fade-enter sf-fade-enter--delay-1"
-            style={{ marginBottom: "var(--sf-space-32)" }}
-            aria-label="Pattern reflection"
+            style={{ marginBottom: "var(--sf-space-32)", cursor: "pointer" }}
+            aria-label="Pattern reflection — tap for proposed updates"
+            role="button"
+            tabIndex={0}
+            onClick={() => setShowQueue(true)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setShowQueue(true); }}
           >
             <MonoLabel
               size="xs"
@@ -160,12 +174,21 @@ export default function SmartScreen({ onBeginSession }) {
             >
               {mirror.observation}
             </p>
+            {getPendingProposals().length > 0 ? (
+              <MonoLabel size="xs" tone="faint" style={{ display: "block", marginTop: "var(--sf-space-12)" }}>
+                Tap — proposed updates waiting
+              </MonoLabel>
+            ) : null}
             <div
               className="sf-thread-divider"
               aria-hidden="true"
               style={{ marginTop: "var(--sf-space-24)" }}
             />
           </section>
+        ) : null}
+
+        {showQueue ? (
+          <MediationQueue onClose={() => setShowQueue(false)} />
         ) : null}
 
         {/* Thread — today's accumulating named work. */}

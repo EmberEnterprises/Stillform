@@ -2,6 +2,8 @@ import React from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getBiasProfile, patternConfidence } from "../lib/biasProfile.js";
+import MediationQueue from "../components/MediationQueue.jsx";
+import { getPendingProposals } from "../lib/mediationApi.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -171,6 +173,15 @@ export default function MyProgress({ onExit, onNavigate }) {
           onTap={() => handleNavigate("what-you-bet-on")}
         />
       </section>
+
+      {/* Concierge — proposed updates (Arlin June 2: queue lives here AND
+          behind the Mirror tap). Renders only when something is genuinely
+          pending — honest absence otherwise, no empty placeholder. */}
+      {getPendingProposals().length > 0 ? (
+        <section style={{ marginTop: "var(--sf-space-32)" }} aria-label="Proposed updates">
+          <MediationQueue inline />
+        </section>
+      ) : null}
     </main>
   );
 }

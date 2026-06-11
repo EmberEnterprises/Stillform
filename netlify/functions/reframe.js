@@ -2094,15 +2094,23 @@ Return ONLY valid JSON:
   "proposals": [
     {
       "target": "trigger_profile" | "anchors" | "growth_baseline",
-      "operation": "add" | "update" | "retire" | "graduate",
       "targetItemId": string or null,
+      "operation": "add" | "update" | "retire" | "graduate",
       "proposed": { /* payload matching target+operation */ },
       "reasoning": string (60-400 chars, shown verbatim to user, must reference specific evidence),
       "evidence": [ string refs to sessions/eods, 1-5 entries ]
     }
-  ]
+  ],
+  "observation": string or null
 }
-0-3 proposals. Empty array if nothing strong is showing. No markdown. JSON only.`;
+0-3 proposals. Empty array if nothing strong is showing. No markdown. JSON only.
+
+OBSERVATION FIELD (Mirror strip — same hard rules as proposals):
+One third-person editorial line (40-180 chars) reflecting a pattern across what the USER has
+named in their own work — never an interpretation of their life, never advice, never a question.
+Good: "Seven variants of criticism spiraling named over three weeks. Body always: shoulders, jaw."
+Bad: "You seem stressed about criticism lately."
+Return null unless the evidence genuinely supports one — null is the honest default.`;
 
       // Compact the context payload for the AI. Strip anything that isn't
       // signal-bearing for proposal generation.
@@ -2201,10 +2209,15 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
           })
           .filter(Boolean);
 
+        // Mirror observation — validated to the same standard as proposals:
+        // a string in the 40–200 char editorial band, else null (honest absence).
+        const obsRaw = typeof parsedPp.observation === "string" ? parsedPp.observation.trim() : null;
+        const observation = obsRaw && obsRaw.length >= 40 && obsRaw.length <= 200 ? obsRaw : null;
+
         return {
           statusCode: 200,
           headers: { ...createCorsHeaders(event), "Content-Type": "application/json" },
-          body: JSON.stringify({ proposals: validated, source: "ai" })
+          body: JSON.stringify({ proposals: validated, observation, source: "ai" })
         };
       } catch (err) {
         console.error("Propose-update error:", err.message);
