@@ -171,3 +171,30 @@ export async function sendReframeMessage({ input, history = [], feelState = null
     return { reframe: "", error: "Connection issue. Check your network." };
   }
 }
+
+/**
+ * State-to-Statement (June 2 2026): one user-initiated call converting the
+ * session's landed frame into a sendable message draft. Returns
+ * { draft } or { fallback: true } — callers show a quiet failure line and
+ * never block the close (Self-Mode law).
+ *
+ * @param {{surfacedFrame?: string|null, takeaway?: string|null}} params
+ * @returns {Promise<{draft: string}|{fallback: true}>}
+ */
+export async function draftStatement({ surfacedFrame = null, takeaway = null } = {}) {
+  try {
+    const response = await fetch("/.netlify/functions/reframe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "statement", surfacedFrame, takeaway, input: "statement" }),
+    });
+    if (!response.ok) return { fallback: true };
+    const data = await response.json();
+    if (data && typeof data.draft === "string" && data.draft.trim().length >= 5) {
+      return { draft: data.draft.trim() };
+    }
+    return { fallback: true };
+  } catch {
+    return { fallback: true };
+  }
+}

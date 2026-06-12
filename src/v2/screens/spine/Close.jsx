@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { draftStatement } from "../../lib/reframeApi.js";
 import EditorialBlock from "../../components/EditorialBlock.jsx";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
@@ -229,6 +230,33 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
     }
   };
 
+  // State-to-Statement (June 2 2026): optional, collapsed by default, one
+  // user-initiated AI call. Quiet failure ("Couldn't draft right now"), never
+  // gates the close. Draft is editable; Copy uses the clipboard API with a
+  // selection fallback.
+  const [stOpen, setStOpen] = useState(false);
+  const [stDraft, setStDraft] = useState("");
+  const [stStatus, setStStatus] = useState("idle"); // idle|loading|ready|failed|copied
+  const handleDraftStatement = async () => {
+    setStOpen(true);
+    setStStatus("loading");
+    const r = await draftStatement({ surfacedFrame: surfacedFrame || null, takeaway: trimmed || null });
+    if (r && typeof r.draft === "string") {
+      setStDraft(r.draft);
+      setStStatus("ready");
+    } else {
+      setStStatus("failed");
+    }
+  };
+  const handleCopyDraft = async () => {
+    try {
+      await navigator.clipboard.writeText(stDraft);
+      setStStatus("copied");
+    } catch {
+      setStStatus("ready"); // clipboard blocked — text stays selectable
+    }
+  };
+
   // Compose → the structured forward close. Always advances to the next-move
   // beat; both forward beats are skippable from there.
   const handlePrimary = () => {
@@ -394,6 +422,47 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
             </button>
           </div>
         )}
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-3"
+          style={{ marginTop: "var(--sf-space-12)" }}
+        >
+          {!stOpen ? (
+            <button type="button" onClick={handleDraftStatement} className="sf-link-quiet">
+              Turn this into a message ›
+            </button>
+          ) : (
+            <div style={{ marginTop: "var(--sf-space-8)" }}>
+              {stStatus === "loading" && (
+                <p className="sf-body-sm" style={{ color: "var(--sf-text-quiet)" }}>Drafting…</p>
+              )}
+              {stStatus === "failed" && (
+                <p className="sf-body-sm" style={{ color: "var(--sf-text-quiet)" }}>
+                  Couldn't draft right now. Your takeaway is safe — close as usual.
+                </p>
+              )}
+              {(stStatus === "ready" || stStatus === "copied") && (
+                <>
+                  <textarea
+                    value={stDraft}
+                    onChange={(e) => { setStDraft(e.target.value); if (stStatus === "copied") setStStatus("ready"); }}
+                    rows={4}
+                    className="sf-input"
+                    style={{ width: "100%" }}
+                    aria-label="Message draft"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCopyDraft}
+                    className="sf-link-quiet"
+                    style={{ marginTop: "var(--sf-space-8)" }}
+                  >
+                    {stStatus === "copied" ? "Copied ✓" : "Copy message"}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </main>
     );
   }

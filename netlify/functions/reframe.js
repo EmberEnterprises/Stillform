@@ -2009,6 +2009,65 @@ ${sourceState ? `Feel state at session start: ${sourceState}\n` : ""}${sourceTex
     // --------------------------------------------------------------------
 
     // --------------------------------------------------------------------
+    // STATEMENT MODE (June 2 2026 — State-to-Statement rebuild)
+    // Converts the session's landed frame into a short SENDABLE message in
+    // the user's own voice. User-initiated only (one call per tap), optional,
+    // never gates the close. Returns { draft } or fallback:true (client
+    // shows a quiet failure line; close flow unaffected — Self-Mode law).
+    // --------------------------------------------------------------------
+    if (mode === "statement") {
+      const stBody = (() => {
+        try { return JSON.parse(event.body); } catch { return {}; }
+      })();
+      const stFrame = typeof stBody.surfacedFrame === "string" ? stBody.surfacedFrame.trim().slice(0, 1200) : "";
+      const stTakeaway = typeof stBody.takeaway === "string" ? stBody.takeaway.trim().slice(0, 400) : "";
+      if (!stFrame && !stTakeaway) {
+        return { statusCode: 400, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Nothing to draft from.", fallback: true }) };
+      }
+      try {
+        const stResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+          body: JSON.stringify({
+            model: "gpt-4o",
+            max_tokens: 220,
+            temperature: 0.6,
+            response_format: { type: "json_object" },
+            messages: [
+              { role: "system", content: "You convert the outcome of a private thinking session into ONE short message the user could actually send to the person involved. Rules: the user's own plain voice — direct, warm where warranted, zero therapy-speak, zero jargon, never mention AI, apps, sessions, or 'reframing'. No greetings/sign-offs unless natural. Max 70 words. If the material doesn't involve another person, draft a message to the most plausible counterpart implied. Respond ONLY as JSON: {\"draft\": \"...\"}" },
+              { role: "user", content: `Where the session landed: ${stFrame || "(none)"}\nThe user's own takeaway: ${stTakeaway || "(none)"}` },
+            ],
+          }),
+        });
+        const stData = await stResponse.json();
+        const stRaw = stData?.choices?.[0]?.message?.content;
+        if (!stResponse.ok || !stRaw) {
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Statement draft failed.", fallback: true }) };
+        }
+        let stParsed;
+        try {
+          stParsed = JSON.parse(String(stRaw).replace(/^```json\s*|\s*```$/g, "").trim());
+        } catch {
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Statement parse failed.", fallback: true }) };
+        }
+        const draft = typeof stParsed?.draft === "string" ? stParsed.draft.trim().slice(0, 600) : "";
+        if (draft.length < 5) {
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Statement draft empty.", fallback: true }) };
+        }
+        return {
+          statusCode: 200,
+          headers: { ...createCorsHeaders(event), "Content-Type": "application/json" },
+          body: JSON.stringify({ draft }),
+        };
+      } catch {
+        return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Statement draft failed.", fallback: true }) };
+      }
+    }
+    // --------------------------------------------------------------------
+    // END STATEMENT MODE
+    // --------------------------------------------------------------------
+
+    // --------------------------------------------------------------------
     // PROPOSE_UPDATE MODE (Phase 6b — AI mediation pipeline)
     // --------------------------------------------------------------------
     // AI generates structured proposals to update the user's artifacts.

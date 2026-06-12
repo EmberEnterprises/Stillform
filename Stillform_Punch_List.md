@@ -31,7 +31,7 @@ Full re-audit of every v1-referenced item against live `src/v2/` + functions (ve
 - Premium sound packs (one-time-purchase add-on)
 - Share-to-Reframe (`?share=` handler)
 - ✅ Contrast + text-size toggle (accessibility) — BUILT June 2 (`lib/a11y.js` + tokens.css overrides + Settings DISPLAY section; proven headless: token flip, zoom 1.12, persists across reload)
-- State-to-Statement labels
+- ✅ State-to-Statement — REBUILT June 2 (backend statement mode + draftStatement client + collapsed Close UI, copy-to-clipboard, quiet failure)
 - Roadmap full-screen
 
 **Set aside (not dead, not active backlog):** Bio-filter capture stays dropped (Arlin's prior friction call). Encryption-at-rest set aside in favor of cloud backup.
