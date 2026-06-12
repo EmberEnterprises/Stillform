@@ -151,15 +151,36 @@ export async function sendReframeMessage({ input, history = [], feelState = null
     // already shape-validated; defensive check before exposing to UI.
     let logPrediction = null;
     const lp = data && data.log_prediction;
-    if (
-      lp && typeof lp === "object" &&
-      typeof lp.text === "string" && lp.text.length > 0 &&
-      typeof lp.confidence === "number" && Number.isFinite(lp.confidence)
-    ) {
-      logPrediction = { text: lp.text, confidence: lp.confidence };
+    if (lp && typeof lp === "object" && typeof lp.text === "string" && lp.text.length > 0) {
+      // CORE LOOP L2: confidence may be null (a bet without a stated number).
+      const conf = typeof lp.confidence === "number" && Number.isFinite(lp.confidence) ? lp.confidence : null;
+      logPrediction = { text: lp.text, confidence: conf };
     }
 
+    // CORE LOOP L2 (CORE_LOOP_SPEC.md): the extract/work contract. Absent
+    // mode = legacy/fallback shape; the screen renders both. Named workMode:
+    // `mode` is the route mode in this scope, and a const here would TDZ the
+    // request body above (the June 2 boot-crash bug class — caught by proof).
+    const workMode = data && (data.mode === "extract" || data.mode === "work") ? data.mode : null;
+    const takenApart = workMode === "work" && data.taken_apart && typeof data.taken_apart === "object"
+      ? {
+          verified: Array.isArray(data.taken_apart.verified) ? data.taken_apart.verified.filter((x) => typeof x === "string" && x.trim()) : [],
+          assumed: Array.isArray(data.taken_apart.assumed) ? data.taken_apart.assumed.filter((x) => typeof x === "string" && x.trim()) : [],
+        }
+      : null;
+    const shape = workMode === "work" && data.shape && typeof data.shape === "object"
+      ? {
+          watch_label: typeof data.shape.watch_label === "string" && data.shape.watch_label.trim() ? data.shape.watch_label.trim() : null,
+          line: typeof data.shape.line === "string" && data.shape.line.trim() ? data.shape.line.trim() : null,
+        }
+      : null;
+
     return {
+      mode: workMode,
+      taken_apart: takenApart,
+      shape,
+      rebuilt: workMode === "work" && typeof data.rebuilt === "string" ? data.rebuilt.trim() : null,
+      ask: workMode === "extract" && typeof data.ask === "string" ? data.ask.trim() : null,
       reframe: text,
       question: data && typeof data.question === "string" ? data.question : undefined,
       next_step: data && typeof data.next_step === "string" ? data.next_step : undefined,

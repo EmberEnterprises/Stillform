@@ -18,7 +18,7 @@
 // Shape: { entries: [{id, text, confidence, loggedAt, outcome, outcomeAt}] }
 //   - id: generated unique string
 //   - text: non-empty user prediction
-//   - confidence: number 0-100 (user-named at prediction time)
+//   - confidence: number 0-100 (user-named) or null (bet made without a stated number)
 //   - loggedAt: ISO timestamp
 //   - outcome: null (pending) or non-empty string (resolved; user's own words)
 //   - outcomeAt: null (pending) or ISO timestamp when outcome marked
@@ -79,8 +79,15 @@ export function savePredictionLog(store) {
 export function recordPrediction({ text, confidence } = {}) {
   const trimmed = typeof text === "string" ? text.trim() : "";
   if (!trimmed) return null;
-  const c = Number(confidence);
-  if (!Number.isFinite(c) || c < 0 || c > 100) return null;
+  // CORE LOOP L2 (June 2026): confidence may be null — a falsifiable bet
+  // without a stated number is still a bet. Fabricating a number would
+  // violate zero-fabrication; null is the honest value.
+  let c = null;
+  if (confidence !== null && confidence !== undefined && confidence !== "") {
+    const n = Number(confidence);
+    if (!Number.isFinite(n) || n < 0 || n > 100) return null;
+    c = n;
+  }
   const entry = {
     id: generateId(),
     text: trimmed,

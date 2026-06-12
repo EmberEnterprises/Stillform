@@ -4,6 +4,7 @@ import MonoLabel from "../../components/MonoLabel.jsx";
 import HairlineDivider from "../../components/HairlineDivider.jsx";
 import { sendReframeMessage } from "../../lib/reframeApi.js";
 import { recordPrediction } from "../../lib/predictionLog.js";
+import { getWatchListChips } from "../../lib/biasProfile.js";
 import { noteAiPatternDetection } from "../../lib/biasProfile.js";
 
 /**
@@ -70,7 +71,8 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
       setHistory([
         { role: "user", text: precisionName },
-        { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step, log_prediction: result.log_prediction || null },
+        { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step, log_prediction: result.log_prediction || null,
+          mode: result.mode || null, taken_apart: result.taken_apart || null, shape: result.shape || null, rebuilt: result.rebuilt || null },
       ]);
       setThinking(false);
       setInitialized(true);
@@ -118,7 +120,8 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
     setHistory([
       ...nextHistory,
-      { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step, log_prediction: result.log_prediction || null },
+      { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step, log_prediction: result.log_prediction || null,
+        mode: result.mode || null, taken_apart: result.taken_apart || null, shape: result.shape || null, rebuilt: result.rebuilt || null },
     ]);
     setThinking(false);
   };
@@ -162,7 +165,8 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
           smaller body-sm for user, hairlines as turn separators. */}
       <div className="sf-fade-enter sf-fade-enter--delay-1">
         {history.map((msg, i) => (
-          <Turn key={i} role={msg.role} text={msg.text} question={msg.question} log_prediction={msg.log_prediction} />
+          <Turn key={i} role={msg.role} text={msg.text} question={msg.question} log_prediction={msg.log_prediction}
+            mode={msg.mode} taken_apart={msg.taken_apart} shape={msg.shape} rebuilt={msg.rebuilt} />
         ))}
 
         {thinking ? (
@@ -329,7 +333,48 @@ function stripInlineMarkdown(s) {
     .replace(/`(.+?)`/g, "$1");
 }
 
-function Turn({ role, text, question, log_prediction }) {
+/* CORE LOOP L2 — work-block chrome (CORE_LOOP_SPEC.md). The work renders
+   as ruled manuscript units; phosphor/oxblood stay sworn (the tags below
+   use the state palette, not the live/growth accents). */
+const WORK_TAG_SAGE = { fontFamily: "var(--sf-font-mono)", fontSize: "9px", letterSpacing: "0.18em", color: "var(--sf-state-positive)" };
+const WORK_TAG_OXBLOOD = { fontFamily: "var(--sf-font-mono)", fontSize: "9px", letterSpacing: "0.18em", color: "var(--sf-state-negative)" };
+
+function WorkLabel({ children }) {
+  return (
+    <span style={{ display: "block", fontFamily: "var(--sf-font-mono)", fontSize: "9px", letterSpacing: "0.3em", color: "var(--sf-accent)", marginBottom: "var(--sf-space-8)" }}>
+      {children}
+    </span>
+  );
+}
+
+/* Shape meta is rendered from THE APP'S OWN RECORDS, never from the model:
+   the label must match a chip on the local watch list or nothing renders.
+   Honest by construction — the server cannot invent counts. */
+function ShapeMeta({ label }) {
+  if (!label) return null;
+  let meta = null;
+  try {
+    const chips = getWatchListChips();
+    const hit = chips.find((c) => c.chip?.label === label);
+    if (hit) {
+      // getWatchListChips returns FLAT entries: {chip, lastSeen, encounterCount, ...}
+      const seen = hit.encounterCount;
+      const last = hit.lastSeen ? new Date(hit.lastSeen) : null;
+      const parts = [];
+      if (Number.isFinite(seen) && seen > 0) parts.push(`SEEN ${seen} TIME${seen === 1 ? "" : "S"}`);
+      if (last && !Number.isNaN(last.getTime())) parts.push(`LAST: ${last.toLocaleDateString(undefined, { month: "short", day: "numeric" }).toUpperCase()}`);
+      if (parts.length) meta = "ON YOUR WATCH LIST · " + parts.join(" · ");
+    }
+  } catch { meta = null; }
+  if (!meta) return null;
+  return (
+    <p style={{ margin: "var(--sf-space-8) 0 0", fontFamily: "var(--sf-font-mono)", fontSize: "9.5px", letterSpacing: "0.14em", color: "var(--sf-text-faint)" }}>
+      {meta}
+    </p>
+  );
+}
+
+function Turn({ role, text, question, log_prediction, mode, taken_apart, shape, rebuilt }) {
   const [logged, setLogged] = useState(false);
 
   if (role === "user") {
@@ -379,6 +424,38 @@ function Turn({ role, text, question, log_prediction }) {
 
   return (
     <div style={{ padding: "var(--sf-space-32) 0 var(--sf-space-16)" }}>
+      {mode === "work" && taken_apart && (taken_apart.verified.length > 0 || taken_apart.assumed.length > 0) ? (
+        <div style={{ borderTop: "1px solid var(--sf-border-hairline)", padding: "var(--sf-space-16) 0 var(--sf-space-8)", marginBottom: "var(--sf-space-12)" }}>
+          <WorkLabel>TAKEN APART</WorkLabel>
+          {taken_apart.verified.map((v, i) => (
+            <p key={"v" + i} style={{ margin: "0 0 var(--sf-space-8)", fontSize: "14.5px", lineHeight: 1.6, color: "var(--sf-text-primary)" }}>
+              <span style={WORK_TAG_SAGE}>verified — </span>{v}
+            </p>
+          ))}
+          {taken_apart.assumed.map((a, i) => (
+            <p key={"a" + i} style={{ margin: "0 0 var(--sf-space-8)", fontSize: "14.5px", lineHeight: 1.6, color: "var(--sf-text-quiet)" }}>
+              <span style={WORK_TAG_OXBLOOD}>assumed — </span>{a}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {mode === "work" && shape && shape.line ? (
+        <div style={{ borderTop: "1px solid var(--sf-border-hairline)", padding: "var(--sf-space-16) 0 var(--sf-space-8)", marginBottom: "var(--sf-space-12)" }}>
+          <WorkLabel>THE SHAPE</WorkLabel>
+          <p style={{ margin: 0, fontSize: "15px", lineHeight: 1.6, color: "var(--sf-text-primary)" }}>
+            {shape.line}
+            {shape.watch_label ? <> <b style={{ color: "var(--sf-accent)", fontWeight: 500 }}>{shape.watch_label}</b> — yours.</> : null}
+          </p>
+          <ShapeMeta label={shape.watch_label} />
+        </div>
+      ) : null}
+
+      {mode === "work" ? (
+        <div style={{ borderTop: "1px solid var(--sf-border-hairline)", paddingTop: "var(--sf-space-16)" }}>
+          <WorkLabel>REBUILT</WorkLabel>
+        </div>
+      ) : null}
       <p
         className="sf-body-lg"
         style={{
@@ -393,6 +470,40 @@ function Turn({ role, text, question, log_prediction }) {
       >
         {stripInlineMarkdown(text)}
       </p>
+      {mode === "work" && log_prediction ? (
+        <div style={{ borderTop: "1px solid var(--sf-border-hairline)", padding: "var(--sf-space-16) 0 var(--sf-space-8)", marginTop: "var(--sf-space-12)" }}>
+          <WorkLabel>ON RECORD</WorkLabel>
+          <p style={{ margin: 0, fontSize: "14.5px", lineHeight: 1.6, color: "var(--sf-text-quiet)" }}>
+            <b style={{ color: "var(--sf-text-primary)", fontWeight: 500 }}>"{log_prediction.text}"</b>
+            {typeof log_prediction.confidence === "number" ? ` — at ${log_prediction.confidence}.` : " — your call, on the table."}
+          </p>
+          {logged ? (
+            <p style={{ margin: "var(--sf-space-8) 0 0", fontFamily: "var(--sf-font-mono)", fontSize: "10px", letterSpacing: "0.18em", color: "var(--sf-text-faint)" }}>
+              LOGGED — THE OUTCOME WILL ANSWER.
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleLog}
+              style={{
+                marginTop: "var(--sf-space-12)",
+                background: "none",
+                border: "none",
+                borderTop: "1px solid var(--sf-accent-line)",
+                borderBottom: "1px solid var(--sf-accent-line)",
+                padding: "7px 10px",
+                fontFamily: "var(--sf-font-mono)",
+                fontSize: "10px",
+                letterSpacing: "0.2em",
+                color: "var(--sf-accent)",
+                cursor: "pointer",
+              }}
+            >
+              LOG THE BET
+            </button>
+          )}
+        </div>
+      ) : null}
       {question ? (
         <p
           style={{
@@ -407,7 +518,7 @@ function Turn({ role, text, question, log_prediction }) {
           {stripInlineMarkdown(question)}
         </p>
       ) : null}
-      {log_prediction ? (
+      {!mode && log_prediction ? (
         logged ? (
           <p
             style={{

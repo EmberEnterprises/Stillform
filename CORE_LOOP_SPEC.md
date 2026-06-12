@@ -61,9 +61,18 @@ work (refined) — same rules.
   matches, no flattering pattern-spotting.
 
 ## Build order
-- L1 server: schema + doctrine + de-mirrored retry (v2 spine path only;
-  v1 legacy paths untouched).
-- L2 client: reframeApi parse + Reframe work blocks + Close integration.
+- L1 server ✅ (9738732): schema + doctrine + de-mirrored retry + mechanical
+  anti-mirror validator (v2 spine path only; v1 legacy untouched). Proven 7/7.
+- L2 client ✅ (June 2026): reframeApi parses extract/work (TDZ shadow on the
+  route `mode` caught by proof — contract var renamed workMode);
+  predictionLog accepts null confidence (a bet without a stated number is
+  still a bet — fabricating one would violate zero-fabrication); Reframe
+  renders the work blocks in the approved-mock order TAKEN APART → THE
+  SHAPE (meta from LOCAL records only — flat-entry lookup fixed) → REBUILT
+  → ON RECORD (bet text visible + LOG THE BET ruled tag; legacy quiet
+  affordance preserved for fallback shape) → the earned question. Close
+  consumes rebuilt via the legacy bridge. Proven 7/7 e2e + order check +
+  null-confidence bet records to storage.
 - L3 proofs: mocked model outputs → render assertions; extraction-cap logic;
   zero-fabrication spot checks. Live prompt behavior verified on Arlin's
   next deploy walk.
