@@ -31,6 +31,6 @@ not phosphor; if it isn't growth it is not oxblood. Brass does everything else.
 ## Rollout (each step: build green → boot smoke → screenshot critique → commit)
 - D1 tokens.css palette+type swap + index.html fonts (re-skins every screen) ✅→
 - D2 home: the trace unit + marginalia treatment for Mirror/smart-floor
-- D3 chapter-rule buttons + manuscript rhythm on spine screens
+- D3a chapter-rule buttons ✅ June 2 (Button.jsx primary/secondary -> top+bottom rules, serif labels, no box; hover = glow not border; regression-shot on home + Settings) → D3b manuscript rhythm on spine screens
 - D4 growth surfaces: arbor on Roadmap + My Progress
 - D5 sweep: Settings/FAQ/Workshop/Paywall/Crisis on the new tokens; kill regressions

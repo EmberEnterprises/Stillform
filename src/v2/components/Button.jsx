@@ -1,13 +1,14 @@
 import React from "react";
 
 /**
- * Button — Stillform v2 button vocabulary.
+ * Button — Stillform button vocabulary.
  *
- * Critical design system change: primary buttons are NO LONGER amber-fill-
- * on-dark. They are dark-with-amber-hairline-and-amber-text. This is the
- * Hermès / Aesop convention — the action is dignified, not loud.
+ * THE SYNTHESIS (June 2 2026): primary and secondary actions are CHAPTER
+ * RULES — a top and bottom rule with the label set in the display serif,
+ * no box, no fill. An action reads as a heading in the manuscript, not a
+ * pill in an app. Ghost stays the quiet sans utility.
  *
- * Anchor: STILLFORM_DESIGN_SYSTEM.md §components → buttons
+ * Anchor: STILLFORM_DESIGN_SYSTEM.md §rollout D3
  *
  * @param {"primary"|"secondary"|"ghost"} variant - default "primary"
  * @param {"md"|"sm"} size - default "md"
@@ -22,17 +23,18 @@ export default function Button({
   children,
   ...rest
 }) {
-  const paddingX = size === "sm" ? "20px" : "28px";
-  const paddingY = size === "sm" ? "10px" : "14px";
+  const paddingX = size === "sm" ? "14px" : "18px";
+  const paddingY = size === "sm" ? "11px" : "15px";
+  const isRule = variant === "primary" || variant === "secondary";
 
   const baseStyle = {
-    fontFamily: "var(--sf-font-sans)",
-    fontSize: size === "sm" ? "13px" : "15px",
-    fontWeight: 400,
+    fontFamily: isRule ? "var(--sf-font-serif)" : "var(--sf-font-sans)",
+    fontSize: isRule ? (size === "sm" ? "16px" : "19px") : (size === "sm" ? "13px" : "15px"),
+    fontWeight: isRule ? 460 : 400,
     letterSpacing: "0.01em",
     lineHeight: 1,
     padding: `${paddingY} ${paddingX}`,
-    borderRadius: "var(--sf-r-default)",
+    borderRadius: isRule ? 0 : "var(--sf-r-default)",
     cursor: "pointer",
     textAlign: "center",
     display: "inline-flex",
@@ -49,16 +51,22 @@ export default function Button({
   let variantClass = "";
 
   if (variant === "primary") {
+    // Chapter rule: brass rules above and below, bone label in the serif.
     variantStyle = {
-      backgroundColor: "var(--sf-ground-elev)",
-      border: "0.5px solid var(--sf-accent-line)",
-      color: "var(--sf-accent)",
+      backgroundColor: "transparent",
+      border: "none",
+      borderTop: "1px solid var(--sf-accent)",
+      borderBottom: "1px solid var(--sf-accent)",
+      color: "var(--sf-text-primary)",
     };
     variantClass = "sf-btn-primary";
   } else if (variant === "secondary") {
+    // Quiet chapter rule: bone-alpha rules.
     variantStyle = {
       backgroundColor: "transparent",
-      border: "0.5px solid var(--sf-border-emphasis)",
+      border: "none",
+      borderTop: "1px solid var(--sf-border-emphasis)",
+      borderBottom: "1px solid var(--sf-border-emphasis)",
       color: "var(--sf-text-primary)",
     };
     variantClass = "sf-btn-secondary";

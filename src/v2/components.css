@@ -17,7 +17,7 @@
 
 .sf-v2 .sf-btn-primary:hover,
 .sf-v2 .sf-btn-primary:focus-visible {
-  border-color: var(--sf-accent);
+  background-color: var(--sf-accent-glow);
   color: var(--sf-text-cream);
 }
 
@@ -35,8 +35,9 @@
 
 .sf-v2 .sf-btn-secondary:hover,
 .sf-v2 .sf-btn-secondary:focus-visible {
-  border-color: var(--sf-accent-line);
-  color: var(--sf-accent);
+  border-top-color: var(--sf-accent-line);
+  border-bottom-color: var(--sf-accent-line);
+  color: var(--sf-text-cream);
 }
 
 .sf-v2 .sf-btn-secondary:active {
