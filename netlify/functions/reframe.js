@@ -301,23 +301,52 @@ Return only valid JSON.`;
  * designed for.
  */
 const REFRAME_PRACTICE_SCHEMA = `OUTPUT CONTRACT — HARD REQUIREMENT (v2 spine):
-Return ONLY valid JSON with this exact shape:
+Return ONLY valid JSON. Every turn is exactly ONE of two modes.
+
+EXTRACT MODE — when material is still insufficient:
 {
-  "distortion": "canonical clinical-spine name (see DISTORTION VOCABULARY) or null — machine-side, never shown to the user",
-  "candidate_names": null,
-  "mechanism": "string or null",
-  "reframe": "1-5 sentence response",
-  "next_step": "single actionable step sentence or null",
-  "question": "single short question or null",
-  "log_prediction": {"text": "the prediction the user named (verbatim, compact)", "confidence": "number 0-100 the user stated"} or null
+  "mode": "extract",
+  "ask": "ONE concrete question, max 12 words, answerable in six words or fewer",
+  "distortion": "canonical clinical-spine name or null — machine-side, never shown",
+  "log_prediction": null
 }
-Rules:
-- "candidate_names": MUST be null on every turn of every session. This surface does NOT consume candidate_names. Do not populate it; do not list candidates inside "reframe" as a workaround. Single probe only.
-- "reframe": 1-5 sentences, no lists, no empathy boilerplate. On turn 1, this is a single concrete probe — pick ONE specific element of what the user wrote and surface a hypothesis they couldn't have written on their own. Mirror at least two of their exact words (or one quoted phrase) so they can tell you actually read what they said.
-- At most one question mark total across "reframe" and "question".
-- "question": short. Open-shaped on turn 1 — questions that ask "what" or "where" or "how" (not "which one"). The canned v1 closing phrase "Which one is it — or something I missed?" is BANNED on this surface; that phrase locks the user into multiple-choice when the work is a single probe. Closed yes/no questions are acceptable later in the session to confirm a name the user has surfaced.
-- "next_step" and "mechanism" may be null.
-- "log_prediction": null in almost every turn. Populate ONLY when running Precision Probe (METACOGNITIVE ARC #6) AND the user has named both a concrete prediction AND a confidence number explicitly in this turn or the previous turn. Once per session max. Skip if fuzzy.
+
+WORK MODE — when material suffices (see MODE RULES):
+{
+  "mode": "work",
+  "taken_apart": {
+    "verified": ["facts the user actually stated, tight to their words"],
+    "assumed": ["the spiral's claims, in the user's own words"]
+  },
+  "shape": {
+    "watch_label": "EXACT label from THE USER'S WATCH LIST below, or null",
+    "line": "one plain sentence naming the shape of the move their thinking made"
+  },
+  "rebuilt": "1-3 sentences. CONSTRUCTED from the verified facts — never a restatement of what they wrote.",
+  "bet": {"text": "the falsifiable prediction the user made, compact", "confidence": null} or null,
+  "question": "one question, earned by the work above, or null",
+  "distortion": "canonical clinical-spine name or null — machine-side, never shown",
+  "log_prediction": null
+}
+
+MODE RULES:
+- "extract" while EITHER (a) one concrete verifiable fact OR (b) the spiral's claim/meaning is missing from the user's own words.
+- MAXIMUM 2 extract turns per session. Your 3rd turn MUST be "work", built from whatever material exists.
+- If the user's FIRST input already contains specifics (a who/what/when plus a claim), go straight to "work".
+- After a work turn: later turns follow the same rules (a new thread may extract once; refinement returns work).
+
+EXTRACT RULES:
+- The ask names something specific from their words and requests ONE small concrete thing ("Stuck in front of what?", "What did she actually say?", "When is it due?").
+- NEVER "tell me more", "can you say more", "how does that feel". NEVER two questions. NEVER restate what they wrote before asking.
+
+WORK RULES — ZERO FABRICATION GOVERNS ALL OF IT:
+- "verified" holds ONLY things the user stated as fact. "assumed" holds ONLY claims/meanings they voiced. Either array may be empty. NEVER invent, infer, or pad.
+- "watch_label" matches the user's watch list ONLY when the move genuinely fits — exact label string or null. A wrong match is worse than null. Never invent counts or history; the app renders those from its own records.
+- "rebuilt" does the cognitive work: it weighs the verified against the assumed and states what actually stands. It must contain something the user did NOT write.
+- "bet" only when the user voiced a falsifiable prediction; null otherwise. Confidence null unless they stated a number.
+- At most ONE question mark in the entire response.
+- MIRRORING IS BANNED. Restating the user's words as your contribution is a validation failure.
+- CRISIS OVERRIDE: if the SAFETY OVERRIDE protocol triggers, return mode "work" with the full safety response in "rebuilt" (taken_apart arrays may be empty, shape null, bet null) — never an extract turn.
 - No markdown fences. JSON only.`;
 
 
@@ -331,11 +360,11 @@ Rules:
  */
 const QUALITY_RETRY_PROMPT_V2 = `QUALITY RETRY OVERRIDE (v2 spine):
 Your previous output failed validation. Repair it to pass all constraints while preserving meaning.
-- Must satisfy the v2 OUTPUT CONTRACT exactly. candidate_names MUST be null.
-- Remove banned phrases and therapy filler.
-- Keep one mechanism only; do not switch frameworks mid-response.
-- The user came here through a Notice surface that already asked them to name what's specifically present in their state. Your turn-1 job is to probe ONE concrete element of what they wrote — NOT to surface 3-4 candidates. Mirror at least two of their exact words. Surface ONE hypothesis the user couldn't have written on their own. Ask ONE open question (what / where / how), not a closed multiple-choice pick.
-- The user is the operator; you make precise space for their work.
+- Must satisfy the v2 OUTPUT CONTRACT exactly: ONE mode, "extract" or "work", with that mode's exact fields.
+- MIRRORING IS BANNED: restating the user's words as the response is the failure being corrected. In "work" mode, "rebuilt" must contain something the user did not write, built from their verified facts.
+- "taken_apart" arrays: only the user's actual stated facts and voiced claims. Empty is honest; padding is fabrication.
+- "extract" mode: ONE concrete question, max 12 words, six-word answer. Never "tell me more".
+- Remove banned phrases and therapy filler. At most one question mark total.
 Return only valid JSON.`;
 
 
@@ -711,6 +740,103 @@ Execution sequence:
 2) Separate objective signal from stress-added noise.
 3) Give one mechanism-congruent action.
 Do not mechanism-shop. Use exactly this mechanism in this response.`;
+}
+
+/*
+ * CORE LOOP (June 2026, CORE_LOOP_SPEC.md) — normalize the extract/work
+ * shapes. Carries the new fields AND maps a legacy `reframe` (rebuilt or
+ * ask) so downstream consumers and the client's lastAssistant path keep
+ * working during the L1->L2 transition.
+ */
+function normalizeWorkLoopPayload(parsed) {
+  const safe = parsed && typeof parsed === "object" ? parsed : {};
+  const distortionRaw = typeof safe.distortion === "string" ? safe.distortion.trim() : "";
+  const distortion = distortionRaw && distortionRaw.toUpperCase() !== "NULL" ? distortionRaw : null;
+  const cleanArr = (a) => Array.isArray(a)
+    ? a.filter((x) => typeof x === "string" && x.trim()).map((x) => sanitizeReframeText(x.trim()).slice(0, 200)).slice(0, 6)
+    : [];
+  if (safe.mode === "extract") {
+    return {
+      mode: "extract",
+      ask: sanitizeReframeText(typeof safe.ask === "string" ? safe.ask.trim() : "").slice(0, 160),
+      distortion,
+      // legacy bridge:
+      reframe: sanitizeReframeText(typeof safe.ask === "string" ? safe.ask.trim() : ""),
+      mechanism: "extract", next_step: null, question: null, log_prediction: null,
+    };
+  }
+  // work
+  const shapeRaw = safe.shape && typeof safe.shape === "object" ? safe.shape : null;
+  const shape = shapeRaw ? {
+    watch_label: typeof shapeRaw.watch_label === "string" && shapeRaw.watch_label.trim() ? shapeRaw.watch_label.trim().slice(0, 80) : null,
+    line: typeof shapeRaw.line === "string" && shapeRaw.line.trim() ? sanitizeReframeText(shapeRaw.line.trim()).slice(0, 240) : null,
+  } : null;
+  let bet = null;
+  if (safe.bet && typeof safe.bet === "object" && typeof safe.bet.text === "string" && safe.bet.text.trim()) {
+    const conf = Number(safe.bet.confidence);
+    bet = { text: safe.bet.text.trim().slice(0, 300), confidence: Number.isFinite(conf) ? Math.max(0, Math.min(100, Math.round(conf))) : null };
+  }
+  const rebuilt = sanitizeReframeText(typeof safe.rebuilt === "string" ? safe.rebuilt.trim() : "");
+  return {
+    mode: "work",
+    taken_apart: {
+      verified: cleanArr(safe.taken_apart?.verified),
+      assumed: cleanArr(safe.taken_apart?.assumed),
+    },
+    shape, rebuilt, bet,
+    question: typeof safe.question === "string" && safe.question.trim() ? sanitizeReframeText(safe.question.trim()) : null,
+    distortion,
+    // legacy bridge:
+    reframe: rebuilt, mechanism: "work", next_step: null,
+    log_prediction: bet, // bets flow through the existing prediction-log affordance
+  };
+}
+
+const EXTRACT_BANNED = ["tell me more", "say more", "share more", "how does that feel", "how are you feeling", "what comes up"];
+
+function validateWorkLoopPayload(payload, { hasCrisisLanguage = false, isLowDemand = false, userInput = "" } = {}) {
+  const reasons = [];
+  if (payload.mode === "extract") {
+    const ask = payload.ask || "";
+    if (!ask) reasons.push("missing ask");
+    if (ask.length > 0 && ask.length < 8) reasons.push("ask too short");
+    if (ask.split(/\s+/).length > 14) reasons.push("ask exceeds 12-word ceiling");
+    if ((ask.split("?").length - 1) !== 1) reasons.push("ask must contain exactly one question");
+    const low = ask.toLowerCase();
+    for (const b of EXTRACT_BANNED) if (low.includes(b)) reasons.push(`banned extract phrasing: ${b}`);
+    if (hasCrisisLanguage) reasons.push("crisis must not receive an extract turn");
+    if (hasAnySnippet(ask, GENERIC_GARBAGE_SNIPPETS)) reasons.push("generic phrasing in ask");
+    return { ok: reasons.length === 0, reasons };
+  }
+  // work mode
+  const rebuilt = payload.rebuilt || "";
+  if (hasCrisisLanguage) {
+    // Crisis: lenient — the safety language must get through. Banned scan only.
+    if (!rebuilt) reasons.push("missing rebuilt");
+    if (hasAnyPattern(rebuilt, BANNED_REFRAME_PATTERNS)) reasons.push("banned phrase in crisis response");
+    return { ok: reasons.length === 0, reasons };
+  }
+  if (!rebuilt || rebuilt.length < 30) reasons.push("rebuilt missing or too short");
+  if (rebuilt.length > 600) reasons.push("rebuilt too long");
+  const sc = estimateSentenceCount(rebuilt);
+  if (sc < 1 || sc > (isLowDemand ? 2 : 3)) reasons.push("rebuilt sentence count out of range");
+  const ta = payload.taken_apart || { verified: [], assumed: [] };
+  if ((ta.verified.length + ta.assumed.length) === 0) reasons.push("taken_apart is empty — no material was worked");
+  // ANTI-MIRROR (mechanical): rebuilt must contain >=3 content words absent
+  // from the user's input — "constructed" is enforced, not requested.
+  const stop = new Set(["the","a","an","and","or","but","is","are","was","were","be","to","of","in","on","at","for","it","its","this","that","you","your","i","my","me","not","no","with","as","by","from","they","their","them"]);
+  const words = (t) => new Set(String(t).toLowerCase().replace(/[^a-z\s']/g, " ").split(/\s+/).filter((w) => w.length > 2 && !stop.has(w)));
+  const inputWords = words(userInput);
+  let novel = 0;
+  for (const w of words(rebuilt)) if (!inputWords.has(w)) novel++;
+  if (novel < 3) reasons.push("rebuilt mirrors the input — contains nothing the user did not write");
+  const qCount = `${rebuilt} ${payload.question || ""} ${payload.shape?.line || ""}`.split("?").length - 1;
+  if (qCount > (isLowDemand ? 0 : 1)) reasons.push(isLowDemand ? "low-demand prefers statements" : "too many questions");
+  for (const t of [rebuilt, payload.shape?.line || "", payload.question || ""]) {
+    if (t && hasAnySnippet(t, GENERIC_GARBAGE_SNIPPETS)) reasons.push("generic phrasing");
+    if (t && hasAnyPattern(t, BANNED_REFRAME_PATTERNS)) reasons.push("banned phrase");
+  }
+  return { ok: reasons.length === 0, reasons };
 }
 
 function normalizeReframePayload(parsed, route) {
@@ -1218,6 +1344,8 @@ Return ONLY valid JSON, no markdown. See OUTPUT CONTRACT appended below for the 
  * liability rails + safety basics. Nothing else.
  */
 const REFRAME_PRACTICE_BASE = `You are the AI inside Stillform's Reframe — a metacognition practice. The user came to name what their thinking is doing with specificity. Your job is to scaffold the analytical work so they can name it with precision and choose what's next. You do NOT challenge whether a thought is true. You do NOT use breath or body as anchors (those are other tools in the app). The user does the work; you make precise space for it.
+
+HOW YOU WORK (the core loop): like a master coach, you EXTRACT before you EXAMINE. A session often opens with one word. You never mirror it back and never ask for an essay — you ask ONE tiny concrete question that a thumb can answer in six words ("Stuck in front of what?", "What did she actually say?"). Within at most two such questions you have material; then you do the visible work: take their sentence apart into what they verified and what the spiral asserted, name the shape of the move, rebuild what actually stands from the verified facts, and put any falsifiable claim on record. The user must leave with worked material they did not arrive with.
 
 The market is people enhancing themselves — not patients in distress. Specific presence is the practice. Generic warmth is the drift.
 
@@ -2538,7 +2666,7 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (healthContext) contextParts.push(`${healthContext}. Use this to calibrate how much capacity this person is likely working with today. Don't diagnose — just factor it in when relevant.`);
     if (deferredCalibration) contextParts.push(deferredCalibration);
     if (signalProfile) contextParts.push(`USER'S BODY SIGNAL PROFILE: ${signalProfile}. When they describe physical sensations, cross-reference these known signals. If their description matches their profile, name it directly: "That sounds like your [jaw/chest/etc] response — you've mapped this before." This is high-value recognition. Use it sparingly but confidently.`);
-    if (biasProfile) contextParts.push(`USER'S IDENTIFIED PROCESSING PATTERNS: ${biasProfile}. Watch for these patterns in what they write. If you see one running, surface it as observation without judgment: "Your system is doing the [pattern] thing right now — you have already mapped this one." Only surface it when you are confident it is present. Do not force it. The user observes; you do not diagnose.`);
+    if (biasProfile) contextParts.push(`THE USER'S WATCH LIST — their identified processing patterns: ${biasProfile}. When you return "shape.watch_label" it must be one of these pattern labels VERBATIM, and only when the move they just made genuinely fits it — a wrong match is worse than null. Never invent counts or history; the app renders those from its own records. The user observes; you do not diagnose.`);
     if (userFlaggedPatterns) contextParts.push(userFlaggedPatterns);
     if (contextProfile) contextParts.push(contextProfile);
     if (priorSessions) contextParts.push(`PRIOR SESSIONS — what the user has worked through in earlier sessions (this is your continuity with them; reference it sparingly to show you remember a recurring thread, never re-litigate a past session, never quote it back verbatim; use only what these entries literally record — do not infer anything more about the user than they state):\n${priorSessions}`);
@@ -2794,9 +2922,14 @@ WHAT STAYING SHARP LOOKS LIKE:
 
       const raw = await requestCompletion(attemptSystemPrompt, attemptMessages);
       previousRaw = raw;
-      const normalized = normalizeReframePayload(parseModelPayload(raw), scienceRoute);
+      const parsedPayload = parseModelPayload(raw);
+      const normalized = (parsedPayload && (parsedPayload.mode === "extract" || parsedPayload.mode === "work"))
+        ? normalizeWorkLoopPayload(parsedPayload)
+        : normalizeReframePayload(parsedPayload, scienceRoute);
       const isLowDemand = isLowDemandBioFilter(bioFilter);
-      lastValidation = validateReframePayload(normalized, { isSummaryRequest: isInternalSummaryRequest, hasCrisisLanguage, isLowDemand });
+      lastValidation = normalized.mode
+        ? validateWorkLoopPayload(normalized, { hasCrisisLanguage, isLowDemand, userInput: input })
+        : validateReframePayload(normalized, { isSummaryRequest: isInternalSummaryRequest, hasCrisisLanguage, isLowDemand });
       lastVoiceValidation = validateVoiceContract(normalized, {
         isSummaryRequest: isInternalSummaryRequest,
         isSoftEntry,

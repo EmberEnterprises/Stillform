@@ -229,20 +229,23 @@ const LEAD = {
 };
 
 const CARD = {
-  padding: "var(--sf-space-20)",
-  marginBottom: "var(--sf-space-16)",
-  background: "var(--sf-ground-elev, #111114)",
-  border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.10))",
-  borderRadius: "var(--sf-radius-md, 12px)",
+  // Synthesis restyle (June 2, Arlin's live-walk catch): a ruled manuscript
+  // section, not a rounded app card. The rule separates; the page carries.
+  padding: "var(--sf-space-20) 0 var(--sf-space-24)",
+  marginBottom: "var(--sf-space-8)",
+  background: "transparent",
+  border: "none",
+  borderTop: "1px solid var(--sf-accent-line)",
+  borderRadius: 0,
 };
 
 const H2 = {
   margin: "var(--sf-space-8) 0 var(--sf-space-12)",
   color: "var(--sf-text-primary)",
-  fontFamily: "var(--sf-font-sans)",
-  fontSize: "18px",
-  fontWeight: 500,
-  lineHeight: 1.3,
+  fontFamily: "var(--sf-font-serif)",
+  fontSize: "22px",
+  fontWeight: 460,
+  lineHeight: 1.25,
 };
 
 const ROW = {
@@ -257,15 +260,19 @@ const ACTION = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  minHeight: "52px",
+  // The fill STAYS — this is the one screen where an unmissable filled
+  // target is functionally right. The pill goes: square corners, calmer
+  // weight. Big and certain, in the system's voice.
+  minHeight: "54px",
   padding: "0 var(--sf-space-20)",
   flex: "1 1 auto",
-  background: "var(--sf-text-primary, #F4F2EC)",
-  color: "var(--sf-ground-deep, #08080A)",
-  borderRadius: "var(--sf-radius-md, 12px)",
+  background: "var(--sf-text-primary, #ECE3D0)",
+  color: "var(--sf-ground-deep, #151009)",
+  borderRadius: "2px",
   fontFamily: "var(--sf-font-sans)",
-  fontSize: "16px",
-  fontWeight: 600,
+  fontSize: "17px",
+  fontWeight: 500,
+  letterSpacing: "0.01em",
   textDecoration: "none",
   WebkitTapHighlightColor: "transparent",
 };
