@@ -26,5 +26,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Boot smoke (blank-screen guard)
+        run: |
+          npm i --no-save puppeteer-core
+          node scripts/boot-smoke.mjs
+
       - name: Security smoke checks
         run: npm run security:smoke
