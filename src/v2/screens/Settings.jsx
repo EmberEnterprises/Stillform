@@ -6,7 +6,7 @@ import HairlineDivider from "../components/HairlineDivider.jsx";
 import { getSubscriptionStatus } from "../lib/subscriptionApi.js";
 import { getA11y, setA11y } from "../lib/a11y.js";
 import { requestCode, verifyCode, getAuthState, signOut } from "../lib/authApi.js";
-import { saveBackup, listBackups, fetchBackup, applyRestore, deviceHasPracticeData } from "../lib/backupApi.js";
+import { saveBackup, listBackups, fetchBackup, applyRestore, deviceHasPracticeData, linkInstallToAccount } from "../lib/backupApi.js";
 
 /**
  * Settings — the user's setup surface.
@@ -305,6 +305,7 @@ function AccountSection() {
     if (r.ok) {
       setAuth(getAuthState()); setStep("idle"); setCode("");
       setNote("Signed in. Backing up…");
+      linkInstallToAccount().catch(() => { /* soft — A5 */ });
       const b = await saveBackup();
       setNote(b.ok ? "Signed in. First backup saved." : "Signed in. Backup will retry on next open.");
     } else {

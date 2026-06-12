@@ -68,6 +68,20 @@ async function authedPost(url, body) {
   }
 }
 
+/**
+ * A5: link this device's install to the signed-in account, so an existing
+ * subscription (keyed by install_id) follows the user across devices.
+ * Backend: subscription-link-account (backfills user_id, never new rows).
+ * Fire on sign-in; fails soft.
+ */
+export async function linkInstallToAccount() {
+  let installId = null;
+  try { installId = localStorage.getItem("stillform_install_id") || null; } catch { /* ok */ }
+  if (!installId) return { ok: false, error: "no_install_id" };
+  const r = await authedPost("/.netlify/functions/subscription-link-account", { install_id: installId });
+  return r.ok ? { ok: true, linked: !!r.data?.linked } : { ok: false, error: r.signedOut ? "signed_out" : "link_failed" };
+}
+
 /** Upload a snapshot. @returns {Promise<{ok, id?, error?}>} */
 export async function saveBackup() {
   const payload = buildSnapshot();
