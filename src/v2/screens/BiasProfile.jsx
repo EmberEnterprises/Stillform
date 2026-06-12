@@ -7,6 +7,7 @@ import {
   getWatchListChips,
   addChipToWatchList,
   removeChipFromWatchList,
+  incrementChipEncounter,
   isOnWatchList,
   patternConfidence,
 } from "../lib/biasProfile.js";
@@ -56,6 +57,20 @@ export default function BiasProfile({ onExit }) {
     removeChipFromWatchList(chipId);
     setConfirmRemoveId(null);
     refresh();
+  };
+
+  // Pattern-awareness layer (June 2 2026, re-conceived from the old
+  // disruption layer): "Caught it live" — the user notices the pattern
+  // running in the wild, mid-day, and logs the catch with one tap.
+  // User-initiated metacognition; never an interrupt. Counts as a real
+  // encounter (lastSeen = now), so catching a retired pattern is
+  // re-activation — information, not a setback (lifecycle handles it).
+  const [caughtId, setCaughtId] = useState(null);
+  const handleCaught = (chipId) => {
+    incrementChipEncounter(chipId);
+    setCaughtId(chipId);
+    refresh();
+    setTimeout(() => setCaughtId((c) => (c === chipId ? null : c)), 2200);
   };
 
   const TYPE_HEADERS = {
@@ -142,6 +157,8 @@ export default function BiasProfile({ onExit }) {
               onRemove={() => setConfirmRemoveId(chip.id)}
               onConfirmRemove={() => handleRemove(chip.id)}
               onCancelRemove={() => setConfirmRemoveId(null)}
+              onCaught={() => handleCaught(chip.id)}
+              justCaught={caughtId === chip.id}
             />
           );
           return (
@@ -245,6 +262,8 @@ function WatchRow({
   onRemove,
   onConfirmRemove,
   onCancelRemove,
+  onCaught,
+  justCaught,
 }) {
   // 5.11(d) + 5.12: provisional → emerging → confirmed → quieting → retired.
   // Quiet states derive from lastSeen + continued detection-active practice
@@ -335,6 +354,29 @@ function WatchRow({
           </Button>
         </div>
       ) : (
+        <div style={{ display: "flex", gap: "var(--sf-space-20)", alignItems: "center" }}>
+        {justCaught ? (
+          <span
+            style={{
+              fontFamily: "var(--sf-font-mono)",
+              fontSize: "11px",
+              letterSpacing: "0.12em",
+              color: "var(--sf-text-quiet)",
+            }}
+            aria-live="polite"
+          >
+            Logged. Naming it counts.
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={onCaught}
+            style={{ ...textLinkStyle, color: "var(--sf-text-quiet)" }}
+            aria-label={`Caught ${chip.label} running just now`}
+          >
+            Caught it live
+          </button>
+        )}
         <button
           type="button"
           onClick={onRemove}
@@ -343,6 +385,7 @@ function WatchRow({
         >
           remove
         </button>
+        </div>
       )}
     </div>
   );

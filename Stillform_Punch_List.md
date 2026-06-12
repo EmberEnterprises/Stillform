@@ -26,7 +26,7 @@ Full re-audit of every v1-referenced item against live `src/v2/` + functions (ve
 - Watch companion — pre-launch priority (needs Arlin's Mac)
 - Cognitive Function Measurement — pending Arlin's fresh design pass
 - Mirror wiring — needs Arlin's trigger/cost/default call
-- Pattern Disruption Layer — REBUILD re-conceived as **metacognitive pattern-awareness** (noticing one's own thinking patterns), NOT the v1 emotional-interrupt; do not port v1 framing
+- Pattern Disruption Layer — ✅ REBUILT June 2 2026 as **metacognitive pattern-awareness**, per the re-conception (never an interrupt). Shipped as **"Caught it live"**: a quiet one-tap action on every watch-list row (active AND gone-quiet) for logging a pattern noticed running in the wild, mid-day, outside any session — user-initiated metacognition as a first-class act. Counts as a real encounter (feeds the lifecycle); catching a gone-quiet pattern re-activates it honestly (information, not setback). Feedback: "Logged. Naming it counts." In-session detection (5.11d), the smart floor, and the Mirror already cover the layer's other functions. Proven headless e2e 4/4 (count tick, feedback, re-activation out of Gone quiet, isolation).
 - Practice Signals — RECLASSIFIED June 2: BLOCKED on Cognitive Function Measurement (its cadence serves CFM checks; CFM awaits Arlin's design pass). Building it now would be an orphan. Unblocks with CFM.
 - Premium sound packs (one-time-purchase add-on)
 - Share-to-Reframe (`?share=` handler)
