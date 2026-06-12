@@ -357,3 +357,21 @@
     opacity: 0.6;
   }
 }
+
+/* ── TraceUnit (design system D2) — the day as a continuous line.
+   Phosphor is sworn to live data; this is its only home on the smart
+   screen. Sweep once on mount; reduced motion gets the finished line. */
+.sf-trace-line {
+  fill: none;
+  stroke: var(--sf-live);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px var(--sf-live-glow));
+  stroke-dasharray: 760;
+  stroke-dashoffset: 760;
+  animation: sf-trace-sweep 2.4s linear forwards;
+}
+@keyframes sf-trace-sweep { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .sf-trace-line { animation: none; stroke-dashoffset: 0; }
+}

@@ -3,6 +3,7 @@ import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
 import { getTodayThread } from "../lib/thread.js";
+import TraceUnit from "../components/TraceUnit.jsx";
 import { getActivePromptAsync, getFallbackActivePrompt } from "../lib/activePrompt.js";
 import { getMirrorObservation } from "../lib/mirror.js";
 import { getTrajectoryStats, formatTrajectoryLine } from "../lib/trajectory.js";
@@ -142,8 +143,14 @@ export default function SmartScreen({ onBeginSession, onOpenRoadmap = null }) {
           >Today</MonoLabel>
         </header>
 
+        {/* Trace — D2: today's entries on the day's continuous line.
+            Renders only when real entries exist (no fabricated lines). */}
+        {showThread ? <TraceUnit entries={thread} /> : null}
+
         {/* Mirror strip — AI observation about user's named patterns.
-            Renders only when cached observation exists; hidden otherwise. */}
+            Renders only when cached observation exists; hidden otherwise.
+            D2: the observation is set as MARGINALIA — the concierge's own
+            hand (Caveat, brass). The voice annotates; it never interrupts. */}
         {showMirror ? (
           <section
             className="sf-fade-enter sf-fade-enter--delay-1"
@@ -164,15 +171,16 @@ export default function SmartScreen({ onBeginSession, onOpenRoadmap = null }) {
             <p
               style={{
                 margin: 0,
-                fontFamily: "var(--sf-font-serif)",
-                fontSize: "18px",
-                lineHeight: 1.5,
+                fontFamily: "var(--sf-font-annotation)",
+                fontSize: "21px",
+                lineHeight: 1.35,
                 fontWeight: 400,
-                color: "var(--sf-text-cream)",
-                fontStyle: "italic",
+                color: "var(--sf-accent)",
+                transform: "rotate(-1.2deg)",
+                transformOrigin: "left top",
               }}
             >
-              {mirror.observation}
+              {"— "}{mirror.observation}
             </p>
             {getPendingProposals().length > 0 ? (
               <MonoLabel size="xs" tone="faint" style={{ display: "block", marginTop: "var(--sf-space-12)" }}>
