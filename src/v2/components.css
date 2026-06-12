@@ -96,8 +96,10 @@
   border: none;
   border-bottom: 0.5px solid var(--sf-border-hairline);
   color: var(--sf-text-primary);
-  font-family: var(--sf-font-sans);
-  font-size: 17px;
+  /* D3b: you write your sitting in your own hand — the serif, italic. */
+  font-family: var(--sf-font-serif);
+  font-style: italic;
+  font-size: 18px;
   line-height: 1.65;
   letter-spacing: 0;
   padding: var(--sf-space-12) 0;
@@ -113,7 +115,6 @@
 .sf-v2 .sf-input::placeholder,
 .sf-v2 .sf-textarea::placeholder {
   color: var(--sf-text-faint);
-  font-family: var(--sf-font-sans);
   font-style: italic;
   font-weight: 300;
 }

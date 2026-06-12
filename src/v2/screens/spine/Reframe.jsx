@@ -335,13 +335,17 @@ function Turn({ role, text, question, log_prediction }) {
     return (
       <div style={{ padding: "var(--sf-space-24) 0" }}>
         <HairlineDivider width="short" weight="hairline" />
+        {/* D3b (June 2 2026): the user's words ARE the manuscript — set in
+            the serif, italic, full ink. Their writing is never the smallest
+            quietest thing in their own practice. */}
         <div
           style={{
             marginTop: "var(--sf-space-16)",
-            color: "var(--sf-text-quiet)",
-            fontFamily: "var(--sf-font-sans)",
-            fontSize: "13px",
-            lineHeight: 1.55,
+            color: "var(--sf-text-primary)",
+            fontFamily: "var(--sf-font-serif)",
+            fontStyle: "italic",
+            fontSize: "17px",
+            lineHeight: 1.6,
             whiteSpace: "pre-wrap",
           }}
         >
@@ -393,8 +397,8 @@ function Turn({ role, text, question, log_prediction }) {
           style={{
             marginTop: "var(--sf-space-16)",
             color: "var(--sf-text-quiet)",
-            fontFamily: "var(--sf-font-sans)",
-            fontSize: "15px",
+            fontFamily: "var(--sf-font-serif)",
+            fontSize: "16px",
             lineHeight: 1.55,
             fontStyle: "italic",
           }}
