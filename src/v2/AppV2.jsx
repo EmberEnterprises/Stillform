@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./tokens.css";
 import "./components.css";
 import { applyA11y } from "./lib/a11y.js";
+import { runVersionGatedBackup, maybeOpportunisticBackup } from "./lib/backupAuto.js";
 
 // Display accessibility (contrast / text size) — apply persisted settings
 // before the tree paints. Module-level call is safe: reads localStorage,
@@ -102,6 +103,9 @@ export default function AppV2() {
   // this lands, shouldGate returns false (no wall), so a slow/failed fetch
   // never blocks a session.
   useEffect(() => {
+    // A4: version-gated auto-backup — the locked non-negotiable. Fire-and-
+    // forget today (no migrations exist yet); future migrations must await it.
+    runVersionGatedBackup();
     refreshSubscriptionStatus();
   }, []);
 
@@ -120,6 +124,7 @@ export default function AppV2() {
           forcedBeat={spineBeat}
           initialText={INITIAL_SHARE_TEXT || null}
           onExit={() => {
+            maybeOpportunisticBackup();
             setSpineBeat(null);
             setScreen("home");
           }}
