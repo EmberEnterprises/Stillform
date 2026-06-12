@@ -308,7 +308,7 @@ relationship with the Member.)
 - TLS 1.2+ for all data in transit
 - AES-256 encryption at rest at the database layer
 - AES-GCM device-local encryption for conversation history
-  prior to cloud upload
+  prior to cloud upload ⚠️ [PLANNED — NOT in the current build (June 2 2026): device-local encryption + cloud sync were features of the deleted old frontend; rebuild backlog. The TLS + database-layer claims above are current platform facts.]
 
 ### Access Control
 - Service-role keys for backend data access, held only by

@@ -100,7 +100,7 @@ applicable Trust Service Criteria. Stillform's initial scope is
   - Subscription billing fraud: mitigated by Lemon Squeezy
     webhook signature verification.
   - Data loss: mitigated by encrypted backups before each app
-    version update.
+    version update. ⚠️ [NOT YET BUILT (June 2 2026) — the auto-backup-before-update system is the locked pre-launch non-negotiable, pending the cloud-backup build. This control is a TARGET, not a current state.]
   - Third-party AI provider data retention: mitigated by
     contractual no-training clauses and not sending PII
     unrelated to the user's voluntary reframe input.
@@ -110,7 +110,7 @@ applicable Trust Service Criteria. Stillform's initial scope is
   ship-preflight checks that fail the build on regression
   patterns:
   - SECURE_KEYS guard (no raw localStorage reads on encrypted
-    keys)
+    keys) ⚠️ [STALE (June 2 2026): the SECURE_KEYS preflight belonged to the deleted old frontend; the current gate is scripts/security-smoke.mjs (CORS/origin/RLS/anon-access checks).]
   - SYNC_KEYS guard (every cloud-synced key references real
     storage)
   - B2B privacy wall guard (no org code accesses practice
@@ -219,7 +219,7 @@ applicable Trust Service Criteria. Stillform's initial scope is
 
 **CC7.5 Recovery of System Affected by Identified Security Events**
 - Encrypted backups taken before each app version update; full
-  restore tested.
+  restore tested. ⚠️ [NOT YET BUILT (June 2 2026) — TARGET control; see CC3.2 flag. No backup/restore system exists in the current build.]
 
 ### CC8 — Change Management
 

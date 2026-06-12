@@ -185,7 +185,7 @@ TLS 1.2 or higher on all endpoints.
 ### At rest
 - AES-256 at the Supabase database layer.
 - Device-local AES-GCM encryption of conversation history
-  before cloud sync.
+  before cloud sync. ⚠️ [PLANNED — NOT in the current build (June 2 2026): device-local encryption + cloud sync were features of the deleted old frontend; rebuild backlog. The TLS + database-layer claims above are current platform facts.]
 
 ### Access
 - Supabase Row-Level Security (RLS) enforced on all user-facing

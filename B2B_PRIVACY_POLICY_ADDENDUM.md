@@ -215,8 +215,10 @@ the Customer at the email on file on request.
 
 Practice content is encrypted in transit (TLS 1.2+ on all
 endpoints) and at rest (AES-256 at the database layer). A
-device-local AES-GCM key further encrypts conversation history
-on the user's device before it is uploaded for cloud sync.
+device-local AES-GCM key further encrypting conversation history
+before cloud upload is PLANNED — not in the current build (June 2
+2026; it was a deleted-old-frontend feature, rebuild backlog). The
+TLS and database-layer protections above are current platform facts.
 
 Access to backend systems is restricted to authorized personnel
 under the principle of least privilege. Production database
