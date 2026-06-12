@@ -1,6 +1,7 @@
 import React from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
+import GrowthArbor from "../components/GrowthArbor.jsx";
 import { getBiasProfile, patternConfidence } from "../lib/biasProfile.js";
 import MediationQueue from "../components/MediationQueue.jsx";
 import { getPendingProposals } from "../lib/mediationApi.js";
@@ -75,6 +76,11 @@ export default function MyProgress({ onExit, onNavigate }) {
         }
         rule
       />
+
+      {/* D4: growth surfaces carry the specimen. */}
+      <div style={{ margin: "var(--sf-space-16) 0 var(--sf-space-8)" }}>
+        <GrowthArbor />
+      </div>
 
       {/* Phase 6.4c: post-event reflection — a manual ACTION (launch a
           post-event session), set apart from the diagnostic mirrors below

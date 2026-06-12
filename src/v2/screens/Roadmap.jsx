@@ -4,6 +4,7 @@ import HairlineDivider from "../components/HairlineDivider.jsx";
 import { getTrajectoryStats } from "../lib/trajectory.js";
 import { getWatchListChips, patternConfidence } from "../lib/biasProfile.js";
 import { getGrowthBaseline } from "../lib/growthBaseline.js";
+import GrowthArbor from "../components/GrowthArbor.jsx";
 
 /**
  * Roadmap — the trajectory, full screen.
@@ -62,6 +63,11 @@ export default function Roadmap({ onExit }) {
         </p>
       ) : (
         <>
+          {/* D4: the arbor — the practice as a living specimen. */}
+          <div style={{ marginBottom: "var(--sf-space-24)" }}>
+            <GrowthArbor />
+          </div>
+
           <section style={SECTION}>
             <MonoLabel size="xs" tone="faint">PRACTICE</MonoLabel>
             <p style={STAT_LINE}>

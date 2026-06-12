@@ -369,6 +369,24 @@
   stroke-width: 1.5;
   stroke-linecap: round;
   filter: drop-shadow(0 0 4px var(--sf-live-glow));
+}
+
+/* GrowthArbor (D4) — branches draw on mount; specimen, not chart. */
+.sf-v2 .sf-arbor path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  animation: sf-arbor-grow 1.8s var(--sf-ease-prestige) forwards;
+}
+.sf-v2 .sf-arbor path:nth-of-type(n+2) { animation-delay: 0.5s; }
+.sf-v2 .sf-arbor circle { opacity: 0; animation: sf-arbor-bud 0.5s ease 1.9s forwards; }
+.sf-v2 .sf-arbor circle:first-of-type { opacity: 1; animation: none; } /* the soma */
+@keyframes sf-arbor-grow { to { stroke-dashoffset: 0; } }
+@keyframes sf-arbor-bud { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .sf-v2 .sf-arbor path { animation: none; stroke-dashoffset: 0; }
+  .sf-v2 .sf-arbor circle { animation: none; opacity: 1;
   stroke-dasharray: 760;
   stroke-dashoffset: 760;
   animation: sf-trace-sweep 2.4s linear forwards;

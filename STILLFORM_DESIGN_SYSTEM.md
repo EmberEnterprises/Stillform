@@ -32,5 +32,5 @@ not phosphor; if it isn't growth it is not oxblood. Brass does everything else.
 - D1 tokens.css palette+type swap + index.html fonts (re-skins every screen) ✅→
 - D2 home: the trace unit + marginalia treatment for Mirror/smart-floor
 - D3a chapter-rule buttons ✅ June 2 (Button.jsx primary/secondary -> top+bottom rules, serif labels, no box; hover = glow not border; regression-shot on home + Settings) → D3b ✅ June 2: the dialog IS the manuscript — user turns serif italic 17px FULL INK (were 13px dim sans: the user's own words were the most demoted text in their own practice — inverted), AI main text already serif cream (kept), AI question serif italic, shared .sf-textarea = the writer's hand (serif italic 18px). Screenshot-proven on a mocked full dialog.
-- D4 growth surfaces: arbor on Roadmap + My Progress
+- D4 ✅ June 2: GrowthArbor.jsx on Roadmap + My Progress — every branch EARNED (one per watch-list pattern by age along the trunk, length by encounter evidence; one per graduated baseline), oxblood + buds ONLY on items active in the last 7 days, deterministic layout (same practice = same specimen), zero items → zero arbor ('the first branch is earned, not drawn in advance'). Proven 4/4 + zero-state + boot.
 - D5 sweep: Settings/FAQ/Workshop/Paywall/Crisis on the new tokens; kill regressions
