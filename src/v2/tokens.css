@@ -12,41 +12,49 @@
   /* ---------------------------------------------------------------------
    * GROUNDS — cinematic depth, true black with cool undertone
    * ------------------------------------------------------------------ */
-  --sf-ground-deep:    #08080A;
-  --sf-ground-elev:    #111114;
-  --sf-ground-elev-2:  #16161A;
+  --sf-ground-deep:    #151009;
+  --sf-ground-elev:    #2A231A;
+  --sf-ground-elev-2:  #221C15;
 
   /* ---------------------------------------------------------------------
    * BORDERS — printed not drawn. All borders rendered at 0.5px.
    * ------------------------------------------------------------------ */
-  --sf-border-hairline:  rgba(255, 255, 255, 0.06);
-  --sf-border-emphasis:  rgba(255, 255, 255, 0.10);
-  --sf-border-printed:   rgba(255, 255, 255, 0.04);
+  --sf-border-hairline:  rgba(236, 227, 208, 0.10);
+  --sf-border-emphasis:  rgba(236, 227, 208, 0.14);
+  --sf-border-printed:   rgba(236, 227, 208, 0.07);
   /* --sf-border-quiet: the standard subtle divider — used 20+ times across the
      diagnostic stack (BiasProfile, TriggerProfile, the mirrors) + spine. Defined
      May 27 2026: it was referenced everywhere but never declared, so it had been
      rendering via the currentColor fallback. 0.08 sits between hairline (0.06)
      and emphasis (0.10) — a quiet but present line. Tune here if needed. */
-  --sf-border-quiet:     rgba(255, 255, 255, 0.08);
+  --sf-border-quiet:     rgba(236, 227, 208, 0.12);
 
   /* ---------------------------------------------------------------------
    * ACCENT — antiqued metallic, NOT wellness amber.
    * Discipline: maximum 5% of any screen. Never as button fill.
    * Used as hairlines, single-character emphasis, small status dots.
    * ------------------------------------------------------------------ */
-  --sf-accent:        #B8862B;
-  --sf-accent-deep:   #8C6420;
-  --sf-accent-glow:   rgba(184, 134, 43, 0.06);
-  --sf-accent-line:   rgba(184, 134, 43, 0.35);
+  --sf-accent:        #C9A45C;
+  --sf-accent-deep:   #9C7A3C;
+  --sf-accent-glow:   rgba(201, 164, 92, 0.07);
+  --sf-accent-line:   rgba(201, 164, 92, 0.38);
+
+  /* THE SYNTHESIS (June 2 2026) — sworn accents. Phosphor = LIVE DATA ONLY
+     (the trace, live catches). Oxblood = NEW GROWTH ONLY (arbor buds,
+     gone-quiet strikethrough). Neither ever decorates. Brass does the rest. */
+  --sf-live:        #6FE3C4;
+  --sf-live-glow:   rgba(111, 227, 196, 0.45);
+  --sf-growth:      #8C3B2A;
+  --sf-font-annotation: 'Caveat', cursive;
 
   /* ---------------------------------------------------------------------
    * TYPOGRAPHY COLORS — cream-on-black is the editorial moment.
    * Pure white on near-black reads as system UI; we don't want that.
    * ------------------------------------------------------------------ */
-  --sf-text-primary:  #E8EAF0;
-  --sf-text-quiet:    rgba(232, 234, 240, 0.62);
-  --sf-text-faint:    rgba(232, 234, 240, 0.40);
-  --sf-text-cream:    #EDE8DC;
+  --sf-text-primary:  #ECE3D0;
+  --sf-text-quiet:    rgba(236, 227, 208, 0.62);
+  --sf-text-faint:    rgba(236, 227, 208, 0.40);
+  --sf-text-cream:    #E4D9C2;
 
   /* ---------------------------------------------------------------------
    * STATE — used only for tonal direction. Never as fills.
@@ -93,8 +101,8 @@
    * TYPOGRAPHY FAMILIES — already loaded via index.html.
    * Cormorant Garamond (serif), DM Sans (sans), IBM Plex Mono (mono).
    * ------------------------------------------------------------------ */
-  --sf-font-serif:  "Cormorant Garamond", "EB Garamond", Georgia, serif;
-  --sf-font-sans:   "DM Sans", "Inter", system-ui, -apple-system, sans-serif;
+  --sf-font-serif: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+  --sf-font-sans: 'Inter', 'DM Sans', system-ui, sans-serif;
   --sf-font-mono:   "IBM Plex Mono", "JetBrains Mono", "Menlo", monospace;
 
   /* ---------------------------------------------------------------------

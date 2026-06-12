@@ -47,19 +47,7 @@ export default function Home({ onBeginSession, onNavigate }) {
       <BreatheOverlay open={breatheOpen} onClose={() => setBreatheOpen(false)} />
 
       {/* Phase indicator — removed when all surfaces are fully functional. */}
-      <div
-        style={{
-          position: "fixed",
-          left: "50%",
-          bottom: "var(--sf-space-8)",
-          transform: "translateX(-50%)",
-          pointerEvents: "none",
-        }}
-      >
-        <MonoLabel size="xs" tone="faint">
-          v2 · phase 3 · smart screen
-        </MonoLabel>
-      </div>
+      {/* dev badge removed June 2 2026 — internal phase labels never render in the product */}
     </>
   );
 }
