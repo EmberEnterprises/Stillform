@@ -38,8 +38,12 @@ export default function QuickBreathe({ onTap }) {
         gap: "var(--sf-space-8)",
         padding: "10px 16px",
         background: "var(--sf-ground-elev)",
-        border: "0.5px solid var(--sf-border-emphasis)",
-        borderRadius: "999px",
+        /* D5 (June 2 2026): the floating valve speaks the system — ruled
+           tag, not a rounded pill. */
+        border: "none",
+        borderTop: "1px solid var(--sf-accent-line)",
+        borderBottom: "1px solid var(--sf-accent-line)",
+        borderRadius: "2px",
         cursor: "pointer",
         appearance: "none",
         boxShadow: "none",

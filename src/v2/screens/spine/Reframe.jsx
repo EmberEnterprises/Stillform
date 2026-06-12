@@ -258,8 +258,9 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
             >
               Send
             </Button>
+            {/* D5: one chapter rule per row — Send carries it; siblings go quiet. */}
             <Button
-              variant="secondary"
+              variant="ghost"
               onClick={handleClose}
               disabled={thinking || !hasUserReplied}
               aria-disabled={thinking || !hasUserReplied}
