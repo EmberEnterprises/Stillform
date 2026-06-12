@@ -36,7 +36,7 @@ export default function Home({ onBeginSession, onNavigate }) {
     <>
       <AppHeader />
 
-      <SmartScreen onBeginSession={onBeginSession} />
+      <SmartScreen onBeginSession={onBeginSession} onOpenRoadmap={() => (onNavigate || (() => {}))("roadmap")} />
 
       <div className="sf-fade-enter sf-fade-enter--delay-2">
         <HomeFooter onNavigate={onNavigate || (() => { /* no-op fallback */ })} />

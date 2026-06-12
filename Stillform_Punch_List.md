@@ -27,7 +27,7 @@ Full re-audit of every v1-referenced item against live `src/v2/` + functions (ve
 - Cognitive Function Measurement — pending Arlin's fresh design pass
 - Mirror wiring — needs Arlin's trigger/cost/default call
 - Pattern Disruption Layer — REBUILD re-conceived as **metacognitive pattern-awareness** (noticing one's own thinking patterns), NOT the v1 emotional-interrupt; do not port v1 framing
-- Practice Signals (function-check cadence + screen)
+- Practice Signals — RECLASSIFIED June 2: BLOCKED on Cognitive Function Measurement (its cadence serves CFM checks; CFM awaits Arlin's design pass). Building it now would be an orphan. Unblocks with CFM.
 - Premium sound packs (one-time-purchase add-on)
 - Share-to-Reframe (`?share=` handler)
 - ✅ Contrast + text-size toggle (accessibility) — BUILT June 2 (`lib/a11y.js` + tokens.css overrides + Settings DISPLAY section; proven headless: token flip, zoom 1.12, persists across reload)

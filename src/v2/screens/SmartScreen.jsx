@@ -62,7 +62,7 @@ import MediationQueue from "../components/MediationQueue.jsx";
  *
  * @param {function(): void} onBeginSession — opens the spine.
  */
-export default function SmartScreen({ onBeginSession }) {
+export default function SmartScreen({ onBeginSession, onOpenRoadmap = null }) {
   const [beat, setBeat] = useState(() => getBeatOverride() || getCurrentBeat());
   const [thread, setThread] = useState(() => getTodayThread(beat));
   const [sessionCount, setSessionCount] = useState(() => getSessionCount());
@@ -258,8 +258,12 @@ export default function SmartScreen({ onBeginSession }) {
         {showTrajectory ? (
           <section
             className="sf-fade-enter sf-fade-enter--delay-2"
-            style={{ marginTop: "var(--sf-space-64)" }}
-            aria-label="Practice trajectory"
+            style={{ marginTop: "var(--sf-space-64)", cursor: onOpenRoadmap ? "pointer" : "default" }}
+            aria-label="Practice trajectory — tap for the roadmap"
+            role={onOpenRoadmap ? "button" : undefined}
+            tabIndex={onOpenRoadmap ? 0 : undefined}
+            onClick={onOpenRoadmap || undefined}
+            onKeyDown={onOpenRoadmap ? (e) => { if (e.key === "Enter" || e.key === " ") onOpenRoadmap(); } : undefined}
           >
             <div
               className="sf-thread-divider"

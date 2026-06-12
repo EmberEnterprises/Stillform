@@ -25,6 +25,7 @@ import Onboarding from "./screens/Onboarding.jsx";
 import Settings from "./screens/Settings.jsx";
 import FAQ from "./screens/FAQ.jsx";
 import CrisisResources from "./screens/CrisisResources.jsx";
+import Roadmap from "./screens/Roadmap.jsx";
 import { isOnboarded, setOnboarded } from "./lib/onboarding.js";
 import { shouldGate } from "./lib/gating.js";
 import { refreshSubscriptionStatus } from "./lib/subscriptionApi.js";
@@ -265,6 +266,14 @@ export default function AppV2() {
     );
   }
 
+  if (screen === "roadmap") {
+    return (
+      <div className="sf-v2">
+        <Roadmap onExit={() => setScreen("home")} />
+      </div>
+    );
+  }
+
   if (screen === "crisis-resources") {
     return (
       <div className="sf-v2">
@@ -307,6 +316,7 @@ export default function AppV2() {
           else if (target === "settings") setScreen("settings");
           else if (target === "faq") setScreen("faq");
           else if (target === "crisis-resources") setScreen("crisis-resources");
+          else if (target === "roadmap") setScreen("roadmap");
         }}
       />
     </div>
