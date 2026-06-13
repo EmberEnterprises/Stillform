@@ -80,7 +80,7 @@ export default function WhatYouBetOnMirror({ onExit }) {
             {recent.map((entry) => (
               <div key={entry.id} style={entryRowStyle}>
                 <p style={predictionStyle}>&ldquo;{entry.text}&rdquo;</p>
-                <p style={confidenceStyle}>You were {entry.confidence}% sure</p>
+                <p style={confidenceStyle}>{typeof entry.confidence === "number" ? `You were ${entry.confidence}% sure` : "You called it — no number attached"}</p>
                 <p style={outcomeStyle}>
                   <span style={outcomeLabelStyle}>What happened: </span>
                   {entry.outcome}
@@ -94,13 +94,13 @@ export default function WhatYouBetOnMirror({ onExit }) {
       ) : pendingCount > 0 ? (
         <p style={{ ...framingStyle, marginTop: "var(--sf-space-24)" }}>
           {pendingCount} prediction{pendingCount === 1 ? "" : "s"} waiting on an outcome.
-          Mark what happened at end of day and they&rsquo;ll land here paired with the
-          confidence you stated.
+          Mark what happened at end of day and they&rsquo;ll land here paired with
+          what you called.
         </p>
       ) : (
         <p style={{ ...framingStyle, marginTop: "var(--sf-space-24)" }}>
           Predictions land here once you log one inside a Reframe and mark what happened.
-          No score, nothing to track — just your stated confidence laid against the outcome,
+          No score, nothing to track — just what you called laid against the outcome,
           the gap visible.
         </p>
       )}

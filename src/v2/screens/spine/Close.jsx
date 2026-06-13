@@ -648,7 +648,7 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
                     opacity: 0.7,
                   }}
                 >
-                  You were {p.confidence}% sure — {relativeDays(p.loggedAt)}
+                  {typeof p.confidence === "number" ? `You were ${p.confidence}% sure` : "You called it"} — {relativeDays(p.loggedAt)}
                 </p>
                 <textarea
                   className="sf-textarea"
