@@ -33,4 +33,18 @@ not phosphor; if it isn't growth it is not oxblood. Brass does everything else.
 - D2 home: the trace unit + marginalia treatment for Mirror/smart-floor
 - D3a chapter-rule buttons ✅ June 2 (Button.jsx primary/secondary -> top+bottom rules, serif labels, no box; hover = glow not border; regression-shot on home + Settings) → D3b ✅ June 2: the dialog IS the manuscript — user turns serif italic 17px FULL INK (were 13px dim sans: the user's own words were the most demoted text in their own practice — inverted), AI main text already serif cream (kept), AI question serif italic, shared .sf-textarea = the writer's hand (serif italic 18px). Screenshot-proven on a mocked full dialog.
 - D4 ✅ June 2: GrowthArbor.jsx on Roadmap + My Progress — every branch EARNED (one per watch-list pattern by age along the trunk, length by encounter evidence; one per graduated baseline), oxblood + buds ONLY on items active in the last 7 days, deterministic layout (same practice = same specimen), zero items → zero arbor ('the first branch is earned, not drawn in advance'). Proven 4/4 + zero-state + boot.
-- D5 ✅ June 2: swept Paywall/FAQ/Crisis/Library/Settings (all clean on tokens — Paywall already reads the system: Fraunces + serif feature list). Nits killed: ONE-RULE-PER-ROW principle (Reframe: Send keeps the chapter rule, I'm-done goes ghost — adjacent rules read fragmented); Quick Breathe pill -> ruled tag (brass top/bottom rules, 2px radius — the floating valve speaks the system). ROLLOUT COMPLETE D1-D5.
+- D5 ✅ June 2: swept Paywall/FAQ/Crisis/Library/Settings (all clean on tokens — Paywall already reads the system: Fraunces + serif feature list). Nits killed: ONE-RULE-PER-ROW principle (Reframe: Send keeps the chapter rule, I'm-done goes ghost — adjacent rules read fragmented); Quick Breathe pill -> ruled tag (brass top/bottom rules, 2px radius — the floating valve speaks the system). ROLLOUT D1-D5 — see honest correction below.
+
+
+## D5 HONEST CORRECTION (June 2026)
+The original D5 commit claimed Paywall/FAQ/Crisis/Library/Settings all swept
+clean. That was only partly true: Paywall, FAQ, and Library were verified by
+eyes here and ARE clean (serif headlines, hairline rules, framing-law copy
+intact). But the CRISIS screen was screenshotted and never VIEWED — it shipped
+as a wall of stock bone-filled slabs, off the manuscript system entirely. This
+is the same shortcut the whole rebuild was called out for. Fixed honestly: the
+crisis actions keep their unmissable one-tap weight (functionally required —
+you must not miss a crisis line) but now render in the system's OWN materials —
+warm elevated ground, full brass rule, brass serif label — instead of pale
+generic blocks. Eyes confirmed on every screen this time.
+ROLLOUT NOW GENUINELY COMPLETE D1-D5.

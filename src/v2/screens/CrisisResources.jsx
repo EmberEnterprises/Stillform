@@ -260,19 +260,23 @@ const ACTION = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  // The fill STAYS — this is the one screen where an unmissable filled
-  // target is functionally right. The pill goes: square corners, calmer
-  // weight. Big and certain, in the system's voice.
-  minHeight: "54px",
+  // Honest D5 redo (June 2026): the old treatment was a wall of bone-filled
+  // slabs — stock furniture, off the manuscript system. Crisis still needs
+  // UNMISSABLE one-tap targets (a thin-ruled phone number you could miss in a
+  // real crisis would be a design failure), so the fill stays — but in the
+  // system's OWN materials: warm elevated ground, a full brass rule, a brass
+  // serif label. Filled and certain, not pale and generic.
+  minHeight: "56px",
   padding: "0 var(--sf-space-20)",
   flex: "1 1 auto",
-  background: "var(--sf-text-primary, #ECE3D0)",
-  color: "var(--sf-ground-deep, #151009)",
+  background: "var(--sf-ground-elev)",
+  color: "var(--sf-accent)",
+  border: "1px solid var(--sf-accent-line)",
   borderRadius: "2px",
-  fontFamily: "var(--sf-font-sans)",
-  fontSize: "17px",
+  fontFamily: "var(--sf-font-serif)",
+  fontSize: "18px",
   fontWeight: 500,
-  letterSpacing: "0.01em",
+  letterSpacing: "0.005em",
   textDecoration: "none",
   WebkitTapHighlightColor: "transparent",
 };
