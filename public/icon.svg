@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#221C15"/>
-  <circle cx="256" cy="256" r="188" fill="#2A231A" stroke="#3A3024" stroke-width="4"/>
+  <rect width="512" height="512" rx="112" fill="#08080A"/>
+  <circle cx="256" cy="256" r="188" fill="#16161A" stroke="#23232A" stroke-width="3"/>
   <text x="256" y="338" text-anchor="middle"
-    font-family="Fraunces, 'Cormorant Garamond', Georgia, serif" font-size="268" font-weight="500" fill="#C9A45C">S</text>
+    font-family="'Cormorant Garamond', Georgia, serif" font-size="272" font-weight="500" fill="#B8862B">S</text>
 </svg>
