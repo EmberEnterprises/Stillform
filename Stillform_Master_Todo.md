@@ -11,6 +11,8 @@
 
 **B-LIST DECISIONS (Arlin, June 2 2026):** (1) Boot-smoke CI guard — YES, wired into the security gate (`scripts/boot-smoke.mjs` + gate step; uses the runner's system Chrome via puppeteer-core, no chromium download; fails the gate on the blank-screen class that shipped June 2). (2) Pattern-awareness layer — GREEN-LIT as scoped (metacognitive pattern-awareness, never an emotional interrupt; build next). (3) Cloud backup — ACCOUNTS architecture locked: email sign-in, restore anywhere; the next major build arc (unlocks restore-purchase + B2B account side). 6.5c ride-out voice = Arlin's ear on the next deploy-walk.
 
+**✅ VOICE INPUT REBUILT (June 15, Bucket 1) — `useSpeechToText` hook + `MicButton` recovered from v1 (faithful port: continuous recog, mobile-Chrome onend auto-restart, intentional-stop, unmount cleanup) restyled to spec (hairline mono tag, SVG mic, terracotta listening pulse, graceful hide when unsupported). Wired into Reframe (appends dictation to draft). Verified by eyes. Other textareas (Close/Notice/etc.) can take the same one-line mount next.**
+
 **🔴 ACTIVE PUNCH LIST — June 15 2026 (Arlin, live walk). Approved, NOT YET BUILT. Do not deploy until done + reviewed.**
 
 *UX fixes (approved via mockup `ux-fixes-mockup.html`, this session):*

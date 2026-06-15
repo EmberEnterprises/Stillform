@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
+import MicButton from "../../components/MicButton.jsx";
 import HairlineDivider from "../../components/HairlineDivider.jsx";
 import { sendReframeMessage } from "../../lib/reframeApi.js";
 import { recordPrediction } from "../../lib/predictionLog.js";
@@ -244,6 +245,10 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
               }
             }}
           />
+
+          <div style={{ marginTop: "var(--sf-space-12)", display: "flex", justifyContent: "flex-end" }}>
+            <MicButton onTranscript={(t) => setDraft((d) => (d ? d + " " : "") + t.trim())} />
+          </div>
 
           <div
             style={{

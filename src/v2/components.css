@@ -395,3 +395,12 @@
   .sf-v2 .sf-arbor path { animation: none; stroke-dashoffset: 0; }
   .sf-v2 .sf-arbor circle { animation: none; opacity: 1; }
 }
+
+/* MicButton listening pulse — slow opacity breath while dictation is live. */
+@keyframes sfPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes sfPulse { 0%, 100% { opacity: 1; } 50% { opacity: 1; } }
+}
