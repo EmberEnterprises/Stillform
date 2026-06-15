@@ -69,7 +69,7 @@ function InfoDot({ onClick, label }) {
  *   advances. opts.selfMode === true if user picked self-led path.
  * @param {function(): void} onExit  Called when user exits the spine.
  */
-export default function Notice({ config, onContinue, onExit , initialText = null }) {
+export default function Notice({ config, onContinue, onExit, initialText = null, isBase = false }) {
   // Resolve render values from config when present; fall back to main-
   // beat defaults otherwise. Backward-compatible — existing callers that
   // don't pass config get the same surface they always did.
@@ -163,7 +163,7 @@ export default function Notice({ config, onContinue, onExit , initialText = null
 
   return (
     <main className="sf-page sf-page--hero">
-      <SpineBack onBack={onExit} />
+      {!isBase ? <SpineBack onBack={onExit} /> : null}
       <div className="sf-fade-enter">
         <EditorialBlock
           label="Notice"

@@ -47,7 +47,7 @@ import { routeMode } from "../lib/reframeApi.js";
  *
  * @param {function(): void} onExit  Called when user exits or returns home.
  */
-export default function Spine({ onExit, forcedBeat = null, initialText = null }) {
+export default function Spine({ onExit, forcedBeat = null, initialText = null, isBaseEntry = false }) {
   // Phase 4 #2 (locked May 16, 2026): beat is locked at session mount.
   // A session belongs to the beat it started in, even if it crosses a
   // beat boundary mid-flow (e.g., user starts at 8:59pm in main beat and
@@ -332,7 +332,7 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null })
     // headline / body / placeholder / chips from config.notice, falling
     // back to main-beat defaults if config is absent (it isn't, but the
     // component is defensive).
-    return <Notice config={config} onContinue={handleNoticeContinue} onExit={onExit} initialText={initialText} />;
+    return <Notice config={config} onContinue={handleNoticeContinue} onExit={onExit} initialText={initialText} isBase={isBaseEntry} />;
   }
 
   if (step === "reframe") {

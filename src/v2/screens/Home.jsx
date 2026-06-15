@@ -2,52 +2,62 @@ import React, { useState } from "react";
 import AppHeader from "../components/AppHeader.jsx";
 import QuickBreathe from "../components/QuickBreathe.jsx";
 import HomeFooter from "../components/HomeFooter.jsx";
-import MonoLabel from "../components/MonoLabel.jsx";
-import SmartScreen from "./SmartScreen.jsx";
+import Spine from "./Spine.jsx";
 import BreatheOverlay from "./BreatheOverlay.jsx";
 
 /**
  * Home — the page shell of the v2 home route.
  *
- * Renders the four persistent layers of the home:
+ * THE HOME *IS* THE PRACTICE (locked architecture, CANON §7 + archive
+ * "one continuous surface that transitions between beats"). There is no
+ * primer/landing screen that announces the practice and hands off to a
+ * separate naming screen — that pattern is explicitly architecturally
+ * wrong (archive: "part of the main card / journey arc, not a parallel
+ * surface the user dismisses to reveal a separate hero"). The user opens
+ * the app and is ALREADY in the current beat's practice surface — the
+ * Notice naming step, textarea live, ready to use.
  *
- *   1. AppHeader (top) — the quiet Stillform wordmark, nothing else
- *   2. SmartScreen (main) — Phase 3 smart screen (Mirror + Thread +
- *      Active prompt + Trajectory, progressively activating per practice).
- *   3. HomeFooter (below main) — Progress · Library · FAQ · Settings
- *   4. QuickBreathe (fixed bottom-right) — stabilization safety valve
+ * Layers:
+ *   1. AppHeader — the quiet Stillform wordmark
+ *   2. Spine (isBaseEntry) — the live practice; starts at the beat's
+ *      Notice naming surface (no back affordance on the base step —
+ *      nothing is behind home). Naming → Reframe → Close flows in place.
+ *   3. HomeFooter — Progress · Library · FAQ · Settings (stays reachable)
+ *   4. QuickBreathe — stabilization safety valve (CANON §271 exception)
  *
- * Quick Breathe wiring: the pill opens BreatheOverlay (the actual breath
- * pacer surface).
+ * onBeginSession is retained for callers that still launch a session
+ * explicitly (e.g. a forced beat from elsewhere); the base home no longer
+ * needs a "begin" tap because the practice is already on screen.
  *
- * Phase 3 swapped the prior single-card "Today" surface for the smart
- * screen — same compounding-visible-on-home spirit, but with editorial
- * composition of multiple substantive sections per the locked v2 truth
- * (Mirror strip + Thread + Active prompt + Trajectory). Today.jsx is
- * kept in the repo for git history but is no longer mounted.
- *
- * @param {function(): void} onBeginSession — opens the spine when the
- *   Active prompt's Begin button is tapped.
+ * @param {function(): void} onNavigate — footer navigation target router
  */
-export default function Home({ onBeginSession, onNavigate }) {
+export default function Home({ onNavigate }) {
   const [breatheOpen, setBreatheOpen] = useState(false);
+
+  const nav = onNavigate || (() => {});
 
   return (
     <>
       <AppHeader />
 
-      <SmartScreen onBeginSession={onBeginSession} onOpenRoadmap={() => (onNavigate || (() => {}))("roadmap")} />
+      <Spine
+        isBaseEntry={true}
+        onExit={() => {
+          // "Exit"/completion from the base practice returns to the base
+          // practice — there is no separate home behind it. Re-mounting the
+          // Spine resets to a fresh naming surface for the current beat.
+          nav("home-refresh");
+        }}
+        onNavigate={nav}
+      />
 
       <div className="sf-fade-enter sf-fade-enter--delay-2">
-        <HomeFooter onNavigate={onNavigate || (() => { /* no-op fallback */ })} />
+        <HomeFooter onNavigate={nav} />
       </div>
 
       <QuickBreathe onTap={() => setBreatheOpen(true)} />
 
       <BreatheOverlay open={breatheOpen} onClose={() => setBreatheOpen(false)} />
-
-      {/* Phase indicator — removed when all surfaces are fully functional. */}
-      {/* dev badge removed June 2 2026 — internal phase labels never render in the product */}
     </>
   );
 }

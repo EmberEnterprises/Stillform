@@ -89,6 +89,7 @@ function pickInitialScreen() {
 
 export default function AppV2() {
   const [screen, setScreen] = useState(pickInitialScreen);
+  const [homeNonce, setHomeNonce] = useState(0);
   // Phase 6.4c: one-shot forced beat for a manual launch (post-event from
   // My Progress). Set right before routing to "spine", consumed by Spine at
   // mount, cleared on exit. Null for the normal time-routed home session.
@@ -298,24 +299,12 @@ export default function AppV2() {
   return (
     <div className="sf-v2">
       <Home
-        onBeginSession={() => {
-          // Normal session = the time-routed beat. Clear any stale forced
-          // beat so a prior post-event launch can't leak into this one.
-          setSpineBeat(null);
-          // Phase 8c: gate the practice after the free limit (fail-open —
-          // shouldGate only returns true when confidently past-limit AND
-          // confirmed not-subscribed). Quick Breathe stays free regardless.
-          if (shouldGate()) {
-            setScreen("paywall");
-            return;
-          }
-          setScreen("spine");
-        }}
+        key={homeNonce}
         onNavigate={(target) => {
-          // Phase 5: 'progress' routes to the MyProgress landing,
-          // 'library' to the Library (Workshop section live; curated
-          // knowledge cards join later). 'settings' to the Settings surface.
-          // FAQ and Crisis-Resources route to their screens.
+          // 'home-refresh' re-mounts Home so a completed in-place session
+          // returns to a fresh naming surface for the current beat.
+          if (target === "home-refresh") { setHomeNonce((n) => n + 1); return; }
+          // Footer navigation targets.
           if (target === "progress") setScreen("my-progress");
           else if (target === "library") setScreen("library");
           else if (target === "settings") setScreen("settings");

@@ -13,6 +13,8 @@
 
 **✅ VOICE INPUT REBUILT (June 15, Bucket 1) — `useSpeechToText` hook + `MicButton` recovered from v1 (faithful port: continuous recog, mobile-Chrome onend auto-restart, intentional-stop, unmount cleanup) restyled to spec (hairline mono tag, SVG mic, terracotta listening pulse, graceful hide when unsupported). Wired into Reframe (appends dictation to draft). Verified by eyes. Other textareas (Close/Notice/etc.) can take the same one-line mount next.**
 
+**✅ HOME IS THE PRACTICE (June 15, the real fix) — grounded in CANON, not improvised.** The live home was a PRIMER ("Today opens here" → tap → separate Notice naming screen) — the exact "announce then hand off to a parallel surface" pattern the archive calls ARCHITECTURALLY WRONG ("part of the main card / journey arc, not a parallel surface the user dismisses to reveal a separate hero"; "ONE continuous surface that transitions between beats"). FIX: Home now renders the Spine inline (isBaseEntry) — you open the app and land ON the beat's Notice naming surface, textarea live, ready to type. No primer, no Begin, no doorstep. Header + footer nav (Progress/Library/Settings) + Quick Breathe retained around it; back affordance suppressed on the base step (nothing behind home); completed session re-mounts a fresh naming surface (homeNonce). Verified by eyes: lands on naming, textarea present, footer reachable, no back, no errors. KNOWN: Notice's own "Back" (chip-flow, not the ← home) is vestigial on the base screen — flagged for Arlin's walk, not reactively removed.
+
 **🔴 ACTIVE PUNCH LIST — June 15 2026 (Arlin, live walk). Approved, NOT YET BUILT. Do not deploy until done + reviewed.**
 
 *UX fixes (approved via mockup `ux-fixes-mockup.html`, this session):*
