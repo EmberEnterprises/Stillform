@@ -158,7 +158,7 @@ export default function BreatheOverlay({ open, onClose }) {
       {done ? (
         <DoneState onClose={onClose} />
       ) : (
-        <ActiveState phase={phase} cycleCount={cycleCount} />
+        <ActiveState phase={phase} cycleCount={cycleCount} onStop={onClose} />
       )}
     </div>
   );
@@ -171,7 +171,7 @@ export default function BreatheOverlay({ open, onClose }) {
  * transition uses the current phase's duration so the user's breath can
  * follow the geometry. Phase label below, cycle count quietly below that.
  * -------------------------------------------------------------------- */
-function ActiveState({ phase, cycleCount }) {
+function ActiveState({ phase, cycleCount, onStop }) {
   return (
     <>
       {/* The breath circle. Scale is set inline based on current phase,
@@ -234,8 +234,34 @@ function ActiveState({ phase, cycleCount }) {
           textTransform: "lowercase",
         }}
       >
-        end when you've settled
+        the full reset runs ~5 min — but stop the moment you've settled
       </div>
+
+      {/* Explicit early-stop. Quick Breathe often needs only a few cycles;
+          the full Cyclic Sighing protocol can run long. This is the
+          user-led stop — a clear control, not a hunt for the corner ×.
+          Tapping it ends the practice immediately (same as onClose). */}
+      <button
+        type="button"
+        onClick={onStop}
+        style={{
+          marginTop: "var(--sf-space-32, 32px)",
+          background: "transparent",
+          border: "none",
+          borderTop: "0.5px solid var(--sf-accent-line, rgba(184,134,43,0.32))",
+          borderBottom: "0.5px solid var(--sf-accent-line, rgba(184,134,43,0.32))",
+          padding: "10px 22px",
+          fontFamily: "var(--sf-font-mono, monospace)",
+          fontSize: "11px",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "var(--sf-accent, #B8862B)",
+          cursor: "pointer",
+          WebkitTapHighlightColor: "transparent",
+        }}
+      >
+        I've settled — done
+      </button>
     </>
   );
 }

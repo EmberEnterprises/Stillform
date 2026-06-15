@@ -101,8 +101,8 @@
    * TYPOGRAPHY FAMILIES — already loaded via index.html.
    * Cormorant Garamond (serif), DM Sans (sans), IBM Plex Mono (mono).
    * ------------------------------------------------------------------ */
-  --sf-font-serif: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
-  --sf-font-sans: 'Inter', 'DM Sans', system-ui, sans-serif;
+  --sf-font-serif: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+  --sf-font-sans: 'DM Sans', 'Inter', system-ui, -apple-system, sans-serif;
   --sf-font-mono:   "IBM Plex Mono", "JetBrains Mono", "Menlo", monospace;
 
   /* ---------------------------------------------------------------------
