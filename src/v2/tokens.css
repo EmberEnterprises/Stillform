@@ -276,6 +276,7 @@ body:has(.sf-v2) {
   padding: var(--sf-space-48) var(--sf-space-24) var(--sf-space-80);
   max-width: 640px;
   margin: 0 auto;
+  position: relative; /* anchor for the spine back affordance */
 }
 
 .sf-page--hero {

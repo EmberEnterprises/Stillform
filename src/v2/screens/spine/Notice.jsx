@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import EditorialBlock from "../../components/EditorialBlock.jsx";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
+import SpineBack from "../../components/SpineBack.jsx";
 import InfoModal from "../../components/InfoModal.jsx";
 import { getChipDefinition } from "../../lib/chipDefinitions.js";
 
@@ -161,6 +162,7 @@ export default function Notice({ config, onContinue, onExit , initialText = null
 
   return (
     <main className="sf-page sf-page--hero">
+      <SpineBack onBack={onExit} />
       <div className="sf-fade-enter">
         <EditorialBlock
           label="Notice"
@@ -276,6 +278,15 @@ export default function Notice({ config, onContinue, onExit , initialText = null
         >
           Quick move ›
         </button>
+        <div style={{
+          marginTop: "var(--sf-space-4, 4px)",
+          fontFamily: "var(--sf-font-sans, sans-serif)",
+          fontSize: "12px",
+          color: "var(--sf-text-faint, rgba(232,234,240,0.52))",
+          lineHeight: 1.5,
+        }}>
+          A 60-second body reset for when you can't think yet.
+        </div>
       </div>
 
       {/* Reset an urge — urge-surf for an acute compulsion pull. Ungated,

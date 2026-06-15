@@ -53,7 +53,7 @@ const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min
  *   - morning: fresh (no entries yet) vs done (>=1 entry, anchor already
  *     set — body shifts from invitation to acknowledgment, no action)
  *
- * Wind-down: now HAS an actionLabel ("Begin") because Phase 4 #5 ships
+ * Wind-down: now HAS an actionLabel ("Set tomorrow's anchor") because Phase 4 #5 ships
  * the minimal wind-down flow (tomorrow anchor → Deep Regulate → close).
  * Canon §10's no-review-within-2h-of-sleep concern is preserved — the
  * wind-down flow is forward-anchor + breathing, never retrospective.
@@ -64,7 +64,7 @@ const FALLBACK_PROMPTS = {
   morning_fresh: {
     headline: "Today opens here.",
     body: "Set what it needs from you.",
-    actionLabel: "Begin",
+    actionLabel: "Name what today needs",
   },
   morning_done: {
     headline: "Today's anchor is set.",
@@ -74,22 +74,22 @@ const FALLBACK_PROMPTS = {
   main_fresh: {
     headline: "The day waits for a first rep.",
     body: "Notice what's present. Name it precisely.",
-    actionLabel: "Begin",
+    actionLabel: "Name what's present",
   },
   main_underway: {
     headline: "The day is underway.",
     body: "Run the next rep — when something's up, or to deepen a name from earlier.",
-    actionLabel: "Begin",
+    actionLabel: "Name what's present",
   },
   eod: {
     headline: "Day's been carried.",
     body: "Close it with care.",
-    actionLabel: "Begin",
+    actionLabel: "Name what landed",
   },
   "wind-down": {
     headline: "Phone down soon.",
     body: "Tomorrow's one anchor?",
-    actionLabel: "Begin",
+    actionLabel: "Set tomorrow's anchor",
   },
 };
 

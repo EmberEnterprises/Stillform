@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
+import SpineBack from "../../components/SpineBack.jsx";
 import MicButton from "../../components/MicButton.jsx";
 import HairlineDivider from "../../components/HairlineDivider.jsx";
 import { sendReframeMessage } from "../../lib/reframeApi.js";
@@ -153,6 +154,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
   return (
     <main className="sf-page">
+      <SpineBack onBack={onExit} />
       <div className="sf-fade-enter" style={{ marginBottom: "var(--sf-space-32)" }}>
         <MonoLabel
           size="xs"
@@ -234,7 +236,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
             className="sf-textarea"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Reply, or refine what's present…"
+            placeholder="Reply, add what else is here, or push back…"
             rows={3}
             aria-label="Reply to the reframe"
             onKeyDown={(e) => {

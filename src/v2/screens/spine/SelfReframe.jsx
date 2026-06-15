@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
+import SpineBack from "../../components/SpineBack.jsx";
 import { SELF_PROMPTS, SELF_MODE_INFO } from "../../lib/selfMode.js";
 
 /**
@@ -74,6 +75,7 @@ export default function SelfReframe({ precisionName, onContinue, onExit }) {
 
   return (
     <main className="sf-page">
+      <SpineBack onBack={onExit} />
       <div
         className="sf-fade-enter"
         style={{ marginBottom: "var(--sf-space-32)" }}
