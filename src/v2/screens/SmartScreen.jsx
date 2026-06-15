@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
 import { getTodayThread } from "../lib/thread.js";
@@ -215,13 +214,22 @@ export default function SmartScreen({ onBeginSession, onOpenRoadmap = null }) {
 
         {/* Active prompt — observation + invitation, AI-generated with
             confidant-voice fallback. Always renders. */}
+        {/* The prompt IS the entry — no start button. Home is the naming
+            screen: tapping the prompt drops the user straight into naming.
+            The headline + body are the invitation; the whole block is the
+            tap target. A faint mono cue makes it discoverable without a CTA. */}
         <section
           className={
             showThread || showMirror
               ? "sf-fade-enter sf-fade-enter--delay-2"
               : "sf-fade-enter sf-fade-enter--delay-1"
           }
-          aria-label="What's next"
+          role="button"
+          tabIndex={0}
+          onClick={handleBegin}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleBegin(); } }}
+          aria-label={`${activePrompt.headline} ${activePrompt.body || ""}`.trim() + " — tap to begin naming"}
+          style={{ cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
         >
           <h1
             style={{
@@ -252,14 +260,13 @@ export default function SmartScreen({ onBeginSession, onOpenRoadmap = null }) {
             </p>
           ) : null}
 
-          {/* Entry into the practice ALWAYS renders — every home state must
-              have an obvious way in. Per-beat label when set; a clean default
-              otherwise (returning / anchor-already-set states). */}
-          <div style={{ marginTop: "var(--sf-space-48)" }}>
-            <Button variant="primary" onClick={handleBegin}>
-              {activePrompt.actionLabel || "Open a session"}
-            </Button>
-          </div>
+          <MonoLabel
+            size="xs"
+            tone="faint"
+            style={{ display: "inline-block", marginTop: "var(--sf-space-32)" }}
+          >
+            {(activePrompt.actionLabel || "Name what's present") + " \u2192"}
+          </MonoLabel>
         </section>
 
         {/* Trajectory — quiet stats line, no AI involvement, hidden
