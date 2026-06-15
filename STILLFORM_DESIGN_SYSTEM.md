@@ -48,3 +48,21 @@ you must not miss a crisis line) but now render in the system's OWN materials �
 warm elevated ground, full brass rule, brass serif label — instead of pale
 generic blocks. Eyes confirmed on every screen this time.
 ROLLOUT NOW GENUINELY COMPLETE D1-D5.
+
+
+## PALETTE CHANGE — INK & BONE (June 15 2026, Arlin's call)
+The original Folio palette (warm umber ground #221C15 / #2A231A, cream text
+#ECE3D0, brass #C9A45C) was rejected on the live walk: the warm browns read
+muddy and dated, not elite — "does not read high-end prestige." STRUCTURE
+UNCHANGED — every D1-D5 decision (Fraunces manuscript type, chapter-rule
+buttons, trace line, growth arbor, marginalia voice, work-block layout) is
+intact; this was a pure VALUE swap, possible because the palette is fully
+tokenized (zero hardcoded color literals in components — verified).
+New ground: true cool charcoal — deep #0F0F10, elev #1E1E20, elev-2 #161617
+(no brown). Text: bone-white #EDEAE3 (rgba base 237,234,227). Accent: muted
+gold #C2A878 (cooled from the brassy brown-gold to read gold-on-graphite).
+Sworn accents preserved in meaning: live/phosphor #6FE0CA (cooled a hair),
+growth/oxblood -> cooler clay #B5654A. State colors de-warmed (sage #88A882,
+clay #C88A6A, cool gray #9C9C9E). Verified by eyes on home, work-turn, and
+crisis screens — the structure now reads as the elite manuscript it was
+designed to be, on a ground that doesn't undercut it.
