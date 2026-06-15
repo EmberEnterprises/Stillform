@@ -89,6 +89,7 @@ function pickInitialScreen() {
 
 export default function AppV2() {
   const [screen, setScreen] = useState(pickInitialScreen);
+  const [entryPayload, setEntryPayload] = useState(null);
   const [homeNonce, setHomeNonce] = useState(0);
   // Phase 6.4c: one-shot forced beat for a manual launch (post-event from
   // My Progress). Set right before routing to "spine", consumed by Spine at
@@ -124,9 +125,11 @@ export default function AppV2() {
         <Spine
           forcedBeat={spineBeat}
           initialText={INITIAL_SHARE_TEXT || null}
+          entryPayload={entryPayload}
           onExit={() => {
             maybeOpportunisticBackup();
             setSpineBeat(null);
+            setEntryPayload(null);
             setScreen("home");
           }}
         />
@@ -300,6 +303,14 @@ export default function AppV2() {
     <div className="sf-v2">
       <Home
         key={homeNonce}
+        onEnterPractice={(text, chip, opts = {}) => {
+          // The user named on the home practice surface. Carry that payload
+          // into the spine, which replays it to land at Reframe/move/reset.
+          setSpineBeat(null);
+          if (shouldGate()) { setScreen("paywall"); return; }
+          setEntryPayload({ text, chip, opts });
+          setScreen("spine");
+        }}
         onNavigate={(target) => {
           // 'home-refresh' re-mounts Home so a completed in-place session
           // returns to a fresh naming surface for the current beat.

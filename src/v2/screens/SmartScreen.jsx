@@ -9,6 +9,8 @@ import { getTrajectoryStats, formatTrajectoryLine } from "../lib/trajectory.js";
 import { getSessionCount } from "../lib/sessions.js";
 import { maybeRunMediation, getPendingProposals } from "../lib/mediationApi.js";
 import MediationQueue from "../components/MediationQueue.jsx";
+import Notice from "./spine/Notice.jsx";
+import { getBeatConfig } from "../lib/beatConfig.js";
 
 /**
  * SmartScreen — the v2 home, Phase 3.
@@ -62,7 +64,7 @@ import MediationQueue from "../components/MediationQueue.jsx";
  *
  * @param {function(): void} onBeginSession — opens the spine.
  */
-export default function SmartScreen({ onBeginSession, onOpenRoadmap = null }) {
+export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   const [beat, setBeat] = useState(() => getBeatOverride() || getCurrentBeat());
   const [thread, setThread] = useState(() => getTodayThread(beat));
   const [sessionCount, setSessionCount] = useState(() => getSessionCount());
@@ -212,61 +214,21 @@ export default function SmartScreen({ onBeginSession, onOpenRoadmap = null }) {
           </section>
         ) : null}
 
-        {/* Active prompt — observation + invitation, AI-generated with
-            confidant-voice fallback. Always renders. */}
-        {/* The prompt IS the entry — no start button. Home is the naming
-            screen: tapping the prompt drops the user straight into naming.
-            The headline + body are the invitation; the whole block is the
-            tap target. A faint mono cue makes it discoverable without a CTA. */}
-        <section
-          className={
-            showThread || showMirror
-              ? "sf-fade-enter sf-fade-enter--delay-2"
-              : "sf-fade-enter sf-fade-enter--delay-1"
-          }
-          role="button"
-          tabIndex={0}
-          onClick={handleBegin}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleBegin(); } }}
-          aria-label={`${activePrompt.headline} ${activePrompt.body || ""}`.trim() + " — tap to begin naming"}
-          style={{ cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
-        >
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: "var(--sf-font-serif)",
-              fontSize: "var(--sf-text-display-md)",
-              lineHeight: "var(--sf-leading-display)",
-              fontWeight: 400,
-              color: "var(--sf-text-cream)",
-              letterSpacing: "-0.01em",
+        {/* The naming surface IS the home practice — rendered inline, not a
+            primer that routes away. The concierge layer (Mirror / thread /
+            trajectory) composes above it. The user lands able to name now.
+            Notice owns the naming + chips + routing; isBase suppresses its
+            back affordance (nothing is behind home). onContinue routes the
+            committed naming into the spine's Reframe/move/reset/self flow. */}
+        <section className="sf-fade-enter sf-fade-enter--delay-2" aria-label="Name what's present">
+          <Notice
+            config={getBeatConfig(beat)}
+            isBase={true}
+            onContinue={(text, chip, opts = {}) => {
+              if (typeof onEnterPractice === "function") onEnterPractice(text, chip, opts);
             }}
-          >
-            {activePrompt.headline}
-          </h1>
-
-          {activePrompt.body ? (
-            <p
-              style={{
-                margin: "var(--sf-space-12) 0 0",
-                fontFamily: "var(--sf-font-sans)",
-                fontSize: "var(--sf-text-body-md)",
-                lineHeight: "var(--sf-leading-body)",
-                color: "var(--sf-text-quiet)",
-                fontWeight: 300,
-              }}
-            >
-              {activePrompt.body}
-            </p>
-          ) : null}
-
-          <MonoLabel
-            size="xs"
-            tone="faint"
-            style={{ display: "inline-block", marginTop: "var(--sf-space-32)" }}
-          >
-            {(activePrompt.actionLabel || "Name what's present") + " \u2192"}
-          </MonoLabel>
+            onExit={() => { /* no exit on the base practice surface */ }}
+          />
         </section>
 
         {/* Trajectory — quiet stats line, no AI involvement, hidden

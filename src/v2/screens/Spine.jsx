@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Notice from "./spine/Notice.jsx";
 import Reframe from "./spine/Reframe.jsx";
 import SelfReframe from "./spine/SelfReframe.jsx";
@@ -47,7 +47,7 @@ import { routeMode } from "../lib/reframeApi.js";
  *
  * @param {function(): void} onExit  Called when user exits or returns home.
  */
-export default function Spine({ onExit, forcedBeat = null, initialText = null, isBaseEntry = false }) {
+export default function Spine({ onExit, forcedBeat = null, initialText = null, isBaseEntry = false, entryPayload = null }) {
   // Phase 4 #2 (locked May 16, 2026): beat is locked at session mount.
   // A session belongs to the beat it started in, even if it crosses a
   // beat boundary mid-flow (e.g., user starts at 8:59pm in main beat and
@@ -80,6 +80,7 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
   });
 
   const [step, setStep] = useState("notice");
+  const entryPayloadConsumed = useRef(false);
   const [precisionName, setPrecisionName] = useState("");
   const [selectedChip, setSelectedChip] = useState(null);
   const [selfMode, setSelfMode] = useState(false);
@@ -109,6 +110,18 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
     if (opts.selfMode) setSelfMode(true);
     setStep("reframe");
   };
+
+  // Home now owns the naming step. When the user commits a naming on the
+  // home practice surface, AppV2 launches the spine with that payload; we
+  // replay it once here so the spine lands at Reframe (or move/reset/self)
+  // without re-asking the user to name what they already named.
+  useEffect(() => {
+    if (entryPayload && !entryPayloadConsumed.current) {
+      entryPayloadConsumed.current = true;
+      handleNoticeContinue(entryPayload.text || "", entryPayload.chip || null, entryPayload.opts || {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Phase 3.5 #2: ReframeContinue no longer persists. It only captures
   // the surfaced frame and conversation length, then transitions to Close.
