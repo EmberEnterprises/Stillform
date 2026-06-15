@@ -90,6 +90,7 @@ export default function Notice({ config, onContinue, onExit , initialText = null
   const [text, setText] = useState(() => (typeof initialText === "string" ? initialText : ""));
   const [selectedChip, setSelectedChip] = useState(null);
   const [infoChip, setInfoChip] = useState(null);
+  const [showChipGuide, setShowChipGuide] = useState(false);
   const textareaRef = useRef(null);
 
   // Focus the textarea on mount — the practice starts when the user can write.
@@ -194,22 +195,23 @@ export default function Notice({ config, onContinue, onExit , initialText = null
           className="sf-fade-enter sf-fade-enter--delay-2"
           style={{ marginTop: "var(--sf-space-32)" }}
         >
-          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
-            Start here if you're stuck
-          </MonoLabel>
+          <div style={{ display: "flex", alignItems: "center", gap: "2px", marginBottom: "var(--sf-space-12)" }}>
+            <MonoLabel size="xs" tone="faint" style={{ display: "block" }}>
+              Start here if you're stuck
+            </MonoLabel>
+            <InfoDot onClick={() => setShowChipGuide(true)} label="these states" />
+          </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
             {chips.map((chip) => (
-              <span key={chip.id} style={{ display: "inline-flex", alignItems: "center" }}>
-                <button
-                  type="button"
-                  className="sf-chip"
-                  aria-selected={selectedChip === chip.id ? "true" : "false"}
-                  onClick={() => handleChipTap(chip.id, chip.label)}
-                >
-                  {chip.label}
-                </button>
-                <InfoDot onClick={() => setInfoChip(chip)} label={chip.label} />
-              </span>
+              <button
+                key={chip.id}
+                type="button"
+                className="sf-chip"
+                aria-selected={selectedChip === chip.id ? "true" : "false"}
+                onClick={() => handleChipTap(chip.id, chip.label)}
+              >
+                {chip.label}
+              </button>
             ))}
           </div>
         </div>
@@ -220,6 +222,18 @@ export default function Notice({ config, onContinue, onExit , initialText = null
         title={infoChip?.label}
         body={infoChip ? getChipDefinition(infoChip.id) : ""}
         onClose={() => setInfoChip(null)}
+      />
+
+      <InfoModal
+        open={showChipGuide}
+        title="These states"
+        body={
+          "Each is a starting point, not a box. Tap the one that fits, or name your own above.\n\n" +
+          chips
+            .map((chip) => `${chip.label} — ${getChipDefinition(chip.id)}`)
+            .join("\n\n")
+        }
+        onClose={() => setShowChipGuide(false)}
       />
 
       <div
