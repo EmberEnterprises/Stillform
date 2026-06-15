@@ -77,7 +77,8 @@ function pickCandidate(threadLength) {
       return {
         key: `quiet:${c.chip?.id || label}`,
         headline: "Something has gone quiet.",
-        body: `${label} hasn't shown in your sessions for weeks. That came from the work. Begin when ready.`,
+        body: `${label} hasn't shown in your sessions for weeks. That came from the work.`,
+        actionLabel: "Begin when ready",
       };
     }
   }
@@ -91,7 +92,8 @@ function pickCandidate(threadLength) {
       return {
         key: `gap:${todayKey()}`,
         headline: "The thread holds.",
-        body: "A few days since the last session. Nothing lost. Begin when ready.",
+        body: "A few days since the last session. Nothing lost.",
+        actionLabel: "Pick the thread back up",
       };
     }
   }
@@ -108,7 +110,8 @@ function pickCandidate(threadLength) {
       return {
         key: `active:${c.chip?.id || label}`,
         headline: "Worth a look.",
-        body: `${label} has been showing up this week. Name it when it arrives. Begin when ready.`,
+        body: `${label} has been showing up this week. Name it when it arrives.`,
+        actionLabel: "Name what's present",
       };
     }
   }
@@ -121,7 +124,7 @@ function pickCandidate(threadLength) {
  *
  * @param {"morning"|"main"|"eod"|"wind-down"} beat
  * @param {number} threadLength
- * @returns {{headline: string, body: string, actionLabel: null, source: "smart-floor"} | null}
+ * @returns {{headline: string, body: string, actionLabel: string, source: "smart-floor"} | null}
  */
 export function getSmartFloorPrompt(beat, threadLength) {
   if (beat !== "morning" && beat !== "main") return null;
@@ -141,5 +144,5 @@ export function getSmartFloorPrompt(beat, threadLength) {
     surfaced: { ...(meta.surfaced || {}), [cand.key]: new Date().toISOString() },
   });
 
-  return { headline: cand.headline, body: cand.body, actionLabel: null, source: "smart-floor" };
+  return { headline: cand.headline, body: cand.body, actionLabel: cand.actionLabel || "Open a session", source: "smart-floor" };
 }

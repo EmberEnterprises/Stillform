@@ -252,13 +252,14 @@ export default function SmartScreen({ onBeginSession, onOpenRoadmap = null }) {
             </p>
           ) : null}
 
-          {activePrompt.actionLabel ? (
-            <div style={{ marginTop: "var(--sf-space-48)" }}>
-              <Button variant="primary" onClick={handleBegin}>
-                {activePrompt.actionLabel}
-              </Button>
-            </div>
-          ) : null}
+          {/* Entry into the practice ALWAYS renders — every home state must
+              have an obvious way in. Per-beat label when set; a clean default
+              otherwise (returning / anchor-already-set states). */}
+          <div style={{ marginTop: "var(--sf-space-48)" }}>
+            <Button variant="primary" onClick={handleBegin}>
+              {activePrompt.actionLabel || "Open a session"}
+            </Button>
+          </div>
         </section>
 
         {/* Trajectory — quiet stats line, no AI involvement, hidden
