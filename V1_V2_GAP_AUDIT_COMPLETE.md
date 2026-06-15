@@ -53,7 +53,7 @@ the ring in Quick Breathe + BreatheGround. "Visual grounding" toggle, on by
 default. **Absent in v2.**
 **Recover:** `932ab88`.
 
-### 3. BODY SCAN TOOL (a whole core tool)
+### 3. BODY SCAN TOOL — ❌ REJECTED BY ARLIN (June 15), do NOT rebuild
 `BodyScanTool`: 6 acupressure points, timed holds, SVG body schematics, auto-
 advance, "Signal cleared." One of the THREE core tools per the project transfer.
 **Absent in v2** — though the Master Todo STILL lists it as a live stabilizer

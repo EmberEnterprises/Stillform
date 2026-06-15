@@ -15,10 +15,10 @@ These have no plan decision to drop them. Silent migration casualties.
   (accent + typing friction), this is an accessibility regression. **Rebuild.**
   *Recovery: v1 MicButton + useSpeechToText hook.*
 
-- **BODY SCAN tool** (6 acupressure points + SVG schematics + scan-pace).
-  Master Todo line 36 STILL lists it as a current Stabilizer; its data layer
-  was built (line 689). Listed-as-live + data-waiting = meant to survive.
-  **Rebuild.** *Recovery: v1 monolith.*
+- ~~BODY SCAN tool~~ — **REJECTED by Arlin (June 15). Do NOT rebuild.** It was
+  listed in the Todo + had a data layer, but Arlin's explicit call is that she
+  does not want it back. Decision over doc. (Master Todo line 36 stabilizer
+  mention + the orphaned data layer should be cleaned up separately.)
 
 ## BUCKET 2 — BUILD THE NEW VERSION (re-conceived, not restored)
 The old thing is gone on purpose; its successor is already planned.
