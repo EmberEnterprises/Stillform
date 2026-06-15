@@ -8,10 +8,8 @@
 -- { schema, appVersion, installId, takenAt, keys: {...} }). Server keeps
 -- the newest 10 per user (trim enforced in backup-save.js after insert).
 --
--- RUN ONCE in the Supabase SQL editor (Arlin's dashboard step). After it
--- runs, add `stillform_v2_backups` to the anon-401 probe list in
--- scripts/security-smoke.mjs (left out until the table exists so the gate
--- doesn't fail on a missing table).
+-- RUN ONCE in the Supabase SQL editor. ✅ RUN June 15 2026. The table is
+-- now in the security-smoke anon-read probe list (scripts/security-smoke.mjs).
 
 create table if not exists public.stillform_v2_backups (
   id          uuid primary key default gen_random_uuid(),

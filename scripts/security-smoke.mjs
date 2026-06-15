@@ -14,7 +14,8 @@ const TABLES = [
   "user_profiles",
   "stillform_uat_feedback",
   "stillform_metrics_daily",
-  "stillform_subscription_state"
+  "stillform_subscription_state",
+  "stillform_v2_backups"
 ];
 
 const fail = (message) => {
