@@ -5,8 +5,8 @@ three; the synthesis was built and approved: **one system, three signatures with
 strict jobs.** Mock: outputs/synthesis.html (this conversation, June 2).
 
 ## The system
-- **BASE = Folio.** Fraunces (optical sizing) display · Inter body · IBM Plex Mono
-  utility · Caveat for marginalia only. Ruled-manuscript rhythm; chapter-rule
+- **BASE = Folio.** Cormorant Garamond display · DM Sans body · IBM Plex Mono
+  utility · Caveat for marginalia only. *(Corrected June 15 2026 to live tokens — D1 "The Synthesis" originally swapped to Fraunces/Inter; that swap was reverted and the locked prestige type (Cormorant + DM Sans) restored. Doc was describing the rejected direction.)* Ruled-manuscript rhythm; chapter-rule
   buttons (top+bottom brass rules, no boxes).
 - **TIME = the Signal trace.** The day as one continuous line; sittings and live
   catches are events ON the line.
@@ -16,9 +16,9 @@ strict jobs.** Mock: outputs/synthesis.html (this conversation, June 2).
   (Caveat, brass). It annotates; it never interrupts.
 
 ## Palette (ONE ground · ONE ink · ONE metal · two sworn accents)
-- ground: #221C15 / elev #2A231A / deep #151009 (warm graphite-umber)
-- ink (text): #ECE3D0 bone · dim rgba(236,227,208,.62) · faint .40
-- metal: #C9A45C brass (the ONLY decorative accent — rules, labels, marginalia)
+- ground: #08080A / elev #111114 / elev-2 #16161A (near-black, per the locked prestige spec) *(corrected June 15 2026 — D1 used warm umber #221C15; reverted to the locked near-black ground)*
+- ink (text): #EDE8DC cream headlines · #E8EAF0 cool body · faint .52 (AA-passing)
+- metal: #B8862B antiqued gold (the ONLY decorative accent — rules, labels, marginalia) *(corrected June 15 2026 — D1 used #C9A45C; reverted to spec #B8862B)*
 - --sf-live: #6FE3C4 phosphor — EXCLUSIVELY live data (the trace, live catches)
 - --sf-growth: #8C3B2A oxblood — EXCLUSIVELY new growth (arbor buds, gone-quiet
   strikethrough)

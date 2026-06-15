@@ -45,7 +45,7 @@ immediately. After a work turn, later turns may be extract (new thread) or
 work (refined) — same rules.
 
 ## Client (Reframe screen)
-- extract → the ask renders as the Fraunces question (manuscript register).
+- extract → the ask renders as the Cormorant question (manuscript register). *(corrected June 15 2026 — live serif token is Cormorant Garamond, not Fraunces)*
 - work → ruled work blocks per the approved mock: TAKEN APART / THE SHAPE /
   REBUILT / ON RECORD / the question. Shape block pulls encounter meta
   (count, last seen) from the LOCAL watch list by label — server never
