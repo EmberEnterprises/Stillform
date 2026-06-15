@@ -12,56 +12,56 @@
   /* ---------------------------------------------------------------------
    * GROUNDS — cinematic depth, true black with cool undertone
    * ------------------------------------------------------------------ */
-  --sf-ground-deep:    #0F0F10;
-  --sf-ground-elev:    #1E1E20;
-  --sf-ground-elev-2:  #161617;
+  --sf-ground-deep:    #08080A;
+  --sf-ground-elev:    #111114;
+  --sf-ground-elev-2:  #16161A;
 
   /* ---------------------------------------------------------------------
    * BORDERS — printed not drawn. All borders rendered at 0.5px.
    * ------------------------------------------------------------------ */
-  --sf-border-hairline:  rgba(237, 234, 227, 0.10);
-  --sf-border-emphasis:  rgba(237, 234, 227, 0.14);
-  --sf-border-printed:   rgba(237, 234, 227, 0.07);
+  --sf-border-hairline:  rgba(255, 255, 255, 0.06);
+  --sf-border-emphasis:  rgba(255, 255, 255, 0.10);
+  --sf-border-printed:   rgba(255, 255, 255, 0.05);
   /* --sf-border-quiet: the standard subtle divider — used 20+ times across the
      diagnostic stack (BiasProfile, TriggerProfile, the mirrors) + spine. Defined
      May 27 2026: it was referenced everywhere but never declared, so it had been
      rendering via the currentColor fallback. 0.08 sits between hairline (0.06)
      and emphasis (0.10) — a quiet but present line. Tune here if needed. */
-  --sf-border-quiet:     rgba(237, 234, 227, 0.12);
+  --sf-border-quiet:     rgba(255, 255, 255, 0.08);
 
   /* ---------------------------------------------------------------------
    * ACCENT — antiqued metallic, NOT wellness amber.
    * Discipline: maximum 5% of any screen. Never as button fill.
    * Used as hairlines, single-character emphasis, small status dots.
    * ------------------------------------------------------------------ */
-  --sf-accent:        #C2A878;
-  --sf-accent-deep:   #9A8556;
-  --sf-accent-glow:   rgba(194, 168, 120, 0.07);
-  --sf-accent-line:   rgba(194, 168, 120, 0.40);
+  --sf-accent:        #B8862B;
+  --sf-accent-deep:   #8C6420;
+  --sf-accent-glow:   rgba(184, 134, 43, 0.06);
+  --sf-accent-line:   rgba(184, 134, 43, 0.35);
 
   /* THE SYNTHESIS (June 2 2026) — sworn accents. Phosphor = LIVE DATA ONLY
      (the trace, live catches). Oxblood = NEW GROWTH ONLY (arbor buds,
      gone-quiet strikethrough). Neither ever decorates. Brass does the rest. */
-  --sf-live:        #6FE0CA;
+  --sf-live:        #6FE3C4;
   --sf-live-glow:   rgba(111, 227, 196, 0.45);
-  --sf-growth:      #B5654A;
+  --sf-growth:      #8C3B2A;
   --sf-font-annotation: 'Caveat', cursive;
 
   /* ---------------------------------------------------------------------
    * TYPOGRAPHY COLORS — cream-on-black is the editorial moment.
    * Pure white on near-black reads as system UI; we don't want that.
    * ------------------------------------------------------------------ */
-  --sf-text-primary:  #EDEAE3;
-  --sf-text-quiet:    rgba(237, 234, 227, 0.60);
-  --sf-text-faint:    rgba(237, 234, 227, 0.40);
-  --sf-text-cream:    #E7E2D6;
+  --sf-text-primary:  #E8EAF0;
+  --sf-text-quiet:    rgba(232, 234, 240, 0.62);
+  --sf-text-faint:    rgba(232, 234, 240, 0.40);
+  --sf-text-cream:    #EDE8DC;
 
   /* ---------------------------------------------------------------------
    * STATE — used only for tonal direction. Never as fills.
    * ------------------------------------------------------------------ */
-  --sf-state-positive:  #88A882;   /* sage */
-  --sf-state-negative:  #C88A6A;   /* clay */
-  --sf-state-neutral:   #9C9C9E;   /* cool gray */
+  --sf-state-positive:  #8FA88A;   /* sage */
+  --sf-state-negative:  #B47A6A;   /* terracotta */
+  --sf-state-neutral:   #A8A29A;   /* warm gray */
 
   /* ---------------------------------------------------------------------
    * RADIUS — calibrated tight. Avoid 8px+ entirely (reads as SaaS).
