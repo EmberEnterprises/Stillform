@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 // NOTE: deliberately NOT importing MonoLabel here. MonoLabel imports InfoModal
 // (for its ⓘ affordance), so importing MonoLabel back created a circular
 // dependency that crashed the production bundle at boot (TDZ: "Cannot access
@@ -28,18 +29,21 @@ export default function InfoModal({ open, title, body, onClose }) {
       if (e.key === "Escape") onClose?.();
     };
     document.addEventListener("keydown", onKey);
-    // Lock background scroll while the modal is open.
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // Background scroll intentionally NOT locked (Arlin, June 15): the page
+    // behind the modal stays scrollable. The fixed scrim stays pinned over
+    // the viewport while content scrolls underneath.
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
     };
   }, [open, onClose]);
 
   if (!open) return null;
 
-  return (
+  // Portal to body: a parent with a CSS transform (e.g. .sf-fade-enter's
+  // persistent translateY) becomes the containing block for position:fixed,
+  // which traps the scrim/centering and lets content overflow. Rendering at
+  // document.body root guarantees the overlay covers the true viewport.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -165,6 +169,7 @@ export default function InfoModal({ open, title, body, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
