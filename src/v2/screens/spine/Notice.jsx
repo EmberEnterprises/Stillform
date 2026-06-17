@@ -91,6 +91,7 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
   const [selectedChip, setSelectedChip] = useState(null);
   const [infoChip, setInfoChip] = useState(null);
   const [showChipGuide, setShowChipGuide] = useState(false);
+  const [infoEntry, setInfoEntry] = useState(null); // "selfled" | "quickmove" | "reset" | null
   const textareaRef = useRef(null);
 
   // Focus the textarea on mount — the practice starts when the user can write.
@@ -236,6 +237,25 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         onClose={() => setShowChipGuide(false)}
       />
 
+      <InfoModal
+        open={!!infoEntry}
+        title={
+          infoEntry === "selfled" ? "Self-led" :
+          infoEntry === "quickmove" ? "Quick move" :
+          infoEntry === "reset" ? "Reset an urge" : ""
+        }
+        body={
+          infoEntry === "selfled"
+            ? "The same practice, but you write the reframe yourself — no AI. For when you'd rather work it through in your own words, in silence."
+            : infoEntry === "quickmove"
+            ? "A roughly 60-second body reset for the moments you can't think yet. Body first, before words — then you can come back and name what's present."
+            : infoEntry === "reset"
+            ? "For an acute urge or compulsion pull. Name the pull, watch it for about 20 seconds without acting, then decide. The wave crests and passes — you don't have to act on it."
+            : ""
+        }
+        onClose={() => setInfoEntry(null)}
+      />
+
       <div
         className="sf-fade-enter sf-fade-enter--delay-3"
         style={{
@@ -266,24 +286,18 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         className="sf-fade-enter sf-fade-enter--delay-3"
         style={{ marginTop: "var(--sf-space-24)" }}
       >
-        <button
-          type="button"
-          onClick={handleSelfLed}
-          disabled={!canContinue}
-          aria-disabled={!canContinue}
-          className="sf-link-quiet"
-        >
-          Or self-led ›
-        </button>
-        <div style={{
-          marginTop: "var(--sf-space-4, 4px)",
-          fontFamily: "var(--sf-font-sans, sans-serif)",
-          fontSize: "12px",
-          color: "var(--sf-text-faint, rgba(232,234,240,0.52))",
-          lineHeight: 1.5,
-        }}>
-          The same practice, written in your own words — no AI.
-        </div>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+          <button
+            type="button"
+            onClick={handleSelfLed}
+            disabled={!canContinue}
+            aria-disabled={!canContinue}
+            className="sf-link-quiet"
+          >
+            Or self-led ›
+          </button>
+          <InfoDot onClick={() => setInfoEntry("selfled")} label="self-led" />
+        </span>
       </div>
 
       {/* Quick move — body-first reset. Ungated (works before naming) because
@@ -294,22 +308,16 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         className="sf-fade-enter sf-fade-enter--delay-3"
         style={{ marginTop: "var(--sf-space-12)" }}
       >
-        <button
-          type="button"
-          onClick={handleQuickMove}
-          className="sf-link-quiet"
-        >
-          Quick move ›
-        </button>
-        <div style={{
-          marginTop: "var(--sf-space-4, 4px)",
-          fontFamily: "var(--sf-font-sans, sans-serif)",
-          fontSize: "12px",
-          color: "var(--sf-text-faint, rgba(232,234,240,0.52))",
-          lineHeight: 1.5,
-        }}>
-          A 60-second body reset for when you can't think yet.
-        </div>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+          <button
+            type="button"
+            onClick={handleQuickMove}
+            className="sf-link-quiet"
+          >
+            Quick move ›
+          </button>
+          <InfoDot onClick={() => setInfoEntry("quickmove")} label="quick move" />
+        </span>
       </div>
 
       {/* Reset an urge — urge-surf for an acute compulsion pull. Ungated,
@@ -319,22 +327,16 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         className="sf-fade-enter sf-fade-enter--delay-3"
         style={{ marginTop: "var(--sf-space-12)" }}
       >
-        <button
-          type="button"
-          onClick={handleReset}
-          className="sf-link-quiet"
-        >
-          Reset an urge ›
-        </button>
-        <div style={{
-          marginTop: "var(--sf-space-4, 4px)",
-          fontFamily: "var(--sf-font-sans, sans-serif)",
-          fontSize: "12px",
-          color: "var(--sf-text-faint, rgba(232,234,240,0.52))",
-          lineHeight: 1.5,
-        }}>
-          Name a pull and ride it out — about 20 seconds, no acting on it.
-        </div>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="sf-link-quiet"
+          >
+            Reset an urge ›
+          </button>
+          <InfoDot onClick={() => setInfoEntry("reset")} label="reset an urge" />
+        </span>
       </div>
     </main>
   );
