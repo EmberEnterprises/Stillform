@@ -126,6 +126,11 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   const showThread = !isWindDown && thread.length > 0;
   const showMirror = !isWindDown && !!mirror;
   const showTrajectory = !isWindDown && !!trajectory;
+  // Does the concierge layer have anything to show? The TODAY label heads
+  // that layer — when there is nothing today yet (new user / fresh day),
+  // TODAY has nothing to label, so we drop it and let the naming block lead
+  // directly (Arlin, June 15: drop the empty top + merge toward one label).
+  const hasConcierge = showThread || showMirror || showTrajectory;
 
   const handleBegin = () => {
     if (typeof onBeginSession === "function") onBeginSession();
@@ -135,14 +140,19 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
     <main className="sf-page sf-page--hero">
       <article className="sf-fade-enter" style={{ width: "100%" }}>
 
-        {/* Card label */}
-        <header style={{ marginBottom: "var(--sf-space-32)" }}>
-          <MonoLabel
-            size="xs"
-            infoTitle="Today"
-            infoBody="The home reflects your practice as it accumulates. Each rep adds a precise name to your library. Over weeks the library compounds into sharper differentiation, better strategic moves, expanded cognitive flexibility. Hoemann 2021 (granular naming improves emotion differentiation), Barrett 2017 (constructed emotion theory), Wells 2009 (metacognitive capacity)."
-          >Today</MonoLabel>
-        </header>
+        {/* TODAY label — heads the concierge layer (thread / trajectory /
+            mirror). Hidden when that layer is empty so the naming block leads
+            directly, with no orphaned label above a void. Tight gap to the
+            naming when present. */}
+        {hasConcierge ? (
+          <header style={{ marginBottom: "var(--sf-space-24)" }}>
+            <MonoLabel
+              size="xs"
+              infoTitle="Today"
+              infoBody="The home reflects your practice as it accumulates. Each rep adds a precise name to your library. Over weeks the library compounds into sharper differentiation, better strategic moves, expanded cognitive flexibility. Hoemann 2021 (granular naming improves emotion differentiation), Barrett 2017 (constructed emotion theory), Wells 2009 (metacognitive capacity)."
+            >Today</MonoLabel>
+          </header>
+        ) : null}
 
         {/* Trace — D2: today's entries on the day's continuous line.
             Renders only when real entries exist (no fabricated lines). */}
