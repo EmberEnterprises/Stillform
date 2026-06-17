@@ -32,6 +32,26 @@ PHASES — ordered by wow, re-sequenced for build dependency where noted. Each p
 - **Phase 3 — Interoceptive precision recalibration (M3).** Paulus 2019 / Seth & Friston 2016: anxiety = miscalibrated interoceptive precision. Leverages the EXISTING MAIA-2 instrument; close the body-prediction loop (predicted vs actual interoceptive state). More standalone; follows the language/evidence phases.
 - **Phase 4+ — research queue (bring more wow candidates, spec into existing docs):** narrative identity / redemptive sequencing (McAdams); episodic future thinking; mental contrasting / WOOP (Oettingen); self-compassion (Neff); temporal landmarks / fresh-start (Dai/Milkman); affect-labeling depth (Lieberman).
 
+INTEGRATION CHECKLIST — every new mechanic must clear ALL of these before it's "done" (grounded in the live architecture, June 15 2026). A mechanic that doesn't connect to the spine AND the data is a bolt-on, not a feature:
+
+  **A. Data connection**
+  - READS existing stores via existing getters (sessions.js, predictionErrors.js, triggerProfile.js, MAIA-2 results, etc.) — never duplicate a store.
+  - Any NEW write uses a `stillform_`-prefixed localStorage key. Verified fact: data-wipe (Settings) and cloud backup (backupApi.js/backupAuto.js) are PREFIX-BASED — a `stillform_`-prefixed key is auto-included in both; a non-conforming key silently escapes wipe AND sync. So: conform the key, then confirm it backs up and wipes.
+  - New schema fields on an EXISTING record (e.g. a new session field) must degrade safely for old records that lack it (no migration system exists yet — `backupAuto.js` flags this; until one does, every reader must tolerate missing fields). Pre-launch data-safety requirement is non-negotiable: auto-backup before any update that touches user data/schema.
+
+  **B. Spine connection**
+  - Identify where it hooks the Notice → Reframe → Close loop. If it carries committed naming/state into the spine, use the existing `entryPayload` pass-through (Spine.jsx) — don't invent a parallel channel.
+  - Beat awareness: state which beats it fires in (morning/main/eod/wind-down). Beat is LOCKED at session mount — respect that.
+  - If it changes AI behavior (e.g. self-distancing voice, reconsolidation mismatch), extend the reframe.js AI context stack (signalProfile/biasProfile/feelState/BEAT_ADDITIONS) — the AI must actually receive the mechanic's inputs, not just the UI.
+
+  **C. Surfacing**
+  - Reflection-safe placement: insight/evidence surfaces live on My Progress / concierge, NEVER on crisis-adjacent or acute surfaces.
+
+  **D. Whole-app symmetry (Arlin's principle)**
+  - Audit whether the equivalent applies to BOTH processing types and across modes (calm/clarity/hype/self) — "where it makes sense" is judgment, not blind mirroring. Flag asymmetries before shipping.
+
+  **E. Ship checklist (the standing 11)** — UAT dropdown, tutorial, FAQ, transfer doc, Plausible event, privacy (only if new data leaves the device — note most stays local), science sheet, AI prompts, promo, punch list, emotion coverage. Apply each where relevant.
+
 STANDING CONSTRAINTS (every phase): zero fabrication; citations web-verified before ship; NO fake-precise metrics (evidence in the user's own words, never a "73%"); deterministic where it touches sensitive/crisis-adjacent ground; reflects-never-diagnoses (user is the authority); framing law holds (metacognition/self-mastery; composure is a felt outcome, never a headline); nothing is "post-launch."
 
 **🔴 ACTIVE PUNCH LIST — June 15 2026 (Arlin, live walk). Approved, NOT YET BUILT. Do not deploy until done + reviewed.**
