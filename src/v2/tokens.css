@@ -282,6 +282,9 @@ body:has(.sf-v2) {
 .sf-page--hero {
   /* Surfaces that lead with a hero get extra top breathing room */
   padding-top: var(--sf-space-64);
+  /* Clear the fixed Quick Breathe valve (bottom-right, ~44px + 16px inset)
+     so practice content never sits underneath it. June 15 craft fix. */
+  padding-bottom: calc(var(--sf-space-80) + var(--sf-space-48));
 }
 
 .sf-stack-paragraph > * + * {

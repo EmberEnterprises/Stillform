@@ -261,8 +261,8 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         style={{
           marginTop: "var(--sf-space-48)",
           display: "flex",
-          alignItems: "center",
-          gap: "var(--sf-space-16)",
+          alignItems: "baseline",
+          gap: "var(--sf-space-24)",
         }}
       >
         <Button
@@ -273,9 +273,27 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         >
           Continue
         </Button>
-        <Button variant="ghost" onClick={onExit}>
-          Back
-        </Button>
+        {!isBase ? (
+          <button
+            type="button"
+            onClick={onExit}
+            style={{
+              background: "transparent",
+              border: "none",
+              padding: "15px 0",
+              cursor: "pointer",
+              fontFamily: "var(--sf-font-serif)",
+              fontSize: "19px",
+              fontWeight: 460,
+              lineHeight: 1,
+              letterSpacing: "0.01em",
+              color: "var(--sf-text-faint)",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            Back
+          </button>
+        ) : null}
       </div>
 
       {/* Self-led link — quiet, opt-in path that routes through SelfReframe
