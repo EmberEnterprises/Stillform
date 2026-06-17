@@ -275,6 +275,15 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         >
           Or self-led ›
         </button>
+        <div style={{
+          marginTop: "var(--sf-space-4, 4px)",
+          fontFamily: "var(--sf-font-sans, sans-serif)",
+          fontSize: "12px",
+          color: "var(--sf-text-faint, rgba(232,234,240,0.52))",
+          lineHeight: 1.5,
+        }}>
+          The same practice, written in your own words — no AI.
+        </div>
       </div>
 
       {/* Quick move — body-first reset. Ungated (works before naming) because
@@ -317,6 +326,15 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         >
           Reset an urge ›
         </button>
+        <div style={{
+          marginTop: "var(--sf-space-4, 4px)",
+          fontFamily: "var(--sf-font-sans, sans-serif)",
+          fontSize: "12px",
+          color: "var(--sf-text-faint, rgba(232,234,240,0.52))",
+          lineHeight: 1.5,
+        }}>
+          Name a pull and ride it out — about 20 seconds, no acting on it.
+        </div>
       </div>
     </main>
   );
