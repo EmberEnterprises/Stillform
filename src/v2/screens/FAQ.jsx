@@ -164,6 +164,21 @@ const ITEMS = [
     ),
   },
   {
+    id: "crisis-summary",
+    q: "What is the summary on the Crisis Resources screen?",
+    a: (
+      <>
+        It's an optional button you tap only if you want it. It gathers what you've already
+        named in your own words across your practice — the things that have come up most, and
+        your own phrasings — into a short, plain summary, so you have somewhere to start if
+        you reach out to a crisis line, a clinician, or someone you trust. It's built entirely
+        from what you wrote; it never interprets, labels, or diagnoses you, and it stays on your
+        device like everything else. You never have to use it, and reaching out without it is
+        always enough.
+      </>
+    ),
+  },
+  {
     id: "cost",
     q: "What does \u201cgone quiet\u201d mean on my watch list?",
     a: "A pattern you watch is confirmed when it keeps showing up in your sessions. If it then stops appearing across continued practice \u2014 real sessions, over weeks \u2014 it moves to \u201cgone quiet.\u201d That\u2019s observed change, not a cure claim: it reflects your sessions, and if the pattern shows up again it simply moves back. That\u2019s information, not a setback.",
