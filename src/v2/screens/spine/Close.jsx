@@ -20,6 +20,14 @@ import { getPendingPredictions, recordOutcome } from "../../lib/predictionLog.js
  *   enforced architecturally: user must reply (Spine), user must name
  *   takeaway (Close)."
  *
+ * CLARIFICATION (June 15 2026, Arlin — see CANON §7.1a): "AI doesn't TELL the
+ * user what they're feeling" is NARROW — it bans PRE-EMPTING the user's own
+ * naming, not all AI interpretation. The intended loop is two-beat: user names
+ * first (here), THEN the AI interprets the patterns + research-gap (fed by a
+ * deterministic discovery engine, never hallucinated). That AI-interpretation
+ * beat is not yet built; this Close currently implements only the user-naming
+ * half. Do not read this header as forbidding the interpretation beat.
+ *
  * Per canon §6 (rumination guard): "Build closing rituals — sessions END."
  *
  * Phase 3.5 item #2 (locked May 16, 2026): Close is an active step.
