@@ -5,6 +5,7 @@ import GrowthArbor from "../components/GrowthArbor.jsx";
 import { getBiasProfile, patternConfidence } from "../lib/biasProfile.js";
 import MediationQueue from "../components/MediationQueue.jsx";
 import { getPendingProposals } from "../lib/mediationApi.js";
+import { getNamingGrowth } from "../lib/namingGrowth.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -125,6 +126,44 @@ export default function MyProgress({ onExit, onNavigate }) {
               ? "1 pattern has gone quiet since you started watching it."
               : `${retiredCount} patterns have gone quiet since you started watching them.`}
           </div>
+        );
+      })()}
+
+      {(() => {
+        // Language sharpening over time — shown inline (the user's own early
+        // vs recent words ARE the proof; it lands better seen than buried
+        // behind a tap). Honest: only renders a "growth" read when the shift
+        // is real; otherwise says so plainly. Never a fabricated metric.
+        let g;
+        try { g = getNamingGrowth(); } catch { g = null; }
+        if (!g || !g.ready) return null;
+        return (
+          <section style={{ marginTop: "var(--sf-space-24)", marginBottom: "var(--sf-space-8)" }}>
+            <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
+              Your naming, over time
+            </MonoLabel>
+            {g.hasGrowth && g.earlyExample && g.recentExample ? (
+              <div style={{ marginBottom: "var(--sf-space-16)" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "var(--sf-space-12)" }}>
+                  <div>
+                    <MonoLabel size="xs" tone="faint">EARLY ON</MonoLabel>
+                    <p style={{ margin: "var(--sf-space-4) 0 0", fontFamily: "var(--sf-font-serif)", fontSize: "20px", lineHeight: 1.3, color: "var(--sf-text-faint)", fontStyle: "italic" }}>
+                      &ldquo;{g.earlyExample}&rdquo;
+                    </p>
+                  </div>
+                  <div>
+                    <MonoLabel size="xs" tone="faint">LATELY</MonoLabel>
+                    <p style={{ margin: "var(--sf-space-4) 0 0", fontFamily: "var(--sf-font-serif)", fontSize: "20px", lineHeight: 1.3, color: "var(--sf-text-cream)" }}>
+                      &ldquo;{g.recentExample}&rdquo;
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+            <p style={{ margin: 0, fontFamily: "var(--sf-font-sans)", fontSize: "var(--sf-text-body-sm, 14px)", lineHeight: "var(--sf-leading-body)", color: "var(--sf-text-quiet)", fontWeight: 300 }}>
+              {g.headline}
+            </p>
+          </section>
         );
       })()}
 
