@@ -8,6 +8,7 @@ import Reset from "./spine/Reset.jsx";
 import Scripts from "./spine/Scripts.jsx";
 import WindDown from "./spine/WindDown.jsx";
 import { saveSession } from "../lib/sessions.js";
+import { recordSignal } from "../lib/signalLog.js";
 import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
 import { deriveThreadName } from "../lib/threadEntry.js";
 import { getCurrentBeat, getBeatOverride, localDateKey } from "../lib/beat.js";
@@ -167,6 +168,15 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
       conversationLength,
       beat,
     });
+
+    // KEYSTONE step 0 (signal log): stop discarding the discrete feel-state
+    // chip this session — record it as a per-occurrence token for the
+    // deterministic discovery engine. selectedChip is always a discrete chip
+    // id (or null); free text never lands here. triggers:[] for now — no
+    // per-session trigger token source exists yet (incrementTriggerEncounter
+    // is defined but never called); capturing that is the readdress item that
+    // unlocks trigger↔feel patterns. Fail-silent; drops empty signals.
+    recordSignal({ chip: selectedChip, triggers: [], beat, mode });
 
     // Append to today's thread so the home reflects the named work
     // immediately on return. Thread is the visible-on-home compounding;
