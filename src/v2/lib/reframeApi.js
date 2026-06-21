@@ -28,6 +28,7 @@
 import { getOrCreateInstallId } from "./identity.js";
 import { formatBiasProfileForAI } from "./biasProfile.js";
 import { formatTriggerProfileForAI } from "./triggerProfile.js";
+import { formatConfirmedFindingsForAI } from "./discoveryFindings.js";
 import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
 import { formatContextProfileForAI } from "./contextProfile.js";
 
@@ -121,6 +122,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         triggerProfile,
         contextProfile,
         priorSessions,
+        confirmedFindings: formatConfirmedFindingsForAI(),
         checkinContext: null,
         eodContext: null,
         sessionCount,

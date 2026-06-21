@@ -6,6 +6,8 @@ import { getBiasProfile, patternConfidence } from "../lib/biasProfile.js";
 import MediationQueue from "../components/MediationQueue.jsx";
 import { getPendingProposals } from "../lib/mediationApi.js";
 import { getNamingGrowth } from "../lib/namingGrowth.js";
+import Button from "../components/Button.jsx";
+import { getNextFinding, confirmFinding, rejectFinding } from "../lib/discoveryFindings.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -167,6 +169,8 @@ export default function MyProgress({ onExit, onNavigate }) {
         );
       })()}
 
+      <DiscoveryFindingCard />
+
       <section style={{ marginTop: "var(--sf-space-16)" }}>
         <MonoLabel
           size="xs"
@@ -228,6 +232,69 @@ export default function MyProgress({ onExit, onNavigate }) {
         </section>
       ) : null}
     </main>
+  );
+}
+
+/**
+ * DiscoveryFindingCard — the reflection-safe confirm surface for the
+ * deterministic discovery engine (CANON §7.1a step 2). Shows ONE candidate
+ * pattern the engine computed from the user's own logged data, phrased as plain
+ * correlation, and asks "does this land?". Confirm → the AI may voice it later;
+ * Reject → it never resurfaces. Renders nothing when the engine isn't ready or
+ * nothing is pending (honest absence — never an empty placeholder, never a
+ * fabricated pattern). The user is the authority; this is not a diagnosis.
+ */
+function DiscoveryFindingCard() {
+  const [finding, setFinding] = React.useState(() => {
+    try { return getNextFinding(); } catch { return null; }
+  });
+  if (!finding) return null;
+
+  const handle = (verdict) => {
+    try {
+      if (verdict === "yes") confirmFinding(finding.candidate);
+      else rejectFinding(finding.candidate);
+    } catch { /* fail-silent */ }
+    let next = null;
+    try { next = getNextFinding(); } catch { next = null; }
+    setFinding(next);
+  };
+
+  return (
+    <section style={{ marginTop: "var(--sf-space-24)", marginBottom: "var(--sf-space-8)" }} aria-label="A pattern in your data">
+      <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
+        A pattern in your data
+      </MonoLabel>
+      <p
+        style={{
+          margin: "0 0 var(--sf-space-8)",
+          fontFamily: "var(--sf-font-serif)",
+          fontSize: "20px",
+          lineHeight: 1.35,
+          color: "var(--sf-text-cream)",
+        }}
+      >
+        {finding.text}
+      </p>
+      <p
+        style={{
+          margin: "0 0 var(--sf-space-16)",
+          fontFamily: "var(--sf-font-sans)",
+          fontSize: "14px",
+          lineHeight: "var(--sf-leading-body)",
+          color: "var(--sf-text-quiet)",
+          fontWeight: 300,
+        }}
+      >
+        This is just what the numbers in your own log show — a correlation, not a cause, and not a diagnosis. Does it land?
+      </p>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}>
+        <Button variant="ghost" onClick={() => handle("yes")}>Yes, that lands</Button>
+        <button type="button" className="sf-link-quiet" onClick={() => handle("no")}>
+          Not really
+        </button>
+      </div>
+    </section>
   );
 }
 

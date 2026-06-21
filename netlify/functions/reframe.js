@@ -1836,6 +1836,7 @@ exports.handler = async function(event) {
       imageData = null,
       imageMimeType = "image/jpeg",
       journalContext = null,
+      confirmedFindings = null,
       textHistoryContext = null,
       checkinContext = null,
       eodContext = null,
@@ -2686,6 +2687,7 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (userFlaggedPatterns) contextParts.push(userFlaggedPatterns);
     if (contextProfile) contextParts.push(contextProfile);
     if (priorSessions) contextParts.push(`PRIOR SESSIONS — what the user has worked through in earlier sessions (this is your continuity with them; reference it sparingly to show you remember a recurring thread, never re-litigate a past session, never quote it back verbatim; use only what these entries literally record — do not infer anything more about the user than they state):\n${priorSessions}`);
+    if (confirmedFindings) contextParts.push(`${confirmedFindings}. You MAY voice ONE of these when it is directly relevant to what the user is working on right now — as a plain observation the data shows ("the pattern you confirmed: X tends to come up with Y"), NEVER as your own insight and NEVER as causation ("X causes Y", "because of X"). Hard limits: voice ONLY a finding in this list; NEVER invent, extend, combine, or sharpen one; NEVER surface one the user has not confirmed; if none fits the moment, say nothing about patterns. The user did the confirming — you are only recalling arithmetic they ratified, never diagnosing.`);
     // PCE.2 — Reconsolidation loop. The prior-frame data ("locked in" / "next
     // move they set") already rides in PRIOR SESSIONS above; this turns the
     // reactivate-and-update into a deliberate move instead of leaving it to
