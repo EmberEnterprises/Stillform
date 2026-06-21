@@ -186,7 +186,7 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={placeholder}
-          rows={4}
+          rows={2}
           aria-label="Name what is present"
         />
       </div>

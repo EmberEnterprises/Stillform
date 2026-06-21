@@ -263,6 +263,48 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
             </MonoLabel>
           </section>
         ) : null}
+
+        {/* Day-one seed — when the concierge layer has nothing yet, the home
+            shouldn't read as a bare form. This is the smart layer's honest
+            SEED: it names what the surface becomes (patterns + trajectory read
+            from the user's own data) without fabricating a single line. As the
+            real Mirror / thread / trajectory accrue, hasConcierge flips true
+            and this disappears. Sits BELOW the naming (naming leads, no
+            primer); restrained, one gesture. */}
+        {!hasConcierge ? (
+          <section
+            className="sf-fade-enter sf-fade-enter--delay-2"
+            style={{ marginTop: "var(--sf-space-64)" }}
+            aria-label="What this surface becomes"
+          >
+            <div
+              className="sf-thread-divider"
+              aria-hidden="true"
+              style={{ marginBottom: "var(--sf-space-20)" }}
+            />
+            <MonoLabel
+              size="xs"
+              tone="faint"
+              style={{ display: "block", marginBottom: "var(--sf-space-12)" }}
+            >
+              Reading from your data
+            </MonoLabel>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--sf-font-serif)",
+                fontSize: "20px",
+                lineHeight: 1.4,
+                fontWeight: 400,
+                color: "var(--sf-text-cream)",
+              }}
+            >
+              Nothing to read yet. As you log, this surface starts reflecting
+              your real patterns and trajectory back to you — drawn from what
+              you named, <span style={{ color: "var(--sf-accent)" }}>never guessed</span>.
+            </p>
+          </section>
+        ) : null}
       </article>
     </main>
   );
