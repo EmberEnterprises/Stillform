@@ -29,6 +29,7 @@ import { getOrCreateInstallId } from "./identity.js";
 import { formatBiasProfileForAI } from "./biasProfile.js";
 import { formatTriggerProfileForAI } from "./triggerProfile.js";
 import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
+import { formatConfirmedFindingsForAI } from "./discoveryFindings.js";
 import { formatContextProfileForAI } from "./contextProfile.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
@@ -121,6 +122,9 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         triggerProfile,
         contextProfile,
         priorSessions,
+        // CANON §7.1a step 2: only USER-CONFIRMED discovery findings reach the
+        // AI (null until the user validates one). The integrity wall.
+        discoveryContext: formatConfirmedFindingsForAI(),
         checkinContext: null,
         eodContext: null,
         sessionCount,

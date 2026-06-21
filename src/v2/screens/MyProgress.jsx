@@ -217,6 +217,12 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="What you were sure of, next to what actually happened. The gap is the data."
           onTap={() => handleNavigate("what-you-bet-on")}
         />
+
+        <ProgressEntry
+          title="What the Engine Noticed"
+          description="Patterns the math found in your own logged moments — two feelings that travel together, one that tends to follow another. Your call on whether each is real."
+          onTap={() => handleNavigate("discovery-mirror")}
+        />
       </section>
 
       {/* Concierge — proposed updates (Arlin June 2: queue lives here AND

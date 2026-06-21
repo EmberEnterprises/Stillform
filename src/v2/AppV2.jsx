@@ -19,6 +19,7 @@ import CapacitiesMirror from "./screens/CapacitiesMirror.jsx";
 import RiskProfileMirror from "./screens/RiskProfileMirror.jsx";
 import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
 import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
+import DiscoveryMirror from "./screens/DiscoveryMirror.jsx";
 import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
 import Paywall from "./screens/Paywall.jsx";
@@ -153,6 +154,7 @@ export default function AppV2() {
             else if (target === "risk-profile") setScreen("risk-profile");
             else if (target === "prediction-mirror") setScreen("prediction-mirror");
             else if (target === "what-you-bet-on") setScreen("what-you-bet-on");
+            else if (target === "discovery-mirror") setScreen("discovery-mirror");
             // Phase 6.4c: post-event reflection — launch the spine in the
             // post-event beat (one-shot). The one manual, deliberate beat.
             else if (target === "post-event") {
@@ -223,6 +225,14 @@ export default function AppV2() {
     return (
       <div className="sf-v2">
         <WhatYouBetOnMirror onExit={() => setScreen("my-progress")} />
+      </div>
+    );
+  }
+
+  if (screen === "discovery-mirror") {
+    return (
+      <div className="sf-v2">
+        <DiscoveryMirror onExit={() => setScreen("my-progress")} />
       </div>
     );
   }

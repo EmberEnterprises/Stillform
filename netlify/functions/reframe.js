@@ -1856,6 +1856,7 @@ exports.handler = async function(event) {
       regulationType = null,
       sessionNotes = null,
       priorSessions = null,
+      discoveryContext = null,
       sessionEntryMode = null,
       sessionRepContext = null,
       aiTone = "balanced",
@@ -2686,6 +2687,14 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (userFlaggedPatterns) contextParts.push(userFlaggedPatterns);
     if (contextProfile) contextParts.push(contextProfile);
     if (priorSessions) contextParts.push(`PRIOR SESSIONS — what the user has worked through in earlier sessions (this is your continuity with them; reference it sparingly to show you remember a recurring thread, never re-litigate a past session, never quote it back verbatim; use only what these entries literally record — do not infer anything more about the user than they state):\n${priorSessions}`);
+    // CANON §7.1a step 2 — the interpretation beat, fed by the deterministic
+    // discovery engine. ONLY user-CONFIRMED findings reach here (the math found
+    // them, the user validated them). The model may VOICE one when the moment
+    // genuinely calls for it, as something the user already knows about
+    // themselves — never as a new revelation, never as cause-and-effect, and it
+    // may NEVER introduce a pattern not on this list. This is the integrity wall
+    // against hallucinated "insight": the model voices only confirmed arithmetic.
+    if (discoveryContext) contextParts.push(discoveryContext);
     // PCE.2 — Reconsolidation loop. The prior-frame data ("locked in" / "next
     // move they set") already rides in PRIOR SESSIONS above; this turns the
     // reactivate-and-update into a deliberate move instead of leaving it to
