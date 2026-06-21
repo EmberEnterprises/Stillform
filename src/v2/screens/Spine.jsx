@@ -9,6 +9,7 @@ import Scripts from "./spine/Scripts.jsx";
 import WindDown from "./spine/WindDown.jsx";
 import { saveSession } from "../lib/sessions.js";
 import { recordSignal } from "../lib/signalLog.js";
+import { tagTrigger } from "../lib/triggerProfile.js";
 import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
 import { deriveThreadName } from "../lib/threadEntry.js";
 import { getCurrentBeat, getBeatOverride, localDateKey } from "../lib/beat.js";
@@ -85,6 +86,10 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
   const [precisionName, setPrecisionName] = useState("");
   const [selectedChip, setSelectedChip] = useState(null);
   const [selfMode, setSelfMode] = useState(false);
+  // Keystone trigger-tagging (June 18 2026): a USER-CONFIRMED discrete trigger
+  // label surfaced + confirmed during Reframe (AI elicits, user confirms).
+  // null when no concrete external trigger was raised/confirmed (skippable).
+  const [confirmedTrigger, setConfirmedTrigger] = useState(null);
   // surfacedFrame = the frame from Reframe (AI's last reply OR SelfReframe's
   // last user answer). Passed to Close where the user can anchor on it,
   // edit it, or write something entirely their own. Not the user's takeaway.
@@ -128,8 +133,9 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
   // the surfaced frame and conversation length, then transitions to Close.
   // The save happens in handleCloseReturn after the user names their own
   // takeaway.
-  const handleReframeContinue = ({ takeaway: t, history }) => {
+  const handleReframeContinue = ({ takeaway: t, history, confirmedTrigger: ct }) => {
     setSurfacedFrame(t);
+    if (typeof ct === "string" && ct.trim()) setConfirmedTrigger(ct.trim());
     const turnCount = Array.isArray(history) ? history.length : 0;
     setConversationLength(turnCount);
     setStep("close");
@@ -172,11 +178,19 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
     // KEYSTONE step 0 (signal log): stop discarding the discrete feel-state
     // chip this session — record it as a per-occurrence token for the
     // deterministic discovery engine. selectedChip is always a discrete chip
-    // id (or null); free text never lands here. triggers:[] for now — no
-    // per-session trigger token source exists yet (incrementTriggerEncounter
-    // is defined but never called); capturing that is the readdress item that
-    // unlocks trigger↔feel patterns. Fail-silent; drops empty signals.
-    recordSignal({ chip: selectedChip, triggers: [], beat, mode });
+    // id (or null); free text never lands here.
+    //
+    // Trigger-tagging (June 18 2026): if a trigger was elicited and the user
+    // CONFIRMED it during Reframe, tag it now — tagTrigger() create/matches the
+    // label + increments its encounter (wiring incrementTriggerEncounter), and
+    // the canonical label joins the signal so the engine can find trigger↔feel
+    // patterns. No confirmed trigger → no token (diffuse states stay honest).
+    const triggers = [];
+    if (confirmedTrigger) {
+      const canon = tagTrigger(confirmedTrigger);
+      if (canon) triggers.push(canon);
+    }
+    recordSignal({ chip: selectedChip, triggers, beat, mode });
 
     // Append to today's thread so the home reflects the named work
     // immediately on return. Thread is the visible-on-home compounding;

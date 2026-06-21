@@ -213,6 +213,26 @@ export function incrementTriggerEncounter(id) {
 }
 
 /**
+ * Tag a trigger for the current session (keystone trigger-tagging, June 18 2026):
+ * create-or-match the label, then mark one encounter. This is the path that
+ * finally WIRES incrementTriggerEncounter (previously defined but never called),
+ * keeping the trigger profile and the signal log consistent on the same
+ * discrete label. The caller passes a USER-CONFIRMED label only (AI elicits,
+ * user confirms — never an AI-assigned trigger).
+ *
+ * @param {string} label  user-confirmed discrete trigger label
+ * @returns {string|null} the canonical label (for the signal log) or null
+ */
+export function tagTrigger(label) {
+  const trimmed = typeof label === "string" ? label.trim() : "";
+  if (!trimmed) return null;
+  const t = addTrigger({ label: trimmed });
+  if (!t || !t.id) return null;
+  incrementTriggerEncounter(t.id);
+  return t.label;
+}
+
+/**
  * Format the Trigger Profile as a string for AI context injection.
  * Sorts by encounterCount desc + lastSeen desc so most load-bearing
  * triggers surface first. Caps to top N. Plural-aware count labels.

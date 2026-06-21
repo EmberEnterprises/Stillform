@@ -42,6 +42,11 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
   const [thinking, setThinking] = useState(false);
   const [error, setError] = useState(null);
   const [initialized, setInitialized] = useState(false);
+  // Trigger-tagging (June 18 2026): the AI may PROPOSE a discrete trigger label
+  // (only one the user raised). pendingTrigger holds an unconfirmed proposal;
+  // confirmedTrigger is set only when the user taps Confirm. Skippable.
+  const [pendingTrigger, setPendingTrigger] = useState(null);
+  const [confirmedTrigger, setConfirmedTrigger] = useState(null);
   const bottomRef = useRef(null);
 
   // Open the session — send the precision-name to the AI as the first turn.
@@ -70,6 +75,8 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
       // list — counts only patterns the user already tracks, per-day deduped,
       // fail-silent. Governed by ZERO FABRICATION (genuine confident reads only).
       if (result.distortion) noteAiPatternDetection(result.distortion);
+
+      maybeProposeTrigger(result.trigger);
 
       setHistory([
         { role: "user", text: precisionName },
@@ -120,6 +127,8 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
     if (result.distortion) noteAiPatternDetection(result.distortion); // 5.11(d)
 
+    maybeProposeTrigger(result.trigger);
+
     setHistory([
       ...nextHistory,
       { role: "assistant", text: result.reframe, question: result.question, next_step: result.next_step, log_prediction: result.log_prediction || null,
@@ -135,7 +144,32 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
     onContinue({
       history,
       takeaway: lastAssistant ? lastAssistant.text : null,
+      // Trigger-tagging: the user-confirmed discrete trigger (or null). The
+      // spine tags it at save (tagTrigger → signal log + encounter).
+      confirmedTrigger: confirmedTrigger || null,
     });
+  };
+
+  // Hold an AI-proposed trigger for the user to confirm. Tolerates a string or
+  // a { label } object. Never auto-confirms; ignored once the user has acted.
+  function maybeProposeTrigger(proposal) {
+    if (confirmedTrigger) return;
+    const lbl =
+      typeof proposal === "string"
+        ? proposal.trim()
+        : proposal && typeof proposal.label === "string"
+        ? proposal.label.trim()
+        : "";
+    if (lbl) setPendingTrigger(lbl);
+  }
+
+  const handleConfirmTrigger = () => {
+    if (pendingTrigger) setConfirmedTrigger(pendingTrigger);
+    setPendingTrigger(null);
+  };
+
+  const handleSkipTrigger = () => {
+    setPendingTrigger(null);
   };
 
   // Phase 3.5 #3: at least one user reply in Reframe is required before
@@ -225,6 +259,50 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
         <div ref={bottomRef} aria-hidden="true" />
       </div>
+
+      {/* Trigger-tagging: confirm an AI-proposed trigger the user raised.
+          The user is the authority — Confirm logs it, Skip drops it. */}
+      {pendingTrigger && !confirmedTrigger ? (
+        <div
+          className="sf-fade-enter"
+          style={{
+            marginTop: "var(--sf-space-24)",
+            paddingTop: "var(--sf-space-16)",
+            borderTop: "1px solid var(--sf-hairline)",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "var(--sf-serif)",
+              fontSize: "17px",
+              color: "var(--sf-text-faint)",
+              margin: "0 0 var(--sf-space-12) 0",
+            }}
+          >
+            Tag this as <span style={{ color: "var(--sf-text)" }}>{pendingTrigger}</span>?
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}>
+            <Button variant="ghost" onClick={handleConfirmTrigger}>Yes, tag it</Button>
+            <button type="button" className="sf-link-quiet" onClick={handleSkipTrigger}>
+              Not this
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {confirmedTrigger ? (
+        <p
+          className="sf-fade-enter"
+          style={{
+            marginTop: "var(--sf-space-24)",
+            fontFamily: "var(--sf-serif)",
+            fontSize: "15px",
+            color: "var(--sf-text-faint)",
+          }}
+        >
+          Tagged: {confirmedTrigger}
+        </p>
+      ) : null}
 
       {/* Reply input + actions */}
       {initialized || error ? (

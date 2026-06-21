@@ -258,9 +258,11 @@ Return ONLY valid JSON with this exact shape:
   "reframe": "1-5 sentence response",
   "next_step": "single actionable step sentence or null",
   "question": "single short closed question or null",
+  "trigger": "discrete trigger label, or null — see rule below",
   "log_prediction": {"text": "the prediction the user named (verbatim, compact)", "confidence": "number 0-100 the user stated"} or null
 }
 Rules:
+- "trigger": null on almost every turn. Populate ONLY when the user has clearly named a CONCRETE EXTERNAL trigger this session — a specific person, situation, or event THEY raised. Prefer an EXACT label from the Trigger profile list; otherwise the user's own short words (2-5 words). NEVER propose a trigger the user did not raise; NEVER assign one for a diffuse or internal state. It is a PROPOSAL the app asks the user to confirm — not a verdict. Once per session max.
 - "candidate_names": 3-4 short strings (2-8 words each) on the FIRST user input of a session, drawn from what the user actually wrote — their language, anchored to specifics they named, NOT generic taxonomy. null on every subsequent turn in the session.
 - "reframe": 1-5 sentences, no lists, no empathy boilerplate.
 - At most one question mark total across "reframe" and "question".
@@ -325,6 +327,7 @@ WORK MODE — when material suffices (see MODE RULES):
   "rebuilt": "1-3 sentences. CONSTRUCTED from the verified facts — never a restatement of what they wrote.",
   "bet": {"text": "the falsifiable prediction the user made, compact", "confidence": null} or null,
   "question": "one question, earned by the work above, or null",
+  "trigger": "discrete trigger label, or null — populate ONLY when the user raised a CONCRETE EXTERNAL trigger (specific person/situation/event); prefer an EXACT label from the user's trigger list, else their own 2-5 words; NEVER one they didn't raise, NEVER for a diffuse/internal state; it's a proposal the app asks them to confirm; once per session max",
   "distortion": "canonical clinical-spine name or null — machine-side, never shown",
   "log_prediction": null
 }
@@ -575,6 +578,18 @@ function buildInputSignalSnippet(input, maxLen = 130) {
   return text.length <= maxLen ? text : `${text.slice(0, maxLen - 1)}…`;
 }
 
+// Trigger-tagging (June 18 2026): sanitize the AI's proposed trigger label
+// into a discrete, short token (or null). Accepts a string or { label }.
+// The user still confirms client-side before anything is logged.
+function sanitizeTriggerProposal(value) {
+  let s = "";
+  if (typeof value === "string") s = value;
+  else if (value && typeof value.label === "string") s = value.label;
+  s = s.trim();
+  if (!s || s.length > 60) return s && s.length > 60 ? s.slice(0, 60).trim() : null;
+  return s;
+}
+
 function sanitizeReframeText(value) {
   if (typeof value !== "string") return "";
   return value
@@ -785,6 +800,7 @@ function normalizeWorkLoopPayload(parsed) {
     },
     shape, rebuilt, bet,
     question: typeof safe.question === "string" && safe.question.trim() ? sanitizeReframeText(safe.question.trim()) : null,
+    trigger: sanitizeTriggerProposal(safe.trigger),
     distortion,
     // legacy bridge:
     reframe: rebuilt, mechanism: "work", next_step: null,
@@ -869,7 +885,7 @@ function normalizeReframePayload(parsed, route) {
       };
     }
   }
-  return { distortion, mechanism, reframe, next_step, question, log_prediction };
+  return { distortion, mechanism, reframe, next_step, question, trigger: sanitizeTriggerProposal(safe.trigger), log_prediction };
 }
 
 // Low-demand mode trigger — kept in sync with src/App.jsx isLowDemandBioFilter
