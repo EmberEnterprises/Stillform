@@ -271,7 +271,7 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
             real Mirror / thread / trajectory accrue, hasConcierge flips true
             and this disappears. Sits BELOW the naming (naming leads, no
             primer); restrained, one gesture. */}
-        {!hasConcierge ? (
+        {!hasConcierge && !isWindDown ? (
           <section
             className="sf-fade-enter sf-fade-enter--delay-2"
             style={{ marginTop: "var(--sf-space-64)" }}
