@@ -3,8 +3,13 @@
  *
  * The spine (Notice → Reframe → Close) previously had no visible way home
  * once entered: a wrong tap trapped the user mid-practice. This is the quiet
- * escape hatch. Styled to the spec (mono, faint, hairline — never loud), top-
- * left, generous tap target. Calls the onExit the spine already provides.
+ * escape hatch. Styled to the spec (mono, restrained, hairline — never loud),
+ * top-left, generous tap target. Calls the onExit the spine already provides.
+ *
+ * Legibility note (June 18 2026 punch-list #1): a SAFETY affordance has to be
+ * findable when someone is stressed and looking for the exit — so it sits on
+ * the "quiet" text tier, not the faintest "faint" tier (which read as the same
+ * under-contrast haze flagged in punch-list #6). Restrained, but legible.
  *
  * Note: Close intentionally does NOT use this — Close IS the deliberate exit
  * (it asks the user to name what landed), so a back affordance there would
@@ -36,7 +41,7 @@ export default function SpineBack({ onBack, label = "← home" }) {
         zIndex: 10,
       }}
     >
-      <MonoLabel size="sm" tone="faint">{label}</MonoLabel>
+      <MonoLabel size="sm" tone="quiet">{label}</MonoLabel>
     </button>
   );
 }
