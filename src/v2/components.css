@@ -404,3 +404,24 @@
 @media (prefers-reduced-motion: reduce) {
   @keyframes sfPulse { 0%, 100% { opacity: 1; } 50% { opacity: 1; } }
 }
+
+/* ══ v7 DRAWN HOME · Stage 1 — living light + grain ════════════════════
+   Decorative only: fixed, pointer-events:none. Aura sits behind content
+   (z-index:-1, over the .sf-v2 ground); grain is a faint overlay on top.
+   Scoped to the home route by mounting in Home.jsx. */
+.sf-v2 .sf-home-aura{
+  position:fixed; left:50%; top:34%; width:120vw; max-width:560px; height:560px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(184,134,43,0.085) 0%, transparent 62%);
+  filter:blur(8px); pointer-events:none; z-index:-1;
+  animation:sfAuraBreathe 7s ease-in-out infinite, sfAuraDrift 24s ease-in-out infinite;
+}
+@keyframes sfAuraBreathe{ 0%,100%{ opacity:.42; } 50%{ opacity:.82; } }
+@keyframes sfAuraDrift{ 0%,100%{ left:42%; } 50%{ left:58%; } }
+.sf-v2 .sf-home-grain{
+  position:fixed; inset:0; pointer-events:none; z-index:60; opacity:.035; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-reduced-motion: reduce){
+  .sf-v2 .sf-home-aura{ animation:none; opacity:.5; }
+}

@@ -32,6 +32,9 @@ export default function Home({ onEnterPractice, onNavigate }) {
 
   return (
     <>
+      <div className="sf-home-aura" aria-hidden="true" />
+      <div className="sf-home-grain" aria-hidden="true" />
+
       <AppHeader />
 
       <SmartScreen onEnterPractice={onEnterPractice} onOpenRoadmap={() => nav("roadmap")} />
