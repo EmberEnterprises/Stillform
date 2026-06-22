@@ -1748,3 +1748,41 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 - [ ] Google Play store approved — flip to public
 - [ ] Apple Store: deferred (post-launch)
 - [ ] Reddit post: not a launch step (contingency only — see Store Submission Path section)
+
+## ▸ SCOPE-LOCK — V7 "DRAWN" HOME REBUILD (locked June 22 2026 — Arlin approved the v7 mockup as the home design; Library/Progress distinction deferred until AFTER this rebuild)
+
+DECISION: Home's visual + interaction design is LOCKED to the v7 "Drawn" direction (iterated v1→v7 as HTML mockups, zero deploys). Translate into the live home (`Home.jsx` → `SmartScreen.jsx` + `spine/Notice.jsx`) WITHOUT stripping the concierge layer and WITHOUT changing locked beat copy. Reference design (recoverable without the mockup):
+
+THE DESIGN
+- Living light: brass radial aura behind the naming field that BREATHES (~7s) + DRIFTS (~24s) — stillness made visible, never static.
+- Grain: near-invisible film-grain overlay (kills banding, tactile depth).
+- Entrance choreography: elements rise/fade in sequence on load (fast, once).
+- Focus bloom: focusing the naming field dims the rest (spotlight) + blooms the field.
+- Naming field (you write in serif): resting BRASS CURSOR PULSE + always-breathing underline + hint "you're already here — just start typing"; on input -> LIVE LISTENING/CALCULATING indicator.
+  ARLIN NOTE (June 22): the listening indicator MUST render LIVE/CALCULATING — visibly alive even at REST (the mockup left it blank until typing; do NOT replicate). Rest = subtle ambient calculating motion; input = ramps to active. SEPARATE from the existing MicButton voice "listening" pulse — must not collide.
+- Drawn action language (system speaks in sans, you write in serif; NO boxes):
+  - Continue (primary) = brass hairline baseline that DRAWS across on commit + arrow nudge.
+  - "Other ways in" = hairline-ruled row, signifying glyph each (O Self-led / ^ Quick move / (loop) Reset urge) + its info dot; drawn underline on active.
+  - Footer links (Progress/Library/FAQ/Settings) = drawn brass underline on hover; CRISIS SUPPORT on its OWN line w/ brass cross (Arlin: own-line).
+  - Prep (inside Today) = drawn inline action w/ arrow.
+- Today "reading your day" engine = QUIET expandable readout of what the engine received today: Calendar (events + what to prep for), HRV, Sleep; In-app/On-web toggle; honest states — "not connected" / "not available on web" — NEVER fake data ("never guessed").
+- Hierarchy for the foggy day: prompt + naming field are the bright PRIMARY; Today + modes + learn line RECEDE.
+- Reduced-motion: a still path (prefers-reduced-motion) that settles the surface (no breathe/drift/blink/eq/scan/entrance) — dysregulated-morning fallback.
+- Tabular numerals on data; draggable Quick Breathe pill that REMEMBERS its position.
+
+HARD CONSTRAINTS / INTEGRITY FLAGS
+1. LOCKED BEAT COPY — use the real beat prompts (morning "Anchor today." / main "Name what's present." / eod "Close the day." / wind-down "Tomorrow's one anchor?"), NOT the mockup placeholder copy ("What's still with you tonight?" etc. — those were explicitly suggestions).
+2. PRESERVE THE CONCIERGE LAYER — Mirror strip, trajectory, thread, mediation gate STAY (May-15 lesson: stripping concierge made home stop feeling smart). v7 RESKINS + RE-TIERS the composition; it does not remove concierge.
+3. TODAY ENGINE IS NATIVE-GATED — calendar/HRV/sleep need Capacitor calendar + HealthKit/Health Connect (native track). Ship UI + honest not-connected/not-on-web states now; real data wiring rides the native integration work. No fake data ever.
+4. RESET = STEP OUT, ARLIN-GATED — "Reset an urge" maps to Step Out (patternInterrupt.js + StepOutOverlay.jsx), BUILT but UNWIRED pending Arlin's section-7 trigger-flow decision. Until decided: present-but-inert OR omit — ARLIN'S CALL.
+5. WHOLE-APP AWARENESS — Notice is shared (home base-entry + spine). Field upgrades verified against BOTH.
+
+STAGED BUILD (build gate each: npm run build + npm run security:smoke + npm run boot:smoke; push when green; ARLIN DEPLOYS)
+- S0: read SmartScreen.jsx + spine/Notice.jsx in full (ground truth before edits).
+- S1: visual/material layer — living light aura, grain, entrance, reduced-motion. Pure CSS/markup, no logic/data. Safe.
+- S2: naming field — resting cursor pulse + breathing underline + focus bloom + LIVE listening/calculating indicator (renders live at rest). Shared Notice -> verify both surfaces.
+- S3: drawn action language — Continue, modes (+glyphs+info), footer links, Crisis own-line, Prep. Replace boxes.
+- S4: Today "reading your day" engine UI + honest states (native data deferred to native track).
+- S5: hierarchy tuning + pill persistence + tabular numerals + ship-checklist (UAT/tutorial/FAQ/transfer/Plausible as applicable).
+
+OPEN DECISIONS FOR ARLIN (before S4): (a) Today engine on home NOW as honest-empty shell, or hold until native data exists? (b) Reset/Step Out — show inert or omit until section-7?
