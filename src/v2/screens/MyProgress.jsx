@@ -97,11 +97,13 @@ export default function MyProgress({ onExit, onNavigate }) {
         <ProgressEntry
           title="Prep for something coming up"
           description="A meeting, a call, a room you're about to walk into. A brief to carry in — what to hold, what to watch, how to land after."
+          glyph="↗"
           onTap={() => handleNavigate("pre-event-brief")}
         />
         <ProgressEntry
           title="Break down something that just happened"
           description="A meeting, a call, a moment — while it's fresh. What worked, what didn't, what to keep for next time."
+          glyph="↺"
           onTap={() => handleNavigate("post-event")}
         />
       </section>
@@ -181,42 +183,49 @@ export default function MyProgress({ onExit, onNavigate }) {
         </div>
 
         <ProgressEntry
+          mark="01"
           title="Context Profile"
           description="Ambient conditions you've noticed correlate with how you feel — weather, hydration, the kind of conversation you just left."
           onTap={() => handleNavigate("context-profile")}
         />
 
         <ProgressEntry
+          mark="02"
           title="Trigger Profile"
           description="External situations you've named as consistently hitting hard — performance reviews, hard conversations, certain people."
           onTap={() => handleNavigate("trigger-profile")}
         />
 
         <ProgressEntry
+          mark="03"
           title="Bias Profile"
           description="Recurring shapes your thinking takes — the patterns you've put on a watch list for the Reframe AI to notice and help loosen over time."
           onTap={() => handleNavigate("bias-profile")}
         />
 
         <ProgressEntry
+          mark="04"
           title="Growth mirror"
           description="The four capacities Stillform trains — Sense, Settle, Seeing yourself, Seeing others — reflected back as you do the work."
           onTap={() => handleNavigate("capacities-mirror")}
         />
 
         <ProgressEntry
+          mark="05"
           title="Where You Lean"
           description="Where you take risk and where you hold back, across the parts of a life — a value-neutral picture of your shape, nothing to fix."
           onTap={() => handleNavigate("risk-profile")}
         />
 
         <ProgressEntry
+          mark="06"
           title="What Didn't Come True"
           description="What you were sure would go wrong that didn't — the disconfirmations your mind otherwise forgets to count."
           onTap={() => handleNavigate("prediction-mirror")}
         />
 
         <ProgressEntry
+          mark="07"
           title="What You Bet On"
           description="What you were sure of, next to what actually happened. The gap is the data."
           onTap={() => handleNavigate("what-you-bet-on")}
@@ -236,13 +245,18 @@ export default function MyProgress({ onExit, onNavigate }) {
 }
 
 /**
- * ProgressEntry — single tappable row in the landing list. Editorial
- * treatment: serif title + sans body + faint arrow indicator. Full row
- * is the tap target.
+ * ProgressEntry — single tappable row. Serif title + sans body + a brass
+ * anchor (mark = index numeral for a catalog item, glyph = an action) +
+ * brass arrow. Full row is the tap target. Shares the home .sf-sec system.
  */
-function ProgressEntry({ title, description, onTap }) {
+function ProgressEntry({ title, description, onTap, mark, glyph }) {
   return (
     <button type="button" onClick={onTap} aria-label={title} className="sf-sec-row">
+      {glyph ? (
+        <span className="sf-sec-glyph" aria-hidden="true">{glyph}</span>
+      ) : mark ? (
+        <span className="sf-sec-mark" aria-hidden="true">{mark}</span>
+      ) : null}
       <span className="sf-sec-row-main">
         <span className="sf-sec-row-top">
           <span className="sf-sec-name">{title}</span>

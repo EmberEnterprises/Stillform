@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import MonoLabel from "../components/MonoLabel.jsx";
 import InstrumentRunner from "./InstrumentRunner.jsx";
 import CDQUEST, { score as cdquestScore } from "../lib/instruments/cdquest.js";
 import SRIS, { score as srisScore } from "../lib/instruments/sris.js";
@@ -13,20 +12,16 @@ import DOSPERT, { score as dospertScore } from "../lib/instruments/dospert.js";
 /**
  * Library — the curated-knowledge surface, reached from the Home footer.
  *
- * Phase 5 sub-item #4, build Step 5c. The locked architecture places the
- * Workshop as a SECTION of the Library ("Workshop section of Library,
- * alongside the Plain-Language Neuroscience cards" — MCQ-30 spec). This is
- * the thin container that makes that surface exist: today its one live
- * section is the Workshop. The curated-knowledge / neuroscience cards are a
- * separate, not-yet-started workstream (Master Todo: "Library content") and
- * are intentionally NOT built or stubbed here — and NOT shown as "coming,"
- * per the no-deferred-framing rule. They join this screen when their
- * workstream ships.
+ * Shares the home design system (FRAMING/cohesion law, June 23 2026): the same
+ * warm aura + grain ground, mono section labels sitting on a DRAWN BRASS rule,
+ * serif item names, dim-brass meta, and a brass arrow that draws on hover —
+ * via the shared .sf-sec* classes in components.css. No page invents its own
+ * look; everything is uniform with home.
  *
- * Workshop registry: each runnable instrument adds one entry. Only
- * instruments with a built definition + scorer appear; the other six locked
- * specs (MCQ-30, SRIS, ERQ, MAIA-2, IRI, DOSPERT) join as their modules
- * build. This is build sequencing, not deferral.
+ * Today its one live section is the Workshop. The curated-knowledge /
+ * neuroscience cards are a separate, not-yet-started workstream and are NOT
+ * built, stubbed, or shown as "coming" here, per the no-deferred-framing rule.
+ * They join this screen as a second section when their workstream ships.
  *
  * Tapping an instrument launches the generic InstrumentRunner in-place;
  * leaving the runner returns to the Library list (not home).
@@ -61,7 +56,7 @@ export default function Library({ onExit }) {
     <>
       <div className="sf-home-aura" aria-hidden="true" />
       <div className="sf-home-grain" aria-hidden="true" />
-      <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
+      <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)", position: "relative", zIndex: 1 }}>
         <button type="button" onClick={onExit} aria-label="Back home" style={backStyle}>
           ← back
         </button>
@@ -84,41 +79,30 @@ export default function Library({ onExit }) {
             judgment — take one whenever you want a closer look.
           </p>
 
-          {INSTRUMENTS.map(({ id, instrument }) => (
-            <InstrumentRow
+          {INSTRUMENTS.map(({ id, instrument }, i) => (
+            <button
               key={id}
-              name={instrument.name}
-              subtitle={instrument.subtitle}
-              estMinutes={instrument.estMinutes}
-              onTake={() => setActiveId(id)}
-            />
+              type="button"
+              className="sf-sec-row"
+              aria-label={`Take ${instrument.name}`}
+              onClick={() => setActiveId(id)}
+            >
+              <span className="sf-sec-mark" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+              <span className="sf-sec-row-main">
+                <span className="sf-sec-row-top">
+                  <span className="sf-sec-name">{instrument.name}</span>
+                  {instrument.estMinutes ? (
+                    <span className="sf-sec-meta">~{instrument.estMinutes} min</span>
+                  ) : null}
+                </span>
+                {instrument.subtitle ? <span className="sf-sec-sub">{instrument.subtitle}</span> : null}
+              </span>
+              <span className="sf-sec-arrow" aria-hidden="true">→</span>
+            </button>
           ))}
         </section>
-
-        {/* Curated-knowledge / neuroscience cards: separate not-yet-started
-            workstream (Master Todo · Library content). They join here when
-            built — not stubbed, not shown as "coming," per no-deferred-framing. */}
       </main>
     </>
-  );
-}
-
-/**
- * InstrumentRow — a tappable Workshop instrument: serif name + est-minutes,
- * subtitle below, faint arrow. Whole row is the tap target (ProgressEntry idiom).
- */
-function InstrumentRow({ name, subtitle, estMinutes, onTake }) {
-  return (
-    <button type="button" onClick={onTake} aria-label={`Take ${name}`} className="sf-sec-row">
-      <span className="sf-sec-row-main">
-        <span className="sf-sec-row-top">
-          <span className="sf-sec-name">{name}</span>
-          {estMinutes ? <span className="sf-sec-meta">~{estMinutes} min</span> : null}
-        </span>
-        {subtitle ? <span className="sf-sec-sub">{subtitle}</span> : null}
-      </span>
-      <span aria-hidden="true" className="sf-sec-arrow">→</span>
-    </button>
   );
 }
 
@@ -134,12 +118,4 @@ const backStyle = {
   padding: "8px 0",
   marginBottom: "var(--sf-space-24)",
   WebkitTapHighlightColor: "transparent",
-};
-
-const sectionLeadStyle = {
-  fontFamily: "var(--sf-font-serif)",
-  fontSize: "15px",
-  lineHeight: 1.5,
-  color: "var(--sf-text-faint)",
-  margin: "0 0 var(--sf-space-16)",
 };

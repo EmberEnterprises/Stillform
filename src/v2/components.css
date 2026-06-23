@@ -520,57 +520,62 @@
 .sf-v2 .sf-today-note{ margin-top:var(--sf-space-12); font-family:var(--sf-font-sans); font-weight:300; font-size:12px; line-height:1.55; color:var(--sf-text-faint); }
 
 /* ══ v7 SECONDARY PAGES — Library / Progress share the home system ════════
-   Same warm ground (reuse .sf-home-aura/.sf-home-grain), a drawn brass rule
-   under each section label, considered list rows (serif name, dim-brass meta,
-   a brass arrow, and a brass underline that DRAWS on hover — the home's
-   drawn-line language). Brass stays to accents only (rule, arrow, draw). */
-.sf-v2 .sf-sec{ margin-top:var(--sf-space-32); }
-.sf-v2 .sf-sec-head{ margin-bottom:var(--sf-space-12); }
+   Cohesion law (June 23 2026): these surfaces are NOT their own look. They use
+   the home's language — warm aura + grain ground, a mono section label sitting
+   ON a drawn brass rule (the home "TODAY" idiom), serif item names, a brass
+   mark anchoring every row (the home modes' brass-glyph idiom — index for a
+   catalog, glyph for an action), dim-brass meta, and a brass underline that
+   draws on hover. Brass stays to accents; restraint holds, but it must READ. */
+.sf-v2 .sf-sec{ margin-top:var(--sf-space-48); }
+.sf-v2 .sf-sec--tight{ margin-top:var(--sf-space-32); }
+
+/* Section header — label + drawn brass rule on one baseline, like home TODAY. */
+.sf-v2 .sf-sec-head{ display:flex; align-items:center; gap:var(--sf-space-12); margin-bottom:var(--sf-space-16); }
 .sf-v2 .sf-sec-head-lbl{
-  display:block; font-family:var(--sf-font-mono); font-size:10px; letter-spacing:.2em;
-  text-transform:uppercase; color:var(--sf-text-faint); margin-bottom:9px;
+  flex-shrink:0; font-family:var(--sf-font-mono); font-size:10px; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--sf-text-quiet);
 }
 .sf-v2 .sf-sec-rule{
-  height:1px;
-  background:linear-gradient(90deg, var(--sf-accent) 0%, var(--sf-accent-line) 38%, transparent 100%);
-  opacity:.75;
+  flex:1; height:1px;
+  background:linear-gradient(90deg, var(--sf-accent) 0%, var(--sf-accent-line) 42%, transparent 100%);
+  opacity:.9;
 }
 .sf-v2 .sf-sec-lead{
   font-family:var(--sf-font-serif); font-size:15px; line-height:1.55; font-style:italic;
-  color:var(--sf-text-faint); margin:var(--sf-space-16) 0 var(--sf-space-8);
+  color:var(--sf-text-faint); margin:0 0 var(--sf-space-8);
 }
+
+/* Row — full-width tap target. Brass mark · serif name · sub · brass arrow. */
 .sf-v2 .sf-sec-row{
   position:relative; display:flex; align-items:flex-start; gap:var(--sf-space-16);
   width:100%; text-align:left; background:none; border:none;
   border-bottom:0.5px solid var(--sf-border-hairline);
-  padding:var(--sf-space-16) 0; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  padding:var(--sf-space-20, 20px) 0; cursor:pointer; -webkit-tap-highlight-color:transparent;
 }
 .sf-v2 .sf-sec-row::after{
   content:""; position:absolute; left:0; right:0; bottom:-0.5px; height:1.5px;
   background:var(--sf-accent); transform:scaleX(0); transform-origin:left;
-  transition:transform .3s var(--sf-ease-prestige);
+  transition:transform .35s var(--sf-ease-prestige);
 }
 .sf-v2 .sf-sec-row:hover::after, .sf-v2 .sf-sec-row:focus-visible::after{ transform:scaleX(1); }
+
+/* Leading brass anchor — index numeral (catalog) or glyph (action). */
+.sf-v2 .sf-sec-mark{
+  flex-shrink:0; width:20px; padding-top:4px; text-align:left;
+  font-family:var(--sf-font-mono); font-size:11px; line-height:1; letter-spacing:.04em;
+  color:var(--sf-accent-line);
+  transition:color .35s var(--sf-ease-prestige);
+}
+.sf-v2 .sf-sec-glyph{
+  flex-shrink:0; width:20px; padding-top:2px; text-align:left;
+  color:var(--sf-accent); font-size:15px; line-height:1; opacity:.85;
+}
+.sf-v2 .sf-sec-row:hover .sf-sec-mark, .sf-v2 .sf-sec-row:focus-visible .sf-sec-mark{ color:var(--sf-accent); }
+
 .sf-v2 .sf-sec-row-main{ flex:1; min-width:0; }
-.sf-v2 .sf-sec-row-top{
-  display:flex; align-items:baseline; gap:var(--sf-space-12); flex-wrap:wrap; margin-bottom:5px;
-}
-.sf-v2 .sf-sec-name{
-  font-family:var(--sf-font-serif); font-size:19px; font-weight:400;
-  color:var(--sf-text-cream); line-height:1.3;
-}
-.sf-v2 .sf-sec-meta{
-  font-family:var(--sf-font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--sf-accent-line); white-space:nowrap;
-}
-.sf-v2 .sf-sec-sub{
-  display:block; font-family:var(--sf-font-sans); font-size:14px; font-weight:300;
-  line-height:1.5; color:var(--sf-text-faint);
-}
-.sf-v2 .sf-sec-arrow{
-  flex-shrink:0; margin-top:5px; color:var(--sf-accent); font-size:15px; line-height:1; opacity:.7;
-  transition:transform .3s var(--sf-ease-prestige), opacity .3s ease;
-}
-.sf-v2 .sf-sec-row:hover .sf-sec-arrow, .sf-v2 .sf-sec-row:focus-visible .sf-sec-arrow{
-  transform:translateX(3px); opacity:1;
-}
+.sf-v2 .sf-sec-row-top{ display:flex; align-items:baseline; gap:var(--sf-space-12); flex-wrap:wrap; margin-bottom:5px; }
+.sf-v2 .sf-sec-name{ font-family:var(--sf-font-serif); font-size:19px; font-weight:400; color:var(--sf-text-cream); line-height:1.3; }
+.sf-v2 .sf-sec-meta{ font-family:var(--sf-font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--sf-accent-line); white-space:nowrap; }
+.sf-v2 .sf-sec-sub{ display:block; font-family:var(--sf-font-sans); font-size:14px; font-weight:300; line-height:1.5; color:var(--sf-text-faint); }
+.sf-v2 .sf-sec-arrow{ flex-shrink:0; margin-top:4px; color:var(--sf-accent); font-size:15px; line-height:1; opacity:.65; transition:transform .35s var(--sf-ease-prestige), opacity .35s ease; }
+.sf-v2 .sf-sec-row:hover .sf-sec-arrow, .sf-v2 .sf-sec-row:focus-visible .sf-sec-arrow{ transform:translateX(3px); opacity:1; }

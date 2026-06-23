@@ -1824,14 +1824,18 @@ PAGES: Settings (collapsible sections — item 4) · FAQ (search + expand/collap
 PROTOCOL (Arlin): move in BLOCKS — audit → update docs/todo (and LIST additions back to her) → build → update docs again. No fragments. No telling her to quit.
 TARGET DATE: July 2 2026 launch-ready.
 
+--- v7 SECONDARY-PAGE SYSTEM (built + UPGRADED June 23, verified from rendered screenshots) ---
+CORRECTION (June 23): an earlier pass wired Library/Progress onto a .sf-sec system but it was TOO TIMID to register — on a phone they still read as flat black-and-white lists, every row identical, "an eyesore" (Arlin, correctly). Lesson re-applied: judge from the RENDERED screen, never from tokens in a file. The system was then UPGRADED so it actually lands.
 
---- v7 SECONDARY-PAGE SYSTEM (built June 23) ---
-Shared CSS appended to components.css so secondary pages run on the HOME system, uniform not cousins:
-  - .sf-home-aura + .sf-home-grain reused = same warm brass ground + film grain (no more flat black).
-  - .sf-sec-head-lbl + .sf-sec-rule = mono section label over a DRAWN BRASS rule (brass->transparent, home's line language).
-  - .sf-sec-row / -name / -meta / -sub / -arrow = considered rows: Cormorant serif name (cream), dim-brass mono meta, sans sub, BRASS arrow, and a brass underline that DRAWS on hover (home's drawn-line motion).
-  - Brass kept to accents only (rule, meta, arrow, hover draw) — <=5%.
-DONE: Library rebuilt on this system (Workshop section: drawn brass rule + 7 instrument rows in the new treatment; instruments + take-flow preserved). Gated green, zero page errors.
-DONE: Progress (MyProgress.jsx) rebuilt on the IDENTICAL system — group it into drawn-brass sections (the prep/breakdown actions; the early-on/lately trajectory; YOUR DIAGNOSTIC STACK of 7 profiles/mirrors), same rows, aura+grain. Then both pages are uniform with home.
+Shared CSS in components.css — secondary pages run on the HOME system, uniform not cousins:
+  - .sf-home-aura + .sf-home-grain reused = same warm brass ground + film grain (no flat black).
+  - .sf-sec-head = mono section label + a DRAWN BRASS rule on ONE baseline (the home "TODAY" idiom) — a visible zone divider, not a faint afterthought.
+  - .sf-sec-mark (brass INDEX numeral 01..NN, catalog) / .sf-sec-glyph (brass ↗/↺, action) = a brass anchor on EVERY row → brass present at rest, rhythm, and actions visually distinct from catalog items. This is the fix that killed the monochrome.
+  - .sf-sec-row / -name (Cormorant serif cream) / -meta (dim-brass mono) / -sub (sans faint) / -arrow (brass) + a brass underline that DRAWS on hover. More air between rows + zones (space-48 between sections).
+  - Brass kept to accents only (rule, mark/glyph, meta, arrow, hover draw) — <=5%.
 
-RESULT: Home + Library + Progress now run on ONE system (warm aura+grain ground, drawn-brass section headers, serif names, dim-brass meta, brass arrows, hover-draw). Settings + FAQ already rebuilt earlier this session. The four secondary surfaces are now uniform with home — judged from rendered screenshots, not code.
+✅ DONE + VERIFIED FROM SCREENSHOT — LIBRARY (Library.jsx): aura+grain ground; "WORKSHOP" label drawing a brass rule across; 7 instrument rows each with a brass index 01..07, serif name, dim-brass ~min, sub, brass arrow. Reads as a considered editorial catalog. Instruments + InstrumentRunner take-flow preserved. Gated green, zero page errors.
+✅ DONE + VERIFIED FROM SCREENSHOT — PROGRESS (MyProgress.jsx): aura+grain ground; now TWO clearly-separate zones — "PREPARE & REVIEW" (the 2 action rows, brass ↗/↺ glyphs) and "YOUR DIAGNOSTIC STACK" (the 7 profiles, brass index 01..07), plus the conditional "Your naming, over time" trajectory block. Same rows/content/onNavigate routing preserved. Actions read as actions, catalog reads as catalog — no longer one undifferentiated list.
+
+RESULT: Home + Library + Progress run on ONE system that actually READS (warm ground, drawn-brass zone headers, per-row brass anchors, serif names, brass arrows, hover-draw). Library = a clean numbered catalog; Progress = a richer multi-zone system — same language, naturally distinct, which also addresses the old "Library/Progress feel indistinct" flag. Settings + FAQ rebuilt earlier this session. All four secondary surfaces now uniform with home. Judged from rendered screenshots, not code.
+PENDING: Arlin's yes/no on the rendered Library + Progress. Then deploy (manual, Arlin) when she's ready.
