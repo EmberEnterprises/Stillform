@@ -93,6 +93,8 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
   const [showChipGuide, setShowChipGuide] = useState(false);
   const [infoEntry, setInfoEntry] = useState(null); // "selfled" | "quickmove" | "reset" | null
   const textareaRef = useRef(null);
+  const [listenLive, setListenLive] = useState(false);
+  const idleRef = useRef(null);
 
   // Focus the textarea on mount — the practice starts when the user can write.
   useEffect(() => {
@@ -104,6 +106,18 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
   }, []);
 
   const canContinue = text.trim().length > 0;
+
+  // Clean up the listening idle timer on unmount.
+  useEffect(() => () => { if (idleRef.current) clearTimeout(idleRef.current); }, []);
+
+  // Listening indicator: alive even at rest (the CSS rest-wave), ramps to
+  // the energetic equalizer while the user is actively typing, then settles.
+  const handleType = (e) => {
+    setText(e.target.value);
+    setListenLive(true);
+    if (idleRef.current) clearTimeout(idleRef.current);
+    idleRef.current = setTimeout(() => setListenLive(false), 900);
+  };
 
   const handleChipTap = (chipId, chipLabel) => {
     // The chip becomes a starting point in the user's writing — they can
@@ -177,18 +191,24 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
       </div>
 
       <div
-        className="sf-fade-enter sf-fade-enter--delay-1"
+        className="sf-fade-enter sf-fade-enter--delay-1 sf-naming-field"
         style={{ marginTop: "var(--sf-space-48)" }}
       >
         <textarea
           ref={textareaRef}
           className="sf-textarea"
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={handleType}
           placeholder={placeholder}
           rows={2}
           aria-label="Name what is present"
         />
+        <div className={`sf-listening${listenLive ? " is-live" : ""}`} aria-hidden="true">
+          <span className="sf-listening-bars"><i /><i /><i /><i /><i /></span>
+          <span className="sf-listening-word">
+            {listenLive ? "Hearing you" : text.trim() ? "Got it" : "Listening"}
+          </span>
+        </div>
       </div>
 
       {chips.length > 0 ? (
