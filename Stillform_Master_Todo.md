@@ -1832,4 +1832,6 @@ Shared CSS appended to components.css so secondary pages run on the HOME system,
   - .sf-sec-row / -name / -meta / -sub / -arrow = considered rows: Cormorant serif name (cream), dim-brass mono meta, sans sub, BRASS arrow, and a brass underline that DRAWS on hover (home's drawn-line motion).
   - Brass kept to accents only (rule, meta, arrow, hover draw) — <=5%.
 DONE: Library rebuilt on this system (Workshop section: drawn brass rule + 7 instrument rows in the new treatment; instruments + take-flow preserved). Gated green, zero page errors.
-NEXT: Progress (MyProgress.jsx) gets the IDENTICAL system — group it into drawn-brass sections (the prep/breakdown actions; the early-on/lately trajectory; YOUR DIAGNOSTIC STACK of 7 profiles/mirrors), same rows, aura+grain. Then both pages are uniform with home.
+DONE: Progress (MyProgress.jsx) rebuilt on the IDENTICAL system — group it into drawn-brass sections (the prep/breakdown actions; the early-on/lately trajectory; YOUR DIAGNOSTIC STACK of 7 profiles/mirrors), same rows, aura+grain. Then both pages are uniform with home.
+
+RESULT: Home + Library + Progress now run on ONE system (warm aura+grain ground, drawn-brass section headers, serif names, dim-brass meta, brass arrows, hover-draw). Settings + FAQ already rebuilt earlier this session. The four secondary surfaces are now uniform with home — judged from rendered screenshots, not code.

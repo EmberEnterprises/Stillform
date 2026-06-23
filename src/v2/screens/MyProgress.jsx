@@ -42,6 +42,8 @@ export default function MyProgress({ onExit, onNavigate }) {
 
   return (
     <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
+      <div className="sf-home-aura" aria-hidden="true" />
+      <div className="sf-home-grain" aria-hidden="true" />
       {/* Top back affordance — mono-faint, top left. Matches the
           ContextProfile back-button treatment for consistency
           across the My Progress sub-tree. */}
@@ -87,7 +89,11 @@ export default function MyProgress({ onExit, onNavigate }) {
           post-event session), set apart from the diagnostic mirrors below
           so it reads as "do this now," not "view this." Off-home per canon;
           the one deliberate manual beat. Routes via AppV2's forcedBeat. */}
-      <section style={{ marginTop: "var(--sf-space-16)", marginBottom: "var(--sf-space-32)" }}>
+      <section className="sf-sec" style={{ marginBottom: "var(--sf-space-32)" }}>
+        <div className="sf-sec-head">
+          <span className="sf-sec-head-lbl">Prepare &amp; review</span>
+          <div className="sf-sec-rule" />
+        </div>
         <ProgressEntry
           title="Prep for something coming up"
           description="A meeting, a call, a room you're about to walk into. A brief to carry in — what to hold, what to watch, how to land after."
@@ -138,10 +144,11 @@ export default function MyProgress({ onExit, onNavigate }) {
         try { g = getNamingGrowth(); } catch { g = null; }
         if (!g || !g.ready) return null;
         return (
-          <section style={{ marginTop: "var(--sf-space-24)", marginBottom: "var(--sf-space-8)" }}>
-            <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
-              Your naming, over time
-            </MonoLabel>
+          <section className="sf-sec" style={{ marginBottom: "var(--sf-space-8)" }}>
+            <div className="sf-sec-head">
+              <span className="sf-sec-head-lbl">Your naming, over time</span>
+              <div className="sf-sec-rule" />
+            </div>
             {g.hasGrowth && g.earlyExample && g.recentExample ? (
               <div style={{ marginBottom: "var(--sf-space-16)" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "var(--sf-space-12)" }}>
@@ -167,14 +174,11 @@ export default function MyProgress({ onExit, onNavigate }) {
         );
       })()}
 
-      <section style={{ marginTop: "var(--sf-space-16)" }}>
-        <MonoLabel
-          size="xs"
-          tone="faint"
-          style={{ display: "block", marginBottom: "var(--sf-space-16)" }}
-        >
-          Your diagnostic stack
-        </MonoLabel>
+      <section className="sf-sec">
+        <div className="sf-sec-head">
+          <span className="sf-sec-head-lbl">Your diagnostic stack</span>
+          <div className="sf-sec-rule" />
+        </div>
 
         <ProgressEntry
           title="Context Profile"
@@ -238,65 +242,14 @@ export default function MyProgress({ onExit, onNavigate }) {
  */
 function ProgressEntry({ title, description, onTap }) {
   return (
-    <button
-      type="button"
-      onClick={onTap}
-      style={{
-        display: "block",
-        width: "100%",
-        textAlign: "left",
-        padding: "var(--sf-space-16) 0",
-        borderBottom: "0.5px solid var(--sf-border-quiet)",
-        background: "transparent",
-        border: "none",
-        borderTop: "none",
-        borderLeft: "none",
-        borderRight: "none",
-        cursor: "pointer",
-        WebkitTapHighlightColor: "transparent",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "var(--sf-space-16)",
-          marginBottom: "var(--sf-space-4)",
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "var(--sf-font-serif)",
-            fontSize: "18px",
-            fontWeight: 400,
-            color: "var(--sf-text-primary)",
-            lineHeight: 1.3,
-          }}
-        >
-          {title}
-        </div>
-        <div
-          aria-hidden="true"
-          style={{
-            fontFamily: "var(--sf-font-mono)",
-            fontSize: "14px",
-            color: "var(--sf-text-faint)",
-            flexShrink: 0,
-          }}
-        >
-          →
-        </div>
-      </div>
-      <div
-        style={{
-          fontSize: "14px",
-          color: "var(--sf-text-secondary)",
-          lineHeight: 1.5,
-        }}
-      >
-        {description}
-      </div>
+    <button type="button" onClick={onTap} aria-label={title} className="sf-sec-row">
+      <span className="sf-sec-row-main">
+        <span className="sf-sec-row-top">
+          <span className="sf-sec-name">{title}</span>
+        </span>
+        {description ? <span className="sf-sec-sub">{description}</span> : null}
+      </span>
+      <span aria-hidden="true" className="sf-sec-arrow">→</span>
     </button>
   );
 }
