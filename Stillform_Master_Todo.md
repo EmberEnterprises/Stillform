@@ -1791,3 +1791,31 @@ OPEN DECISIONS FOR ARLIN (before S4): (a) Today engine on home NOW as honest-emp
 Arlin wants the app's philosophy captured as a note. SCOPE TBD — confirm with Arlin before building:
   (a) PLACEMENT — DECIDED (Arlin, June 22): the philosophy is a LEARNING ITEM — it lives in the Library / Learning Track, NOT an internal doc or a static about-page. Arlin's rationale: engaging the philosophy aids NEUROPLASTICITY by training a different way of thinking, which is the practice's core mechanism — so it's framed as content the user learns from, consistent with metacognition-expands-cognitive-capacity. Build it as a Library/learning entry. (Likely pairs with the Library/Progress distinction work that's already queued for after the home rebuild.)
   (b) CONTENT: the philosophy text itself — DO NOT FABRICATE; Arlin provides/dictates the through-line. Candidate threads from canon she may draw from (her words, not Claude's): metacognition that EXPANDS cognitive capacity via neuroplasticity; the trader-desk edge (a skill with a track record, not a sedative); user-led practice, AI as architecture not actor; show-don't-tell care.
+
+## ▸▸ MISSED-FEEDBACK & V1→V2 PARITY AUDIT (June 23 2026 — Arlin flagged sloppy/incomplete logging)
+Trigger: home aesthetic polish (light/grain/modes/Today) shipped while structural nav/account/settings items AND several of Arlin's own mockup-feedback items were never logged or built. Full-conversation re-audit, each item ground-truthed against live code. Classes: [SURFACE]=built but not surfaced/linked · [BUILD]=needs building · [PARITY]=V1 feature absent in V2 · [DECIDE]=needs Arlin's call · [VERIFY]=confirm exact state.
+NOTE on the V1→V2 audit Arlin referenced: the June-15 audit was REAL but scoped to VISUALS + TOOLS (palette, fonts, breathing trees, Body Scan, voice). It did NOT comprehensively cover nav chrome / Settings parity / FAQ. That is this audit's job.
+
+### A. App-wide navigation & identity chrome
+1. [SURFACE] LOGIN / SIGN-IN action — auth EXISTS (Accounts A1–A5, email-code; lives in Settings → Account) but there is NO surfaced login affordance anywhere else. Add a visible "Sign in" action. DECIDE placement (header / footer / dedicated).
+2. [BUILD/VERIFY] BACK on every page — spine screens have SpineBack ("← home"); non-spine screens exit via ad-hoc onExit; **Paywall.jsx has NO back/exit (trap)**; treatment not uniform or reliably visible. Standardize a visible back/home affordance on every screen; fix the Paywall trap first (safety).
+3. [DECIDE] STILLFORM WORDMARK on every page as a home LINK — AppHeader wordmark is HOME-ONLY by canon §10 ("home header is one wordmark and nothing else") and is identity, not a clickable home link. Arlin wants it on EVERY page, tappable → home. CONFLICTS with canon §10 — Arlin confirms overriding canon, then build into global chrome.
+
+### B. Settings — V1→V2 parity (NOT covered by the June-15 visual audit)
+4. [PARITY] V2 Settings currently = Access (subscription) · Display (VERIFY contents) · Your data · Clear data · Privacy & contact · Account. V1 additionally had: sound/audio toggle · screen-light mode · reduced motion · daily reminder + time picker · tension/body check-in · signal mapping · trigger-profile CRUD · schedule & notifications · biometric lock. AUDIT each: v2 logic exists → expose; missing → build or Arlin marks intended-drop. (May-30 Settings note deferred several "don't promise before they work" — re-walk now that Arlin wants parity.)
+
+### C. FAQ
+5. [DECIDE/BUILD] FAQ.jsx exists but copy is DRAFT (never approved). Arlin says the characteristics she decided on are not reflected. ACTION: pull Arlin's FAQ decisions from transcripts; apply; Arlin owns final copy. DO NOT fabricate FAQ positioning.
+
+### D. Home mockup feedback (this session) not logged/built
+6. [BUILD] Quick Breathe = DRAGGABLE pill that REMEMBERS its position — current QuickBreathe.jsx is position:fixed, NOT draggable, no persistence. Build drag + persist (e.g. stillform_qb_pos).
+7. [VERIFY/BUILD] Quick Breathe pill SHAPE doesn't match the mockup pill per Arlin — match mockup styling.
+8. [BUILD] PREP action inside the Today engine ("Prep for review →") — Today design had it; current TodayEngine has none. (Pairs with the existing Pre-event Brief / "Prep for something coming up" surface.)
+9. [DECIDE] CRISIS brass cross/dot — Arlin asked for a brass mark on Crisis in mockup feedback; Claude overrode it citing canon subordination WITHOUT flagging. Arlin decides: brass mark (her ask) vs subordinate/no-mark (canon §10 framing law).
+10. [BUILD] Today engine fuller design — calendar meetings + prep context (currently honest not-connected states only). Data lands with native calendar (Phase 9); structure + Prep can exist now.
+
+### PROCESS RULE (Arlin, June 23 2026 — STANDING, applies every session)
+- Do MASS doc/todo updates, never one-item-at-a-time (Arlin shouldn't have to prompt each — she forgets, work goes invisible).
+- Sequence every change: AUDIT (against canon/philosophy) → UPDATE docs + add to todo → BUILD → UPDATE docs again.
+- When adding to the todo, LIST everything being added back to Arlin in the reply so she can catch omissions.
+- NEVER silently drop Arlin's feedback or override a decision (e.g. the Crisis cross) without flagging it for her call.
