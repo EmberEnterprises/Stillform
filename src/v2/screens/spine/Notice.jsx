@@ -316,65 +316,44 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         ) : null}
       </div>
 
-      {/* Self-led link — quiet, opt-in path that routes through SelfReframe
-          instead of the AI Reframe. Same practice, you write it yourself.
-          Tucked below the primary action so it doesn't compete; visible
-          enough that users who prefer silence can find it without hunting. */}
+      {/* Other ways in — the drawn modes row (v7). Self-led is gated on a
+          name (handleSelfLed); quick move + reset are ungated. */}
       <div
         className="sf-fade-enter sf-fade-enter--delay-3"
-        style={{ marginTop: "var(--sf-space-24)" }}
+        style={{ marginTop: "var(--sf-space-32)" }}
       >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
-          <button
-            type="button"
-            onClick={handleSelfLed}
-            disabled={!canContinue}
-            aria-disabled={!canContinue}
-            className="sf-link-quiet"
-          >
-            Or self-led ›
-          </button>
-          <InfoDot onClick={() => setInfoEntry("selfled")} label="self-led" />
-        </span>
-      </div>
-
-      {/* Quick move — body-first reset. Ungated (works before naming) because
-          its whole purpose is the moment you can't think yet; "Keep going"
-          afterward returns to the naming. The Support Sheet's first surfaced
-          tool (Phase 6.2). */}
-      <div
-        className="sf-fade-enter sf-fade-enter--delay-3"
-        style={{ marginTop: "var(--sf-space-12)" }}
-      >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
-          <button
-            type="button"
-            onClick={handleQuickMove}
-            className="sf-link-quiet"
-          >
-            Quick move ›
-          </button>
-          <InfoDot onClick={() => setInfoEntry("quickmove")} label="quick move" />
-        </span>
-      </div>
-
-      {/* Reset an urge — urge-surf for an acute compulsion pull. Ungated,
-          like quick move; the Support Sheet's second tool (Phase 6.3). Can
-          cross-route to a Move from inside the flow. */}
-      <div
-        className="sf-fade-enter sf-fade-enter--delay-3"
-        style={{ marginTop: "var(--sf-space-12)" }}
-      >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="sf-link-quiet"
-          >
-            Reset an urge ›
-          </button>
-          <InfoDot onClick={() => setInfoEntry("reset")} label="reset an urge" />
-        </span>
+        <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
+          Other ways in
+        </MonoLabel>
+        <div className="sf-modes">
+          <div className="sf-mode">
+            <button
+              type="button"
+              className="sf-mode-btn"
+              onClick={handleSelfLed}
+              disabled={!canContinue}
+              aria-disabled={!canContinue}
+            >
+              <span className="sf-mode-glyph" aria-hidden="true">○</span>
+              <span className="sf-mode-label">Self-led</span>
+            </button>
+            <span className="sf-mode-info"><InfoDot onClick={() => setInfoEntry("selfled")} label="self-led" /></span>
+          </div>
+          <div className="sf-mode">
+            <button type="button" className="sf-mode-btn" onClick={handleQuickMove}>
+              <span className="sf-mode-glyph" aria-hidden="true">↗</span>
+              <span className="sf-mode-label">Quick move</span>
+            </button>
+            <span className="sf-mode-info"><InfoDot onClick={() => setInfoEntry("quickmove")} label="quick move" /></span>
+          </div>
+          <div className="sf-mode">
+            <button type="button" className="sf-mode-btn" onClick={handleReset}>
+              <span className="sf-mode-glyph" aria-hidden="true">↺</span>
+              <span className="sf-mode-label">Reset urge</span>
+            </button>
+            <span className="sf-mode-info"><InfoDot onClick={() => setInfoEntry("reset")} label="reset an urge" /></span>
+          </div>
+        </div>
       </div>
     </main>
   );

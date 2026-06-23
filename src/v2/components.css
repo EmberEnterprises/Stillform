@@ -476,3 +476,19 @@
   .sf-v2 .sf-naming-field::after{ animation:none; opacity:.6; }
   .sf-v2 .sf-listening-bars i{ animation:none !important; height:4px; }
 }
+
+/* ══ v7 DRAWN HOME · Stage 3 — "Other ways in" drawn modes row ════════
+   Promotes the three modes (self-led / quick move / reset) from quiet
+   links into a hairline-ruled row: a signifying glyph + label each, a
+   drawn brass underline on hover/focus, info dot pinned per cell. Self-led
+   stays gated on a name (disabled); quick move + reset are ungated. */
+.sf-v2 .sf-modes{ display:flex; border-top:0.5px solid var(--sf-border-hairline); border-bottom:0.5px solid var(--sf-border-hairline); }
+.sf-v2 .sf-mode{ position:relative; flex:1; display:flex; align-items:center; justify-content:center; padding:14px 4px 12px; min-height:58px; }
+.sf-v2 .sf-mode + .sf-mode{ border-left:0.5px solid var(--sf-border-hairline); }
+.sf-v2 .sf-mode-btn{ background:none; border:none; cursor:pointer; padding:0; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; WebkitTapHighlightColor:transparent; }
+.sf-v2 .sf-mode-btn:disabled{ opacity:.4; cursor:default; }
+.sf-v2 .sf-mode-glyph{ font-size:15px; line-height:1; color:var(--sf-accent); }
+.sf-v2 .sf-mode-label{ font-family:var(--sf-font-sans); font-size:12px; letter-spacing:.02em; color:var(--sf-text-primary); }
+.sf-v2 .sf-mode-btn::after{ content:""; position:absolute; left:8%; right:8%; bottom:-12px; height:1.5px; background:var(--sf-accent); transform:scaleX(0); transition:transform .25s var(--sf-ease-prestige); }
+.sf-v2 .sf-mode-btn:not(:disabled):hover::after, .sf-v2 .sf-mode-btn:focus-visible::after{ transform:scaleX(1); }
+.sf-v2 .sf-mode-info{ position:absolute; top:5px; right:5px; }
