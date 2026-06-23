@@ -1823,3 +1823,13 @@ For EACH page: (1) recover the V1 STRUCTURE from git (c97411a) so the organizati
 PAGES: Settings (collapsible sections — item 4) · FAQ (search + expand/collapse + links — item 5) · Library · Progress/Mirror.
 PROTOCOL (Arlin): move in BLOCKS — audit → update docs/todo (and LIST additions back to her) → build → update docs again. No fragments. No telling her to quit.
 TARGET DATE: July 2 2026 launch-ready.
+
+
+--- v7 SECONDARY-PAGE SYSTEM (built June 23) ---
+Shared CSS appended to components.css so secondary pages run on the HOME system, uniform not cousins:
+  - .sf-home-aura + .sf-home-grain reused = same warm brass ground + film grain (no more flat black).
+  - .sf-sec-head-lbl + .sf-sec-rule = mono section label over a DRAWN BRASS rule (brass->transparent, home's line language).
+  - .sf-sec-row / -name / -meta / -sub / -arrow = considered rows: Cormorant serif name (cream), dim-brass mono meta, sans sub, BRASS arrow, and a brass underline that DRAWS on hover (home's drawn-line motion).
+  - Brass kept to accents only (rule, meta, arrow, hover draw) — <=5%.
+DONE: Library rebuilt on this system (Workshop section: drawn brass rule + 7 instrument rows in the new treatment; instruments + take-flow preserved). Gated green, zero page errors.
+NEXT: Progress (MyProgress.jsx) gets the IDENTICAL system — group it into drawn-brass sections (the prep/breakdown actions; the early-on/lately trajectory; YOUR DIAGNOSTIC STACK of 7 profiles/mirrors), same rows, aura+grain. Then both pages are uniform with home.
