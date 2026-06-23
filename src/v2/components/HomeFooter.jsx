@@ -49,7 +49,7 @@ export default function HomeFooter({ onNavigate }) {
             key={item.id}
             type="button"
             onClick={() => handleNavigate(item.id)}
-            className="sf-btn-ghost"
+            className="sf-btn-ghost sf-foot-link"
             style={{
               background: "transparent",
               border: "none",
@@ -82,7 +82,7 @@ export default function HomeFooter({ onNavigate }) {
         <button
           type="button"
           onClick={() => handleNavigate("crisis-resources")}
-          className="sf-btn-ghost"
+          className="sf-btn-ghost sf-foot-link"
           style={{
             background: "transparent",
             border: "none",

@@ -492,3 +492,17 @@
 .sf-v2 .sf-mode-btn::after{ content:""; position:absolute; left:8%; right:8%; bottom:-12px; height:1.5px; background:var(--sf-accent); transform:scaleX(0); transition:transform .25s var(--sf-ease-prestige); }
 .sf-v2 .sf-mode-btn:not(:disabled):hover::after, .sf-v2 .sf-mode-btn:focus-visible::after{ transform:scaleX(1); }
 .sf-v2 .sf-mode-info{ position:absolute; top:5px; right:5px; }
+
+/* ══ v7 DRAWN HOME · Stage 3b — footer drawn underlines ═══════════════
+   Progress / Library / FAQ / Settings (and the subordinate Crisis link)
+   get a brass underline that draws in on hover/focus. Crisis keeps its
+   quiet resting color + own line per canon framing law (no cross, not
+   signalled as a crisis tool). */
+.sf-v2 .sf-foot-link{ position:relative; }
+.sf-v2 .sf-foot-link::after{
+  content:""; position:absolute; left:var(--sf-space-4); right:var(--sf-space-4); bottom:2px;
+  height:1px; background:var(--sf-accent); transform:scaleX(0); transform-origin:left;
+  transition:transform .25s var(--sf-ease-prestige);
+}
+.sf-v2 .sf-foot-link:hover::after, .sf-v2 .sf-foot-link:focus-visible::after{ transform:scaleX(1); }
+.sf-v2 .sf-foot-link:hover, .sf-v2 .sf-foot-link:focus-visible{ color:var(--sf-text-quiet) !important; }
