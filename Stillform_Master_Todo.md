@@ -1786,3 +1786,8 @@ STAGED BUILD (build gate each: npm run build + npm run security:smoke + npm run 
 - S5: hierarchy tuning + pill persistence + tabular numerals + ship-checklist (UAT/tutorial/FAQ/transfer/Plausible as applicable).
 
 OPEN DECISIONS FOR ARLIN (before S4): (a) Today engine on home NOW as honest-empty shell, or hold until native data exists? (b) Reset/Step Out — show inert or omit until section-7?
+
+## ▸ OPEN — ADD "PHILOSOPHY" TO THE APP AS A NOTE (Arlin, June 22 2026)
+Arlin wants the app's philosophy captured as a note. SCOPE TBD — confirm with Arlin before building:
+  (a) PLACEMENT: a user-facing in-app note (an about/manifesto surface users can read) OR an internal philosophy doc folded into canon.
+  (b) CONTENT: the philosophy text itself — DO NOT FABRICATE; Arlin provides/dictates the through-line. Candidate threads from canon she may draw from (her words, not Claude's): metacognition that EXPANDS cognitive capacity via neuroplasticity; the trader-desk edge (a skill with a track record, not a sedative); user-led practice, AI as architecture not actor; show-don't-tell care.
