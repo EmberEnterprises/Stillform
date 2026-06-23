@@ -55,7 +55,10 @@ export default function FAQ({ onExit }) {
   };
 
   return (
-    <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
+    <>
+      <div className="sf-home-aura" aria-hidden="true" />
+      <div className="sf-home-grain" aria-hidden="true" />
+      <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)", position: "relative", zIndex: 1 }}>
       <button type="button" onClick={onExit} aria-label="Back to home" style={BACK_BTN}>
         ← back
       </button>
@@ -119,7 +122,8 @@ export default function FAQ({ onExit }) {
           </a>
         </p>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
 
@@ -243,10 +247,11 @@ const CHEV = {
 };
 
 const QTEXT = {
-  fontSize: "16px",
-  fontWeight: 600,
-  lineHeight: 1.4,
-  color: "var(--sf-text-primary)",
+  fontFamily: "var(--sf-font-serif)",
+  fontSize: "19px",
+  fontWeight: 400,
+  lineHeight: 1.3,
+  color: "var(--sf-text-cream)",
 };
 
 

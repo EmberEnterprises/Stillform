@@ -99,7 +99,10 @@ export default function Settings({ onExit }) {
     : "Inactive";
 
   return (
-    <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
+    <>
+      <div className="sf-home-aura" aria-hidden="true" />
+      <div className="sf-home-grain" aria-hidden="true" />
+      <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)", position: "relative", zIndex: 1 }}>
       <button type="button" onClick={onExit} aria-label="Back to home" style={BACK_BTN}>
         ← back
       </button>
@@ -226,7 +229,8 @@ export default function Settings({ onExit }) {
         </div>
       </CollapsibleSection>
 
-    </main>
+      </main>
+    </>
   );
 }
 

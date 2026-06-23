@@ -1,22 +1,21 @@
 import React, { useState } from "react";
-import MonoLabel from "./MonoLabel.jsx";
 
 /**
  * CollapsibleSection — a v7 group header for the secondary pages.
  *
- * Restores the organized, non-overwhelming sectioning the V1 Settings had
- * (8 collapsible sections, recovered from git c97411a) in the locked v7
- * language: a hairline-ruled header with an uppercase mono label and a quiet
- * brass chevron that rotates on open. Brass is kept to the chevron only
- * (≤5%); the rule is a neutral hairline; restraint over decoration.
+ * Matches the home/Library/Progress section language exactly: a mono uppercase
+ * label sitting on a DRAWN BRASS rule (the home "TODAY" idiom — label · rule ·
+ * chevron on one baseline), with a brass chevron that rotates on open. Brass
+ * stays to the rule + chevron (≤5%). One system across every secondary page.
  *
- * Used by Settings now; FAQ / Library / Progress reuse it so every secondary
- * page reads as one calm, sectioned surface rather than a dumped list.
+ * NOTE: padding uses real spacing tokens (no var(--sf-space-20) — that token
+ * does not exist; it was silently collapsing header padding to zero and
+ * cramming the sections together).
  */
 export default function CollapsibleSection({ label, defaultOpen = false, children }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <section style={{ borderTop: "1px solid var(--sf-border-hairline)" }}>
+    <section>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -25,9 +24,8 @@ export default function CollapsibleSection({ label, defaultOpen = false, childre
           width: "100%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: "var(--sf-space-16)",
-          padding: "var(--sf-space-20) 0",
+          gap: "var(--sf-space-12)",
+          padding: "var(--sf-space-20, 20px) 0",
           background: "none",
           border: "none",
           cursor: "pointer",
@@ -35,10 +33,32 @@ export default function CollapsibleSection({ label, defaultOpen = false, childre
           WebkitTapHighlightColor: "transparent",
         }}
       >
-        <MonoLabel size="xs" tone={open ? "primary" : "faint"}>{label}</MonoLabel>
+        <span
+          style={{
+            flexShrink: 0,
+            fontFamily: "var(--sf-font-mono)",
+            fontSize: "10px",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: open ? "var(--sf-text-primary)" : "var(--sf-text-quiet)",
+          }}
+        >
+          {label}
+        </span>
         <span
           aria-hidden="true"
           style={{
+            flex: 1,
+            height: "1px",
+            background:
+              "linear-gradient(90deg, var(--sf-accent) 0%, var(--sf-accent-line) 42%, transparent 100%)",
+            opacity: 0.9,
+          }}
+        />
+        <span
+          aria-hidden="true"
+          style={{
+            flexShrink: 0,
             color: "var(--sf-accent)",
             fontSize: "11px",
             lineHeight: 1,
