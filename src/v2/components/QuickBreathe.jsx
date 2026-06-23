@@ -1,57 +1,176 @@
-import React from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import MonoLabel from "./MonoLabel.jsx";
 
 /**
- * QuickBreathe — the ONE persistent surface across home beats.
+ * QuickBreathe — the ONE persistent surface across home beats (CANON §10/§271
+ * stabilization safety valve).
  *
- * Per STILLFORM_CANON.md §10: "The home renders ONE current-beat surface
- * per view... plus the persistent Quick Breathe pill (stabilization
- * safety valve — the ONE exception)."
+ * June 23 2026 (Arlin): restored to a real PILL and made DRAGGABLE with
+ * position memory, per the v7 home mockup. This intentionally reverses the
+ * June-2 "D5" ruled-tag treatment ("speaks the system, not a rounded pill")
+ * in favour of Arlin's mockup direction. The user can drag it anywhere; its
+ * position is remembered (stillform_qb_pos, prefix-conforming so it rides the
+ * existing wipe/sync) and re-clamped into view on resize. A drag is told from
+ * a tap by a small movement threshold, so dragging never opens the breathe
+ * overlay and a clean tap always does. Keyboard (Enter/Space) opens it too.
  *
- * Phase 1: fixed bottom-right, hairline border, ghost amber dot, mono-sm
- * label. No actual breath tool yet — that wires in Phase 2 with the spine.
- * Tapping the pill is a no-op for now; visual placement and treatment is
- * what Phase 1 verifies.
- *
- * Future: drag mechanics + position persistence are an optional polish
- * pass once the static placement is verified.
- *
- * Design system notes: amber is used at MAX 5% of any screen. Here the
- * accent appears as a small dot (4px) + the border hairline. Never as fill.
+ * Amber stays ≤5%: a 4px dot only. The ring is a neutral hairline.
  */
+const POS_KEY = "stillform_qb_pos";
+const MARGIN = 16; // viewport inset (px)
+const DRAG_THRESHOLD = 5; // px before a press counts as a drag
+
+function loadPos() {
+  try {
+    const raw = localStorage.getItem(POS_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw);
+    if (typeof p?.x === "number" && typeof p?.y === "number") return p;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
 export default function QuickBreathe({ onTap }) {
-  const handleTap = () => {
+  const btnRef = useRef(null);
+  const [pos, setPos] = useState(null); // {x,y} left/top px; null until measured
+  const posRef = useRef(null);
+  const drag = useRef({ active: false, moved: false, dx: 0, dy: 0, sx: 0, sy: 0 });
+
+  useEffect(() => {
+    posRef.current = pos;
+  }, [pos]);
+
+  const clamp = useCallback((x, y) => {
+    const el = btnRef.current;
+    const w = el ? el.offsetWidth : 140;
+    const h = el ? el.offsetHeight : 40;
+    const maxX = window.innerWidth - w - MARGIN;
+    const maxY = window.innerHeight - h - MARGIN;
+    return {
+      x: Math.max(MARGIN, Math.min(x, Math.max(MARGIN, maxX))),
+      y: Math.max(MARGIN, Math.min(y, Math.max(MARGIN, maxY))),
+    };
+  }, []);
+
+  // Initial position: saved, else bottom-right. Measured after mount.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const el = btnRef.current;
+    const w = el ? el.offsetWidth : 140;
+    const h = el ? el.offsetHeight : 40;
+    const saved = loadPos();
+    setPos(
+      saved
+        ? clamp(saved.x, saved.y)
+        : { x: window.innerWidth - w - MARGIN, y: window.innerHeight - h - MARGIN }
+    );
+  }, [clamp]);
+
+  // Re-clamp on resize so it never strands off-screen.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => setPos((p) => (p ? clamp(p.x, p.y) : p));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [clamp]);
+
+  const fireTap = () => {
     if (typeof onTap === "function") onTap();
   };
 
+  const onPointerDown = (e) => {
+    const el = btnRef.current;
+    if (!el || posRef.current == null) return;
+    drag.current = {
+      active: true,
+      moved: false,
+      dx: e.clientX - posRef.current.x,
+      dy: e.clientY - posRef.current.y,
+      sx: e.clientX,
+      sy: e.clientY,
+    };
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const onPointerMove = (e) => {
+    if (!drag.current.active) return;
+    if (
+      Math.abs(e.clientX - drag.current.sx) > DRAG_THRESHOLD ||
+      Math.abs(e.clientY - drag.current.sy) > DRAG_THRESHOLD
+    ) {
+      drag.current.moved = true;
+    }
+    setPos(clamp(e.clientX - drag.current.dx, e.clientY - drag.current.dy));
+  };
+
+  const onPointerUp = (e) => {
+    if (!drag.current.active) return;
+    drag.current.active = false;
+    const el = btnRef.current;
+    try {
+      el && el.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+    if (drag.current.moved) {
+      const p = posRef.current;
+      if (p) {
+        try {
+          localStorage.setItem(POS_KEY, JSON.stringify(p));
+        } catch {
+          /* ignore */
+        }
+      }
+    } else {
+      fireTap(); // clean tap → open
+    }
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      fireTap();
+    }
+  };
+
+  const placement = pos
+    ? { left: `${pos.x}px`, top: `${pos.y}px` }
+    : { right: `${MARGIN}px`, bottom: `${MARGIN}px` };
+
   return (
     <button
+      ref={btnRef}
       type="button"
-      onClick={handleTap}
       aria-label="Quick Breathe"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onKeyDown={onKeyDown}
       style={{
         position: "fixed",
-        right: "var(--sf-space-16)",
-        bottom: "var(--sf-space-16)",
+        ...placement,
         display: "inline-flex",
         alignItems: "center",
         gap: "var(--sf-space-8)",
         padding: "10px 16px",
         background: "var(--sf-ground-elev)",
-        /* D5 (June 2 2026): the floating valve speaks the system — ruled
-           tag, not a rounded pill. */
-        border: "none",
-        borderTop: "1px solid var(--sf-accent-line)",
-        borderBottom: "1px solid var(--sf-accent-line)",
-        borderRadius: "2px",
-        cursor: "pointer",
+        border: "1px solid var(--sf-border-hairline)",
+        borderRadius: "999px",
+        cursor: "grab",
+        touchAction: "none",
         appearance: "none",
         boxShadow: "none",
         WebkitTapHighlightColor: "transparent",
         transition: "border-color var(--sf-motion-default) var(--sf-ease-prestige)",
         zIndex: 10,
+        userSelect: "none",
       }}
-      className="sf-btn-secondary"
     >
       <span
         aria-hidden="true"

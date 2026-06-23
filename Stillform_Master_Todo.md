@@ -1797,21 +1797,21 @@ Trigger: home aesthetic polish (light/grain/modes/Today) shipped while structura
 NOTE on the V1→V2 audit Arlin referenced: the June-15 audit was REAL but scoped to VISUALS + TOOLS (palette, fonts, breathing trees, Body Scan, voice). It did NOT comprehensively cover nav chrome / Settings parity / FAQ. That is this audit's job.
 
 ### A. App-wide navigation & identity chrome
-1. [SURFACE] LOGIN / SIGN-IN action — auth EXISTS (Accounts A1–A5, email-code; lives in Settings → Account) but there is NO surfaced login affordance anywhere else. Add a visible "Sign in" action. DECIDE placement (header / footer / dedicated).
-2. [BUILD/VERIFY] BACK on every page — spine screens have SpineBack ("← home"); non-spine screens exit via ad-hoc onExit; **Paywall.jsx has NO back/exit (trap)**; treatment not uniform or reliably visible. Standardize a visible back/home affordance on every screen; fix the Paywall trap first (safety).
-3. [DECIDE] STILLFORM WORDMARK on every page as a home LINK — AppHeader wordmark is HOME-ONLY by canon §10 ("home header is one wordmark and nothing else") and is identity, not a clickable home link. Arlin wants it on EVERY page, tappable → home. CONFLICTS with canon §10 — Arlin confirms overriding canon, then build into global chrome.
+1. [BUILD] LOGIN / SIGN-IN — auth EXISTS (Accounts A1–A5, email-code; in Settings → Account) but is buried. DECIDED (Arlin June 23): put SIGN-IN in the SURFACE HEADER (global chrome), not Settings. Build in the global header (item 3).
+2. [BUILD/VERIFY] BACK on every page — spine screens have SpineBack ("← home"); non-spine screens exit via ad-hoc onExit. CORRECTION (verified June 23): Paywall is NOT a trap — it renders a quiet "Not now ›" exit (line 197). Real gap: the back/home affordance is not UNIFORM or reliably visible across screens. Standardize via the global header chrome (item 3).
+3. [BUILD] GLOBAL HEADER CHROME — DECIDED (Arlin June 23): the Stillform wordmark appears on EVERY page as a tappable HOME link, with SIGN-IN in the same header. Arlin clarified this is NOT an override — wordmark-as-home-link is the consistent identity she has asked for; canon §10's "wordmark and nothing else" was about not cluttering the home header with ICONS, and a quiet wordmark-home-link + quiet sign-in honors that restraint. ACTION: one global header in AppV2 wrapping every screen (wordmark→home, quiet Sign in, back/← where there is somewhere behind). Update the canon §10 note accordingly.
 
 ### B. Settings — V1→V2 parity (NOT covered by the June-15 visual audit)
 4. [PARITY] V2 Settings currently = Access (subscription) · Display (VERIFY contents) · Your data · Clear data · Privacy & contact · Account. V1 additionally had: sound/audio toggle · screen-light mode · reduced motion · daily reminder + time picker · tension/body check-in · signal mapping · trigger-profile CRUD · schedule & notifications · biometric lock. AUDIT each: v2 logic exists → expose; missing → build or Arlin marks intended-drop. (May-30 Settings note deferred several "don't promise before they work" — re-walk now that Arlin wants parity.)
 
 ### C. FAQ
-5. [DECIDE/BUILD] FAQ.jsx exists but copy is DRAFT (never approved). Arlin says the characteristics she decided on are not reflected. ACTION: pull Arlin's FAQ decisions from transcripts; apply; Arlin owns final copy. DO NOT fabricate FAQ positioning.
+5. [BUILD] FAQ — DECIDED (Arlin June 23): build the FAQ characteristics she ALREADY requested. ACTION: pull Arlin's FAQ decisions from transcripts and apply; Arlin owns final copy. DO NOT fabricate FAQ positioning.
 
 ### D. Home mockup feedback (this session) not logged/built
-6. [BUILD] Quick Breathe = DRAGGABLE pill that REMEMBERS its position — current QuickBreathe.jsx is position:fixed, NOT draggable, no persistence. Build drag + persist (e.g. stillform_qb_pos).
-7. [VERIFY/BUILD] Quick Breathe pill SHAPE doesn't match the mockup pill per Arlin — match mockup styling.
+6. ✅ DONE (June 23) Quick Breathe = DRAGGABLE pill that REMEMBERS its position — QuickBreathe.jsx rewritten: draggable via pointer events, clamped to viewport, re-clamped on resize, position persisted to stillform_qb_pos (prefix-conforming → rides wipe/sync). Drag-vs-tap by movement threshold; keyboard opens it. Build/security/boot green. Pending Arlin deploy.
+7. ✅ DONE (June 23) Quick Breathe pill SHAPE — now a rounded pill (borderRadius 999px, hairline ring, brass dot ≤5%), per the mockup. Intentionally REVERSES the June-2 D5 ruled-tag decision per Arlin's June-23 direction (logged in the component header).
 8. [BUILD] PREP action inside the Today engine ("Prep for review →") — Today design had it; current TodayEngine has none. (Pairs with the existing Pre-event Brief / "Prep for something coming up" surface.)
-9. [DECIDE] CRISIS brass cross/dot — Arlin asked for a brass mark on Crisis in mockup feedback; Claude overrode it citing canon subordination WITHOUT flagging. Arlin decides: brass mark (her ask) vs subordinate/no-mark (canon §10 framing law).
+9. [BUILD] CRISIS aesthetic + brass cross — DECIDED (Arlin June 23): build the brass cross she requested AND the proper aesthetic for the Crisis Resources page. (Claude had silently overridden the cross citing canon — corrected.) ACTION: brass cross on the Crisis affordance + aesthetic pass on CrisisResources.jsx.
 10. [BUILD] Today engine fuller design — calendar meetings + prep context (currently honest not-connected states only). Data lands with native calendar (Phase 9); structure + Prep can exist now.
 
 ### PROCESS RULE (Arlin, June 23 2026 — STANDING, applies every session)
