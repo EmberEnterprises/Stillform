@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import HairlineDivider from "../components/HairlineDivider.jsx";
@@ -25,7 +25,35 @@ import HairlineDivider from "../components/HairlineDivider.jsx";
  *
  * @param {function(): void} onExit — called when the user taps back to home.
  */
+const idOf = (it) =>
+  it.id || it.q.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
 export default function FAQ({ onExit }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(() => new Set());
+  const q = query.trim().toLowerCase();
+  const filtered = q ? ITEMS.filter((it) => it.q.toLowerCase().includes(q)) : ITEMS;
+
+  const toggle = (id) =>
+    setOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  // Jump chip: auto-expand the target, then smooth-scroll to it once rendered.
+  const jump = (id) => {
+    setOpen((prev) => new Set(prev).add(id));
+    setTimeout(() => {
+      try {
+        document.getElementById(`faq-q-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch {
+        /* non-fatal */
+      }
+    }, 60);
+  };
+
   return (
     <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
       <button type="button" onClick={onExit} aria-label="Back to home" style={BACK_BTN}>
@@ -40,16 +68,47 @@ export default function FAQ({ onExit }) {
         rule
       />
 
-      {ITEMS.map((item, i) => (
-        <React.Fragment key={item.id}>
-          <section style={SECTION}>
-            <MonoLabel label={`Q · ${String(i + 1).padStart(2, "0")}`} />
-            <p style={QUESTION}>{item.q}</p>
-            <div style={ANSWER}>{item.a}</div>
-          </section>
-          {i < ITEMS.length - 1 && <HairlineDivider />}
-        </React.Fragment>
-      ))}
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search the FAQ"
+        aria-label="Search the FAQ"
+        style={SEARCH}
+      />
+
+      {/* Jump index — tap a question to open it and scroll to it. */}
+      {filtered.length > 0 && (
+        <div style={CHIPS}>
+          {filtered.map((it) => {
+            const id = idOf(it);
+            return (
+              <button key={id} type="button" onClick={() => jump(id)} style={CHIP}>
+                {it.q.replace(/\?$/, "")}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {filtered.length === 0 && <p style={NORESULTS}>No questions match that search.</p>}
+
+      {/* Entries — expand/collapse per question. */}
+      {filtered.map((it) => {
+        const id = idOf(it);
+        const isOpen = open.has(id);
+        return (
+          <div key={id} id={`faq-q-${id}`} style={ENTRY}>
+            <button type="button" onClick={() => toggle(id)} aria-expanded={isOpen} style={QBTN}>
+              <span aria-hidden="true" style={{ ...CHEV, transform: isOpen ? "rotate(90deg)" : "none" }}>
+                ▸
+              </span>
+              <span style={QTEXT}>{it.q}</span>
+            </button>
+            {isOpen && <div style={ANSWER}>{it.a}</div>}
+          </div>
+        );
+      })}
 
       <HairlineDivider />
       <section style={{ ...SECTION, marginBottom: "var(--sf-space-32)" }}>
@@ -115,6 +174,79 @@ const LINK = {
   color: "inherit",
   textDecoration: "underline",
   textUnderlineOffset: "3px",
+};
+
+const SEARCH = {
+  width: "100%",
+  boxSizing: "border-box",
+  background: "var(--sf-ground-elev)",
+  border: "1px solid var(--sf-border-hairline)",
+  borderRadius: "8px",
+  padding: "12px 14px",
+  color: "var(--sf-text-primary)",
+  fontSize: "14px",
+  lineHeight: 1.5,
+  outline: "none",
+  marginTop: "var(--sf-space-24)",
+  marginBottom: "var(--sf-space-20)",
+};
+
+const CHIPS = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "6px",
+  marginBottom: "var(--sf-space-32)",
+};
+
+const CHIP = {
+  background: "transparent",
+  border: "1px solid var(--sf-border-hairline)",
+  borderRadius: "999px",
+  padding: "6px 11px",
+  fontSize: "11px",
+  letterSpacing: "0.02em",
+  color: "var(--sf-text-faint)",
+  cursor: "pointer",
+  WebkitTapHighlightColor: "transparent",
+};
+
+const NORESULTS = {
+  color: "var(--sf-text-faint)",
+  fontSize: "13px",
+  fontStyle: "italic",
+  textAlign: "center",
+  padding: "var(--sf-space-32) var(--sf-space-16)",
+};
+
+const ENTRY = { borderTop: "1px solid var(--sf-border-hairline)" };
+
+const QBTN = {
+  width: "100%",
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "12px",
+  background: "transparent",
+  border: "none",
+  textAlign: "left",
+  padding: "16px 0",
+  cursor: "pointer",
+  WebkitTapHighlightColor: "transparent",
+};
+
+const CHEV = {
+  flexShrink: 0,
+  marginTop: "3px",
+  color: "var(--sf-accent)",
+  fontSize: "11px",
+  lineHeight: 1,
+  transition: "transform var(--sf-motion-default) var(--sf-ease-prestige)",
+};
+
+const QTEXT = {
+  fontSize: "16px",
+  fontWeight: 600,
+  lineHeight: 1.4,
+  color: "var(--sf-text-primary)",
 };
 
 
