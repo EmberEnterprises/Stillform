@@ -1,4 +1,5 @@
 import React from "react";
+import BrassCross from "./BrassCross.jsx";
 
 /**
  * HomeFooter — three quiet links to the other home surfaces, plus a
@@ -95,8 +96,12 @@ export default function HomeFooter({ onNavigate }) {
             textTransform: "uppercase",
             WebkitTapHighlightColor: "transparent",
             transition: "color var(--sf-motion-default) var(--sf-ease-prestige)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "5px",
           }}
         >
+          <BrassCross size={9} />
           Crisis Resources
         </button>
       </div>

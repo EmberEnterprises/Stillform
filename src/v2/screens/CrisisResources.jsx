@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import MonoLabel from "../components/MonoLabel.jsx";
+import BrassCross from "../components/BrassCross.jsx";
 import HairlineDivider from "../components/HairlineDivider.jsx";
 import { buildSessionSummary } from "../lib/sessionSummary.js";
 
@@ -146,6 +147,7 @@ export default function CrisisResources({ onExit }) {
       </button>
 
       <header style={{ marginBottom: "var(--sf-space-24)" }}>
+        <BrassCross size={22} style={{ display: "block", marginBottom: "var(--sf-space-12)" }} />
         <MonoLabel size="xs">CRISIS RESOURCES</MonoLabel>
         <h1 style={H1}>If it's heavier than practice right now.</h1>
         <p style={LEAD}>
