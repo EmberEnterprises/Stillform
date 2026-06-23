@@ -10,6 +10,7 @@ import { getSessionCount } from "../lib/sessions.js";
 import { maybeRunMediation, getPendingProposals } from "../lib/mediationApi.js";
 import MediationQueue from "../components/MediationQueue.jsx";
 import Notice from "./spine/Notice.jsx";
+import TodayEngine from "../components/TodayEngine.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
 
 /**
@@ -139,6 +140,12 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   return (
     <main className="sf-page sf-page--hero">
       <article className="sf-fade-enter" style={{ width: "100%" }}>
+
+        {/* Today engine — quiet device-context readout (calendar / HRV /
+            sleep) with honest states only, no fabricated data. Receding so
+            the naming surface leads. (S5: merge with the concierge "Today"
+            header for established users so there's a single Today anchor.) */}
+        <TodayEngine />
 
         {/* TODAY label — heads the concierge layer (thread / trajectory /
             mirror). Hidden when that layer is empty so the naming block leads

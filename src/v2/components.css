@@ -506,3 +506,15 @@
 }
 .sf-v2 .sf-foot-link:hover::after, .sf-v2 .sf-foot-link:focus-visible::after{ transform:scaleX(1); }
 .sf-v2 .sf-foot-link:hover, .sf-v2 .sf-foot-link:focus-visible{ color:var(--sf-text-quiet) !important; }
+
+/* ══ v7 DRAWN HOME · Stage 4 — Today engine (device-context readout) ══
+   Quiet + receding so the naming surface leads. Collapsed by default;
+   expands to honest source states (no fabricated data). */
+.sf-v2 .sf-today{ margin-bottom:var(--sf-space-24); }
+.sf-v2 .sf-today-head{ width:100%; display:flex; align-items:center; gap:8px; background:none; border:none; border-bottom:0.5px solid var(--sf-border-hairline); padding:8px 0; cursor:pointer; WebkitTapHighlightColor:transparent; }
+.sf-v2 .sf-today-lbl{ font-family:var(--sf-font-mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--sf-text-faint); }
+.sf-v2 .sf-today-caret{ margin-left:auto; font-size:10px; color:var(--sf-text-faint); }
+.sf-v2 .sf-today-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:0.5px solid var(--sf-border-hairline); }
+.sf-v2 .sf-today-name{ font-family:var(--sf-font-mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--sf-text-faint); }
+.sf-v2 .sf-today-state{ font-family:var(--sf-font-mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--sf-text-faint); opacity:.75; }
+.sf-v2 .sf-today-note{ margin-top:var(--sf-space-12); font-family:var(--sf-font-sans); font-weight:300; font-size:12px; line-height:1.55; color:var(--sf-text-faint); }
