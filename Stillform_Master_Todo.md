@@ -1789,5 +1789,5 @@ OPEN DECISIONS FOR ARLIN (before S4): (a) Today engine on home NOW as honest-emp
 
 ## ▸ OPEN — ADD "PHILOSOPHY" TO THE APP AS A NOTE (Arlin, June 22 2026)
 Arlin wants the app's philosophy captured as a note. SCOPE TBD — confirm with Arlin before building:
-  (a) PLACEMENT: a user-facing in-app note (an about/manifesto surface users can read) OR an internal philosophy doc folded into canon.
+  (a) PLACEMENT — DECIDED (Arlin, June 22): the philosophy is a LEARNING ITEM — it lives in the Library / Learning Track, NOT an internal doc or a static about-page. Arlin's rationale: engaging the philosophy aids NEUROPLASTICITY by training a different way of thinking, which is the practice's core mechanism — so it's framed as content the user learns from, consistent with metacognition-expands-cognitive-capacity. Build it as a Library/learning entry. (Likely pairs with the Library/Progress distinction work that's already queued for after the home rebuild.)
   (b) CONTENT: the philosophy text itself — DO NOT FABRICATE; Arlin provides/dictates the through-line. Candidate threads from canon she may draw from (her words, not Claude's): metacognition that EXPANDS cognitive capacity via neuroplasticity; the trader-desk edge (a skill with a track record, not a sedative); user-led practice, AI as architecture not actor; show-don't-tell care.
