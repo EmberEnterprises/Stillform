@@ -157,7 +157,10 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
   };
 
   const handleSelfLed = () => {
-    if (!canContinue) return;
+    // Gated on a name, but never a dead button: tapping it with nothing
+    // named focuses the field instead of silently doing nothing. Lets the
+    // three modes stay visually identical (no dimmed/disabled hue).
+    if (!canContinue) { textareaRef.current?.focus(); return; }
     onContinue(text.trim(), selectedChip, { selfMode: true });
   };
 
@@ -176,8 +179,16 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
     onContinue(text.trim(), selectedChip, { reset: true });
   };
 
+  // When embedded in SmartScreen (isBase) the parent already owns the
+  // sf-page--hero wrapper. Rendering another here double-stacks the hero
+  // top/bottom padding (64px + 128px) and opens a large void below the
+  // actions — and nests <main> inside <main>, which is invalid. So the base
+  // surface renders in a plain div with no page padding; only the standalone
+  // spine surface keeps the hero <main>.
+  const Wrapper = isBase ? "div" : "main";
+  const wrapperProps = isBase ? {} : { className: "sf-page sf-page--hero" };
   return (
-    <main className="sf-page sf-page--hero">
+    <Wrapper {...wrapperProps}>
       {!isBase ? <SpineBack onBack={onExit} /> : null}
       <div className="sf-fade-enter">
         <EditorialBlock
@@ -331,8 +342,6 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
               type="button"
               className="sf-mode-btn"
               onClick={handleSelfLed}
-              disabled={!canContinue}
-              aria-disabled={!canContinue}
             >
               <span className="sf-mode-glyph" aria-hidden="true">○</span>
               <span className="sf-mode-label">Self-led</span>
@@ -355,7 +364,7 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
           </div>
         </div>
       </div>
-    </main>
+    </Wrapper>
   );
 }
 
