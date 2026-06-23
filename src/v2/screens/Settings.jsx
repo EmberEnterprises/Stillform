@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
+import CollapsibleSection from "../components/CollapsibleSection.jsx";
 import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import HairlineDivider from "../components/HairlineDivider.jsx";
@@ -116,122 +117,115 @@ export default function Settings({ onExit }) {
         rule
       />
 
+      {/* ACCOUNT — email-code sign-in, manual backup, restore, sign out */}
+      <CollapsibleSection label="Account" defaultOpen>
+        <AccountSection />
+      </CollapsibleSection>
+
       {/* ACCESS — subscription status (install-id based; no auth required) */}
-      <section style={SECTION}>
-        <MonoLabel label="Access" />
-        <p style={ROW}>
-          {accessLabel}
-          {sub.status ? ` · ${sub.status}` : ""}
-        </p>
-        {sub.error && !sub.loading && (
-          <p style={FAINT}>{sub.error} If access looks wrong, refresh from the server.</p>
-        )}
-        <Button variant="secondary" onClick={refresh}>
-          {refreshing ? "Refreshing…" : "Refresh from server"}
-        </Button>
-      </section>
-
-      <HairlineDivider />
-
-      {/* ACCOUNT — accounts arc A3 (June 2 2026): email-code sign-in,
-          manual backup, restore with typed confirm on non-empty devices,
-          sign out. Backup is the ONLY thing behind sign-in (Self-Mode law:
-          practice never gates on an account). */}
-      <AccountSection />
-
-      <HairlineDivider />
-
-      {/* DISPLAY — accessibility (contrast / text size). Applies app-wide
-          instantly via lib/a11y.js token overrides; persists on-device. */}
-      <div style={SECTION}>
-        <MonoLabel size="xs" tone="faint">DISPLAY</MonoLabel>
-        <div style={ROW}>
-          <span style={{ color: "var(--sf-text-primary)" }}>High contrast</span>
-          <button
-            type="button"
-            onClick={() => toggleA11y("contrast", "high")}
-            style={a11y.contrast === "high" ? TOGGLE_ON : TOGGLE_OFF}
-            aria-pressed={a11y.contrast === "high"}
-            aria-label="Toggle high contrast"
-          >
-            {a11y.contrast === "high" ? "On" : "Off"}
-          </button>
+      <CollapsibleSection label="Access">
+        <div style={SECTION}>
+          <p style={ROW}>
+            {accessLabel}
+            {sub.status ? ` \u00b7 ${sub.status}` : ""}
+          </p>
+          {sub.error && !sub.loading && (
+            <p style={FAINT}>{sub.error} If access looks wrong, refresh from the server.</p>
+          )}
+          <Button variant="secondary" onClick={refresh}>
+            {refreshing ? "Refreshing\u2026" : "Refresh from server"}
+          </Button>
         </div>
-        <div style={ROW}>
-          <span style={{ color: "var(--sf-text-primary)" }}>Larger text</span>
-          <button
-            type="button"
-            onClick={() => toggleA11y("textSize", "large")}
-            style={a11y.textSize === "large" ? TOGGLE_ON : TOGGLE_OFF}
-            aria-pressed={a11y.textSize === "large"}
-            aria-label="Toggle larger text"
-          >
-            {a11y.textSize === "large" ? "On" : "Off"}
-          </button>
+      </CollapsibleSection>
+
+      {/* DISPLAY — accessibility (contrast / text size), app-wide via a11y.js */}
+      <CollapsibleSection label="Display">
+        <div style={SECTION}>
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>High contrast</span>
+            <button
+              type="button"
+              onClick={() => toggleA11y("contrast", "high")}
+              style={a11y.contrast === "high" ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={a11y.contrast === "high"}
+              aria-label="Toggle high contrast"
+            >
+              {a11y.contrast === "high" ? "On" : "Off"}
+            </button>
+          </div>
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>Larger text</span>
+            <button
+              type="button"
+              onClick={() => toggleA11y("textSize", "large")}
+              style={a11y.textSize === "large" ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={a11y.textSize === "large"}
+              aria-label="Toggle larger text"
+            >
+              {a11y.textSize === "large" ? "On" : "Off"}
+            </button>
+          </div>
         </div>
-      </div>
+      </CollapsibleSection>
 
-      {/* YOUR DATA — read-only summary of what's on this device */}
-      <section style={SECTION}>
-        <MonoLabel label="Your data" />
-        <p style={ROW}>
-          {summary.sessions} session{summary.sessions === 1 ? "" : "s"} logged · {summary.items} item
-          {summary.items === 1 ? "" : "s"} stored on this device.
-        </p>
-        <p style={FAINT}>
-          Everything lives on this device. Nothing leaves it except the anonymous check that
-          confirms your access.
-        </p>
-      </section>
-
-      <HairlineDivider />
-
-      {/* CLEAR DATA — destructive, confirm-gated, local wipe */}
-      <section style={SECTION}>
-        <MonoLabel label="Clear data" />
-        {cleared ? (
-          <p style={ROW}>Your data on this device has been cleared.</p>
-        ) : !confirmClear ? (
-          <>
-            <p style={FAINT}>
-              Removes your sessions, saved reframes, and profiles from this device. This can't be
-              undone. Your access stays intact.
-            </p>
-            <Button variant="ghost" onClick={() => setConfirmClear(true)}>
-              Clear all data from this device
-            </Button>
-          </>
-        ) : (
-          <>
-            <p style={ROW}>Clear everything on this device? This can't be undone.</p>
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <Button variant="ghost" onClick={clearDeviceData}>
-                Yes, clear it
+      {/* YOUR DATA — read-only summary + destructive clear (confirm-gated) */}
+      <CollapsibleSection label="Your data">
+        <div style={SECTION}>
+          <p style={ROW}>
+            {summary.sessions} session{summary.sessions === 1 ? "" : "s"} logged · {summary.items} item
+            {summary.items === 1 ? "" : "s"} stored on this device.
+          </p>
+          <p style={FAINT}>
+            Everything lives on this device. Nothing leaves it except the anonymous check that
+            confirms your access.
+          </p>
+        </div>
+        <div style={{ ...SECTION, marginTop: "var(--sf-space-16)" }}>
+          <MonoLabel size="xs" tone="faint">CLEAR DATA</MonoLabel>
+          {cleared ? (
+            <p style={ROW}>Your data on this device has been cleared.</p>
+          ) : !confirmClear ? (
+            <>
+              <p style={FAINT}>
+                Removes your sessions, saved reframes, and profiles from this device. This can't be
+                undone. Your access stays intact.
+              </p>
+              <Button variant="ghost" onClick={() => setConfirmClear(true)}>
+                Clear all data from this device
               </Button>
-              <Button variant="secondary" onClick={() => setConfirmClear(false)}>
-                Cancel
-              </Button>
-            </div>
-          </>
-        )}
-      </section>
-
-      <HairlineDivider />
+            </>
+          ) : (
+            <>
+              <p style={ROW}>Clear everything on this device? This can't be undone.</p>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                <Button variant="ghost" onClick={clearDeviceData}>
+                  Yes, clear it
+                </Button>
+                <Button variant="secondary" onClick={() => setConfirmClear(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </CollapsibleSection>
 
       {/* PRIVACY + CONTACT */}
-      <section style={{ ...SECTION, marginBottom: "var(--sf-space-32)" }}>
-        <MonoLabel label="Privacy & contact" />
-        <p style={ROW}>
-          <a href="/privacy.html" style={LINK}>
-            Privacy policy
-          </a>
-        </p>
-        <p style={ROW}>
-          <a href="mailto:ARAembersllc@proton.me" style={LINK}>
-            ARAembersllc@proton.me
-          </a>
-        </p>
-      </section>
+      <CollapsibleSection label="Privacy & contact">
+        <div style={{ ...SECTION, marginBottom: "var(--sf-space-32)" }}>
+          <p style={ROW}>
+            <a href="/privacy.html" style={LINK}>
+              Privacy policy
+            </a>
+          </p>
+          <p style={ROW}>
+            <a href="mailto:ARAembersllc@proton.me" style={LINK}>
+              ARAembersllc@proton.me
+            </a>
+          </p>
+        </div>
+      </CollapsibleSection>
+
     </main>
   );
 }
