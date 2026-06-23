@@ -1,40 +1,94 @@
 import React from "react";
 
 /**
- * AppHeader — single quiet Stillform wordmark at top-left.
+ * AppHeader — the Stillform wordmark, the top chrome on every surface.
  *
- * Per STILLFORM_CANON.md §10: "Splash gets the wordmark or it gets nothing."
- * Operator-tier silence beats a wrong word. The home header is one
- * wordmark and nothing else — no help icon, no settings icon, no
- * subscribe link. Those live as quiet footer affordances.
+ * June 23 2026 (Arlin): the wordmark is the consistent identity + HOME link on
+ * every page, and Sign in lives in the header (not buried in Settings). This
+ * updates canon §10's "home header is one wordmark and nothing else" per
+ * Arlin's direction — restraint kept (the wordmark + a quiet text "Sign in,"
+ * no icons; she clarified the wordmark-as-home-link is the consistent identity
+ * she has asked for, not an override).
  *
- * Design system: Cormorant Garamond serif at display-sm scale, with
- * intentional weight contrast — "Still" at 300, "form" at 400 with the
- * accent color as a single-character emphasis
- * wordmark identity treatment).
+ * Props (all optional, backward-compatible — no props = the original silent
+ * wordmark):
+ *   onHome   — when provided, the wordmark is a home-link button. Omit on the
+ *              home surface itself (identity only; nothing to link to).
+ *   onSignIn — when provided, renders a quiet "Sign in" at the right, routing
+ *              to where auth lives (currently Settings → Account; a dedicated
+ *              login surface is a flagged refinement).
  */
-export default function AppHeader() {
+export default function AppHeader({ onHome, onSignIn }) {
+  const wordmark = (
+    <>
+      <span style={{ fontWeight: 300 }}>Still</span>
+      <span style={{ fontWeight: 400, fontStyle: "italic", color: "var(--sf-accent)" }}>form</span>
+    </>
+  );
+  const wordmarkStyle = {
+    fontFamily: "var(--sf-font-serif)",
+    fontSize: "22px",
+    lineHeight: 1,
+    letterSpacing: 0,
+    color: "var(--sf-text-cream)",
+  };
+
   return (
     <header
       style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "var(--sf-space-16)",
         padding: "var(--sf-space-24) var(--sf-space-24) 0",
         maxWidth: "640px",
         margin: "0 auto",
       }}
     >
-      <div
-        style={{
-          fontFamily: "var(--sf-font-serif)",
-          fontSize: "22px",
-          lineHeight: 1,
-          letterSpacing: 0,
-          color: "var(--sf-text-cream)",
-        }}
-        aria-label="Stillform"
-      >
-        <span style={{ fontWeight: 300 }}>Still</span>
-        <span style={{ fontWeight: 400, fontStyle: "italic", color: "var(--sf-accent)" }}>form</span>
-      </div>
+      {typeof onHome === "function" ? (
+        <button
+          type="button"
+          onClick={onHome}
+          aria-label="Stillform — home"
+          style={{
+            ...wordmarkStyle,
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          {wordmark}
+        </button>
+      ) : (
+        <div style={wordmarkStyle} aria-label="Stillform">
+          {wordmark}
+        </div>
+      )}
+
+      {typeof onSignIn === "function" ? (
+        <button
+          type="button"
+          onClick={onSignIn}
+          className="sf-foot-link"
+          style={{
+            background: "none",
+            border: "none",
+            padding: "var(--sf-space-4)",
+            cursor: "pointer",
+            color: "var(--sf-text-faint)",
+            fontFamily: "var(--sf-font-mono)",
+            fontSize: "9px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            position: "relative",
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          Sign in
+        </button>
+      ) : null}
     </header>
   );
 }

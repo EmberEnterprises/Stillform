@@ -9,6 +9,7 @@ import { runVersionGatedBackup, maybeOpportunisticBackup } from "./lib/backupAut
 // sets <html> data attributes only.
 applyA11y();
 import Home from "./screens/Home.jsx";
+import AppHeader from "./components/AppHeader.jsx";
 import Spine from "./screens/Spine.jsx";
 import FoundationVerify from "./screens/FoundationVerify.jsx";
 import MyProgress from "./screens/MyProgress.jsx";
@@ -32,29 +33,16 @@ import { shouldGate } from "./lib/gating.js";
 import { refreshSubscriptionStatus } from "./lib/subscriptionApi.js";
 
 /**
- * AppV2 — root of the v2 frontend.
+ * AppV2 — root of the v2 frontend. State-machine routing (no URL hash).
  *
- * Phase 5 routing (state machine, no URL hash for now):
- *   home            → main journey home, beat-aware (Phase 1)
- *   spine           → Notice → Reframe → Close (Phase 2)
- *   my-progress     → diagnostic stack landing (Phase 5 sub-item #2)
- *   context-profile → diagnostic stack editor (Phase 5 sub-item #1)
- *   verify          → foundation primitives audit (?v=2&verify=1)
+ * GLOBAL CHROME (June 23 2026, Arlin): every non-home surface renders a single
+ * AppHeader — the Stillform wordmark as a HOME link + a quiet Sign in. The home
+ * surface keeps its own AppHeader (so its composition is untouched); the spine,
+ * onboarding, and verify run headerless (immersive / first-run / audit). Each
+ * screen keeps its own in-content back (→ correct parent); the header adds home
+ * + sign-in, not a second back.
  *
- * Two-level back behavior under Progress:
- *   home → my-progress (Progress link in HomeFooter)
- *   my-progress → context-profile (entry tap)
- *   context-profile → my-progress (back from editor)
- *   my-progress → home (back from landing)
- *
- * Anchor: STILLFORM_CANON.md §architecture.
- */
-/**
- * Share-to-Reframe (rebuilt June 2 2026): the Android share-intent layer
- * deep-links into the app with ?share=<text>. Read once, sanitize, and
- * consume (URL cleaned so a refresh doesn't re-trigger). Guards: first-run
- * completion (not onboarded -> normal onboarding, share ignored) and the
- * session gate (gated -> paywall, same as any session entry).
+ * Anchor: STILLFORM_CANON.md §architecture / §10 (header note updated June 23).
  */
 function readShareText() {
   try {
@@ -82,46 +70,42 @@ function pickInitialScreen() {
   } catch {
     /* noop */
   }
-  // First-run: a brand-new device sees the intro before Home.
   if (!isOnboarded()) return "onboarding";
   return "home";
 }
+
+// Surfaces that render WITHOUT the global header: home (own AppHeader),
+// onboarding (first-run flow), verify (audit), spine (immersive practice with
+// its own ← home back).
+const HEADERLESS = new Set(["home", "onboarding", "verify", "spine"]);
 
 export default function AppV2() {
   const [screen, setScreen] = useState(pickInitialScreen);
   const [entryPayload, setEntryPayload] = useState(null);
   const [homeNonce, setHomeNonce] = useState(0);
-  // Phase 6.4c: one-shot forced beat for a manual launch (post-event from
-  // My Progress). Set right before routing to "spine", consumed by Spine at
-  // mount, cleared on exit. Null for the normal time-routed home session.
-  const [spineBeat, setSpineBeat] = useState(
-    // Share entry always opens a MAIN session: shared text is in-the-moment
-    // material; landing it in wind-down's anchor flow would be wrong.
-    INITIAL_SHARE_TEXT ? "main" : null
-  );
+  // Phase 6.4c: one-shot forced beat for a manual launch (post-event from My
+  // Progress). Null for the normal time-routed home session.
+  const [spineBeat, setSpineBeat] = useState(INITIAL_SHARE_TEXT ? "main" : null);
 
-  // Phase 8c: warm the subscription-status cache once on mount so the gate
-  // decision (shouldGate) has a resolved status to read. Fail-open: until
-  // this lands, shouldGate returns false (no wall), so a slow/failed fetch
-  // never blocks a session.
+  // Phase 8c: warm subscription status; A4: version-gated auto-backup.
   useEffect(() => {
-    // A4: version-gated auto-backup — the locked non-negotiable. Fire-and-
-    // forget today (no migrations exist yet); future migrations must await it.
     runVersionGatedBackup();
     refreshSubscriptionStatus();
   }, []);
 
-  if (screen === "verify") {
-    return (
-      <div className="sf-v2">
-        <FoundationVerify />
-      </div>
-    );
-  }
+  // Global header actions.
+  const goHome = () => {
+    setSpineBeat(null);
+    setEntryPayload(null);
+    setScreen("home");
+  };
+  const goSignIn = () => setScreen("settings"); // auth lives in Settings → Account (dedicated login surface = flagged refinement)
 
-  if (screen === "spine") {
-    return (
-      <div className="sf-v2">
+  const renderScreen = () => {
+    if (screen === "verify") return <FoundationVerify />;
+
+    if (screen === "spine") {
+      return (
         <Spine
           forcedBeat={spineBeat}
           initialText={INITIAL_SHARE_TEXT || null}
@@ -133,19 +117,15 @@ export default function AppV2() {
             setScreen("home");
           }}
         />
-      </div>
-    );
-  }
+      );
+    }
 
-  if (screen === "my-progress") {
-    return (
-      <div className="sf-v2">
+    if (screen === "my-progress") {
+      return (
         <MyProgress
           onExit={() => setScreen("home")}
           onNavigate={(target) => {
-            // Map editor ids → screen state. As future editors ship,
-            // they add their case here. Unknown targets fall through
-            // silently (defensive — landing only emits known ids).
+            // Map editor ids → screen state. Unknown targets fall through.
             if (target === "context-profile") setScreen("context-profile");
             else if (target === "trigger-profile") setScreen("trigger-profile");
             else if (target === "bias-profile") setScreen("bias-profile");
@@ -153,154 +133,46 @@ export default function AppV2() {
             else if (target === "risk-profile") setScreen("risk-profile");
             else if (target === "prediction-mirror") setScreen("prediction-mirror");
             else if (target === "what-you-bet-on") setScreen("what-you-bet-on");
-            // Phase 6.4c: post-event reflection — launch the spine in the
-            // post-event beat (one-shot). The one manual, deliberate beat.
+            // Phase 6.4c: post-event reflection — launch spine in post-event beat.
             else if (target === "post-event") {
               setSpineBeat("post-event");
               setScreen("spine");
             }
-            // Phase 7d: Pre-event Brief — its own standalone artifact screen
-            // (not a beat). Manual entry now; calendar-driven entry is Phase 9.
+            // Phase 7d: Pre-event Brief — standalone artifact screen.
             else if (target === "pre-event-brief") setScreen("pre-event-brief");
           }}
         />
-      </div>
-    );
-  }
+      );
+    }
 
-  if (screen === "context-profile") {
+    // Diagnostic editors — onExit returns to my-progress (AppV2 owns the stack).
+    if (screen === "context-profile") return <ContextProfile onExit={() => setScreen("my-progress")} />;
+    if (screen === "trigger-profile") return <TriggerProfile onExit={() => setScreen("my-progress")} />;
+    if (screen === "bias-profile") return <BiasProfile onExit={() => setScreen("my-progress")} />;
+    if (screen === "capacities-mirror") return <CapacitiesMirror onExit={() => setScreen("my-progress")} />;
+    if (screen === "risk-profile") return <RiskProfileMirror onExit={() => setScreen("my-progress")} />;
+    if (screen === "prediction-mirror") return <PredictionErrorMirror onExit={() => setScreen("my-progress")} />;
+    if (screen === "what-you-bet-on") return <WhatYouBetOnMirror onExit={() => setScreen("my-progress")} />;
+
+    if (screen === "library") return <Library onExit={() => setScreen("home")} />;
+
+    if (screen === "pre-event-brief") {
+      return <PreEventBrief onDone={() => setScreen("home")} onExit={() => setScreen("my-progress")} />;
+    }
+
+    if (screen === "paywall") return <Paywall onClose={() => setScreen("home")} />;
+
+    if (screen === "onboarding") {
+      return <Onboarding onComplete={() => { setOnboarded(); setScreen("home"); }} />;
+    }
+
+    if (screen === "settings") return <Settings onExit={() => setScreen("home")} />;
+    if (screen === "roadmap") return <Roadmap onExit={() => setScreen("home")} />;
+    if (screen === "crisis-resources") return <CrisisResources onExit={() => setScreen("home")} />;
+    if (screen === "faq") return <FAQ onExit={() => setScreen("home")} />;
+
+    // Default: home.
     return (
-      <div className="sf-v2">
-        {/* onExit returns to my-progress (parent), NOT home. AppV2
-            owns the route stack; ContextProfile doesn't know its
-            parent. */}
-        <ContextProfile onExit={() => setScreen("my-progress")} />
-      </div>
-    );
-  }
-
-  if (screen === "trigger-profile") {
-    return (
-      <div className="sf-v2">
-        <TriggerProfile onExit={() => setScreen("my-progress")} />
-      </div>
-    );
-  }
-
-  if (screen === "bias-profile") {
-    return (
-      <div className="sf-v2">
-        <BiasProfile onExit={() => setScreen("my-progress")} />
-      </div>
-    );
-  }
-
-  if (screen === "capacities-mirror") {
-    return (
-      <div className="sf-v2">
-        <CapacitiesMirror onExit={() => setScreen("my-progress")} />
-      </div>
-    );
-  }
-
-  if (screen === "risk-profile") {
-    return (
-      <div className="sf-v2">
-        <RiskProfileMirror onExit={() => setScreen("my-progress")} />
-      </div>
-    );
-  }
-
-  if (screen === "prediction-mirror") {
-    return (
-      <div className="sf-v2">
-        <PredictionErrorMirror onExit={() => setScreen("my-progress")} />
-      </div>
-    );
-  }
-
-  if (screen === "what-you-bet-on") {
-    return (
-      <div className="sf-v2">
-        <WhatYouBetOnMirror onExit={() => setScreen("my-progress")} />
-      </div>
-    );
-  }
-
-  if (screen === "library") {
-    return (
-      <div className="sf-v2">
-        <Library onExit={() => setScreen("home")} />
-      </div>
-    );
-  }
-
-  if (screen === "pre-event-brief") {
-    return (
-      <div className="sf-v2">
-        <PreEventBrief
-          onDone={() => setScreen("home")}
-          onExit={() => setScreen("my-progress")}
-        />
-      </div>
-    );
-  }
-
-  if (screen === "paywall") {
-    return (
-      <div className="sf-v2">
-        <Paywall onClose={() => setScreen("home")} />
-      </div>
-    );
-  }
-
-  if (screen === "onboarding") {
-    return (
-      <div className="sf-v2">
-        <Onboarding
-          onComplete={() => {
-            setOnboarded();
-            setScreen("home");
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (screen === "settings") {
-    return (
-      <div className="sf-v2">
-        <Settings onExit={() => setScreen("home")} />
-      </div>
-    );
-  }
-
-  if (screen === "roadmap") {
-    return (
-      <div className="sf-v2">
-        <Roadmap onExit={() => setScreen("home")} />
-      </div>
-    );
-  }
-
-  if (screen === "crisis-resources") {
-    return (
-      <div className="sf-v2">
-        <CrisisResources onExit={() => setScreen("home")} />
-      </div>
-    );
-  }
-
-  if (screen === "faq") {
-    return (
-      <div className="sf-v2">
-        <FAQ onExit={() => setScreen("home")} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="sf-v2">
       <Home
         key={homeNonce}
         onEnterPractice={(text, chip, opts = {}) => {
@@ -315,7 +187,6 @@ export default function AppV2() {
           // 'home-refresh' re-mounts Home so a completed in-place session
           // returns to a fresh naming surface for the current beat.
           if (target === "home-refresh") { setHomeNonce((n) => n + 1); return; }
-          // Footer navigation targets.
           if (target === "progress") setScreen("my-progress");
           else if (target === "library") setScreen("library");
           else if (target === "settings") setScreen("settings");
@@ -324,6 +195,13 @@ export default function AppV2() {
           else if (target === "roadmap") setScreen("roadmap");
         }}
       />
+    );
+  };
+
+  return (
+    <div className="sf-v2">
+      {!HEADERLESS.has(screen) ? <AppHeader onHome={goHome} onSignIn={goSignIn} /> : null}
+      {renderScreen()}
     </div>
   );
 }

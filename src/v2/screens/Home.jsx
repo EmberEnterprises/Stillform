@@ -35,7 +35,7 @@ export default function Home({ onEnterPractice, onNavigate }) {
       <div className="sf-home-aura" aria-hidden="true" />
       <div className="sf-home-grain" aria-hidden="true" />
 
-      <AppHeader />
+      <AppHeader onSignIn={() => nav("settings")} />
 
       <SmartScreen onEnterPractice={onEnterPractice} onOpenRoadmap={() => nav("roadmap")} />
 
