@@ -12,6 +12,7 @@ import MediationQueue from "../components/MediationQueue.jsx";
 import Notice from "./spine/Notice.jsx";
 import TodayEngine from "../components/TodayEngine.jsx";
 import TodaysBriefCard from "../components/TodaysBriefCard.jsx";
+import EodArtifactCard from "../components/EodArtifactCard.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
 
 /**
@@ -236,6 +237,10 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
             "on the home screen"). Self-gates: renders nothing until generated.
             Sits in the daily-context zone, just above the naming surface. */}
         <TodaysBriefCard />
+
+        {/* EOD artifact — the evening read, re-readable on the home (Arlin:
+            home + inline at close). Self-gates until generated at evening close. */}
+        <EodArtifactCard />
 
         {/* The naming surface IS the home practice — rendered inline, not a
             primer that routes away. The concierge layer (Mirror / thread /
