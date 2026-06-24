@@ -34,20 +34,20 @@ const REGIONS = [
   {
     region: "Brazil",
     lines: [
-      { name: "CVV — Centro de Valorização da Vida", note: "Gratuito e sigiloso, 24/7. Emergências: 192.", number: "Ligar 188", href: "tel:188" },
-      { name: "CVV — apoio por chat", note: "Atendimento online.", number: "cvv.org.br", href: "https://www.cvv.org.br", external: true },
+      { name: "CVV — Centro de Valorização da Vida", note: "Free and confidential, 24/7. Emergency: 192.", number: "Ligar 188", href: "tel:188" },
+      { name: "CVV — apoio por chat", note: "Online chat support.", number: "cvv.org.br", href: "https://www.cvv.org.br", external: true },
     ],
   },
   {
     region: "Spain",
     lines: [
-      { name: "Línea 024", note: "Atención a la conducta suicida. Gratuita, 24/7. Emergencias: 112.", number: "Llamar 024", href: "tel:024" },
+      { name: "Línea 024", note: "Suicide-crisis support. Free, 24/7. Emergency: 112.", number: "Llamar 024", href: "tel:024" },
     ],
   },
   {
     region: "Mexico",
     lines: [
-      { name: "Línea de la Vida", note: "Gratuita y confidencial, 24/7. Emergencias: 911.", number: "Llamar 800 911 2000", href: "tel:8009112000" },
+      { name: "Línea de la Vida", note: "Free and confidential, 24/7. Emergency: 911.", number: "Llamar 800 911 2000", href: "tel:8009112000" },
     ],
   },
   {
