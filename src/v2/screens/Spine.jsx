@@ -14,6 +14,7 @@ import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
 import { deriveThreadName } from "../lib/threadEntry.js";
 import { getCurrentBeat, getBeatOverride, localDateKey } from "../lib/beat.js";
 import { getBeatConfig } from "../lib/beatConfig.js";
+import { gatherTodaysBriefInputs, generateTodaysBrief, saveTodaysBrief } from "../lib/todaysBriefApi.js";
 import { routeMode } from "../lib/reframeApi.js";
 
 /**
@@ -224,6 +225,28 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
         localStorage.setItem(config.completionFlag, JSON.stringify(payload));
       } catch {
         /* localStorage write failure is non-fatal — session is still saved */
+      }
+    }
+
+    // Today's Brief (June 23 2026): on MORNING completion, fire-and-forget
+    // generate the morning artifact and persist it day-keyed. The home screen
+    // surfaces it all day (re-readable per Arlin). Non-blocking — the user
+    // returns home immediately; a pending flag lets the home show a composing
+    // state and poll for arrival. Best-effort: never blocks or fails the session.
+    if (beat === "morning") {
+      try {
+        const briefInputs = gatherTodaysBriefInputs({
+          mood: selectedChip || "",
+          precision: precisionName || "",
+        });
+        try { localStorage.setItem("stillform_todays_brief_pending", localDateKey()); } catch { /* non-fatal */ }
+        generateTodaysBrief(briefInputs)
+          .then((res) => { if (res && !res.error) saveTodaysBrief(res); })
+          .finally(() => {
+            try { localStorage.removeItem("stillform_todays_brief_pending"); } catch { /* non-fatal */ }
+          });
+      } catch {
+        /* brief generation is best-effort; the session is unaffected */
       }
     }
 
