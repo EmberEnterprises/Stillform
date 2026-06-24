@@ -86,7 +86,7 @@ export default function AppHeader({ onHome, onSignIn }) {
             WebkitTapHighlightColor: "transparent",
           }}
         >
-          Sign in
+          Log in
         </button>
       ) : null}
     </header>

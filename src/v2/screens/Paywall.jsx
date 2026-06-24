@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import Button from "../components/Button.jsx";
+import HairlineDivider from "../components/HairlineDivider.jsx";
+import AccountSection from "../components/AccountSection.jsx";
 import { startCheckout } from "../lib/subscriptionApi.js";
 
 /**
@@ -198,6 +200,17 @@ export default function Paywall({ onClose }) {
       </div>
 
       {error ? <p style={ERR}>{error}</p> : null}
+
+      {/* Log in / sign up — relocated here from Settings (Arlin, June 23): the
+          subscription surface is where account + access live, so logging in or
+          signing up lands you in one place, not buried in Settings. */}
+      <div className="sf-fade-enter sf-fade-enter--delay-3" style={{ marginTop: "var(--sf-space-64)" }}>
+        <HairlineDivider />
+        <MonoLabel size="xs" tone="faint" style={{ display: "block", margin: "var(--sf-space-24) 0 var(--sf-space-16)" }}>
+          Log in or sign up
+        </MonoLabel>
+        <AccountSection />
+      </div>
     </main>
   );
 }

@@ -99,7 +99,7 @@ export default function AppV2() {
     setEntryPayload(null);
     setScreen("home");
   };
-  const goSignIn = () => setScreen("settings"); // auth lives in Settings → Account (dedicated login surface = flagged refinement)
+  const goSignIn = () => setScreen("paywall"); // Log in / sign up lives on the subscription page (Arlin, June 23)
 
   const renderScreen = () => {
     if (screen === "verify") return <FoundationVerify />;
@@ -193,6 +193,7 @@ export default function AppV2() {
           else if (target === "faq") setScreen("faq");
           else if (target === "crisis-resources") setScreen("crisis-resources");
           else if (target === "roadmap") setScreen("roadmap");
+          else if (target === "paywall") setScreen("paywall");
         }}
       />
     );
