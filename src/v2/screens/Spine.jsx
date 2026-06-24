@@ -15,6 +15,7 @@ import { deriveThreadName } from "../lib/threadEntry.js";
 import { getCurrentBeat, getBeatOverride, localDateKey } from "../lib/beat.js";
 import { getBeatConfig } from "../lib/beatConfig.js";
 import { gatherTodaysBriefInputs, generateTodaysBrief, saveTodaysBrief } from "../lib/todaysBriefApi.js";
+import { gatherEodArtifactInputs, generateEodArtifact, saveEodArtifact, readEodArtifact, EOD_PENDING_KEY } from "../lib/eodArtifactApi.js";
 import { routeMode } from "../lib/reframeApi.js";
 
 /**
@@ -247,6 +248,28 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
           });
       } catch {
         /* brief generation is best-effort; the session is unaffected */
+      }
+    }
+
+    // EOD artifact (June 23 2026): on EOD completion, fire-and-forget generate
+    // the evening artifact — the AI's read of what the day taught — from the
+    // day's data plus the takeaway the user just named. Persisted day-keyed; the
+    // home card (EodArtifactCard) surfaces it, and the inline-at-close reveal
+    // reads the same store. Idempotent (skip if today's already exists). Best-
+    // effort: never blocks or fails the session.
+    if (beat === "eod") {
+      try {
+        if (!readEodArtifact()) {
+          const eodInputs = gatherEodArtifactInputs(payload);
+          try { localStorage.setItem(EOD_PENDING_KEY, localDateKey()); } catch { /* non-fatal */ }
+          generateEodArtifact(eodInputs)
+            .then((res) => { if (res && !res.error) saveEodArtifact(res.artifact); })
+            .finally(() => {
+              try { localStorage.removeItem(EOD_PENDING_KEY); } catch { /* non-fatal */ }
+            });
+        }
+      } catch {
+        /* eod artifact generation is best-effort; the session is unaffected */
       }
     }
 
