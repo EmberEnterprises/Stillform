@@ -1,115 +1,115 @@
 import React from "react";
 import BrassCross from "../components/BrassCross.jsx";
+import CollapsibleSection from "../components/CollapsibleSection.jsx";
 
 /**
- * CrisisResources — the safety handoff surface (Home footer sub-link; named by
- * crisis states elsewhere). This screen existing and working is a safety
- * requirement: a dead end is not acceptable.
+ * CrisisResources — the safety handoff surface (Home footer sub-link).
+ * This screen existing and working is a safety requirement.
  *
  * FRAMING (canon framing law): Stillform is a practice, not a crisis service —
- * this screen never positions the product as a crisis tool. Quiet, fast handoff
- * to people trained for the moment. Plain language, large single-tap targets,
- * no product voice, no upsell.
+ * never positioned as a crisis tool. Quiet, fast handoff. No product voice, no
+ * upsell, no analytics on this screen (views here are nobody's data point).
  *
- * REBUILD (June 23 2026, Arlin): clean V1 formatting, skinned in the HOME
- * aesthetic (warm aura + grain ground, drawn-brass section rule, Cormorant serif
- * name, brass action pills). The opt-in "summary of what you\'ve been working
- * through" data pop-up was REMOVED — surfacing the user\'s own data on a crisis
- * surface is the wrong thing in that moment. No data thing, no dropdown.
+ * STRUCTURE = V1 (June 23 2026, Arlin — reproduced faithfully this time, not
+ * re-invented): region label + horizontal rows (name + note LEFT, the number
+ * with an arrow RIGHT), a PRIMARY region shown, the rest behind an "Other
+ * resources" expander, emergency numbers always visible. Skinned in the HOME
+ * aesthetic for uniformity (warm aura + grain ground, drawn-brass region rules,
+ * Cormorant serif names, brass numbers, hairline rows). No data-summary pop-up.
  *
- * DELIBERATE: no analytics on this screen — views here are nobody\'s data point.
  * Numbers web-verified June 2 2026 (zero-fabrication). Text links US-only.
  *
  * @param {function(): void} onExit — back to home.
  */
 
-const RESOURCES = [
+// Primary region first; others fall behind the "Other resources" expander.
+const REGIONS = [
   {
-    meta: "CALL OR TEXT · 24/7 · US",
-    name: "988 Suicide & Crisis Lifeline",
-    note: "Free, confidential, around the clock. Spanish available.",
-    actions: [
-      { label: "Call 988", href: "tel:988", aria: "Call 988 now" },
-      { label: "Text 988", href: "sms:988", aria: "Text 988 now" },
+    region: "United States",
+    lines: [
+      { name: "988 Suicide & Crisis Lifeline", note: "Free, confidential, 24/7. Spanish available.", number: "Call or text 988", href: "tel:988" },
+      { name: "Crisis Text Line", note: "Text-based support with a trained counsellor, 24/7.", number: "Text HOME to 741741", href: "sms:741741?&body=HOME" },
     ],
   },
   {
-    meta: "TEXT · 24/7 · US",
-    name: "Crisis Text Line",
-    note: "Text-based support with a trained counsellor.",
-    actions: [
-      { label: "Text HOME to 741741", href: "sms:741741?&body=HOME", aria: "Text HOME to 741741 now" },
+    region: "Brazil",
+    lines: [
+      { name: "CVV — Centro de Valorização da Vida", note: "Gratuito e sigiloso, 24/7. Emergências: 192.", number: "Ligar 188", href: "tel:188" },
+      { name: "CVV — apoio por chat", note: "Atendimento online.", number: "cvv.org.br", href: "https://www.cvv.org.br", external: true },
     ],
   },
   {
-    meta: "CALL · 24/7 · BRAZIL",
-    name: "CVV — Centro de Valorização da Vida",
-    note: "Gratuito e sigiloso. Emergências: 192 (SAMU).",
-    actions: [
-      { label: "Ligar 188", href: "tel:188", aria: "Ligar 188 agora" },
-      { label: "Chat — cvv.org.br", href: "https://www.cvv.org.br", aria: "Chat CVV", external: true },
+    region: "Spain",
+    lines: [
+      { name: "Línea 024", note: "Atención a la conducta suicida. Gratuita, 24/7. Emergencias: 112.", number: "Llamar 024", href: "tel:024" },
     ],
   },
   {
-    meta: "CALL · 24/7 · SPAIN",
-    name: "Línea 024 — atención a la conducta suicida",
-    note: "Gratuita y confidencial. Emergencias: 112.",
-    actions: [
-      { label: "Llamar 024", href: "tel:024", aria: "Llamar al 024 ahora" },
+    region: "Mexico",
+    lines: [
+      { name: "Línea de la Vida", note: "Gratuita y confidencial, 24/7. Emergencias: 911.", number: "Llamar 800 911 2000", href: "tel:8009112000" },
     ],
   },
   {
-    meta: "CALL · 24/7 · MEXICO",
-    name: "Línea de la Vida",
-    note: "Gratuita y confidencial. Emergencias: 911.",
-    actions: [
-      { label: "Llamar 800 911 2000", href: "tel:8009112000", aria: "Llamar 800 911 2000 ahora" },
-    ],
-  },
-  {
-    meta: "CALL · MON–FRI 09:00–18:00 · ARMENIA",
-    name: "Emotional Support Hotline",
-    note: "Toll-free, nationwide (MHAI · Yerevan Municipality). Not 24/7 — outside hours, call 112 or use the directory below.",
-    actions: [
-      { label: "Call 0800 00 900", href: "tel:080000900", aria: "Call 0800 00 900 now" },
-      { label: "Call 112", href: "tel:112", aria: "Call 112 now" },
-      { label: "Armenia lines", href: "https://findahelpline.com/countries/am", aria: "Armenia helpline directory", external: true },
-    ],
-  },
-  {
-    meta: "IMMEDIATE DANGER",
-    name: "Emergency services",
-    note: "If you or someone else is in immediate danger, call your local emergency number now.",
-    actions: [
-      { label: "Call 911 (US)", href: "tel:911", aria: "Call 911 now" },
+    region: "Armenia",
+    lines: [
+      { name: "Emotional Support Hotline", note: "Toll-free (MHAI · Yerevan). Mon–Fri 09:00–18:00. Outside hours, call 112.", number: "Call 0800 00 900", href: "tel:080000900" },
+      { name: "Armenia helpline directory", note: "All Armenia crisis lines.", number: "findahelpline.com", href: "https://findahelpline.com/countries/am", external: true },
     ],
   },
 ];
 
-function ResourceRow({ meta, name, note, actions }) {
+const EMERGENCY = {
+  region: "Immediate danger",
+  lines: [
+    { name: "Emergency services (US)", note: "If you or someone else is in immediate danger.", number: "Call 911", href: "tel:911" },
+    { name: "Emergency services (Europe & more)", note: "The single emergency number across the EU and many other countries.", number: "Call 112", href: "tel:112" },
+  ],
+};
+
+function CrisisLine({ name, note, number, href, external }) {
+  const body = (
+    <>
+      <span style={LINE_MAIN}>
+        <span style={NAME}>{name}</span>
+        {note ? <span style={NOTE}>{note}</span> : null}
+      </span>
+      <span style={NUM}>
+        {number} <span aria-hidden="true">→</span>
+      </span>
+    </>
+  );
+  return href ? (
+    <a
+      href={href}
+      style={LINE}
+      aria-label={`${name} — ${number}`}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      {body}
+    </a>
+  ) : (
+    <div style={LINE}>{body}</div>
+  );
+}
+
+function RegionGroup({ region, lines }) {
   return (
-    <div style={CARD}>
-      <span style={META}>{meta}</span>
-      <h2 style={NAME}>{name}</h2>
-      {note ? <p style={NOTE}>{note}</p> : null}
-      <div style={ACTIONS}>
-        {actions.map((a) => (
-          <a
-            key={a.href + a.label}
-            href={a.href}
-            style={ACTION}
-            aria-label={a.aria}
-            {...(a.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            {a.label}
-          </a>
-        ))}
+    <div style={{ marginBottom: "var(--sf-space-24)" }}>
+      <div className="sf-sec-head">
+        <span className="sf-sec-head-lbl">{region}</span>
+        <div className="sf-sec-rule" />
       </div>
+      {lines.map((l) => (
+        <CrisisLine key={l.href + l.number} {...l} />
+      ))}
     </div>
   );
 }
 
 export default function CrisisResources({ onExit }) {
+  const [primary, ...others] = REGIONS;
+
   return (
     <>
       <div className="sf-home-aura" aria-hidden="true" />
@@ -121,11 +121,7 @@ export default function CrisisResources({ onExit }) {
 
         <header style={{ marginBottom: "var(--sf-space-32)" }}>
           <BrassCross size={22} style={{ display: "block", marginBottom: "var(--sf-space-16)" }} />
-          <div className="sf-sec-head">
-            <span className="sf-sec-head-lbl">Crisis Resources</span>
-            <div className="sf-sec-rule" />
-          </div>
-          <h1 style={H1}>If it&rsquo;s heavier than practice right now.</h1>
+          <h1 style={H1}>Crisis Resources</h1>
           <p style={LEAD}>
             Stillform is a practice, not a crisis service. The lines below are
             staffed by people trained for exactly this moment — free,
@@ -133,18 +129,31 @@ export default function CrisisResources({ onExit }) {
           </p>
         </header>
 
-        {RESOURCES.map((r) => (
-          <ResourceRow key={r.name} {...r} />
-        ))}
+        {/* Primary region — always visible */}
+        <RegionGroup region={primary.region} lines={primary.lines} />
 
-        <p style={{ ...NOTE, marginTop: "var(--sf-space-24)" }}>
+        {/* Other regions — V1's "Other resources" expander */}
+        {others.length > 0 ? (
+          <CollapsibleSection label="Other resources">
+            {others.map((r) => (
+              <RegionGroup key={r.region} region={r.region} lines={r.lines} />
+            ))}
+          </CollapsibleSection>
+        ) : null}
+
+        {/* Emergency — always visible, never behind an expander */}
+        <div style={{ marginTop: "var(--sf-space-32)" }}>
+          <RegionGroup region={EMERGENCY.region} lines={EMERGENCY.lines} />
+        </div>
+
+        <p style={NOTE_BLOCK}>
           Anywhere else,{" "}
           <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer" style={INLINE_LINK}>
             findahelpline.com
           </a>{" "}
           lists crisis lines by country.
         </p>
-        <p style={{ ...NOTE, marginTop: "var(--sf-space-8)", marginBottom: "var(--sf-space-48)" }}>
+        <p style={{ ...NOTE_BLOCK, marginTop: "var(--sf-space-8)", marginBottom: "var(--sf-space-48)" }}>
           Reaching out is not a failure of the practice. It is the strongest read
           of the moment there is.
         </p>
@@ -160,39 +169,36 @@ const BACK_BTN = {
   marginBottom: "var(--sf-space-24)", WebkitTapHighlightColor: "transparent",
 };
 const H1 = {
-  fontFamily: "var(--sf-font-serif)", fontSize: "30px", fontWeight: 400,
-  lineHeight: 1.2, color: "var(--sf-text-cream)", margin: "var(--sf-space-12) 0 var(--sf-space-12)",
+  fontFamily: "var(--sf-font-serif)", fontSize: "32px", fontWeight: 400,
+  lineHeight: 1.15, color: "var(--sf-text-cream)", margin: "var(--sf-space-8) 0 var(--sf-space-12)",
 };
 const LEAD = {
   fontFamily: "var(--sf-font-sans)", fontWeight: 300, fontSize: "15px",
   lineHeight: 1.6, color: "var(--sf-text-faint)", margin: 0,
 };
-const CARD = {
-  borderTop: "0.5px solid var(--sf-border-hairline)",
-  padding: "var(--sf-space-24) 0",
+// V1 horizontal row, home aesthetic: name+note left, brass number → right.
+const LINE = {
+  display: "flex", justifyContent: "space-between", alignItems: "center",
+  gap: "var(--sf-space-16)", padding: "var(--sf-space-16) 0", minHeight: "44px",
+  borderBottom: "0.5px solid var(--sf-border-hairline)",
+  textDecoration: "none", color: "inherit", WebkitTapHighlightColor: "transparent",
 };
-const META = {
-  display: "block", fontFamily: "var(--sf-font-mono)", fontSize: "10px",
-  letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--sf-accent-line)",
-  marginBottom: "var(--sf-space-8)",
-};
+const LINE_MAIN = { flex: 1, minWidth: 0, display: "flex", flexDirection: "column" };
 const NAME = {
-  fontFamily: "var(--sf-font-serif)", fontSize: "21px", fontWeight: 400,
-  lineHeight: 1.3, color: "var(--sf-text-cream)", margin: 0,
+  fontFamily: "var(--sf-font-serif)", fontSize: "18px", fontWeight: 400,
+  lineHeight: 1.3, color: "var(--sf-text-cream)",
 };
 const NOTE = {
+  fontFamily: "var(--sf-font-sans)", fontWeight: 300, fontSize: "13px",
+  lineHeight: 1.5, color: "var(--sf-text-faint)", marginTop: "3px",
+};
+const NUM = {
+  flexShrink: 0, fontFamily: "var(--sf-font-sans)", fontSize: "14px", fontWeight: 500,
+  color: "var(--sf-accent)", whiteSpace: "nowrap",
+};
+const NOTE_BLOCK = {
   fontFamily: "var(--sf-font-sans)", fontWeight: 300, fontSize: "13.5px",
-  lineHeight: 1.55, color: "var(--sf-text-faint)", margin: "var(--sf-space-8) 0 0",
-};
-const ACTIONS = {
-  display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)",
-  marginTop: "var(--sf-space-16)",
-};
-const ACTION = {
-  display: "inline-flex", alignItems: "center", minHeight: "44px",
-  padding: "0 18px", border: "1px solid var(--sf-accent-line)", borderRadius: "8px",
-  color: "var(--sf-accent)", fontFamily: "var(--sf-font-sans)", fontSize: "14px",
-  fontWeight: 400, textDecoration: "none", WebkitTapHighlightColor: "transparent",
+  lineHeight: 1.55, color: "var(--sf-text-faint)", margin: "var(--sf-space-24) 0 0",
 };
 const INLINE_LINK = {
   color: "var(--sf-accent)", textDecoration: "underline", textUnderlineOffset: "3px",
