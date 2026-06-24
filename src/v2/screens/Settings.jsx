@@ -168,6 +168,18 @@ export default function Settings({ onExit }) {
               {a11y.textSize === "large" ? "On" : "Off"}
             </button>
           </div>
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>Reduced motion</span>
+            <button
+              type="button"
+              onClick={() => toggleA11y("motion", "reduced")}
+              style={a11y.motion === "reduced" ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={a11y.motion === "reduced"}
+              aria-label="Toggle reduced motion"
+            >
+              {a11y.motion === "reduced" ? "On" : "Off"}
+            </button>
+          </div>
         </div>
       </CollapsibleSection>
 

@@ -1,32 +1,36 @@
 /*
- * a11y.js — accessibility display settings (contrast + text size).
+ * a11y.js — accessibility display settings (contrast + text size + motion).
  *
- * Rebuild-backlog item (re-audited June 2 2026; Arlin chose rebuild).
- * Two binary settings, persisted on-device, applied as data attributes
- * on <html> so tokens.css can override design tokens app-wide:
+ * Settings persisted on-device, applied as data attributes on <html> so
+ * tokens.css / components.css can override app-wide:
  *
  *   html[data-sf-contrast="high"]   — brighter quiet/faint text, stronger
- *                                     borders (token overrides only; no
- *                                     per-component changes)
+ *                                     borders (token overrides only)
  *   html[data-sf-textsize="large"]  — whole-UI scale bump via zoom (the
- *                                     codebase sizes in px; zoom scales all
- *                                     of it uniformly and is supported by
- *                                     every WebView this app ships in —
- *                                     Chromium, WebKit, and Firefox 126+)
+ *                                     codebase sizes in px; zoom scales all of
+ *                                     it uniformly; supported by every WebView
+ *                                     this app ships in)
+ *   html[data-sf-motion="reduced"]  — stops the ambient/decorative animation
+ *                                     (aura breath + drift, film grain, focus
+ *                                     bloom, draws, listening wave). An IN-APP
+ *                                     control: the app already honors the OS
+ *                                     "reduce motion" preference, but many
+ *                                     people don't have it set system-wide and
+ *                                     still want the screen to hold still.
  *
- * applyA11y() runs at AppV2 mount (before first paint of the tree) and on
- * every change from Settings. Honest scope: this is display accessibility
- * only — reduced-motion already respects the OS preference elsewhere.
+ * applyA11y() runs at AppV2 mount (before first paint) and on every change
+ * from Settings.
  *
  * Storage: stillform_v2_a11y → {"contrast":"default"|"high",
- *                               "textSize":"default"|"large"}
+ *                               "textSize":"default"|"large",
+ *                               "motion":"full"|"reduced"}
  */
 
 const KEY = "stillform_v2_a11y";
 
-const DEFAULTS = { contrast: "default", textSize: "default" };
+const DEFAULTS = { contrast: "default", textSize: "default", motion: "full" };
 
-/** @returns {{contrast:string, textSize:string}} */
+/** @returns {{contrast:string, textSize:string, motion:string}} */
 export function getA11y() {
   try {
     const raw = localStorage.getItem(KEY);
@@ -35,13 +39,14 @@ export function getA11y() {
     return {
       contrast: parsed.contrast === "high" ? "high" : "default",
       textSize: parsed.textSize === "large" ? "large" : "default",
+      motion: parsed.motion === "reduced" ? "reduced" : "full",
     };
   } catch {
     return { ...DEFAULTS };
   }
 }
 
-/** Persist one setting and re-apply. @param {"contrast"|"textSize"} k */
+/** Persist one setting and re-apply. @param {"contrast"|"textSize"|"motion"} k */
 export function setA11y(k, value) {
   const cur = getA11y();
   const next = { ...cur, [k]: value };
@@ -62,4 +67,6 @@ export function applyA11y(settings) {
   else el.removeAttribute("data-sf-contrast");
   if (s.textSize === "large") el.setAttribute("data-sf-textsize", "large");
   else el.removeAttribute("data-sf-textsize");
+  if (s.motion === "reduced") el.setAttribute("data-sf-motion", "reduced");
+  else el.removeAttribute("data-sf-motion");
 }

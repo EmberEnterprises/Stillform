@@ -579,3 +579,20 @@
 .sf-v2 .sf-sec-sub{ display:block; font-family:var(--sf-font-sans); font-size:14px; font-weight:300; line-height:1.5; color:var(--sf-text-faint); }
 .sf-v2 .sf-sec-arrow{ flex-shrink:0; margin-top:4px; color:var(--sf-accent); font-size:15px; line-height:1; opacity:.65; transition:transform .35s var(--sf-ease-prestige), opacity .35s ease; }
 .sf-v2 .sf-sec-row:hover .sf-sec-arrow, .sf-v2 .sf-sec-row:focus-visible .sf-sec-arrow{ transform:translateX(3px); opacity:1; }
+
+/* ══ Reduced motion — in-app toggle (a11y.js sets html[data-sf-motion]) ════
+   Mirrors the OS prefers-reduced-motion behavior for people who don't have the
+   system setting on but still want the screen to hold still: stops the ambient
+   aura breath/drift, the listening wave, draws, blooms, and makes transitions
+   resolve instantly. App stays fully functional — state changes, just no
+   motion. App-scoped (.sf-v2) so it never reaches outside the app tree. */
+html[data-sf-motion="reduced"] .sf-v2 *,
+html[data-sf-motion="reduced"] .sf-v2 *::before,
+html[data-sf-motion="reduced"] .sf-v2 *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+html[data-sf-motion="reduced"] .sf-v2 .sf-home-aura { animation: none !important; opacity: 0.5; }
+html[data-sf-motion="reduced"] .sf-v2 .sf-listening-bars i { animation: none !important; height: 4px; }

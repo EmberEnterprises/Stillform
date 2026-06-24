@@ -214,12 +214,6 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
           rows={2}
           aria-label="Name what is present"
         />
-        <div className={`sf-listening${listenLive ? " is-live" : ""}`} aria-hidden="true">
-          <span className="sf-listening-bars"><i /><i /><i /><i /><i /></span>
-          <span className="sf-listening-word">
-            {listenLive ? "Hearing you" : text.trim() ? "Got it" : "Listening"}
-          </span>
-        </div>
       </div>
 
       {chips.length > 0 ? (

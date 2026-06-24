@@ -296,6 +296,10 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
             >
               Reading from your data
             </MonoLabel>
+            <div className="sf-listening" aria-hidden="true" style={{ marginBottom: "var(--sf-space-16)" }}>
+              <span className="sf-listening-bars"><i /><i /><i /><i /><i /></span>
+              <span className="sf-listening-word">Listening</span>
+            </div>
             <p
               style={{
                 margin: 0,
