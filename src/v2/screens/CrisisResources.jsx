@@ -35,7 +35,7 @@ const REGIONS = [
     region: "Brazil",
     lines: [
       { name: "CVV — Centro de Valorização da Vida", note: "Free and confidential, 24/7. Emergency: 192.", number: "Ligar 188", href: "tel:188" },
-      { name: "CVV — apoio por chat", note: "Online chat support.", number: "cvv.org.br", href: "https://www.cvv.org.br", external: true },
+      { name: "CVV — chat support", note: "Online chat support.", number: "cvv.org.br", href: "https://www.cvv.org.br", external: true },
     ],
   },
   {
