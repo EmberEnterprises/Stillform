@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import CollapsibleSection from "./CollapsibleSection.jsx";
 import { readTodaysBrief } from "../lib/todaysBriefApi.js";
 
 /**
@@ -56,29 +57,25 @@ export default function TodaysBriefCard() {
   const hasContent = brief && SECTIONS.some(({ key }) => brief[key]);
 
   return (
-    <section
+    <div
       className="sf-fade-enter sf-fade-enter--delay-1"
       style={{ marginBottom: "var(--sf-space-32)" }}
-      aria-label="Today's Brief"
     >
-      <div className="sf-sec-head">
-        <span className="sf-sec-head-lbl">Today&rsquo;s Brief</span>
-        <div className="sf-sec-rule" />
-      </div>
-
-      {!hasContent ? (
-        <p style={COMPOSING}>Composing from this morning&rsquo;s check-in&hellip;</p>
-      ) : (
-        SECTIONS.map(({ key, label }) =>
-          brief[key] ? (
-            <div key={key} style={ROW}>
-              <span style={LBL}>{label}</span>
-              <p style={TXT}>{brief[key]}</p>
-            </div>
-          ) : null
-        )
-      )}
-    </section>
+      <CollapsibleSection label="Today's Brief" defaultOpen>
+        {!hasContent ? (
+          <p style={COMPOSING}>Composing from this morning&rsquo;s check-in&hellip;</p>
+        ) : (
+          SECTIONS.map(({ key, label }) =>
+            brief[key] ? (
+              <div key={key} style={ROW}>
+                <span style={LBL}>{label}</span>
+                <p style={TXT}>{brief[key]}</p>
+              </div>
+            ) : null
+          )
+        )}
+      </CollapsibleSection>
+    </div>
   );
 }
 
