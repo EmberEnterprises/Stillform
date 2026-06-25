@@ -12,6 +12,7 @@ import Home from "./screens/Home.jsx";
 import AppHeader from "./components/AppHeader.jsx";
 import Spine from "./screens/Spine.jsx";
 import FoundationVerify from "./screens/FoundationVerify.jsx";
+import StateCheck from "./screens/spine/StateCheck.jsx"; // debug route ?statecheck=1 (orphan draft, M3 increment 2a)
 import MyProgress from "./screens/MyProgress.jsx";
 import ContextProfile from "./screens/ContextProfile.jsx";
 import TriggerProfile from "./screens/TriggerProfile.jsx";
@@ -64,6 +65,7 @@ function pickInitialScreen() {
   try {
     const params = new URLSearchParams(window.location.search);
     if (params.get("verify") === "1") return "verify";
+    if (params.get("statecheck") === "1") return "statecheck";
     if (params.get("paywall") === "1") return "paywall";
     if (params.get("onboard") === "1") return "onboarding";
     if (INITIAL_SHARE_TEXT && isOnboarded()) return shouldGate() ? "paywall" : "spine";
@@ -77,7 +79,7 @@ function pickInitialScreen() {
 // Surfaces that render WITHOUT the global header: home (own AppHeader),
 // onboarding (first-run flow), verify (audit), spine (immersive practice with
 // its own ← home back).
-const HEADERLESS = new Set(["home", "onboarding", "verify", "spine"]);
+const HEADERLESS = new Set(["home", "onboarding", "verify", "spine", "statecheck"]);
 
 export default function AppV2() {
   const [screen, setScreen] = useState(pickInitialScreen);
@@ -103,6 +105,7 @@ export default function AppV2() {
 
   const renderScreen = () => {
     if (screen === "verify") return <FoundationVerify />;
+    if (screen === "statecheck") return <StateCheck onDone={goHome} onSkip={goHome} />;
 
     if (screen === "spine") {
       return (
