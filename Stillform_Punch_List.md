@@ -668,3 +668,11 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 
 ### Escalation rule
 - [ ] If any invariant fails, release is blocked and changes are reworked before push
+
+
+### June 23 2026 — session open items (tracked, not yet done)
+- [ ] **PRIVACY ACCURACY — Arlin's call (flag).** The "data" FAQ says "the only thing that leaves your device is an anonymous access check — no journal content, nothing personal." This is inaccurate for AI features: Reframe AND the new briefs send context (your words + patterns) to GPT-4o to generate. Predates this session (Reframe always sent content); the briefs compound it. Needs accurate wording + Arlin sign-off (and confirmation of server-side retention before any non-retention claim). NOT changed unilaterally — privacy claim is Arlin's authority.
+- [ ] **Plausible events for Today's Brief + EOD** — neither fires analytics, unlike the other surfaces (Move/breathing/etc.). Add generation/view events (e.g. "Todays Brief Shown", "EOD Artifact Shown") — deferred, tracked.
+- [ ] **EOD Part 2b — inline-at-close reveal** (the remaining EOD half; show the artifact on the close screen before returning home).
+- [ ] **Deploy + device-walk this session** — Crisis, login-on-Paywall, Settings, Today's Brief, EOD card; and confirm LIVE AI generation for both briefs (sandbox can't reach the netlify functions).
+- [ ] Flagged refinements (non-blocking): home "Today" engine header vs "Today's Brief" possible merge; whether to enrich the v2 morning/eod beats for richer brief inputs; Move card local-selection vs orphaned AI backend; Settings keep-or-drop (reminders/biometric/sound packs/export); Paywall account-line trim.

@@ -754,3 +754,8 @@ Single skips are noise. Consistent skips are signal. Surfacing skip patterns bef
 - Ochsner, K.N. & Gross, J.J. (2005) — The cognitive control of emotion — *Trends in Cognitive Sciences*
 - Mehling et al. (2012) — Body Awareness: Construct and Self-Report Measures — *PLOS ONE*
 - Wells, A. (2009) — Metacognitive Therapy — flexibility over classification
+
+
+---
+
+**Today's Brief & EOD artifact (Application Layer) — science is applied, not new (June 23 2026).** The morning brief's four sections map to existing entries in this sheet: *hardware* = interoception/constructed emotion (Barrett 2017; Seth 2013); *risks* = cognitive appraisal of upcoming load (Lazarus 1991 — appraisal tradition; reappraisal entries below); *moves* = implementation intentions (Gollwitzer 1999); *recovery* = emotion-regulation/downregulation (Ochsner & Gross 2005; Sheppes & Gross 2011). The EOD artifact is a retrospective AI-named takeaway (reconsolidation-adjacent reflection), distinct from the user's own takeaway. No new science introduced — these surfaces operationalize science already cited here.

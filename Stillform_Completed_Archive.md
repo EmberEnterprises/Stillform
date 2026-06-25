@@ -1471,3 +1471,12 @@ Three-commit research-driven cleanup. Triggered by Arlin's pushback "the whole a
 - [x] Apple Developer purchased ($99/yr, TestFlight unlocked)
 - [x] DUNS confirmed
 - [x] Security gate — 41 must-match checks
+
+
+### June 23 2026 — secondary-page cohesion + Application Layer (Today's Brief / EOD)
+- [x] Crisis Resources rebuilt to V1 structure (region rows: name-left / number-right, primary + "Other resources" expander, emergency always visible) in the home aesthetic; data-summary pop-up removed; all web-verified numbers preserved; regional NOTES rewritten to English source for clean i18n (names/numbers stay constant).
+- [x] Login wording "Log in" (was "Sign in"); AccountSection extracted to its own component and moved onto the Paywall (login/sign-up now lives on the subscription page); Account + Access sections removed from Settings (Settings = Display / Your data / Privacy & Contact).
+- [x] Today's Brief v2 — `todaysBriefApi.js` (client + day-keyed storage + gatherer), morning-completion generation hook in Spine, `TodaysBriefCard` on the home screen, collapsible. Verified seeded render; live gen pending deploy.
+- [x] EOD artifact v2 Part 2a — generation hook at eod completion (Part 1 api+card pre-existed in 0377945 but nothing generated); home card "The day, named" now has data. Verified seeded render; live gen pending deploy.
+- [x] Concierge spec §6 — Teaching Posture doctrine ("teach the posture, refuse the domain"; structure/frictionless-movement/routine are the scaffolding of self-mastery, never output).
+- [x] FAQ — removed stale "crisis summary" entry (feature removed); added Today's Brief + "The day, named" entries.

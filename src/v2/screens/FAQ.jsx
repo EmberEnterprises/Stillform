@@ -301,17 +301,26 @@ const ITEMS = [
     ),
   },
   {
-    id: "crisis-summary",
-    q: "What is the summary on the Crisis Resources screen?",
+    id: "todays-brief",
+    q: "What is Today's Brief?",
     a: (
       <>
-        It's an optional button you tap only if you want it. It gathers what you've already
-        named in your own words across your practice — the things that have come up most, and
-        your own phrasings — into a short, plain summary, so you have somewhere to start if
-        you reach out to a crisis line, a clinician, or someone you trust. It's built entirely
-        from what you wrote; it never interprets, labels, or diagnoses you, and it stays on your
-        device like everything else. You never have to use it, and reaching out without it is
-        always enough.
+        After your morning check-in, Stillform composes a short brief for the day &mdash; your
+        hardware (the state you&rsquo;re carrying), the risks worth seeing, a move or two, and how
+        to recover. It&rsquo;s built from what you named plus your own patterns, and the brief
+        is kept on your home screen so you can re-read it through the day. Collapse it any time.
+      </>
+    ),
+  },
+  {
+    id: "day-named",
+    q: "What is \u201cThe day, named\u201d?",
+    a: (
+      <>
+        When you close out the evening, Stillform writes one line naming what the day taught
+        you &mdash; a read you might not catch yourself. It&rsquo;s separate from the takeaway you
+        name for yourself; it&rsquo;s the app&rsquo;s reflection of the day, drawn from what happened
+        in your practice. It&rsquo;s kept on your device and shows on your home screen.
       </>
     ),
   },
