@@ -107,6 +107,7 @@ export async function generateEodArtifact(inputs = {}) {
     const data = await response.json();
     const artifact = data && typeof data.artifact === "string" && data.artifact.trim() ? data.artifact.trim() : null;
     if (!artifact) return { artifact: null, error: "Empty artifact. Try again." };
+    try { window.plausible?.("EOD Artifact Generated"); } catch { /* analytics non-fatal */ }
     return { artifact, error: null };
   } catch {
     return { artifact: null, error: "Couldn't reach the network. Try again." };

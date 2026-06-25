@@ -113,6 +113,7 @@ export async function generateTodaysBrief(inputs = {}) {
     if (!hardware && !risks && !moves && !recovery) {
       return { ...empty, error: "Empty brief. Try again." };
     }
+    try { window.plausible?.("Today's Brief Generated"); } catch { /* analytics non-fatal */ }
     return { hardware, risks, moves, recovery, error: null };
   } catch {
     return { ...empty, error: "Couldn't reach the network. Try again." };

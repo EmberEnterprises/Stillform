@@ -55,8 +55,14 @@ export default function StateCheck({ onDone, onSkip }) {
     });
   };
 
-  const done = () => { try { onDone?.(selected); } catch { /* parent owns flow */ } };
-  const skip = () => { (typeof onSkip === "function" ? onSkip : () => onDone?.([]))(); };
+  const done = () => {
+    try { window.plausible?.("State Check Completed", { props: { count: selected.length } }); } catch { /* analytics non-fatal */ }
+    try { onDone?.(selected); } catch { /* parent owns flow */ }
+  };
+  const skip = () => {
+    try { window.plausible?.("State Check Skipped"); } catch { /* analytics non-fatal */ }
+    (typeof onSkip === "function" ? onSkip : () => onDone?.([]))();
+  };
 
   return (
     <main className="sf-page sf-page--hero">
