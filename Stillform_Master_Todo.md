@@ -1807,7 +1807,7 @@ The standing 11, applied to this session (Crisis rebuild + i18n · Login/Subscri
   3. FAQ — DONE: removed stale crisis-summary entry (feature removed); added Today's Brief + "The day, named".
   4. Transfer doc — pointer doc by design; shipped work recorded in Completed Archive instead.
   5. Plausible — GAP (tracked, Punch List): Today's Brief + EOD fire no events.
-  6. Privacy — FLAGGED for Arlin (Punch List): the "data" FAQ "nothing personal leaves" claim is inaccurate for AI features (Reframe + briefs send context); predates this session; needs her wording + sign-off; NOT changed unilaterally.
+  6. Privacy — LAUNCH-GATE (Arlin decided June 23: address right before launch, not mid-build; do not re-raise). The "data" FAQ "nothing personal leaves" claim is inaccurate for AI features (Reframe + briefs send context) — corrected as a final pre-launch step.
   7. Science sheet — DONE: application pointer (briefs apply existing Barrett/Lazarus/Gollwitzer/Ochsner-Gross; no new science).
   8. AI prompts — server-side (todays-brief.js / eod-artifact.js), voice server-enforced; reframe context unaffected.
   9. Promo — not done (briefs are promo-worthy; flagged, non-blocking). 10. Punch list — DONE. 11. Emotion coverage — N/A.
@@ -1819,7 +1819,7 @@ PLACEMENT (Arlin, "2 and 1") = BOTH on the home screen AND inline at evening clo
 STATE (read-before-write): PART 1 (api lib + EodArtifactCard home card, collapsible "The day, named", read+poll) ALREADY EXISTED (commit 0377945) — but nothing GENERATED the artifact, so the card was always empty.
 PART 2a ✅ (June 23) — GENERATION + HOME: eod generation hook in Spine.handleCloseReturn (beat==="eod"): idempotent, gather(payload incl. takeaway)→generate→saveEodArtifact, sets/clears EOD_PENDING_KEY, fire-and-forget try/catch. Home card now has data. Verified build/security/boot green + seeded home render (zero errors).
 PART 2b ⏳ REMAINING — inline-at-close reveal: show the artifact on the eod close screen before returning home (same day-keyed store). Needs careful Close.jsx surgery + moving/duplicating the generation trigger to the close render so it's visible there; read the full eod Close flow first.
-LABEL "The day, named" — Arlin to confirm/rename.
+LABEL "The day, named" — CONFIRMED FINAL (Arlin, June 23).
 
 ### A4. APPLICATION LAYER (Engine 2) — STATE CORRECTION + TODAY'S BRIEF v2 BUILD (Arlin, June 23)
 STATE CORRECTION (read-before-build): Engine 2 is NOT paused/unbuilt — most is LIVE in v2. Live + wired: Pre-event Brief (preEventBriefApi + PreEventBrief.jsx + AppV2 + MyProgress), Scripts (scriptsApi + Spine "need the words" ride-out at Close), Move card (Spine Notice→move, runs on LOCAL selection `selectMoveForNotice`, not AI), Roadmap. The prior "Engine 2 paused" note was stale memory, corrected here.
