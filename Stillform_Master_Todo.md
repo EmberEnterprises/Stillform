@@ -943,7 +943,7 @@ Low-demand mode serves anyone whose cognition is partly offline — Medicated bi
 
 **Spec drafted Apr 30 — see COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md in repo root.**
 
-**Phase 0 storage infrastructure SHIPPED May 6, 2026.** The data layer the rest of the feature plugs into. No UI, no stimulus libraries, no surfacing logic — those ship in subsequent phases per the spec. Phase 0 includes:
+**Phase 0 storage was implemented then REVERTED — NOT shipped, NOT on a forward path (corrected June 23 against live code + spec §STATUS May 17).** Phase 0 storage + Phase 1 UI were built May 7 (Builds #31–37, #46) and reverted entirely the same day; `stillform_function_checks` was removed from SYNC_KEYS. Verified absent from the codebase June 23 — no `appendFunctionCheck` / `function_checks` anywhere in src/ (the May 29 audit `f766b6e` already flagged CFM as not carried over). **Per Arlin: the spec is good, the implementation approach was wrong — this needs a different design pass, NOT a re-attempt of the same code.** Gated on the four Phase 1 decisions below + that design pass. The reverted attempt had included (kept here only as reference of the prior design, NOT as current/shipped state):
 - `stillform_function_checks` registered as a secure-storage key (encrypted at rest like sessions and journal)
 - Registered in SYNC_KEYS so records persist to cloud sync if the user is signed in
 - `FUNCTION_CHECK_CANDIDATES` constant for the three Phase 1 candidates: AFFECT_LABELING, INTEROCEPTIVE_LATENCY, COGNITIVE_DEFUSION
