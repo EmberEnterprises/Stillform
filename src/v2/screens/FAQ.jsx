@@ -325,6 +325,19 @@ const ITEMS = [
     ),
   },
   {
+    id: "something-surfaced",
+    q: "What is \u201cSomething surfaced\u201d on My Progress?",
+    a: (
+      <>
+        As you practice, Stillform quietly notes the discrete things you name &mdash; a feel-state,
+        a trigger &mdash; and runs simple math over them to spot when two tend to show up near each
+        other. When it finds one, it asks you plainly: does this land? It&rsquo;s never a claim or a
+        diagnosis &mdash; a pattern drawn from your own words, for you to confirm or wave off. If you
+        say &ldquo;not this,&rdquo; it never comes back.
+      </>
+    ),
+  },
+  {
     id: "cost",
     q: "What does \u201cgone quiet\u201d mean on my watch list?",
     a: "A pattern you watch is confirmed when it keeps showing up in your sessions. If it then stops appearing across continued practice \u2014 real sessions, over weeks \u2014 it moves to \u201cgone quiet.\u201d That\u2019s observed change, not a cure claim: it reflects your sessions, and if the pattern shows up again it simply moves back. That\u2019s information, not a setback.",

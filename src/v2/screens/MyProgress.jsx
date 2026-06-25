@@ -6,6 +6,7 @@ import { getBiasProfile, patternConfidence } from "../lib/biasProfile.js";
 import MediationQueue from "../components/MediationQueue.jsx";
 import { getPendingProposals } from "../lib/mediationApi.js";
 import { getNamingGrowth } from "../lib/namingGrowth.js";
+import DiscoveryFindingCard from "../components/DiscoveryFindingCard.jsx";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -79,6 +80,11 @@ export default function MyProgress({ onExit, onNavigate }) {
         }
         rule
       />
+
+      {/* Keystone Step 2: the discovery confirm surface. Self-gating (renders
+          nothing until the engine is ready + a candidate is undecided), so it
+          leads only when there's something real to confirm. */}
+      <DiscoveryFindingCard />
 
       {/* D4: growth surfaces carry the specimen. */}
       <div style={{ margin: "var(--sf-space-16) 0 var(--sf-space-8)" }}>
