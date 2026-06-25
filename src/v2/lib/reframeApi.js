@@ -30,6 +30,7 @@ import { formatBiasProfileForAI } from "./biasProfile.js";
 import { formatTriggerProfileForAI } from "./triggerProfile.js";
 import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
 import { formatContextProfileForAI } from "./contextProfile.js";
+import { formatConfirmedFindingsForAI } from "./discoveryFindings.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
 
@@ -95,6 +96,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   const sessionCount = getSessionCount();
   const contextProfile = formatContextProfileForAI();
   const priorSessions = formatRecentSessionsForAI();
+  const confirmedFindings = formatConfirmedFindingsForAI();
 
   try {
     const response = await fetch(REFRAME_API_URL, {
@@ -121,6 +123,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         triggerProfile,
         contextProfile,
         priorSessions,
+        confirmedFindings,
         checkinContext: null,
         eodContext: null,
         sessionCount,

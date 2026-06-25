@@ -1848,6 +1848,7 @@ exports.handler = async function(event) {
       userFlaggedPatterns = null,
       triggerProfile = null,
       contextProfile = null,
+      confirmedFindings = null,
       deferredCalibration = null,
       priorToolContext = null,
       practiceEntryContext = null,
@@ -2685,6 +2686,7 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (biasProfile) contextParts.push(`THE USER'S WATCH LIST — their identified processing patterns: ${biasProfile}. When you return "shape.watch_label" it must be one of these pattern labels VERBATIM, and only when the move they just made genuinely fits it — a wrong match is worse than null. Never invent counts or history; the app renders those from its own records. The user observes; you do not diagnose.`);
     if (userFlaggedPatterns) contextParts.push(userFlaggedPatterns);
     if (contextProfile) contextParts.push(contextProfile);
+    if (confirmedFindings) contextParts.push(`CONFIRMED PATTERNS — patterns the app found in the user's OWN logged history by arithmetic (co-occurrence, never causation) AND THE USER HAS CONFIRMED land: ${confirmedFindings} You MAY surface ONE of these as an observation when it is genuinely relevant to what they are working right now — this is the one sanctioned exception to "never volunteer a pattern they did not raise," because the math found it and the user confirmed it. Rules: voice it as the observation it is ("these two tend to show up near each other" / "X tends to follow Y"), NEVER as causation or diagnosis; offer it, never insist; at most one, sparingly; never invent, extend, or combine findings beyond exactly what is listed here; the app owns the counts and history — do not fabricate numbers.`);
     if (priorSessions) contextParts.push(`PRIOR SESSIONS — what the user has worked through in earlier sessions (this is your continuity with them; reference it sparingly to show you remember a recurring thread, never re-litigate a past session, never quote it back verbatim; use only what these entries literally record — do not infer anything more about the user than they state):\n${priorSessions}`);
     // PCE.2 — Reconsolidation loop. The prior-frame data ("locked in" / "next
     // move they set") already rides in PRIOR SESSIONS above; this turns the

@@ -75,6 +75,25 @@ export function getConfirmedFindings() {
   return readStore().confirmed;
 }
 
+/**
+ * Step 3: format confirmed findings for the Reframe AI context. Returns the
+ * confirmed findings' plain-language labels (most-recently-confirmed first,
+ * capped to keep context lean), or null if none. The AI may VOICE these — the
+ * sanctioned exception to "never volunteer a pattern" — because the math found
+ * them and the user confirmed them. Co-occurrence labels, never causation.
+ */
+export function formatConfirmedFindingsForAI() {
+  const confirmed = getConfirmedFindings();
+  if (!Array.isArray(confirmed) || confirmed.length === 0) return null;
+  const labels = confirmed
+    .slice()
+    .sort((a, b) => (b.confirmedAt || 0) - (a.confirmedAt || 0))
+    .slice(0, 5)
+    .map((f) => f && f.label)
+    .filter((l) => typeof l === "string" && l.trim());
+  return labels.length ? labels.join(" ") : null;
+}
+
 export function confirmFinding(candidate) {
   const id = candidateId(candidate);
   if (!id) return false;
