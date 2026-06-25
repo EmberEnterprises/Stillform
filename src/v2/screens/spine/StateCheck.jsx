@@ -17,9 +17,11 @@ import MonoLabel from "../../components/MonoLabel.jsx";
  *
  * ⚠️ VOICE IS A DRAFT. The mono label, headline, body copy, and the final state
  * LABELS are placeholders for Arlin's voice pass — only the state `id`s (the
- * discrete tokens the engine sees) are load-bearing. PLACEMENT in the session
- * flow is also Arlin's call; this component is self-contained and currently
- * ORPHAN (not wired into the Spine) until she sets both.
+ * discrete tokens the engine sees) are load-bearing.
+ * PLACEMENT (Arlin's call, set June 23 2026): AT SESSION CLOSE — wired via the
+ * Spine (Close → handleCloseToStateCheck → "statecheck" step → onDone →
+ * handleCloseReturn(payload, bodyTokens) → recordSignal({ body })). The
+ * ?statecheck=1 debug route remains for isolated preview. Remaining: voice pass.
  *
  * @param {object} props
  * @param {function} props.onDone   (bodyTokens: string[]) selected state ids (may be [])
