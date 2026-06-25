@@ -259,7 +259,11 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
     // effort: never blocks or fails the session.
     if (beat === "eod") {
       try {
-        if (!readEodArtifact()) {
+        // Part 2b: the eod close reveal is now the primary generator (it kicks
+        // generation + sets the pending flag before the reveal mounts). This
+        // hook stays as a fallback — fires only if no artifact exists AND none
+        // is pending (e.g. the reveal's generation failed without saving).
+        if (!readEodArtifact() && !localStorage.getItem(EOD_PENDING_KEY)) {
           const eodInputs = gatherEodArtifactInputs(payload);
           try { localStorage.setItem(EOD_PENDING_KEY, localDateKey()); } catch { /* non-fatal */ }
           generateEodArtifact(eodInputs)

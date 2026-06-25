@@ -7,6 +7,8 @@ import BreathingSession from "../../components/BreathingSession.jsx";
 import { getSessionCount } from "../../lib/sessions.js";
 import { recordPredictionError } from "../../lib/predictionErrors.js";
 import { getPendingPredictions, recordOutcome } from "../../lib/predictionLog.js";
+import EodArtifactCard from "../../components/EodArtifactCard.jsx";
+import { gatherEodArtifactInputs, generateEodArtifact, saveEodArtifact, readEodArtifact, EOD_PENDING_KEY } from "../../lib/eodArtifactApi.js";
 
 /**
  * Close — the closing step of the spine.
@@ -216,6 +218,33 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
         : null,
   });
 
+  // EOD inline-at-close reveal (Part 2b): for the eod beat, the close doesn't
+  // exit straight home — it routes through a final "reveal" step that shows the
+  // day's artifact (the AI's read of what the day taught) before the user leaves.
+  // Generation is kicked HERE so the pending flag is set before the reveal mounts
+  // (the card then shows composing → artifact). Every other beat exits straight
+  // home, unchanged. Idempotent: skips if today's artifact already exists.
+  const [revealPayload, setRevealPayload] = useState(null);
+  const fireEodGeneration = (payload) => {
+    try {
+      if (readEodArtifact()) return;
+      try { localStorage.setItem(EOD_PENDING_KEY, new Date().toISOString().slice(0, 10)); } catch { /* non-fatal */ }
+      const inputs = gatherEodArtifactInputs(payload || {});
+      generateEodArtifact(inputs)
+        .then((res) => { if (res && !res.error) saveEodArtifact(res.artifact); })
+        .finally(() => { try { localStorage.removeItem(EOD_PENDING_KEY); } catch { /* non-fatal */ } });
+    } catch { /* best-effort; never blocks the close */ }
+  };
+  const finishClose = (payload) => {
+    if (beat === "eod") {
+      setRevealPayload(payload);
+      fireEodGeneration(payload);
+      setStep("reveal");
+    } else {
+      onReturnHome(payload);
+    }
+  };
+
   // The breathing offer (if configured) sits AFTER the forward beats.
   // Terminal calls in the breathing handlers rebuild the payload from state
   // (flushed by then); the direct-return path takes an explicit
@@ -224,7 +253,7 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
     if (breathingOffer && resolveBreathingPattern(breathingOffer)) {
       setStep("breathing-offer");
     } else {
-      onReturnHome(buildClosePayload(lockInOverride));
+      finishClose(buildClosePayload(lockInOverride));
     }
   };
 
@@ -311,11 +340,11 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
         props: { beat: beat || "unknown", pattern: breathingOffer },
       });
     } catch { /* non-fatal */ }
-    onReturnHome(buildClosePayload());
+    finishClose(buildClosePayload());
   };
 
-  const handleBreathingComplete = () => { onReturnHome(buildClosePayload()); };
-  const handleBreathingEndEarly = () => { onReturnHome(buildClosePayload()); };
+  const handleBreathingComplete = () => { finishClose(buildClosePayload()); };
+  const handleBreathingEndEarly = () => { finishClose(buildClosePayload()); };
 
   // ---------------- Render ----------------
 
@@ -328,6 +357,32 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
         onComplete={handleBreathingComplete}
         onSkip={handleBreathingEndEarly}
       />
+    );
+  }
+
+  // EOD reveal step (Part 2b): the inline-at-close artifact. Shown only for the
+  // eod beat, as the last screen before home. EodArtifactCard reads the day-keyed
+  // store (composing → artifact); generation was kicked in finishClose so the
+  // pending flag is already set when this mounts. "Return home" carries the
+  // captured payload on to the spine (which surfaces the same artifact on home).
+  if (step === "reveal") {
+    return (
+      <main className="sf-page sf-page--hero">
+        <div className="sf-fade-enter">
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
+            One more thing, before you go.
+          </MonoLabel>
+        </div>
+        <EodArtifactCard />
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-2"
+          style={{ marginTop: "var(--sf-space-48)" }}
+        >
+          <Button variant="primary" onClick={() => onReturnHome(revealPayload || buildClosePayload())}>
+            Return home
+          </Button>
+        </div>
+      </main>
     );
   }
 
