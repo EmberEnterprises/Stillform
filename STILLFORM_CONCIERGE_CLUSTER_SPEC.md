@@ -71,7 +71,53 @@ never "you seem." Mediation reasoning shown verbatim; approve language is user-a
 ("Apply this to my profile"). No push notifications anywhere in this cluster — all
 three surfaces are pull/ambient, visible only inside the app the user opened.
 
-## 6 · ARLIN'S DECISIONS (the 3 that are hers)
+## 6 · TEACHING POSTURE — teach the posture, refuse the domain
+
+Source: the @execute / Dan Koe "modern artisan" carousels (project knowledge, June 23).
+They teach *well* — the value is the pedagogy, not the subject. The concierge borrows
+the teaching posture; it refuses the productivity domain.
+
+**The posture the concierge teaches with:**
+- **Name it to loosen its grip.** Naming a vague thing so it stops running you is the
+  core move — and it already *is* Stillform. Teaching surfaces lead with naming, not instruction.
+- **One scannable unit at a time.** Small beats, never a wall. Lower friction, and it's
+  how the practice lands.
+- **A framework they keep.** Hand over a portable model the user internalizes and reuses
+  — the spine of the practice, not a dependency on the app.
+- **Meet them where they are.** Personalize the path from the diagnostic stack the
+  concierge already holds.
+- **One concrete, low-friction move.** One if-then, never a menu.
+
+**Self-mastery is built, not willed — through structure, frictionless movement, and good
+routines (Arlin, June 23).** These are NOT the domain to refuse; they are the scaffolding
+self-mastery is made of, and the concierge teaches them openly:
+- **Structure.** The practice has a spine (beats, briefs, anchors). The concierge makes
+  that spine legible.
+- **Frictionless movement.** The path state → named → moved must be near-zero friction.
+  The concierge *removes* steps; it never adds them.
+- **Good routines.** Repetition is the neuroplastic engine. The concierge teaches the
+  routine (morning brief, evening close) as the thing that compounds capacity.
+All three serve seeing-yourself-clearly and expanding baseline — never output.
+
+**The line (what tips it into a productivity tool):**
+- **Output as the pitch.** "8 hours in 4," "ahead of 99%." The instant the concierge
+  promises output, it's a productivity tool. Sharper work and composure are *felt results*,
+  never the sell.
+- **Task management.** The concierge never manages tasks or treats the calendar as a todo
+  list. It changes how the user meets their states.
+- **Grind / optimization tone.** Operator-calm, not hustle.
+
+**Telos test — apply to every teaching surface (onboarding, the briefs, in-flow nudges):**
+does it teach the user to *see themselves more clearly* / build the routine that *expands
+capacity*? → keep. Does it promise *output*, manage *tasks*, or sell *productivity*? → refuse.
+
+**Already live (the exemplar):** Today's Brief — hardware / risks / moves / recovery — is
+this posture: a portable, friction-reducing framework pointed at the user's state and
+patterns, not a task list. Hold every teaching surface to that bar.
+
+*(Expandable — the structure / frictionless-movement / routine doctrine may detail further.)*
+
+## 7 · ARLIN'S DECISIONS (the 3 that are hers)
 
 1. **Mediation cadence (cost lever):** weekly · every 5th session close · manual-only
    ("Review my patterns" button) · skip L2 for now.
