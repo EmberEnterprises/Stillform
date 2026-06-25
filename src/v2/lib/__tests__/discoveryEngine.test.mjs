@@ -2,11 +2,12 @@ import { findPatterns, findDisconfirmingInstance } from "../discoveryEngine.js";
 
 const BASE = new Date("2026-05-01T09:00:00Z").getTime();
 const DAY = 24 * 60 * 60 * 1000;
-function entry(dayOffset, chip, triggers = []) {
+function entry(dayOffset, chip, triggers = [], body = []) {
   return {
     id: `t_${dayOffset}_${Math.random().toString(36).slice(2, 6)}`,
     chip,
     triggers,
+    body,
     beat: "main",
     mode: "calm",
     loggedAt: new Date(BASE + dayOffset * DAY).toISOString(),
@@ -154,6 +155,21 @@ const SEQ = { kind: "sequence", from: { type: "trigger", value: "meeting" }, to:
 {
   ok("empty entries → null", findDisconfirmingInstance([], SEQ) === null);
   ok("null finding → null", findDisconfirmingInstance([entry(0,"",["meeting"])], null) === null);
+}
+
+// --- M3: body token strand (body↔feel discovery) ---
+{
+  const log = [
+    entry(0,"anxious",[],["chest-tight"]), entry(1,"calm"),
+    entry(2,"anxious",[],["chest-tight"]), entry(3,"tired"),
+    entry(4,"anxious",[],["chest-tight"]), entry(5,"calm"),
+    entry(6,"focused"), entry(7,"anxious",[],["chest-tight"]),
+  ];
+  const r = findPatterns(log);
+  const co = r.candidates.find((c) => c.kind === "co-occurrence" &&
+    ((c.a.type === "body" && c.b.type === "feel") || (c.a.type === "feel" && c.b.type === "body")));
+  ok("body↔feel co-occurrence is discovered", !!co && co.support >= 3);
+  ok("body token typed as 'body'", !!co && (co.a.type === "body" || co.b.type === "body"));
 }
 
 console.log(`\nRESULT: ${pass} passed, ${fail} failed`);

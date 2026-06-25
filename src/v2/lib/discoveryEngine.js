@@ -44,6 +44,17 @@ function tokensOf(entry) {
       }
     }
   }
+  // M3 interoceptive strand: discrete body-state tokens (fed by the body-capture
+  // surface). Same arithmetic as feel/trigger — the engine finds body↔feel and
+  // body↔trigger co-occurrence/sequence patterns once body data is logged.
+  if (entry && Array.isArray(entry.body)) {
+    for (const b of entry.body) {
+      if (typeof b === "string" && b.trim()) {
+        const v = b.trim();
+        out.push({ type: "body", value: v, key: `body:${v.toLowerCase()}` });
+      }
+    }
+  }
   // De-dup within an entry by key (a token present twice is still one signal).
   const seen = new Set();
   return out.filter((tok) => (seen.has(tok.key) ? false : (seen.add(tok.key), true)));

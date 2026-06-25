@@ -26,6 +26,7 @@
 //   - id:       unique string "sig_{ts}_{rand}"
 //   - chip:     string|null   discrete feel-state chip label/id (null if free-text/none)
 //   - triggers: string[]      trigger label(s) present this occurrence (may be [])
+//   - body:     string[]      discrete body-state token(s) this occurrence (may be []); fed by the body-capture surface (form = Arlin's design)
 //   - beat:     string|null   "morning"|"main"|"eod"|"wind-down"
 //   - mode:     string|null   "calm"|"clarity"|"hype"|"self"
 //   - loggedAt: ISO 8601
@@ -91,10 +92,11 @@ export function saveSignalLog(store) {
  * @param {object} input
  * @param {string|null} input.chip      discrete feel-state chip (null if free-text/none)
  * @param {string[]}    input.triggers  trigger labels present this occurrence
+ * @param {string[]}    input.body      discrete body-state token(s) this occurrence (may be [])
  * @param {string|null} input.beat
  * @param {string|null} input.mode
  */
-export function recordSignal({ chip = null, triggers = [], beat = null, mode = null } = {}) {
+export function recordSignal({ chip = null, triggers = [], body = [], beat = null, mode = null } = {}) {
   const cleanChip =
     typeof chip === "string" && chip.trim() ? chip.trim() : null;
   const cleanTriggers = Array.isArray(triggers)
@@ -107,14 +109,25 @@ export function recordSignal({ chip = null, triggers = [], beat = null, mode = n
       )
     : [];
 
+  const cleanBody = Array.isArray(body)
+    ? Array.from(
+        new Set(
+          body
+            .filter((b) => typeof b === "string" && b.trim())
+            .map((b) => b.trim()),
+        ),
+      )
+    : [];
+
   // Drop fully-empty signals — nothing discrete to learn from.
-  if (!cleanChip && cleanTriggers.length === 0) return null;
+  if (!cleanChip && cleanTriggers.length === 0 && cleanBody.length === 0) return null;
 
   const now = new Date();
   const entry = {
     id: generateId(),
     chip: cleanChip,
     triggers: cleanTriggers,
+    body: cleanBody,
     beat: typeof beat === "string" ? beat : null,
     mode: typeof mode === "string" ? mode : null,
     loggedAt: now.toISOString(),
