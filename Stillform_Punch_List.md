@@ -676,3 +676,5 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 - [ ] **EOD Part 2b — inline-at-close reveal** (the remaining EOD half; show the artifact on the close screen before returning home).
 - [ ] **Deploy + device-walk this session** — Crisis, login-on-Paywall, Settings, Today's Brief, EOD card; and confirm LIVE AI generation for both briefs (sandbox can't reach the netlify functions).
 - [ ] Flagged refinements (non-blocking): home "Today" engine header vs "Today's Brief" possible merge; whether to enrich the v2 morning/eod beats for richer brief inputs; Move card local-selection vs orphaned AI backend; Settings keep-or-drop (reminders/biometric/sound packs/export); Paywall account-line trim. (EOD label “The day, named” CONFIRMED FINAL by Arlin June 23 — no longer a placeholder.)
+
+- **M1 reconsolidation-mismatch FAQ entry (voice = Arlin).** M1 is live (the Reframe AI may gently surface that a confirmed pattern looks like it shifted — as a question, user confirms). Ship-checklist FAQ item: needs a short user-facing entry, written in Arlin's voice (not auto-written). Mirror the existing "something-surfaced" entry's register.
