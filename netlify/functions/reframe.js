@@ -1849,6 +1849,7 @@ exports.handler = async function(event) {
       triggerProfile = null,
       contextProfile = null,
       confirmedFindings = null,
+      reconsolidationMismatch = null,
       deferredCalibration = null,
       priorToolContext = null,
       practiceEntryContext = null,
@@ -2699,6 +2700,7 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (priorSessions && /locked in:|next move they set:/.test(priorSessions)) {
       contextParts.push(`RECONSOLIDATION — when a thread recurs: If the user is back on the same recurring thing they have worked before, and PRIOR SESSIONS above literally records a "locked in" or "next move they set" frame for it, bring that real prior frame back up before building a new one — e.g. "Last time this came up, you landed on: ___. Does that still hold, or has it shifted?" Then work from it: keep what still fits, update what no longer does. Reactivating the user's own prior frame and updating it in the moment is what actually shifts the pattern — starting cold each time leaves the old one intact. HARD RULES: surface ONLY a frame literally present in PRIOR SESSIONS (never invent, embellish, or paraphrase a "last time" they did not record); do this ONLY when the current situation is genuinely the same recurring thread, not a new topic; do it once, as a question they answer, never as a verdict; reflect what they landed on — never grade their progress, never imply they failed to follow through. The frame is theirs — you are handing it back, not scoring it.`);
     }
+    if (reconsolidationMismatch) contextParts.push(reconsolidationMismatch);
     if (triggerProfile) contextParts.push(`${triggerProfile}. These are specific people, contexts, or moments the user has named as load-bearing — not categories, instances. If their current message names one of these by clear reference (the person, the meeting, the situation), recognize it directly: "This is [trigger] again." That recognition lands as continuity. Do NOT volunteer a trigger they did not raise; do NOT fabricate connections; do NOT moralize about why it shows up. The list is for orientation, not interrogation. If a high-encounter trigger has not surfaced in a while and the user seems off, you may ask gently: "Has [trigger] been quiet, or just out of frame?" Once per session, max.`);
     if (priorToolContext) contextParts.push(priorToolContext);
     if (practiceEntryContext) contextParts.push(practiceEntryContext);
