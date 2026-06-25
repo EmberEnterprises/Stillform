@@ -7,6 +7,7 @@ import MoveCard from "./spine/MoveCard.jsx";
 import Reset from "./spine/Reset.jsx";
 import Scripts from "./spine/Scripts.jsx";
 import WindDown from "./spine/WindDown.jsx";
+import StateCheck from "./spine/StateCheck.jsx";
 import { saveSession } from "../lib/sessions.js";
 import { recordSignal } from "../lib/signalLog.js";
 import { tagTrigger } from "../lib/triggerProfile.js";
@@ -92,6 +93,9 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
   // label surfaced + confirmed during Reframe (AI elicits, user confirms).
   // null when no concrete external trigger was raised/confirmed (skippable).
   const [confirmedTrigger, setConfirmedTrigger] = useState(null);
+  // M3 state-check at close: the close payload is stashed while the user does a
+  // quick body-state read, then handed to handleCloseReturn with the body tokens.
+  const [pendingClosePayload, setPendingClosePayload] = useState(null);
   // surfacedFrame = the frame from Reframe (AI's last reply OR SelfReframe's
   // last user answer). Passed to Close where the user can anchor on it,
   // edit it, or write something entirely their own. Not the user's takeaway.
@@ -146,7 +150,16 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
   // Phase 3.5 #2: persistence point. Called when the user has named what
   // landed in Close and tapped Return home. Persists session + thread,
   // then exits the spine.
-  const handleCloseReturn = (closePayload) => {
+  // M3 (state check at close, Arlin's placement): intercept the close→home exit
+  // so the user does a quick body-state read first; its tokens are handed to
+  // handleCloseReturn and flow into recordSignal. handleCloseReturn keeps all of
+  // its existing save logic untouched — it just gains a `bodyTokens` param.
+  const handleCloseToStateCheck = (closePayload) => {
+    setPendingClosePayload(closePayload);
+    setStep("statecheck");
+  };
+
+  const handleCloseReturn = (closePayload, bodyTokens = []) => {
     // PCE.1: Close now returns { takeaway, nextMove, lockIn }. Tolerate a
     // bare string for safety (any older/edge caller) so persistence never
     // breaks on shape.
@@ -192,7 +205,7 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
       const canon = tagTrigger(confirmedTrigger);
       if (canon) triggers.push(canon);
     }
-    recordSignal({ chip: selectedChip, triggers, beat, mode });
+    recordSignal({ chip: selectedChip, triggers, body: Array.isArray(bodyTokens) ? bodyTokens : [], beat, mode });
 
     // Append to today's thread so the home reflects the named work
     // immediately on return. Thread is the visible-on-home compounding;
@@ -455,13 +468,26 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
     );
   }
 
+  // step === "statecheck" — M3 body-state read at session close (Arlin's
+  // placement). Captures discrete body tokens, then hands them to the real
+  // close handler. Voice (prompt + labels) is Arlin's; only state ids are
+  // load-bearing. Skip is first-class (trauma-sensitive, never forced).
+  if (step === "statecheck") {
+    return (
+      <StateCheck
+        onDone={(body) => handleCloseReturn(pendingClosePayload, body)}
+        onSkip={() => handleCloseReturn(pendingClosePayload, [])}
+      />
+    );
+  }
+
   // step === "close"
   return (
     <Close
       surfacedFrame={surfacedFrame}
       breathingOffer={config?.close?.breathingOffer || null}
       beat={beat}
-      onReturnHome={handleCloseReturn}
+      onReturnHome={handleCloseToStateCheck}
       onWantScript={(seed) => {
         setScriptSeed(seed);
         setStep("scripts");
