@@ -1,4 +1,4 @@
-import { findPatterns } from "../discoveryEngine.js";
+import { findPatterns, findDisconfirmingInstance } from "../discoveryEngine.js";
 
 const BASE = new Date("2026-05-01T09:00:00Z").getTime();
 const DAY = 24 * 60 * 60 * 1000;
@@ -117,6 +117,43 @@ function ok(name, cond) {
     (c) => c.kind === "sequence" && c.from.value === "deadline" && c.to.value === "exhausted",
   );
   ok("sequence outside lag window is NOT emitted", !seq);
+}
+
+// --- findDisconfirmingInstance (M1 reconsolidation mismatch) ---
+const SEQ = { kind: "sequence", from: { type: "trigger", value: "meeting" }, to: { type: "feel", value: "drained" } };
+{
+  // pattern held historically, most-recent meeting had NO drained follow, window elapsed
+  const log = [entry(0,"",["meeting"]),entry(2,"drained"),entry(7,"",["meeting"]),entry(9,"drained"),
+               entry(14,"",["meeting"]),entry(16,"drained"),entry(19,"calm"),entry(21,"",["meeting"]),entry(27,"focused")];
+  const m = findDisconfirmingInstance(log, SEQ);
+  ok("seq break: surfaces likely mismatch", !!m && m.trigger.value === "meeting" && m.expected.value === "drained");
+}
+{
+  // most-recent meeting DID get drained within window → null
+  const log = [entry(0,"",["meeting"]),entry(2,"drained"),entry(7,"",["meeting"]),entry(9,"drained"),
+               entry(14,"",["meeting"]),entry(16,"drained"),entry(21,"",["meeting"]),entry(23,"drained")];
+  ok("seq confirmed by most-recent → null", findDisconfirmingInstance(log, SEQ) === null);
+}
+{
+  // meeting is the very last entry → premature, window not elapsed → null
+  const log = [entry(0,"",["meeting"]),entry(2,"drained"),entry(7,"",["meeting"]),entry(9,"drained"),entry(14,"",["meeting"])];
+  ok("seq premature (window not elapsed) → null", findDisconfirmingInstance(log, SEQ) === null);
+}
+{
+  // feel+feel co-occurrence has no trigger→feel direction → null
+  const co = { kind: "co-occurrence", a: { type: "feel", value: "x" }, b: { type: "feel", value: "y" } };
+  ok("co-occurrence with no direction → null", findDisconfirmingInstance([entry(0,"x"),entry(1,"y")], co) === null);
+}
+{
+  // co-occurrence trigger+feel, most-recent trigger entry lacks the feel → mismatch
+  const co = { kind: "co-occurrence", a: { type: "trigger", value: "meeting" }, b: { type: "feel", value: "drained" } };
+  const log = [entry(0,"drained",["meeting"]),entry(5,"drained",["meeting"]),entry(10,"drained",["meeting"]),entry(15,"calm",["meeting"])];
+  const m = findDisconfirmingInstance(log, co);
+  ok("co-occurrence break: surfaces likely mismatch", !!m && m.trigger.value === "meeting");
+}
+{
+  ok("empty entries → null", findDisconfirmingInstance([], SEQ) === null);
+  ok("null finding → null", findDisconfirmingInstance([entry(0,"",["meeting"])], null) === null);
 }
 
 console.log(`\nRESULT: ${pass} passed, ${fail} failed`);

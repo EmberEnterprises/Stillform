@@ -13,7 +13,7 @@
  */
 
 import { getSignals } from "./signalLog.js";
-import { findPatterns } from "./discoveryEngine.js";
+import { findPatterns, findDisconfirmingInstance } from "./discoveryEngine.js";
 
 const STORAGE_KEY = "stillform_discovery_findings";
 
@@ -136,4 +136,49 @@ export function getNextCandidate(opts = {}) {
   } catch {
     return null;
   }
+}
+
+
+/**
+ * M1 — the reconsolidation-window mismatch. For each CONFIRMED finding, ask the
+ * engine whether the most-recent occurrence of its trigger broke the pattern
+ * (the expected token did not follow). Returns the most-recent such "likely
+ * break" with its finding label, or null. Computation only — the AI suggests
+ * it and the user confirms; the app never asserts a break.
+ */
+export function getReconsolidationMismatch() {
+  try {
+    const signals = getSignals();
+    const result = findPatterns(signals);
+    if (!result || !result.ready || !Array.isArray(result.candidates)) return null;
+    const confirmedIds = new Set(readStore().confirmed.map((f) => f.id));
+    if (!confirmedIds.size) return null;
+
+    let best = null;
+    for (const c of result.candidates) {
+      if (!confirmedIds.has(candidateId(c))) continue;
+      const m = findDisconfirmingInstance(signals, c);
+      if (!m) continue;
+      const t = m.triggerLoggedAt ? new Date(m.triggerLoggedAt).getTime() : 0;
+      if (!best || t > best._t) best = { ...m, label: candidateLabel(c), _t: t };
+    }
+    if (!best) return null;
+    delete best._t;
+    return best;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * M1 context field — the computed likely mismatch for the Reframe AI to
+ * SUGGEST (never assert), timed to the reconsolidation window, for the user to
+ * confirm. Returns null when there is no current mismatch. The HARD-RULE
+ * wording below is conservative scaffolding — Arlin owns the final voice.
+ */
+export function formatReconsolidationMismatchForAI() {
+  const m = getReconsolidationMismatch();
+  if (!m || !m.label || !(m.trigger && m.trigger.value)) return null;
+  const triggerVal = m.trigger.value;
+  return `LIKELY MISMATCH (computed from the user's OWN logged history — arithmetic, not your guess): a confirmed pattern of theirs is "${m.label}" The most recent time "${triggerVal}" came up, the expected part did NOT appear to follow in what they logged. IF the user is working this exact thread in this session, you MAY surface this ONCE, SUGGESTIVELY, timed to the moment they are activated on it — as something that is LIKELY the case for them to AGREE with or correct, never as a verdict: offer the pattern, then ask whether this time felt like the usual or different. The QUESTION is the point; their agreement is what makes it real. HARD RULES: only on this confirmed pattern; once; as a question; never a verdict or diagnosis; reflect, never grade ("you broke it" / "you failed"); never invent or extend beyond exactly this; the app owns the counts — do not fabricate numbers. If they are not on this thread, do not raise it.`;
 }

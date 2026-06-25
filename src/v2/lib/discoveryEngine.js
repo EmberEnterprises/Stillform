@@ -169,4 +169,87 @@ export function findPatterns(entries, opts = {}) {
   return { ready: true, entryCount: sorted.length, candidates };
 }
 
+/**
+ * findDisconfirmingInstance — the reconsolidation-mismatch arithmetic (M1).
+ *
+ * Given a CONFIRMED structured candidate with a clear trigger→expected
+ * direction, find the MOST RECENT occurrence of the trigger where the expected
+ * token did NOT follow — the "likely break" the app SUGGESTS and the user
+ * confirms. Arithmetic only: it never decides a break happened, it surfaces a
+ * candidate for the user to agree with.
+ *
+ * Direction:
+ *   • sequence       → trigger = from, expected = to
+ *   • co-occurrence  → only when one side is "trigger" and the other "feel"
+ *                      (trigger = the trigger side, expected = the feel side);
+ *                      otherwise no directional break semantics → null.
+ * "Did not follow":
+ *   • co-occurrence  → expected token absent from the SAME (most-recent-trigger) entry
+ *   • sequence       → expected token absent from every entry within (0, lagDays]
+ *                      after the trigger AND the window has fully elapsed (else
+ *                      premature → null)
+ *
+ * Returns { kind, trigger, expected, triggerDateKey, triggerLoggedAt } or null.
+ * Pure + deterministic. Conservative: most-recent only, null liberally.
+ */
+export function findDisconfirmingInstance(entries, finding, opts = {}) {
+  if (!Array.isArray(entries) || !entries.length || !finding) return null;
+  const cfg = { ...DEFAULTS, ...opts };
+
+  let trigger = null;
+  let expected = null;
+  if (finding.kind === "sequence" && finding.from && finding.to) {
+    trigger = finding.from;
+    expected = finding.to;
+  } else if (finding.kind === "co-occurrence" && finding.a && finding.b) {
+    const { a, b } = finding;
+    if (a.type === "trigger" && b.type === "feel") { trigger = a; expected = b; }
+    else if (b.type === "trigger" && a.type === "feel") { trigger = b; expected = a; }
+    else return null; // no clear trigger→feel direction
+  } else {
+    return null;
+  }
+
+  const keyOf = (tok) => `${tok.type}:${String(tok.value).toLowerCase()}`;
+  const triggerKey = keyOf(trigger);
+  const expectedKey = keyOf(expected);
+
+  const timed = entries
+    .map((e) => ({ e, t: entryTime(e), tokens: tokensOf(e) }))
+    .filter((x) => x.t != null)
+    .sort((x, y) => x.t - y.t);
+  if (!timed.length) return null;
+
+  let trig = null;
+  let trigIdx = -1;
+  for (let i = timed.length - 1; i >= 0; i--) {
+    if (timed[i].tokens.some((tok) => tok.key === triggerKey)) { trig = timed[i]; trigIdx = i; break; }
+  }
+  if (!trig) return null;
+
+  let expectedFollowed;
+  if (finding.kind === "co-occurrence") {
+    expectedFollowed = trig.tokens.some((tok) => tok.key === expectedKey);
+  } else {
+    const now = Number.isFinite(opts.now) ? opts.now : timed[timed.length - 1].t;
+    if (dayGap(trig.t, now) < cfg.lagDays) return null; // window not yet elapsed — premature, not a break
+    expectedFollowed = false;
+    for (let j = trigIdx + 1; j < timed.length; j++) {
+      const gap = dayGap(trig.t, timed[j].t);
+      if (gap < 1) continue;
+      if (gap > cfg.lagDays) break;
+      if (timed[j].tokens.some((tok) => tok.key === expectedKey)) { expectedFollowed = true; break; }
+    }
+  }
+  if (expectedFollowed) return null; // most recent occurrence confirmed the pattern — nothing to suggest
+
+  return {
+    kind: finding.kind,
+    trigger: { type: trigger.type, value: trigger.value },
+    expected: { type: expected.type, value: expected.value },
+    triggerDateKey: trig.e && typeof trig.e.dateKey === "string" ? trig.e.dateKey : null,
+    triggerLoggedAt: trig.e && trig.e.loggedAt ? trig.e.loggedAt : null,
+  };
+}
+
 export const DISCOVERY_DEFAULTS = DEFAULTS;
