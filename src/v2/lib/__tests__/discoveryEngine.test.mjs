@@ -172,5 +172,35 @@ const SEQ = { kind: "sequence", from: { type: "trigger", value: "meeting" }, to:
   ok("body token typed as 'body'", !!co && (co.a.type === "body" || co.b.type === "body"));
 }
 
+// --- M3: body-state as the predicted/expected side of a mismatch ---
+{
+  // feel→body co-occurrence: anxious usually brings tight-chest; most-recent anxious did NOT
+  const FB = { kind: "co-occurrence", a: { type: "feel", value: "anxious" }, b: { type: "body", value: "tight-chest" } };
+  const held = [{...entry(0,"anxious"),body:["tight-chest"]},{...entry(3,"anxious"),body:["tight-chest"]},{...entry(6,"anxious"),body:["tight-chest"]}];
+  const mism = findDisconfirmingInstance([...held,{...entry(10,"anxious"),body:[]}], FB);
+  ok("M3 feel→body mismatch surfaces", !!mism && mism.trigger.value==="anxious" && mism.expected.value==="tight-chest");
+  ok("M3 feel→body confirmed by most-recent → null", findDisconfirmingInstance([...held,{...entry(10,"anxious"),body:["tight-chest"]}], FB)===null);
+}
+{
+  // trigger→body co-occurrence
+  const TB = { kind: "co-occurrence", a: { type: "trigger", value: "meeting" }, b: { type: "body", value: "tense-jaw" } };
+  const log = [{...entry(0,"",["meeting"]),body:["tense-jaw"]},{...entry(5,"",["meeting"]),body:["tense-jaw"]},{...entry(10,"",["meeting"]),body:[]}];
+  const m = findDisconfirmingInstance(log, TB);
+  ok("M3 trigger→body mismatch surfaces", !!m && m.trigger.value==="meeting" && m.expected.value==="tense-jaw");
+}
+{
+  // body+body has no antecedent→expected direction
+  const BB = { kind: "co-occurrence", a: { type: "body", value: "x" }, b: { type: "body", value: "y" } };
+  ok("M3 body+body co-occurrence → null", findDisconfirmingInstance([{...entry(0,""),body:["x","y"]}], BB)===null);
+}
+{
+  // sequence feel→body (already type-agnostic; confirm body works as the consequent)
+  const SB = { kind: "sequence", from: { type: "feel", value: "anxious" }, to: { type: "body", value: "drained-body" } };
+  const log = [{...entry(0,"anxious")},{...entry(2,""),body:["drained-body"]},{...entry(7,"anxious")},{...entry(9,""),body:["drained-body"]},
+               {...entry(14,"anxious")},{...entry(16,""),body:["drained-body"]},{...entry(21,"anxious")},{...entry(27,"calm")}];
+  const m = findDisconfirmingInstance(log, SB);
+  ok("M3 feel→body sequence mismatch surfaces", !!m && m.expected.value==="drained-body");
+}
+
 console.log(`\nRESULT: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

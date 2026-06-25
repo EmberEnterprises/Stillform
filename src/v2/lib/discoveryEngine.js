@@ -191,9 +191,9 @@ export function findPatterns(entries, opts = {}) {
  *
  * Direction:
  *   • sequence       → trigger = from, expected = to
- *   • co-occurrence  → only when one side is "trigger" and the other "feel"
- *                      (trigger = the trigger side, expected = the feel side);
- *                      otherwise no directional break semantics → null.
+ *   • co-occurrence  → expected = the body state if present (M3 recalibration),
+ *                      else the feeling (M1); antecedent = the trigger if present,
+ *                      else the feeling. Same-type pairs have no direction → null.
  * "Did not follow":
  *   • co-occurrence  → expected token absent from the SAME (most-recent-trigger) entry
  *   • sequence       → expected token absent from every entry within (0, lagDays]
@@ -213,10 +213,20 @@ export function findDisconfirmingInstance(entries, finding, opts = {}) {
     trigger = finding.from;
     expected = finding.to;
   } else if (finding.kind === "co-occurrence" && finding.a && finding.b) {
+    // Direction by role: the EXPECTED (consequent) is the body state if present
+    // (M3 recalibrates the body), else the feeling (M1); the ANTECEDENT is the
+    // trigger if present, else the feeling. Same-type pairs have no direction.
     const { a, b } = finding;
-    if (a.type === "trigger" && b.type === "feel") { trigger = a; expected = b; }
-    else if (b.type === "trigger" && a.type === "feel") { trigger = b; expected = a; }
-    else return null; // no clear trigger→feel direction
+    const dir = ((x, y) => {
+      if (x.type === "body" && y.type !== "body") return [y, x];
+      if (y.type === "body" && x.type !== "body") return [x, y];
+      if (x.type === "trigger" && y.type === "feel") return [x, y];
+      if (y.type === "trigger" && x.type === "feel") return [y, x];
+      return null;
+    })(a, b);
+    if (!dir) return null; // no clear antecedent→expected direction
+    trigger = dir[0];
+    expected = dir[1];
   } else {
     return null;
   }
