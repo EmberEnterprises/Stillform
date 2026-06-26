@@ -243,6 +243,13 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="Take one thought, rate how much you believe it, look at the evidence, then re-rate. The drop is the work."
           onTap={() => handleNavigate("thought-record")}
         />
+
+        <ProgressEntry
+          mark="09"
+          title="Your Arc"
+          description="The through-line of your practice — your own named moments, in order, with the patterns that recur and the predictions that didn't come true."
+          onTap={() => handleNavigate("narrative-arc")}
+        />
       </section>
 
       {/* Concierge — proposed updates (Arlin June 2: queue lives here AND
