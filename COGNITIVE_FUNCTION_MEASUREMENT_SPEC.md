@@ -283,3 +283,116 @@ These are real and necessary but they belong in build-phase specs, not in this c
 ---
 
 *ARA Embers LLC · Cognitive Function Measurement Spec · April 30, 2026*
+
+---
+
+## STIMULUS LIBRARY — FIRST-PASS DRAFT (June 23 2026) — awaiting Arlin's cut/rewrite
+
+_Drafted by Claude as editable starting material (Decision 3). Voice + final cut are Arlin's. Grounded in the live 10-chip vocabulary (chipDefinitions.js) and the spec's two exercise formats. Balanced coverage: affect-labeling 3 per chip (pos 9 / neg 12 / complex 9); defusion 15 across life domains + distortion types. NOT final — preserved here so the work isn't lost; the shaped version replaces this once Arlin cuts/rewrites._
+
+# CFM Stimulus Library — First-Pass Draft
+
+**Status:** first pass, for Arlin to cut and rewrite. Voice and final cut are yours. I drafted coverage and structure so you're editing, not starting from a blank page. Cut freely — it's easier to delete than to generate.
+
+**How the two exercises use these:**
+- **Affect-labeling** — the user reads one scenario, then taps the chip that fits. Time-to-tap and accuracy are measured. So each scenario needs to point at *one* target chip clearly enough that there's a right answer, without naming the feeling outright. The target chip is listed beside each.
+- **Defusion** — the user sees one fused thought, then has 30 seconds to generate alternative frames on it. The scorer rates each frame distinct / reworded / same. So each thought needs to be a single, fact-feeling negative cognition with room to be reframed.
+
+**Coverage check (affect-labeling):** balanced across your 10 chips, 3 each — positive (excited, focused, settled = 9), negative (anxious, angry, stuck, flat = 12), complex (mixed, distant, unsure = 9). All operator-life situations, not clinical.
+
+---
+
+## Affect-Labeling Scenarios (30) — scenario → target chip
+
+**Excited** *(high energy, positive, forward)*
+1. The plan you pitched just got greenlit, and your calendar suddenly has room to actually build it.
+2. You wake up before your alarm with the next move already clear, and you want to start now.
+3. A door you'd written off reopens — the email says "let's talk."
+
+**Focused** *(locked in, sharp, steady)*
+4. Two hours in, the noise has dropped away and the work is just moving through your hands.
+5. The problem that wouldn't crack last week is laying itself out cleanly, one piece at a time.
+6. You sit down, the room goes quiet, and you already know exactly where to start.
+
+**Settled** *(at-ease, regulated, low-arousal positive)*
+7. The hard part is behind you, nothing is owed, and the evening is yours.
+8. You're walking with no particular place to be, breath even, nothing pulling at you.
+9. The conversation you were dreading went fine, and your shoulders have dropped.
+
+**Anxious** *(threat-detection on, worry/dread, body-first)*
+10. The office said results would come "sometime this week." Your phone buzzes.
+11. You hit send on something that can't be unsent, and now you're refreshing for a reply.
+12. It's 2 a.m. and a list of everything that could go wrong is running on its own.
+
+**Angry** *(heat, tension, sharp edges)*
+13. You find out a decision that affects you was made in a room you weren't invited to.
+14. Someone takes credit, in front of everyone, for the thing you stayed late to build.
+15. The same boundary you set last week just got stepped over again like you never said it.
+
+**Stuck** *(cognitive, paralysis, replay)*
+16. Three good options, a deadline today, and you've been staring at the same screen for an hour.
+17. You keep replaying the same exchange, and it won't resolve into anything you can use.
+18. You know something's off about the plan but you can't put your finger on what.
+
+**Flat** *(low energy, grey, low motivation)*
+19. The things that usually pull you forward are just there, and none of them move you.
+20. You did everything on the list and felt nothing finishing any of it.
+21. The day is fine. Nothing's wrong. You'd just rather not.
+
+**Mixed** *(two recognizable states at once)*
+22. You got the offer you wanted — in the city you didn't.
+23. You're relieved it's over and already missing it, in the same breath.
+24. You won the argument and you're not sure you were right.
+
+**Distant** *(disconnected from the body, watching from outside)*
+25. You're in the meeting, talking, but it's like you're watching it from the back of the room.
+26. Your hands are doing the dishes and you're somewhere else entirely, far off and muffled.
+27. People are laughing around you and the sound is reaching you through glass.
+
+**Unsure** *(a state that hasn't surfaced into language yet)*
+28. Something shifted an hour ago and you still can't say what it is or what it's about.
+29. There's a signal in your chest, but every word you try on for it slides off.
+30. You're feeling something. That's as far as you can get right now.
+
+---
+
+## Defusion Thoughts (15) — fused cognitions to reframe
+
+*Spanning work, performance, relationships, self-worth, social, health, money, identity, and uncertainty — and varied in distortion type (catastrophizing, mind-reading, all-or-nothing, labeling, personalization, fortune-telling).*
+
+**Work / career**
+1. One mistake and they'll finally see I don't belong here.
+2. If this project fails, that's my reputation gone.
+
+**Performance / competence**
+3. I should have this figured out by now. Everyone else does.
+4. If I can't do this, I'm a fraud — it's only a matter of time before it shows.
+
+**Relationships**
+5. They've gone quiet on me. I've done something wrong.
+6. If I needed them and actually asked, they'd find me too much.
+
+**Self-worth**
+7. I always end up letting the people who count on me down.
+8. There's something in me that ruins the good things.
+
+**Social**
+9. Everyone in that room could tell I didn't fit.
+10. They were polite, but they left thinking less of me.
+
+**Health / body**
+11. This isn't going away — it has to be something serious.
+
+**Money / security**
+12. If this doesn't work out, I lose everything I've built.
+
+**Identity / future**
+13. I've already wasted the years that were supposed to matter.
+14. This is just who I am now. It doesn't change.
+
+**Control / uncertainty**
+15. If I can't see how this ends, it's going to end badly.
+
+---
+
+*First-pass draft — ARA Embers LLC · for Arlin's cut and rewrite. The voice is a starting point, not the final register.*
