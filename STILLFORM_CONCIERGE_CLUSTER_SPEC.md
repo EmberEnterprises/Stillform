@@ -1,6 +1,6 @@
 # STILLFORM CONCIERGE CLUSTER — SPEC
 
-**ARA Embers LLC · Draft v0.1 · June 2, 2026 · Status: FOR ARLIN'S DECISIONS (3 flagged below)**
+**ARA Embers LLC · v1.0 · June 2, 2026 · Status: DECISIONS RESOLVED + M1–M5 BUILT/WIRED** (verified against live code June 26, 2026). The 3 decisions in §7 were resolved June 2 — the authoritative resolution record is `CONCIERGE_CLUSTER_SPEC.md` + the Master Todo header. Mediation client runs at the SmartScreen home-mount gate (`maybeRunMediation`), writes the Mirror via `setMirrorObservation`, and queues proposals; the smart-prompt floor (L3) is consumed by `activePrompt.js`.
 
 ## 1 · WHY THIS CLUSTER
 
@@ -117,11 +117,19 @@ patterns, not a task list. Hold every teaching surface to that bar.
 
 *(Expandable — the structure / frictionless-movement / routine doctrine may detail further.)*
 
-## 7 · ARLIN'S DECISIONS (the 3 that are hers)
+## 7 · ARLIN'S DECISIONS — RESOLVED June 2, 2026
 
-1. **Mediation cadence (cost lever):** weekly · every 5th session close · manual-only
-   ("Review my patterns" button) · skip L2 for now.
-2. **Queue placement:** My Progress section (recommended) · Settings · its own card on
-   SmartScreen.
-3. **Mirror feed confirm:** piggyback-$0 as specced (recommended) · dedicated call
-   (fresher, adds cost) — piggyback can upgrade later without rework.
+All three were resolved June 2. The authoritative record is `CONCIERGE_CLUSTER_SPEC.md`
++ the Master Todo header. The original option sets below were superseded by the resolved
+values:
+
+1. **Mediation cadence:** RESOLVED → **ALL THREE gates**, evaluated at the single
+   home-mount gate — EOD-done-today · ≥3 closes since last run · 24h home-open; 2h
+   burst-guard so triggers never stack. (Supersedes the earlier "weekly / every-5th /
+   manual / skip" framing.)
+2. **Queue placement:** RESOLVED → **BOTH** — Mirror tap-through overlay + a My Progress
+   inline section.
+3. **Mirror feed:** RESOLVED → a single `propose_update` call returns the proposals AND
+   one Mirror observation (one GPT-4o call, no extra spend), written via
+   `setMirrorObservation` from `mediationApi.js`. (Supersedes the piggyback-vs-dedicated
+   framing.)
