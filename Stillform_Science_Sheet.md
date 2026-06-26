@@ -761,3 +761,14 @@ Single skips are noise. Consistent skips are signal. Surfacing skip patterns bef
 ---
 
 **Today's Brief & EOD artifact (Application Layer) — science is applied, not new (June 23 2026).** The morning brief's four sections map to existing entries in this sheet: *hardware* = interoception/constructed emotion (Barrett 2017; Seth 2013); *risks* = cognitive appraisal of upcoming load (Lazarus 1991 — appraisal tradition; reappraisal entries below); *moves* = implementation intentions (Gollwitzer 1999); *recovery* = emotion-regulation/downregulation (Ochsner & Gross 2005; Sheppes & Gross 2011). The EOD artifact is a retrospective AI-named takeaway (reconsolidation-adjacent reflection), distinct from the user's own takeaway. No new science introduced — these surfaces operationalize science already cited here.
+
+## June 23 2026 — Thought Record + Practice Evidence (CFM measurement)
+
+**Thought Record (belief-strength re-rating).** Standard CBT cognitive restructuring. Rating belief strength (0-100%), examining evidence, and re-rating operationalizes cognitive reappraisal — Ochsner & Gross (2005), already in the science spine. HONEST BOUND: the delta is a self-report of conviction change, not a neural measure. Connects to memory reconsolidation (Ecker et al. 2012) when the thought is worked in an activated state.
+
+**Practice Evidence (Cognitive Function Measurement).** Short exercises measuring trained functions over time, read ONLY against the user's own past — never a norm.
+- *Affect-labeling latency + granularity.* Lieberman et al. (2007): affect labeling regulates (reduces amygdala reactivity). HONEST BOUND: latency here is a BEHAVIORAL practice signal, not a validated neuroplasticity readout — the citation supports labeling-as-regulation, not speed-as-brain-change. Granularity (precise picks vs Mixed/Unsure fallbacks) measured alongside speed, because robotic fast-labeling is drift (CANON §3).
+- *Cognitive defusion (distinct-count).* ACT lineage. Tracks cognitive flexibility — how many genuinely different angles — not correctness. Rewording isn't a new vantage point.
+- *Interoceptive latency — HELD, not shipped.* MAIA (Mehling et al. 2012) measures self-reported AWARENESS; the literature separates awareness from accuracy/latency, so a "time to find a sensation" test is NOT what MAIA validates. Held until it can be grounded honestly.
+
+INTEGRITY (all CFM): evidence the function is changing over the user's OWN baseline, never a grade, never against anyone else; honest when flat.

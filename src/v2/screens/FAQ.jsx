@@ -268,6 +268,39 @@ const ITEMS = [
     ),
   },
   {
+    id: "thought-record",
+    q: "What is the Thought Record?",
+    a: (
+      <>
+        You take one thought, rate how strongly you believe it, look at the evidence for and
+        against, then rate it again. The change in that number is the point — watching a certainty
+        loosen when you actually examine it. It stays on your device.
+      </>
+    ),
+  },
+  {
+    id: "your-arc",
+    q: "What is Your Arc?",
+    a: (
+      <>
+        The through-line of your practice, in your own words — the moments you named, in order,
+        with the patterns that keep returning. It's built only from what you've entered, never a
+        story written for you, and it shows nothing until you've practiced enough to form a line.
+      </>
+    ),
+  },
+  {
+    id: "practice-evidence",
+    q: "What is Practice Evidence?",
+    a: (
+      <>
+        Short exercises that measure functions the practice trains — how quickly you name a
+        feeling, how flexibly you can re-see a thought. The numbers are read only against your own
+        earlier rounds, never a norm or anyone else, as honest evidence the practice is working.
+      </>
+    ),
+  },
+  {
     id: "session",
     q: "How does a session work?",
     a: (

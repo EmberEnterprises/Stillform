@@ -44,6 +44,7 @@ export default function DefusionRound({ onExit }) {
     }
     const metrics = { distinctCount: scored.distinctCount, total: scored.total };
     recordFunctionCheck({ exercise: "defusion", metrics });
+    window.plausible?.("Defusion Round Completed", { props: { distinct: scored.distinctCount } });
     setResult({ metrics, progress: getProgressVsBaseline("defusion") });
     setPhase("result");
   };

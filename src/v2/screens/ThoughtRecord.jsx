@@ -37,6 +37,7 @@ export default function ThoughtRecord({ onExit }) {
     if (!saved) {
       recordBeliefRating({ thought, before, after, evidence });
       setSaved(true);
+      window.plausible?.("Thought Record Completed", { props: { direction: delta < 0 ? "dropped" : delta > 0 ? "held" : "flat" } });
     }
     advance("result");
   };

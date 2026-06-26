@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import AffectLabelingRound from "./AffectLabelingRound.jsx";
@@ -21,6 +21,7 @@ import { getProgressVsBaseline } from "../lib/functionChecks.js";
 
 export default function PracticeEvidence({ onExit }) {
   const [view, setView] = useState("hub"); // hub | affect-labeling | defusion
+  useEffect(() => { window.plausible?.("Practice Evidence Opened"); }, []);
 
   if (view === "affect-labeling") return <AffectLabelingRound onExit={() => setView("hub")} />;
   if (view === "defusion") return <DefusionRound onExit={() => setView("hub")} />;

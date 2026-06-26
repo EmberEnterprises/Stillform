@@ -68,6 +68,7 @@ export default function AffectLabelingRound({ onExit }) {
       answered: answered.length,
     };
     recordFunctionCheck({ exercise: "affect-labeling", metrics });
+    window.plausible?.("Affect Labeling Round Completed", { props: { answered: metrics.answered } });
     setResult({ metrics, progress: getProgressVsBaseline("affect-labeling") });
     setPhase("result");
   };

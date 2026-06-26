@@ -323,3 +323,14 @@ Vagal activation (Gerritsen & Band 2018) under Pillar 2. Cognitive reappraisal (
 All 11 surgical corrections to `Stillform_Science_Sheet.md` committed (commits 175bb6e4 through 9536e676). The 20-30% magnitude in microbias section was verified-as-fabricated against the actual Genzer 2025 paper and removed. Lieberman attribution corrected to Genzer et al. throughout. 60 BPM Visual Entrainment renamed to Ambient Pulse with overclaim removed. Acupressure mechanism, cortisol timing, AI-partner claim, two-pathway framing, autonomic flexibility claim, fractal magnitude, Window of Tolerance phrasing all softened to match what the literature actually supports. Full accounting in `/mnt/user-data/outputs/STILLFORM_AUDIT_FABRICATION_REVIEW.md`.
 
 ---
+
+---
+
+## My Progress surfaces added (June 23 2026)
+
+Reachable entries in the user's library (My Progress), never auto-injected:
+- **Thought Record** (mark 08) — CBT belief-strength re-rating. `lib/beliefRating.js` + `screens/ThoughtRecord.jsx`.
+- **Your Arc** (mark 09) — honest through-line of named moments. `lib/narrativeArc.js` + `screens/NarrativeArc.jsx`.
+- **Practice Evidence** (mark 10) — CFM hub: affect-labeling + defusion rounds vs own baseline. `lib/functionChecks.js` + `cfmStimuli.js` + `cognitive-defusion-score` fn; `PracticeEvidence/AffectLabelingRound/DefusionRound.jsx`. End-of-session nudge `FunctionCheckOffer.jsx` (fires from spine AFTER the session saves).
+
+First-pass copy; result voice + naming are Arlin's. All store on-device (stillform-prefixed → existing on-device privacy claim; defusion frames go to the AI like Reframe, covered by existing AI-processing language).

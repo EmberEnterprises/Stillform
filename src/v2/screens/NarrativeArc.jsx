@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { assembleNarrativeArc } from "../lib/narrativeArc.js";
@@ -36,6 +36,7 @@ function formatDate(dateKey) {
 
 export default function NarrativeArc({ onExit }) {
   const arc = assembleNarrativeArc();
+  useEffect(() => { window.plausible?.("Narrative Arc Viewed", { props: { ready: arc.ready } }); }, [arc.ready]);
 
   return (
     <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
