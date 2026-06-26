@@ -38,7 +38,7 @@ export default function Onboarding({ onComplete }) {
             label="Stillform"
             headline="Get sharper at reading your own mind."
             headlineSize="xl"
-            body="Stillform is a metacognition practice. Each time you use it, you name what your mind is actually doing — with a little more precision than last time. That precision compounds: you read your own patterns faster, decide better under pressure, and understand yourself at a finer grain. Composure is just the part you feel first."
+            body="Stillform is a metacognition practice. Each time you use it, you name what your mind is actually doing — with a little more precision than last time. That precision compounds: you read your own patterns faster, decide better under pressure, and understand yourself at a finer grain."
           />
         </div>
         <div className="sf-fade-enter sf-fade-enter--delay-2" style={{ marginTop: "var(--sf-space-48)" }}>
