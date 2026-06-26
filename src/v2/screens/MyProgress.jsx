@@ -236,6 +236,13 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="What you were sure of, next to what actually happened. The gap is the data."
           onTap={() => handleNavigate("what-you-bet-on")}
         />
+
+        <ProgressEntry
+          mark="08"
+          title="Thought Record"
+          description="Take one thought, rate how much you believe it, look at the evidence, then re-rate. The drop is the work."
+          onTap={() => handleNavigate("thought-record")}
+        />
       </section>
 
       {/* Concierge — proposed updates (Arlin June 2: queue lives here AND

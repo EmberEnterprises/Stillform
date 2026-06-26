@@ -21,6 +21,7 @@ import CapacitiesMirror from "./screens/CapacitiesMirror.jsx";
 import RiskProfileMirror from "./screens/RiskProfileMirror.jsx";
 import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
 import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
+import ThoughtRecord from "./screens/ThoughtRecord.jsx";
 import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
 import Paywall from "./screens/Paywall.jsx";
@@ -136,6 +137,7 @@ export default function AppV2() {
             else if (target === "risk-profile") setScreen("risk-profile");
             else if (target === "prediction-mirror") setScreen("prediction-mirror");
             else if (target === "what-you-bet-on") setScreen("what-you-bet-on");
+            else if (target === "thought-record") setScreen("thought-record");
             // Phase 6.4c: post-event reflection — launch spine in post-event beat.
             else if (target === "post-event") {
               setSpineBeat("post-event");
@@ -156,6 +158,7 @@ export default function AppV2() {
     if (screen === "risk-profile") return <RiskProfileMirror onExit={() => setScreen("my-progress")} />;
     if (screen === "prediction-mirror") return <PredictionErrorMirror onExit={() => setScreen("my-progress")} />;
     if (screen === "what-you-bet-on") return <WhatYouBetOnMirror onExit={() => setScreen("my-progress")} />;
+    if (screen === "thought-record") return <ThoughtRecord onExit={() => setScreen("my-progress")} />;
 
     if (screen === "library") return <Library onExit={() => setScreen("home")} />;
 
