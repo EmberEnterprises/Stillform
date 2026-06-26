@@ -95,3 +95,69 @@ export function getProgressVsBaseline(exercise) {
   const baseline = checks[0];
   return { count, latest, baseline, hasComparison: count >= 2 && latest.id !== baseline.id };
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+ * The nudge: when (if ever) to OFFER a function check at end of session.
+ * Gentle by construction — a maturity gate, a weekly cap, and it stays quiet
+ * for anyone already practicing. Never a streak, never a guilt trip.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+import { getSessionCount, getSessions } from "./sessions.js";
+
+const OFFER_KEY = "stillform_fc_last_offered";
+const MATURITY_SESSIONS = 5; // offer once there's enough practice to measure against
+const MATURITY_DAYS = 7;     // …or they've simply been here a week
+const CAP_DAYS = 7;          // never offer more than weekly
+
+const DAY_MS = 86400000;
+
+/** Parse a sessions.js dateKey "YYYY-M-D" (month is 0-indexed as stored). */
+function parseDateKey(key) {
+  if (typeof key !== "string") return NaN;
+  const [y, m, d] = key.split("-").map(Number);
+  if (![y, m, d].every(Number.isFinite)) return NaN;
+  return new Date(y, m, d).getTime();
+}
+
+function daysSince(ms) {
+  return Number.isFinite(ms) ? (Date.now() - ms) / DAY_MS : Infinity;
+}
+
+/**
+ * True only when it's a good moment to offer — and rarely. The surface still
+ * decides whether the context fits (e.g. not during wind-down).
+ */
+export function shouldOfferFunctionCheck() {
+  // maturity: enough sessions OR enough time
+  let sessions = 0;
+  try { sessions = getSessionCount() || 0; } catch { /* ok */ }
+
+  let daysSinceFirst = 0;
+  try {
+    const firsts = (getSessions() || []).map((s) => parseDateKey(s && s.dateKey)).filter(Number.isFinite);
+    if (firsts.length) daysSinceFirst = daysSince(Math.min(...firsts));
+  } catch { /* ok */ }
+
+  const mature = sessions >= MATURITY_SESSIONS || daysSinceFirst >= MATURITY_DAYS;
+  if (!mature) return false;
+
+  // weekly cap on offers
+  const ls = safeLocal();
+  try {
+    const last = ls && ls.getItem(OFFER_KEY);
+    if (last && daysSince(Date.parse(last)) < CAP_DAYS) return false;
+  } catch { /* ok */ }
+
+  // don't nudge someone already practicing — a recent check means they know the way in
+  try {
+    const ts = getFunctionChecks().entries.map((e) => Date.parse(e.recordedAt)).filter(Number.isFinite);
+    if (ts.length && daysSince(Math.max(...ts)) < CAP_DAYS) return false;
+  } catch { /* ok */ }
+
+  return true;
+}
+
+/** Record that the offer was shown (starts the weekly cap). Call on show. */
+export function markFunctionCheckOffered() {
+  try { safeLocal()?.setItem(OFFER_KEY, new Date().toISOString()); } catch { /* ok */ }
+}

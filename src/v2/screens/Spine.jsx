@@ -8,7 +8,9 @@ import Reset from "./spine/Reset.jsx";
 import Scripts from "./spine/Scripts.jsx";
 import WindDown from "./spine/WindDown.jsx";
 import StateCheck from "./spine/StateCheck.jsx";
+import FunctionCheckOffer from "../components/FunctionCheckOffer.jsx";
 import { saveSession } from "../lib/sessions.js";
+import { shouldOfferFunctionCheck, markFunctionCheckOffered } from "../lib/functionChecks.js";
 import { recordSignal } from "../lib/signalLog.js";
 import { tagTrigger } from "../lib/triggerProfile.js";
 import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
@@ -52,7 +54,7 @@ import { routeMode } from "../lib/reframeApi.js";
  *
  * @param {function(): void} onExit  Called when user exits or returns home.
  */
-export default function Spine({ onExit, forcedBeat = null, initialText = null, isBaseEntry = false, entryPayload = null }) {
+export default function Spine({ onExit, onNavigate = null, forcedBeat = null, initialText = null, isBaseEntry = false, entryPayload = null }) {
   // Phase 4 #2 (locked May 16, 2026): beat is locked at session mount.
   // A session belongs to the beat it started in, even if it crosses a
   // beat boundary mid-flow (e.g., user starts at 8:59pm in main beat and
@@ -306,7 +308,15 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
       /* analytics failure is non-fatal */
     }
 
-    onExit();
+    // The nudge: session is now saved + logged. Only here — after the record is
+    // safe — may we offer a Practice-evidence round. Gated, capped, and never on
+    // wind-down/eod. "Not now" goes straight home, no penalty.
+    if (onNavigate && beat !== "wind-down" && beat !== "eod" && shouldOfferFunctionCheck()) {
+      markFunctionCheckOffered();
+      setStep("fc-offer");
+    } else {
+      onExit();
+    }
   };
 
   const handleSwitchToSelfMode = () => {
@@ -464,6 +474,18 @@ export default function Spine({ onExit, forcedBeat = null, initialText = null, i
         seed={scriptSeed}
         onDone={onExit}
         onExit={onExit}
+      />
+    );
+  }
+
+  // step === "fc-offer" — the end-of-session nudge, rendered only after the
+  // session is saved (see handleCloseReturn). Accept → Practice Evidence;
+  // decline → home.
+  if (step === "fc-offer") {
+    return (
+      <FunctionCheckOffer
+        onAccept={() => onNavigate?.("practice-evidence")}
+        onDecline={onExit}
       />
     );
   }

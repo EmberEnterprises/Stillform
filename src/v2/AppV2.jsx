@@ -122,6 +122,12 @@ export default function AppV2() {
             setEntryPayload(null);
             setScreen("home");
           }}
+          onNavigate={(target) => {
+            maybeOpportunisticBackup();
+            setSpineBeat(null);
+            setEntryPayload(null);
+            setScreen(target);
+          }}
         />
       );
     }
