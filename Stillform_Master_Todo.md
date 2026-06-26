@@ -769,7 +769,19 @@ Real conversion-killer. Note for now, not focus — Arlin flagged this is a note
 
 ---
 
-## 🟡 PENDING — Practice Evidence Sprint 1 follow-up
+## ✅ CFM EXERCISE UI — BUILT (June 23 2026, on Arlin's go)
+
+**The Practice Evidence surface + measurement modules are live.** Built on the locked principles (numbers = evidence vs the user's OWN past only, never a norm; granularity rewarded alongside speed; claims tied to the exact task; affect-labeling + defusion first, interoceptive-latency HELD as the weakest science; skips neutral; silent timer; reuse the real feel-chips; bounded round; deliberate entry, never auto-rendered; result voice = Arlin's blank).
+
+Files: `src/v2/lib/functionChecks.js` (results store, trend vs own baseline, stillform-prefixed → auto-synced) · `src/v2/lib/cfmApi.js` (defusion scorer client call, fail-soft) · `src/v2/screens/AffectLabelingRound.jsx` (scenario → own chips → silent latency + granularity) · `src/v2/screens/DefusionRound.jsx` (thought → angles → scorer → distinct count, fail-soft never pollutes baseline) · `src/v2/screens/PracticeEvidence.jsx` (hub, reachable My Progress mark 10). Consumes the LIVE `cfmStimuli.js` (30 affect + 15 defusion) + the `cognitive-defusion-score` function. 8/8 store logic + 11/11 prior + build/security/boot green.
+
+**ARLIN'S REMAINING CALLS:** (1) the RESULT VOICE — every round ends on a dashed `[ result voice — Arlin ]` slot; the honest interpretive line tying the number to the task is hers (highest-stakes copy). (2) NAMING — "Practice evidence" is a placeholder. (3) the hub framing lines are first-pass. STILL DEFERRED: interoceptive-latency module (held on science); an end-of-session OFFER card (`shouldOfferFunctionCheck` gating) if she wants it surfaced from the spine rather than only from My Progress.
+
+**STIMULUS DEPTH NOTE:** a richer 60-affect/30-defusion set with cultural-inclusion + moral/ethical triggers once existed (PR #91, `src/practice-evidence/`) but was DELETED with the v1 frontend in commit 237167b — gone from live. Live exercises run on the 30+15 `cfmStimuli.js`. If Arlin wants that depth back, the stimulus library is the place to expand (a content pass, not a code blocker).
+
+---
+
+## 🟡 HISTORICAL — Practice Evidence Sprint 1 (PR #91, src/practice-evidence/ — DELETED 237167b; kept for the second-rater question + stimulus-depth design)
 
 PR #91 shipped the Sprint 1 deliverable for the Cognitive Function Measurement moonshot:
 - Stimulus library v2 draft (`src/practice-evidence/STIMULI_DRAFT.md`, 60 affect-labeling + 30 defusion entries with cultural inclusion + moral/ethical/cultural-difference triggers).

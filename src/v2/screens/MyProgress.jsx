@@ -250,6 +250,13 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="The through-line of your practice — your own named moments, in order, with the patterns that recur and the predictions that didn't come true."
           onTap={() => handleNavigate("narrative-arc")}
         />
+
+        <ProgressEntry
+          mark="10"
+          title="Practice Evidence"
+          description="Short exercises on the functions the practice trains — measured over time, against your own past, as honest evidence it's working."
+          onTap={() => handleNavigate("practice-evidence")}
+        />
       </section>
 
       {/* Concierge — proposed updates (Arlin June 2: queue lives here AND

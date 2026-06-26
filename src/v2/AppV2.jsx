@@ -23,6 +23,7 @@ import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
 import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
 import ThoughtRecord from "./screens/ThoughtRecord.jsx";
 import NarrativeArc from "./screens/NarrativeArc.jsx";
+import PracticeEvidence from "./screens/PracticeEvidence.jsx";
 import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
 import Paywall from "./screens/Paywall.jsx";
@@ -140,6 +141,7 @@ export default function AppV2() {
             else if (target === "what-you-bet-on") setScreen("what-you-bet-on");
             else if (target === "thought-record") setScreen("thought-record");
             else if (target === "narrative-arc") setScreen("narrative-arc");
+            else if (target === "practice-evidence") setScreen("practice-evidence");
             // Phase 6.4c: post-event reflection — launch spine in post-event beat.
             else if (target === "post-event") {
               setSpineBeat("post-event");
@@ -162,6 +164,7 @@ export default function AppV2() {
     if (screen === "what-you-bet-on") return <WhatYouBetOnMirror onExit={() => setScreen("my-progress")} />;
     if (screen === "thought-record") return <ThoughtRecord onExit={() => setScreen("my-progress")} />;
     if (screen === "narrative-arc") return <NarrativeArc onExit={() => setScreen("my-progress")} />;
+    if (screen === "practice-evidence") return <PracticeEvidence onExit={() => setScreen("my-progress")} />;
 
     if (screen === "library") return <Library onExit={() => setScreen("home")} />;
 
