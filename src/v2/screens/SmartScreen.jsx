@@ -14,6 +14,14 @@ import TodayEngine from "../components/TodayEngine.jsx";
 import TodaysBriefCard from "../components/TodaysBriefCard.jsx";
 import EodArtifactCard from "../components/EodArtifactCard.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
+import StepOutOffer from "../components/StepOutOffer.jsx";
+import StepOutOverlay from "./StepOutOverlay.jsx";
+import {
+  getActiveLoopOffer,
+  markStepOutOffered,
+  markStepOutDismissed,
+  markStepOutAccepted,
+} from "../lib/stepOutTrigger.js";
 
 /**
  * SmartScreen — the v2 home, Phase 3.
@@ -75,6 +83,16 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   const [showQueue, setShowQueue] = useState(false);
   const [trajectory, setTrajectory] = useState(() => getTrajectoryStats());
 
+  // Step Out (pattern-interrupt) prompt-on-open. Deterministic + user-led:
+  // getActiveLoopOffer() returns a loop the user ALREADY confirmed whose own
+  // token recurred in the last few days (stepOutTrigger.js), or null. Read
+  // once on mount — "prompt on open" semantics; the cadence store gates re-fires.
+  const [loopOffer] = useState(() => {
+    try { return getActiveLoopOffer(); } catch { return null; }
+  });
+  const [stepOutOpen, setStepOutOpen] = useState(false);
+  const [offerHandled, setOfferHandled] = useState(false);
+
   // Active prompt starts with the synchronous fallback so the surface
   // renders immediately. The async AI fetch then resolves and (when AI
   // is available) replaces the fallback. Self Mode fallback architecture
@@ -90,6 +108,15 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   // leaves the Mirror and queue unchanged; the practice never blocks.
   useEffect(() => {
     maybeRunMediation();
+  }, []);
+
+  // Mark the Step Out offer as surfaced (gates the spec's re-fire window).
+  // Once, on mount — not a dismissal, just records that it was shown.
+  useEffect(() => {
+    if (loopOffer && loopOffer.findingId) {
+      try { markStepOutOffered(loopOffer.findingId); } catch { /* fail-silent */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -135,6 +162,27 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   // directly (Arlin, June 15: drop the empty top + merge toward one label).
   const hasConcierge = showThread || showMirror || showTrajectory;
 
+  // Step Out leads only when a confirmed loop is active, not yet handled this
+  // open, and not during wind-down (no loop-chasing near sleep — CANON §10,
+  // where the concierge layer is hidden too).
+  const showStepOut = !!loopOffer && !offerHandled && !isWindDown;
+  const acceptStepOut = () => setStepOutOpen(true);
+  const declineStepOut = () => {
+    if (loopOffer) {
+      try { markStepOutDismissed(loopOffer.findingId); } catch { /* fail-silent */ }
+    }
+    setOfferHandled(true);
+  };
+  const closeStepOut = () => {
+    setStepOutOpen(false);
+    setOfferHandled(true);
+  };
+  const completeStepOut = () => {
+    if (loopOffer) {
+      try { markStepOutAccepted(loopOffer.findingId); } catch { /* fail-silent */ }
+    }
+  };
+
   const handleBegin = () => {
     if (typeof onBeginSession === "function") onBeginSession();
   };
@@ -142,6 +190,19 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   return (
     <main className="sf-page sf-page--hero">
       <article className="sf-fade-enter" style={{ width: "100%" }}>
+
+        {/* Step Out — the pattern-interrupt offer. Lead element of the
+            concierge composition when a confirmed loop is active (quieter
+            inline, not a doorstep; the naming surface stays reachable below).
+            Self-gates: renders nothing when no loop is active. Suppressed
+            during wind-down. */}
+        {showStepOut ? (
+          <StepOutOffer
+            patternLabel={loopOffer.label}
+            onAccept={acceptStepOut}
+            onDecline={declineStepOut}
+          />
+        ) : null}
 
         {/* Today engine — quiet device-context readout (calendar / HRV /
             sleep) with honest states only, no fabricated data. Receding so
@@ -327,6 +388,16 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
             </p>
           </section>
         ) : null}
+
+        {/* Step Out overlay — the pattern-interrupt experience (fixed,
+            scroll-locked). Opens from the offer; completing the grounding
+            (onComplete) is what quiets the loop. */}
+        <StepOutOverlay
+          open={stepOutOpen}
+          onClose={closeStepOut}
+          patternLabel={loopOffer ? loopOffer.label : null}
+          onComplete={completeStepOut}
+        />
       </article>
     </main>
   );
