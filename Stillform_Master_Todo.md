@@ -19,6 +19,23 @@
 
 ---
 
+## 🏗️ BUILD PROGRAM — locked June 26, 2026 (Arlin: "build everything, finalize from the docs")
+
+**Coverage audit run June 26 against live code (28 screens / 51 lib / 39 fns). The app is overwhelmingly built; the remaining want-list is finite. Mandate: complete the whole app from the science/research/docs. Sequence (Arlin): mechanics first → then AI personalities.**
+
+**BUILT (verified June 26 — do not re-propose):** core loop + 5 beats + spine; all 7 Workshop instruments + 3 result frames; concierge M1–M5 (Mirror / Mediation / smart-prompt floor); engagement architecture Engine 1 (Mirror + Achievement + Roadmap / 5 stages Noticing→Naming→Anticipating→Recognizing→Holding), Engine 2 (Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact), Engine 3 (Trigger Profile); CFM (PracticeEvidence + AffectLabeling + Defusion); profiles (Trigger/Bias/Context/Capacities/Risk); plain-language science card; crisis resources + handoff summary; prediction log + naming growth; accounts/backup code (inactive); discovery finding card.
+
+**REMAINING BUILD — the finite real list, queued:**
+- **PHASE A — finish mechanics:** (A1) **Step Out trigger wiring** [built, unwired — CALL: deterministic cadence per WIP + `PATTERN_DISRUPTION_SPEC.md`]; (A2) **two M3 wiring calls** [CALL: wind-down exempt from body-check; `bioFilter` null-slot populated from latest StateCheck].
+- **PHASE B — build the practice out:** (B1) **Composure-as-Class outward layer** — the microbiases in-flow move ("see others clearly," IRI base extended; UNBUILT; Arlin's explicit ask; **spec DRAFTED for Arlin sign-off before live ship** — interpersonally sensitive, must not read as lecture/DEI per the roadmap endgame); (B2) **discovery engine keystone** [verify/complete the deterministic engine — `DiscoveryFindingCard` exists]; (B3) **Library depth** [thin launcher → readable depth]; (B4) **Learning Track** [UNBUILT; evidence-based lessons, rep-then-name; large]; (B5) **wow mechanics** — forecast-and-verify + evolution layer; (B6) **kinesthetic close** [spec not drafted]; (B7) **Self Mode processing flow** [research-first; AI-down path].
+- **PHASE C — AI personality rework** [see the AI block above; CALL on the real-constraint fork: option (b) separate real facts from the added permanent/no-way-out absolutism; sequenced after mechanics per Arlin].
+
+**HELD / ARLIN'S / NOT-NOW (excluded by rule or decision):** CFM interoceptive module (held, weakest science); Onboarding copy (Arlin's voice, last); Pricing (Arlin's rule — earned by the finished product, never mid-build); cloud-sync/accounts activation (Arlin's 2 Supabase steps); Watch haptic (Arlin's Mac + Android Studio); translations (post-launch); health integrations HRV/HealthKit/Health Connect (Layer 2, device-dependent).
+
+**Calls Claude is making from the docs (Arlin veto on sight):** A1 cadence · A2 both wiring calls · C real-constraint fork. **Genuinely Arlin's:** B1 microbiases live AI move (sign-off before ship) · whether to pull Phase C (AI rework) earlier than its post-mechanics slot.
+
+---
+
 ## 🟢 STILLFORM — TRUTH LOCKED
 
 **There is ONE Stillform — one app, one URL. `src/main.jsx` renders it directly (`<AppV2 />`): no version check, no toggle, no version parameter. The old `src/App.jsx` was deleted (`237167b`, May 17 2026) — there is no second app, and there is no second website. The bare `stillformapp.com` IS the app and the only URL to use. The only URL params that do anything are `?beat=morning|main|eod|wind-down` (forces a beat for testing) and `?verify=1` (primitives audit) — neither is a version. `src/v2/` is purely an internal folder name left over from an old migration, NOT a product version — never surface "v2" to anyone, and ignore any version-style URL param in stale notes or old commit messages; it is dead and does nothing. Backend stable — Supabase, 28 Netlify functions, LemonSqueezy.**
