@@ -166,7 +166,7 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
           />
         </div>
 
-        <Button variant="ghost" onClick={handleSkip}>
+        <Button variant="primary" onClick={handleSkip}>
           I&rsquo;m good now
         </Button>
 
