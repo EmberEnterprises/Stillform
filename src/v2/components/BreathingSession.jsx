@@ -167,7 +167,7 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
         </div>
 
         <Button variant="ghost" onClick={handleSkip}>
-          Stop
+          I&rsquo;m good now
         </Button>
 
         {/* The breath's rationale + the exit-is-success cue, folded into the
@@ -178,7 +178,7 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
             {why}
           </p>
           <p style={{ fontSize: "clamp(0.9rem, 2.6vw, 0.95rem)", color: "var(--sf-text-faint)", lineHeight: 1.55 }}>
-            Stop whenever you feel a bit better — that's the signal, not the count.
+            You don&rsquo;t have to finish every round &mdash; when you feel a bit better, that&rsquo;s the signal.
           </p>
         </div>
       </div>
