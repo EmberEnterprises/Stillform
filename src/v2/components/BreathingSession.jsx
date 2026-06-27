@@ -33,8 +33,12 @@ import Button from "./Button.jsx";
  */
 export default function BreathingSession({ pattern = "deep-regulate", onComplete, onSkip }) {
   const config = PATTERNS[pattern] || PATTERNS["deep-regulate"];
-  const { phases, totalRounds, label } = config;
+  const { phases, totalRounds, label, summary, why } = config;
 
+  // Intro-first (Arlin, June 27 walk): explain the breath + why + that you stop
+  // when you feel a bit better, BEFORE the rounds begin — never drop the user
+  // cold into a countdown. The timer only runs once started.
+  const [started, setStarted] = useState(false);
   const [roundIndex, setRoundIndex] = useState(0);   // 0-based
   const [phaseIndex, setPhaseIndex] = useState(0);   // 0-based within current round
   const [secondsLeft, setSecondsLeft] = useState(phases[0].duration);
@@ -43,6 +47,7 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
   // Run a single 1-second tick. When seconds hit 0, advance to next phase
   // (or next round, or complete if all rounds done).
   useEffect(() => {
+    if (!started) return;            // intro showing — don't tick yet
     if (secondsLeft <= 0) {
       // Advance: next phase, or next round, or complete.
       const isLastPhase = phaseIndex >= phases.length - 1;
@@ -74,7 +79,7 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
 
     const timer = setTimeout(() => setSecondsLeft(secondsLeft - 1), 1000);
     return () => clearTimeout(timer);
-  }, [secondsLeft, phaseIndex, roundIndex, phases, totalRounds, pattern, onComplete]);
+  }, [started, secondsLeft, phaseIndex, roundIndex, phases, totalRounds, pattern, onComplete]);
 
   const handleSkip = () => {
     if (typeof onSkip === "function") {
@@ -87,8 +92,51 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
     }
   };
 
+  const handleBegin = () => {
+    startTimestampRef.current = Date.now();  // measure the run from Begin, not mount
+    setStarted(true);
+  };
+
   const currentPhase = phases[phaseIndex];
   const phaseProgressPercent = ((currentPhase.duration - secondsLeft) / currentPhase.duration) * 100;
+
+  // Intro — what this is, why it works, and that you stop when you feel a bit
+  // better (the exit is success, not "ending early"). Shown before the rounds.
+  // COPY IS FIRST-PASS — Arlin's voice to set.
+  if (!started) {
+    return (
+      <main className="sf-page sf-page--hero">
+        <div className="sf-fade-enter" style={{ textAlign: "center", maxWidth: "32rem", margin: "0 auto" }}>
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-24)" }}>
+            {label}
+          </MonoLabel>
+          <p
+            style={{
+              fontFamily: "var(--sf-font-display)",
+              fontWeight: "var(--sf-weight-light)",
+              fontSize: "clamp(1.4rem, 5vw, 1.9rem)",
+              color: "var(--sf-text-primary)",
+              lineHeight: 1.3,
+              marginBottom: "var(--sf-space-24)",
+            }}
+          >
+            {summary}
+          </p>
+          <p style={{ fontSize: "clamp(1rem, 3vw, 1.0625rem)", color: "var(--sf-text-secondary)", lineHeight: 1.55, marginBottom: "var(--sf-space-24)" }}>
+            {why}
+          </p>
+          <p style={{ fontSize: "clamp(1rem, 3vw, 1.0625rem)", color: "var(--sf-text-secondary)", lineHeight: 1.55, marginBottom: "var(--sf-space-48)" }}>
+            You don't have to finish every round. Stop whenever you feel a bit
+            better — that's the signal, not the count.
+          </p>
+          <Button variant="primary" onClick={handleBegin}>Begin</Button>
+          <div style={{ marginTop: "var(--sf-space-16)" }}>
+            <Button variant="ghost" onClick={handleSkip}>Not now</Button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="sf-page sf-page--hero">
@@ -166,8 +214,11 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
           />
         </div>
 
+        <p style={{ fontSize: "clamp(0.85rem, 2.6vw, 0.95rem)", color: "var(--sf-text-secondary)", lineHeight: 1.5, marginBottom: "var(--sf-space-16)", opacity: 0.85 }}>
+          Stop whenever you feel a bit better.
+        </p>
         <Button variant="ghost" onClick={handleSkip}>
-          End early
+          Stop
         </Button>
       </div>
     </main>
@@ -187,6 +238,8 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
 const PATTERNS = {
   "deep-regulate": {
     label: "Deep Regulate",
+    summary: "Ten rounds — in, hold, a long eight-count exhale, then a brief rest. About three minutes.",
+    why: "The long exhale is the lever: a slow breath out pulls your heart rate down and signals your body the alarm can stand down.",
     phases: [
       { name: "Inhale", duration: 4, instruction: "In through your nose." },
       { name: "Hold",   duration: 4, instruction: "Hold." },
@@ -197,6 +250,8 @@ const PATTERNS = {
   },
   "cyclic-sighing": {
     label: "Cyclic Sighing",
+    summary: "A double breath in, then a long breath out — the physiological sigh. About five minutes.",
+    why: "The two stacked inhales reopen your lungs; the long exhale offloads the most. It's the pattern research points to as one of the fastest ways to settle.",
     phases: [
       { name: "Inhale",     duration: 4, instruction: "Deep breath in through your nose." },
       { name: "Top-off",    duration: 1, instruction: "Small top-off — fill your lungs completely." },
@@ -206,6 +261,8 @@ const PATTERNS = {
   },
   "quick-reset": {
     label: "Quick Reset",
+    summary: "Four short rounds — in through the nose, hold, a longer breath out. About a minute.",
+    why: "The breath out runs longer than the breath in. That longer exhale is what eases your system down.",
     phases: [
       { name: "Inhale", duration: 4, instruction: "In through your nose." },
       { name: "Hold",   duration: 4, instruction: "Hold." },

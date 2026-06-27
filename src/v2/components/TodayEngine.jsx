@@ -35,6 +35,12 @@ const SOURCES = [
 export default function TodayEngine() {
   const [open, setOpen] = useState(false);
   const native = isNativePlatform();
+  // On web the device signals (calendar / HRV / sleep) are unavailable, so this
+  // panel only ever reads "not available" — and it duplicates the concierge
+  // "Today" header (Arlin, June 27 walk: "today is redundant"). Render nothing
+  // on web; the single Today anchor is the concierge header, which carries the
+  // science tooltip. Native keeps the real readout.
+  if (!native) return null;
   const stateLabel = native ? "Not connected" : "Not available on web";
 
   return (
