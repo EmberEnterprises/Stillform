@@ -157,6 +157,13 @@ export default function Spine({ onExit, onNavigate = null, forcedBeat = null, in
   // handleCloseReturn and flow into recordSignal. handleCloseReturn keeps all of
   // its existing save logic untouched — it just gains a `bodyTokens` param.
   const handleCloseToStateCheck = (closePayload) => {
+    // M3 (Arlin's call, June 26): wind-down is EXEMPT from the at-close body
+    // check — no body interrogation near sleep (CANON §10, no review near
+    // sleep). Close proceeds straight to save with no body tokens.
+    if (beat === "wind-down") {
+      handleCloseReturn(closePayload, []);
+      return;
+    }
     setPendingClosePayload(closePayload);
     setStep("statecheck");
   };

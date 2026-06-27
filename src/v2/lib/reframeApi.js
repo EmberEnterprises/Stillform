@@ -31,6 +31,7 @@ import { formatTriggerProfileForAI } from "./triggerProfile.js";
 import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
 import { formatContextProfileForAI } from "./contextProfile.js";
 import { formatConfirmedFindingsForAI, formatReconsolidationMismatchForAI } from "./discoveryFindings.js";
+import { getLatestBodyBioFilter } from "./signalLog.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
 
@@ -118,7 +119,11 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         // backend only injects when beat === "eod".
         todayThread,
         // Phase 2 minimal context. These all default safely on the backend.
-        bioFilter: null,
+        // M3 (Arlin's call, June 26): the otherwise-null bioFilter slot is now
+        // populated from the latest SAME-DAY StateCheck body capture, mapped to
+        // the backend's token vocabulary. Null when none / only "clear" / stale
+        // (the backend already defaults safely on null — back-compat).
+        bioFilter: getLatestBodyBioFilter(),
         signalProfile: null,
         biasProfile,
         triggerProfile,

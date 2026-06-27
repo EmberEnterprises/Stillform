@@ -153,3 +153,53 @@ export function getSignals() {
 export function getSignalCount() {
   return getSignalLog().entries.length;
 }
+
+// Maps StateCheck body-state ids → the reframe.js bioFilter token vocabulary
+// (LOW_DEMAND_FLAGS = medicated/depleted/sleep/pain/hormonal/gut). REQUIRED, not
+// raw ids: StateCheck emits "sleep-deprived" but reframe.js matches "sleep", and
+// "clear" is NOT an active filter (it means nothing notable is running).
+const BIOFILTER_TOKEN_MAP = {
+  activated: "activated",
+  depleted: "depleted",
+  "sleep-deprived": "sleep",
+  pain: "pain",
+  hormonal: "hormonal",
+  // "clear" intentionally absent — excluded below.
+};
+
+/**
+ * getLatestBodyBioFilter — the most recent SAME-DAY body-state capture, mapped
+ * to reframe.js's bioFilter token vocabulary, as a comma-joined string (or
+ * null). Populates the otherwise-null bioFilter slot in the reframe context so
+ * the AI can read the user's current hardware state (M3, Arlin's call June 26).
+ *
+ * SAME-DAY ONLY — a stale read must never mis-frame today's session. Returns
+ * null when there is no same-day body capture, or when the only state was
+ * "clear" (nothing notable running → no active filter → AI defaults safely).
+ *
+ * NOTE (flagged for Arlin): StateCheck fires at session CLOSE, so this is the
+ * latest same-day CLOSE read, not a fresh start-of-session read. The same-day
+ * gate keeps it current; the start-read-vs-close-read nuance is the open M3
+ * design question.
+ */
+export function getLatestBodyBioFilter() {
+  let entries;
+  try {
+    entries = getSignalLog().entries;
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  const today = todayKey();
+  // Walk newest→oldest (entries are stored in chronological push order).
+  let latestBody = null;
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const e = entries[i];
+    if (!e || e.dateKey !== today) continue;
+    if (Array.isArray(e.body) && e.body.length > 0) { latestBody = e.body; break; }
+  }
+  if (!latestBody) return null;
+  const tokens = latestBody.map((id) => BIOFILTER_TOKEN_MAP[id]).filter(Boolean);
+  if (tokens.length === 0) return null; // e.g. only "clear"
+  return Array.from(new Set(tokens)).join(", ");
+}
