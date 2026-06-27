@@ -167,7 +167,7 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
         </div>
 
         <Button variant="primary" onClick={handleSkip}>
-          I&rsquo;m good now
+          Complete
         </Button>
 
         {/* The breath's rationale + the exit-is-success cue, folded into the
