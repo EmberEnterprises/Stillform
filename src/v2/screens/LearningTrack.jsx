@@ -1,0 +1,87 @@
+import React, { useState } from "react";
+import EditorialBlock from "../components/EditorialBlock.jsx";
+import LessonRunner from "./LessonRunner.jsx";
+import { LESSONS, getLesson } from "../lib/learningTrack.js";
+
+/**
+ * LearningTrack — the self-paced Track surface. The structured-proactive
+ * complement to the live-reactive spine: the spine is metacognition of your
+ * emotional life as it happens; the Track is metacognition of your learning,
+ * on purpose. Both build the same thing.
+ *
+ * Shares the home/Library design system (sf-sec rows, EditorialBlock). Tapping
+ * a lesson runs it in-place via LessonRunner; leaving returns to this list.
+ *
+ * @param {function(): void} onExit — back to Home
+ */
+export default function LearningTrack({ onExit }) {
+  const [activeId, setActiveId] = useState(null);
+
+  if (activeId) {
+    return <LessonRunner lesson={getLesson(activeId)} onExit={() => setActiveId(null)} />;
+  }
+
+  return (
+    <>
+      <div className="sf-home-aura" aria-hidden="true" />
+      <div className="sf-home-grain" aria-hidden="true" />
+      <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)", position: "relative", zIndex: 1 }}>
+        <button type="button" onClick={onExit} aria-label="Back home" style={backStyle}>
+          ← back
+        </button>
+
+        <EditorialBlock
+          label="Learning Track"
+          headline="The Track"
+          headlineSize="md"
+          body="Short lessons where you don't read about a move — you do it once, then watch how your own mind did it. The same move turns out to run under learning almost anything."
+          rule
+        />
+
+        <section className="sf-sec">
+          <div className="sf-sec-head">
+            <span className="sf-sec-head-lbl">Lessons</span>
+            <div className="sf-sec-rule" />
+          </div>
+          <p className="sf-sec-lead">
+            Go at your own pace — one whenever you want a few minutes. Each is a small rep, then the
+            name for what you just did.
+          </p>
+
+          {LESSONS.map((lesson, i) => (
+            <button
+              key={lesson.id}
+              type="button"
+              className="sf-sec-row"
+              aria-label={`Start lesson: ${lesson.title}`}
+              onClick={() => setActiveId(lesson.id)}
+            >
+              <span className="sf-sec-mark" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+              <span className="sf-sec-row-main">
+                <span className="sf-sec-row-top">
+                  <span className="sf-sec-name">{lesson.title}</span>
+                </span>
+                {lesson.transferLine ? <span className="sf-sec-sub">{lesson.transferLine}</span> : null}
+              </span>
+              <span className="sf-sec-arrow" aria-hidden="true">→</span>
+            </button>
+          ))}
+        </section>
+      </main>
+    </>
+  );
+}
+
+const backStyle = {
+  background: "transparent",
+  border: "none",
+  color: "var(--sf-text-faint)",
+  fontFamily: "var(--sf-font-mono)",
+  fontSize: "11px",
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  cursor: "pointer",
+  padding: "8px 0",
+  marginBottom: "var(--sf-space-24)",
+  WebkitTapHighlightColor: "transparent",
+};
