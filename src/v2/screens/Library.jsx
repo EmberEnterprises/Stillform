@@ -8,6 +8,8 @@ import MAIA2, { score as maia2Score } from "../lib/instruments/maia2.js";
 import IRI, { score as iriScore } from "../lib/instruments/iri.js";
 import MCQ30, { score as mcq30Score } from "../lib/instruments/mcq30.js";
 import DOSPERT, { score as dospertScore } from "../lib/instruments/dospert.js";
+import ScienceReader from "./ScienceReader.jsx";
+import { SCIENCE_ENTRIES, getScienceEntry } from "../lib/scienceLibrary.js";
 
 /**
  * Library — the curated-knowledge surface, reached from the Home footer.
@@ -40,6 +42,7 @@ const INSTRUMENTS = [
 
 export default function Library({ onExit }) {
   const [activeId, setActiveId] = useState(null);
+  const [activeScienceId, setActiveScienceId] = useState(null);
 
   const active = activeId ? INSTRUMENTS.find((e) => e.id === activeId) : null;
   if (active) {
@@ -48,6 +51,15 @@ export default function Library({ onExit }) {
         instrument={active.instrument}
         scoreFn={active.scoreFn}
         onExit={() => setActiveId(null)}
+      />
+    );
+  }
+
+  if (activeScienceId) {
+    return (
+      <ScienceReader
+        entry={getScienceEntry(activeScienceId)}
+        onExit={() => setActiveScienceId(null)}
       />
     );
   }
@@ -96,6 +108,36 @@ export default function Library({ onExit }) {
                   ) : null}
                 </span>
                 {instrument.subtitle ? <span className="sf-sec-sub">{instrument.subtitle}</span> : null}
+              </span>
+              <span className="sf-sec-arrow" aria-hidden="true">→</span>
+            </button>
+          ))}
+        </section>
+
+        <section className="sf-sec">
+          <div className="sf-sec-head">
+            <span className="sf-sec-head-lbl">The Science</span>
+            <div className="sf-sec-rule" />
+          </div>
+          <p className="sf-sec-lead">
+            The research the practice is built on — the mechanism behind each tool,
+            and where to check it. Drawn from Stillform&rsquo;s science sheet.
+          </p>
+
+          {SCIENCE_ENTRIES.map((entry, i) => (
+            <button
+              key={entry.id}
+              type="button"
+              className="sf-sec-row"
+              aria-label={`Read about ${entry.title}`}
+              onClick={() => setActiveScienceId(entry.id)}
+            >
+              <span className="sf-sec-mark" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+              <span className="sf-sec-row-main">
+                <span className="sf-sec-row-top">
+                  <span className="sf-sec-name">{entry.title}</span>
+                </span>
+                {entry.oneLiner ? <span className="sf-sec-sub">{entry.oneLiner}</span> : null}
               </span>
               <span className="sf-sec-arrow" aria-hidden="true">→</span>
             </button>
