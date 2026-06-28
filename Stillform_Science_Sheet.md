@@ -772,3 +772,33 @@ Single skips are noise. Consistent skips are signal. Surfacing skip patterns bef
 - *Interoceptive latency — HELD, not shipped.* MAIA (Mehling et al. 2012) measures self-reported AWARENESS; the literature separates awareness from accuracy/latency, so a "time to find a sensation" test is NOT what MAIA validates. Held until it can be grounded honestly.
 
 INTEGRITY (all CFM): evidence the function is changing over the user's OWN baseline, never a grade, never against anyone else; honest when flat.
+
+## Learning & Skill Acquisition (Learning Track foundation) — added June 28 2026
+
+**What it does:** The Learning Track turns each concept into a *run-it-then-name-it-then-carry-it* practice (a small firsthand rep → naming the metacognitive move → an explicit cross-domain parallel). This section is the evidence base for HOW that is structured so it builds a durable, portable skill rather than a one-time read. No new in-app neuroscience is introduced; this is the pedagogy spine under the Track.
+
+**The science:**
+
+**Deliberate practice — the rep design.** Skill grows from specific, effortful reps aimed at the edge of current ability, with feedback and refinement — not from volume or passive review. This grounds the Track's drills (the move from several angles) and its levels (escalating difficulty). Ericsson, Krampe & Tesch-Römer (1993). HONEST BOUND: the strong "practice is sufficient / 10,000 hours" version is contested (Macnamara et al. 2014; Sala & Gobet) — individual differences and domain matter. Stillform claims structured practice *builds* the move, NOT that practice is all that matters.
+
+**Spaced + retrieval practice — the come-back (highest-leverage).** Across the largest syntheses, the two most effective techniques are distributed (spaced) practice and practice testing (retrieval). Returning to a move at *growing intervals* and recalling/re-running it *from memory* (not re-reading) is what makes it durable ("successive relearning"). This grounds the Track's spaced come-back and recall-based return reps. Dunlosky, Rawson, Marsh, Nathan & Willingham (2013), *Psychological Science in the Public Interest* 14(1); a 2021 meta-analysis of ten techniques (Hattie & Donoghue) replicating the result; Roediger & Karpicke (2006), *Psychological Science*.
+
+**Desirable difficulty — why the harder return is the point.** Effortful retrieval produces more durable learning than easy re-reading; fluency is a false signal of mastery. People systematically *misjudge* this — even after experiencing spacing/retrieval, they rate the effortful strategies as less effective. The Track embraces the harder return and must frame it honestly so users don't abandon the thing that works. Bjork & Bjork (1992) — storage vs. retrieval strength / desirable difficulties.
+
+**Interleaving — mixing moves over time.** Alternating between different moves (rather than blocking one to completion) builds the ability to recognize *which* move a situation calls for (contextual interference). Practice-session performance feels worse; later retention and selection are better. Argues for interleaving moves across the Track over time, not only finishing one before the next. Rohrer & Taylor (2007).
+
+**Transfer — the load-bearing, disciplined claim.** The Track's cross-domain beat ("the same move a musician makes naming a note by ear") is a *transfer* claim, and the evidence is blunt: **far transfer is rare and does NOT happen automatically; near transfer is common.** Generic "train this and it carries everywhere" claims (brain-training, working-memory training) are largely unsupported — the same overclaim family Stillform already refuses (cf. learning-styles, Pashler 2008). Detterman (1993); Sala & Gobet (2017); Barnett & Ceci (2002). HOWEVER — far transfer *can* be promoted by the one technique the Track is already using: explicitly abstracting the underlying principle and bridging it across domains ("high-road transfer" / "teach for transfer"). Salomon & Perkins (1989); Barnett & Ceci (2002). HONEST FRAMING (locked): the transfer beat helps the user *abstract a move so it can carry*; it is NOT a claim that the practice makes them better at unrelated skills (chess, an instrument). Claim the mechanism (principled abstraction), never the miracle (automatic far transfer).
+
+**Who says so:**
+- Ericsson, Krampe & Tesch-Römer (1993) — "The Role of Deliberate Practice in the Acquisition of Expert Performance" — *Psychological Review* 100:363–406
+- Dunlosky, Rawson, Marsh, Nathan & Willingham (2013) — "Improving Students' Learning With Effective Learning Techniques" — *Psychological Science in the Public Interest* 14(1):4–58
+- Hattie & Donoghue (2021) — meta-analysis of ten learning techniques (distributed practice + practice testing highest-impact)
+- Roediger & Karpicke (2006) — the testing effect / retrieval practice — *Psychological Science*
+- Bjork & Bjork (1992) — desirable difficulties; storage vs. retrieval strength
+- Rohrer & Taylor (2007) — interleaved practice
+- Detterman (1993) — skeptical review of transfer ("the case for the prosecution")
+- Sala & Gobet (2017) — meta-analyses: little far transfer from chess / music / working-memory training
+- Barnett & Ceci (2002) — taxonomy of transfer; far transfer needs deliberate support — *Psychological Bulletin*
+- Salomon & Perkins (1989) — low-road vs. high-road transfer (mindful abstraction)
+
+**If they push back:** "The Learning Track isn't brain-training that promises to transfer everywhere — the evidence says that rarely works, and we won't claim it. It's built on what does: spaced retrieval, effortful practice at the edge, and explicitly abstracting each move so it can carry. The cross-domain beat is *teaching for transfer* — the one method shown to help — framed as a parallel that builds the abstraction, never a promise you'll get better at unrelated skills."
