@@ -3,46 +3,42 @@
  *
  * The Track is the thesis made concrete: "expand cognitive capacity via
  * neuroplasticity -> self-mastery" is a claim until the user DOES the move and
- * watches their own mind do it. Each lesson is a full PRACTICE UNIT, not a card.
+ * watches their own mind do it. Each lesson is a full PRACTICE UNIT.
  *
- * DEEP MOVE-TEMPLATE (approved direction; mockup-reviewed). Order of a move:
- *   intro         "The move"        — name a real concept (no passive lecture)
- *   workedExample "Watch it once"   — the move done once, narrated (a model)
- *   rep           the anchor drill  — the user DOES it (active, interactive)
- *   drills        foundation/further— more reps; further = harder (desirable
- *                                     difficulty). Prompt-strings, done by hand.
- *   name          "what you did"    — the metacognitive move, named
- *   runLive       "Run it live"     — how to use it in a real moment today
- *   notice        "What to notice"  — the tell that it worked
- *   whenHard      "When it's hard"  — the common failure + the fix
- *   deeperCut     why/trap/when/pairsWith — the mechanics under the move
- *   levels        the rungs it climbs (beginner expression -> under-load mastery)
- *   transfer      "Where it carries"— principled abstraction (see DISCIPLINE)
- *   conceptId     "Where to check it" — links to the scienceLibrary entry
- *   comeBack      spaced retrieval  — return at growing intervals, recall from
- *                                     MEMORY (not re-read); the effort is the point
+ * The Track teaches the DOABLE moves (each has a firsthand rep). The rest of the
+ * science stays in the Library to read — not every vetted concept is a move you
+ * drill. Every lesson's conceptId maps to a REAL scienceLibrary entry; no new
+ * science is invented here.
+ *
+ * DEEP MOVE-TEMPLATE (approved; mockup-reviewed). Order of a move:
+ *   intro/title   "The move"        · workedExample "Watch it once"
+ *   rep           the anchor drill (the user DOES it)
+ *   drills        foundation / further (further = harder, desirable difficulty)
+ *   name          "what you just did" · runLive · notice · whenHard
+ *   deeperCut     why / trap / when / pairsWith
+ *   levels        the rungs it climbs · transfer "Where it carries"
+ *   conceptId     "Where to check it" (Library) · comeBack (spaced retrieval)
  *
  * TRANSFER DISCIPLINE (locked): far transfer is rare and NOT automatic
  * (Detterman 1993; Sala & Gobet 2017; Barnett & Ceci 2002). The transfer beat
- * names the SAME move appearing across domains and teaches for transfer by
- * explicit abstraction (high-road transfer; Salomon & Perkins 1989). It is
- * NEVER a promise that this practice makes you better at an unrelated skill
- * (chess, an instrument). Same overclaim-refusal family as the learning-styles
- * ban below.
+ * names the SAME move across domains by explicit abstraction (high-road
+ * transfer; Salomon & Perkins 1989). NEVER a promise this practice makes you
+ * better at an unrelated skill. Same overclaim-refusal family as the
+ * learning-styles ban below.
  *
- * HARD GUARDRAIL (non-negotiable): NO learning-styles / VAK / brain-type
- * matching anywhere (Pashler et al. 2008 — debunked neuromyth). Task-level
- * difference is real; a PERSON having a "brain-type" is false and never ships.
+ * HARD GUARDRAIL: NO learning-styles / VAK / brain-type matching (Pashler 2008).
+ * NO gamification: no scores, streaks, points, pep. Reps are not graded/stored.
  *
- * NO gamification: no scores, streaks, points, or pep. Reps are not graded and
- * not stored — the value is the doing, not a record.
+ * COPY STATUS: ALL prose is FIRST-PASS DRAFT — Arlin's curriculum voice to set.
+ * The structure, transfer mechanic, spaced come-back, and disciplines are the
+ * build; the wording is hers.
  *
- * COPY STATUS: ALL prose here (intro / workedExample / drills / name / runLive /
- * notice / whenHard / deeperCut / levels / transfer / comeBack) is FIRST-PASS
- * DRAFT — Arlin's curriculum voice to set. The STRUCTURE, the transfer mechanic,
- * the spaced come-back, and the discipline are the build; wording is hers.
+ * HELD FOR SIGN-OFF (not in LESSONS): a "Reading others" chapter + a microbiases
+ * move ("check your read when you're running low") is drafted but withheld —
+ * same interpersonal-sensitivity gate as B1 (Arlin sign-off before live ship).
  *
- * Rep `kind`: "word" | "twoline" | "choice" | "breath".
+ * Rep `kind`: "word" | "twoline" | "choice" | "breath" | "do" (instruction-only;
+ * the user does the action, Continue acts as done — uses rep.doneLabel).
  */
 
 export const CHAPTERS = [
@@ -54,7 +50,7 @@ export const CHAPTERS = [
   {
     id: "stepping-back",
     title: "Stepping back",
-    blurb: "Getting outside a thought so it stops being the air you breathe and becomes something you can see.",
+    blurb: "Getting outside a thought or a pattern so it stops being the air you breathe and becomes something you can see.",
   },
   {
     id: "the-body",
@@ -163,6 +159,55 @@ export const LESSONS = [
       "Come back in several days and try to name three feelings more precisely from memory before you re-read anything. The recall is the rep \u2014 if it comes back slow, that slowness is the move working.",
   },
   {
+    id: "check-the-hardware",
+    chapter: "naming",
+    conceptId: "bio-filter",
+    title: "Check the hardware first",
+    transferLine: "the same check a pilot runs before trusting an instrument",
+    intro:
+      "Before you trust a feeling as a fact about your life, check whether it\u2019s a fact about your body. A bleak mood on four hours of sleep is often just four hours of sleep. One check, right now.",
+    workedExample:
+      "Watch it once: someone reads their flat, hopeless afternoon as \u2018my work is going nowhere.\u2019 Then they notice they haven\u2019t eaten since morning. The hopelessness doesn\u2019t fully lift \u2014 but it stops being a verdict on their life and becomes a low-fuel reading. Different problem, different fix.",
+    rep: {
+      kind: "choice",
+      prompt: "What\u2019s your hardware doing right now? Pick the closest.",
+      options: ["under-slept", "hungry / low fuel", "wired / over-caffeinated", "in pain", "run-down", "all clear"],
+      allowOther: false,
+    },
+    drills: {
+      foundation: [
+        "Take the feeling you came in with and ask: how much of this is the hardware you just named?",
+        "Recall a recent \u2018everything is wrong\u2019 moment \u2014 what was your body doing that day?",
+      ],
+      further: [
+        "Catch a feeling in real time today and run the hardware check before you act on it.",
+        "Notice a feeling that ISN\u2019T explained by the hardware \u2014 that\u2019s the one worth working. The check tells you which is which.",
+      ],
+    },
+    name: "That\u2019s the bio-filter \u2014 separating the software (what you\u2019re feeling about your life) from the hardware (what your body is running on). Misreading a depleted body as a permanent truth is one of the most common ways a feeling lies to you.",
+    runLive:
+      "Next time a feeling arrives heavy today, run the check before the story: slept? eaten? in pain? The check doesn\u2019t dismiss the feeling \u2014 it tells you what you\u2019re actually dealing with.",
+    notice:
+      "The tell: once you name the hardware, the feeling often loosens its grip on \u2018this is my life\u2019 and settles into \u2018this is my body right now.\u2019 That shift is the whole move.",
+    whenHard:
+      "If everything reads \u2018all clear\u2019 but the feeling\u2019s still strong, good \u2014 that\u2019s the signal it\u2019s real software, worth working with the other moves. The check isn\u2019t meant to explain everything away.",
+    deeperCut: {
+      why: "The body\u2019s state sets the baseline your brain interprets everything against \u2014 the same event lands differently fed vs starving, rested vs wrecked. Naming the hardware re-bases the read.",
+      trap: "Using it to dismiss every feeling (\u2018I\u2019m just tired\u2019) and never working the real ones. The check sorts hardware from software; it doesn\u2019t delete software.",
+      when: "First thing when a feeling seems bigger than the situation, or recurs at the same time of day \u2014 a clue it\u2019s a body rhythm.",
+      pairsWith: "Pairs with Naming a feeling \u2014 name it, then check whether the body is the author.",
+    },
+    levels: [
+      "Run the check after a feeling has already run you.",
+      "Run it in the moment, before acting.",
+      "Notice the body\u2019s contribution forming and re-base the read before the story even sets.",
+    ],
+    transfer:
+      "It\u2019s the same check a pilot runs before trusting an instrument, or a good engineer runs before trusting a reading \u2014 is the gauge telling me about the world, or about the gauge? Knowing the difference between signal and instrument-error is most of good judgment, anywhere.",
+    comeBack:
+      "In a few days, before re-reading, recall the check from memory \u2014 what were the things you ask about? Pull the list back yourself; the small effort of recalling it is what makes it automatic when you need it.",
+  },
+  {
     id: "stepping-outside-a-thought",
     chapter: "stepping-back",
     conceptId: "reframe",
@@ -213,6 +258,150 @@ export const LESSONS = [
       "In a few days, before opening this again, try to recall the exact prefix. Pull it from memory. If it comes back slow, good \u2014 the slowness is the move working.",
   },
   {
+    id: "watching-the-watcher",
+    chapter: "stepping-back",
+    conceptId: "metacognition",
+    title: "Watching the watcher",
+    transferLine: "the same step a scientist takes observing their own method, not just the result",
+    intro:
+      "Most of the day you think your thoughts. This move is different: you watch yourself thinking them. That one step up is where every other move in here lives. Let\u2019s take it once.",
+    workedExample:
+      "Watch it once: mid-worry, someone catches it \u2014 \u2018I\u2019m spinning the same loop again.\u2019 Nothing about the worry changed. But for a second they were standing one level above it, watching the loop instead of being the loop. That vantage point is the move.",
+    rep: {
+      kind: "do",
+      prompt: "Notice one thought you\u2019re having right now \u2014 any thought. Then notice the thing that just noticed it. Sit with that \u2018noticer\u2019 for a breath, then tap below.",
+      doneLabel: "Done",
+    },
+    drills: {
+      foundation: [
+        "Name what your mind is doing right now as an activity \u2014 \u2018planning,\u2019 \u2018rehearsing,\u2019 \u2018judging\u2019 \u2014 not the content, the activity.",
+        "Catch yourself mid-thought once more and label the mode it\u2019s in.",
+      ],
+      further: [
+        "Do it while a feeling\u2019s active \u2014 watch the thinking AND the feeling from one step up, without getting pulled in. Harder, and the rep that matters.",
+        "Notice the gap between you and your thoughts widen the longer you watch. Stay in that gap for three breaths.",
+      ],
+    },
+    name: "That\u2019s metacognition \u2014 thinking about your own thinking. It\u2019s the master move: you can\u2019t change a process you\u2019re inside of, only one you can see. Every other move here is a specific use of this one step up.",
+    runLive:
+      "Once today, when your mind is busy, take the step up: \u2018what is my mind doing right now?\u2019 Name the activity. You\u2019ve just gone meta on it.",
+    notice:
+      "The tell: a small sense of room. The thoughts keep coming, but there\u2019s now a \u2018you\u2019 watching them arrive, slightly apart from them.",
+    whenHard:
+      "If you keep getting pulled back into the content, that\u2019s normal \u2014 the pull IS the thing you\u2019re learning to feel. Each time you notice you got pulled in, that noticing is another rep, not a failure.",
+    deeperCut: {
+      why: "Watching your own thinking recruits the brain\u2019s capacity to model itself \u2014 and a process you can observe is one you can interrupt and steer. That\u2019s the root of self-mastery, not a metaphor for it.",
+      trap: "Turning it into more thinking \u2014 analyzing the thought instead of simply watching it. The move is to observe the activity, not to add commentary on it.",
+      when: "Any time you\u2019re caught in a loop \u2014 the watching is itself the way out, because a loop runs on not being seen.",
+      pairsWith: "Pairs with Stepping outside a thought \u2014 watching the watcher is the wide move; stepping out of a specific thought is the precise one.",
+    },
+    levels: [
+      "Notice you were thinking, after the fact.",
+      "Catch the thinking as it happens and name its mode.",
+      "Hold the vantage point under load \u2014 watching the process while it\u2019s hot, and steering from there.",
+    ],
+    transfer:
+      "It\u2019s the same step a scientist takes observing their own method, not just the result, or a writer reading their draft as a stranger would. Stepping above your own process to see how it runs is what lets you improve it \u2014 in thinking, in craft, in anything.",
+    comeBack:
+      "In a few days, recall from memory what the step actually was before re-reading. If you have to reach for it, good \u2014 reaching is the rep that wires it in.",
+  },
+  {
+    id: "spot-a-repeat",
+    chapter: "stepping-back",
+    conceptId: "pattern-recognition",
+    title: "Spot a repeat",
+    transferLine: "the same eye a coach has for the move you keep making",
+    intro:
+      "A reaction you have once is an event. The same reaction three times is a pattern \u2014 and a pattern you can see is one you can get ahead of. Let\u2019s find one of yours.",
+    workedExample:
+      "Watch it once: someone notices they go quiet and curt most Sunday evenings. Once, it\u2019s a bad mood. Named as a repeat \u2014 \u2018this happens most Sundays\u2019 \u2014 it stops being random weather and becomes a thing with a shape, a trigger, and a possible exit.",
+    rep: {
+      kind: "word",
+      prompt: "Name one reaction you\u2019ve had more than once lately \u2014 a mood, a move, a spiral that keeps recurring. A few words.",
+      placeholder: "the thing that repeats",
+    },
+    drills: {
+      foundation: [
+        "For the repeat you named, what tends to come right before it? Name the trigger.",
+        "Has it shown up this week? When?",
+      ],
+      further: [
+        "Find a repeat you\u2019d rather not admit to \u2014 the harder-to-see ones run you the most.",
+        "Name a repeat that\u2019s GOOD \u2014 something steady you do that works. Patterns aren\u2019t only problems.",
+      ],
+    },
+    name: "That\u2019s pattern recognition \u2014 the engine under self-knowledge. A pattern stays in charge as long as it\u2019s invisible; the moment you can name \u2018this happens, around then, after that,\u2019 it stops being weather and becomes something you can meet on purpose.",
+    runLive:
+      "When a familiar feeling hits today, ask: \u2018is this a one-off, or the repeat?\u2019 If it\u2019s the repeat, you already know its shape \u2014 that\u2019s the advantage.",
+    notice:
+      "The tell: a click of recognition \u2014 \u2018oh, this again.\u2019 That recognition is the distance that lets you choose instead of just react.",
+    whenHard:
+      "If nothing obvious repeats, look at times, places, or people rather than feelings \u2014 patterns often hide in the WHEN and WHO, not the what. And some take weeks to see; that\u2019s what the app\u2019s own pattern surfacing is for.",
+    deeperCut: {
+      why: "Naming a recurrence turns an automatic loop into an explicit prediction \u2014 and a prediction can be checked, met early, and updated. Invisible patterns just run; named ones become choices.",
+      trap: "Forcing a pattern that isn\u2019t there, or treating correlation as cause (\u2018X always makes me Y\u2019). Name what recurs; stay honest that it\u2019s a tendency, not a law.",
+      when: "Most useful just before a known trigger \u2014 that\u2019s when seeing the repeat lets you get ahead of it instead of inside it.",
+      pairsWith: "Pairs with the app\u2019s own pattern surfacing \u2014 you spot the repeats you can feel; the app surfaces the ones only the data shows.",
+    },
+    levels: [
+      "Name a repeat after you\u2019ve noticed it a few times.",
+      "Catch the repeat as it\u2019s starting.",
+      "See the trigger that fires it and meet the pattern before it runs \u2014 the whole point.",
+    ],
+    transfer:
+      "It\u2019s the same eye a coach has for the move an athlete keeps making, or an analyst has for the recurring setup. Seeing the repeat in the noise is what separates reacting from anticipating \u2014 in your own mind as much as anywhere.",
+    comeBack:
+      "In a few days, before re-reading, try to recall the repeat you named \u2014 and whether it\u2019s shown up since. Tracking it from memory is itself the practice of watching your own patterns.",
+  },
+  {
+    id: "ride-the-urge",
+    chapter: "stepping-back",
+    conceptId: "urge-surfing",
+    title: "Ride the urge",
+    transferLine: "the same patience a free-diver has waiting out the urge to breathe",
+    intro:
+      "An urge feels like a command \u2014 do it now. It\u2019s actually a wave: it rises, peaks, and falls on its own if you don\u2019t act. This move is learning to ride it instead of obey it. One rep.",
+    workedExample:
+      "Watch it once: the pull to check the phone hits. Instead of grabbing it, someone just watches the urge \u2014 notices it climb, feel almost unbearable, then, unobeyed, start to fade. The phone\u2019s still there. The urge passed without being fed. They learned it would.",
+    rep: {
+      kind: "do",
+      prompt: "Bring to mind an urge you feel right now \u2014 to check something, react, snack, escape. Don\u2019t act on it. Just watch it: where it sits in your body, how strong it is. Watch for a few breaths as it shifts, then tap below.",
+      doneLabel: "It shifted",
+    },
+    drills: {
+      foundation: [
+        "Name where the urge lives in your body \u2014 chest, hands, jaw. Urges are physical before they\u2019re decisions.",
+        "Rate it 1\u201310, watch for thirty seconds, rate it again. Notice it moved.",
+      ],
+      further: [
+        "Ride a stronger urge \u2014 one you usually obey instantly. The bigger the wave, the more the rep teaches.",
+        "Do it without white-knuckling \u2014 not gritting against the urge, just watching it, curious. Resisting feeds it; watching starves it.",
+      ],
+    },
+    name: "That was urge-surfing \u2014 staying with an urge as a passing sensation instead of an order. Every time you watch one crest and fall without acting, you teach your nervous system that the urge isn\u2019t a command, and its grip loosens for next time.",
+    runLive:
+      "Next time an urge says \u2018now,\u2019 today, put one breath between the urge and the action. Watch the wave for that breath. Often that\u2019s all it takes for the peak to pass.",
+    notice:
+      "The tell: the urge that felt like it would last forever noticeably eases while you watch it \u2014 and you\u2019re still here, not having obeyed it. That\u2019s the proof it was a wave, not a command.",
+    whenHard:
+      "If the urge wins sometimes, that\u2019s expected \u2014 you\u2019re not after a perfect record, you\u2019re building a capacity. Even watching it for two seconds before acting is a rep that counts.",
+    deeperCut: {
+      why: "Urges follow a rise-and-fall curve; acting on one reinforces it for next time, while watching it pass without acting weakens that loop. You\u2019re retraining the response through the not-acting.",
+      trap: "Turning it into a willpower clench \u2014 fighting the urge. The fight keeps you fused to it. The move is detached watching, not gritted resistance.",
+      when: "The instant an urge says \u2018now\u2019 \u2014 that \u2018now\u2019 is the wave telling you it\u2019s near its peak and about to fall.",
+      pairsWith: "Pairs with the exhale lever \u2014 one long exhale gives you the breath of space to watch the urge instead of obey it.",
+    },
+    levels: [
+      "Watch a mild urge pass.",
+      "Ride a strong urge you\u2019d normally obey.",
+      "Feel the urge arrive and watch it without effort \u2014 no clench, just the calm knowledge it\u2019ll pass.",
+    ],
+    transfer:
+      "It\u2019s the same patience a free-diver has waiting out the urge to breathe, or anyone resisting the easy quick move for the better slow one. Tolerating a strong pull without obeying it is the muscle under most discipline \u2014 you just worked it directly.",
+    comeBack:
+      "In a few days, recall the move from memory before re-reading: what did you do with the urge? Not fight it, not feed it \u2014 watch it. Pulling that back yourself is what makes it available when an urge actually hits.",
+  },
+  {
     id: "the-exhale-lever",
     chapter: "the-body",
     conceptId: "breathing",
@@ -260,6 +449,102 @@ export const LESSONS = [
       "It\u2019s the same reset an athlete uses between points and a singer uses for breath support. Controlling the exhale is a lever that works the same way under any kind of load. You didn\u2019t learn a Stillform trick \u2014 you located something you already carry.",
     comeBack:
       "In a few days, do one from memory before re-reading \u2014 can you recall the rhythm? Double sip in, long out. Pulling the pattern back from memory is what makes it yours.",
+  },
+  {
+    id: "drop-into-the-body",
+    chapter: "the-body",
+    conceptId: "somatic-interrupt",
+    title: "Drop back into the body",
+    transferLine: "the same reset a performer uses to get out of their head and into the room",
+    intro:
+      "When you\u2019re spun up in your head, the fastest exit isn\u2019t another thought \u2014 it\u2019s a single point of physical contact. Feet on the floor. Jaw unclenched. The body is the door out of the spiral. Let\u2019s use it once.",
+    workedExample:
+      "Watch it once: mid-spiral, someone presses their feet flat into the floor and feels the contact for a moment. The thoughts don\u2019t stop \u2014 but they get a half-step quieter, because attention can\u2019t be fully in the runaway story and fully in the soles of the feet at once. The body pulled focus back.",
+    rep: {
+      kind: "do",
+      prompt: "Right now: plant both feet flat and feel the floor pushing back. Unclench your jaw. Drop your shoulders. Stay with the physical sensation for three breaths \u2014 not the thoughts, the contact. Then tap below.",
+      doneLabel: "Done",
+    },
+    drills: {
+      foundation: [
+        "Name what you feel in contact with the world right now \u2014 the chair, the floor, your feet. Anything physical.",
+        "Find one spot of tension you didn\u2019t know you were holding, and let it go.",
+      ],
+      further: [
+        "Do it while a thought is actively pulling \u2014 drop to the body without waiting for the thought to finish. Hard, and the point.",
+        "Use a tiny cue with eyes open in a normal moment \u2014 feet, breath, jaw \u2014 so it works in a meeting, not just in private.",
+      ],
+    },
+    name: "That\u2019s a somatic interrupt \u2014 using a physical anchor to break the pull of a runaway mental loop. Attention is mostly single-channel; filling it with a body sensation leaves less room for the spiral. It\u2019s not avoidance \u2014 it\u2019s changing which channel you\u2019re on.",
+    runLive:
+      "Next time your head runs away today, drop to one physical point \u2014 feet, breath, hands \u2014 for a few seconds before you do anything else. The body is the handle when thoughts won\u2019t give you one.",
+    notice:
+      "The tell: a small drop in the volume of the thoughts, and a sense of being HERE \u2014 in the room, in the body \u2014 rather than lost in the loop. Even a little counts.",
+    whenHard:
+      "If the thoughts pull you back out instantly, that\u2019s fine \u2014 just return to the body again. The move isn\u2019t holding the body forever; it\u2019s the returning, as many times as it takes.",
+    deeperCut: {
+      why: "Attention is largely single-channel \u2014 a vivid physical sensation competes directly with the mental loop for it, which is why grounding in the body quiets the head without your having to argue the thoughts down.",
+      trap: "Doing it as another thing to think ABOUT (\u2018am I grounding right?\u2019) instead of actually feeling the contact. The move is sensation, not analysis of sensation.",
+      when: "The moment you notice you\u2019ve left the room and gone into your head \u2014 the leaving is the cue to drop back.",
+      pairsWith: "Pairs with the exhale lever \u2014 the breath is itself a body anchor; the long exhale and the felt contact work the same channel.",
+    },
+    levels: [
+      "Use a body anchor when you remember to, in private.",
+      "Use it mid-spiral, deliberately.",
+      "Drop to the body automatically, eyes open, in the middle of real life \u2014 before the spiral builds.",
+    ],
+    transfer:
+      "It\u2019s the same reset a performer uses to get out of their head and into the room, or an athlete uses to stop overthinking and feel the movement. Coming back to the body to quiet the mind is a lever that works the same under any kind of pressure.",
+    comeBack:
+      "In a few days, recall the anchors from memory before re-reading \u2014 what were the contact points? Feet, jaw, shoulders, breath. Pulling them back yourself is what makes one available the instant you need it.",
+  },
+  {
+    id: "scan-once",
+    chapter: "the-body",
+    conceptId: "body-scan",
+    title: "Scan once",
+    transferLine: "the same sweep a mechanic does listening to an engine before guessing at it",
+    intro:
+      "Your body is usually holding a feeling somewhere before your mind has named it \u2014 a tight jaw, locked shoulders, a held breath. A quick scan reads the signal at its source. Let\u2019s take one pass.",
+    workedExample:
+      "Watch it once: someone feeling vaguely \u2018off\u2019 does a slow sweep \u2014 jaw (tight), shoulders (up by the ears), stomach (knotted). Suddenly the vague \u2018off\u2019 has a location and a shape. They didn\u2019t think their way to it; they read it off the body, which knew first.",
+    rep: {
+      kind: "do",
+      prompt: "Take one slow pass, top to bottom. Jaw \u2014 what\u2019s it doing? Shoulders \u2014 up or down? Chest and breath \u2014 tight or open? Stomach \u2014 settled or knotted? Don\u2019t fix anything yet. Just read each one. Then tap below.",
+      doneLabel: "Done reading",
+    },
+    drills: {
+      foundation: [
+        "Name the single tightest spot you found. That\u2019s where the feeling is living.",
+        "For that one spot, let it soften a little on an exhale. Notice if the feeling shifts with it.",
+      ],
+      further: [
+        "Scan before you know what you feel \u2014 use the body to tell you, instead of asking your mind first.",
+        "Catch a body signal in real time today (a clenched jaw mid-email) and read it as information before it builds.",
+      ],
+    },
+    name: "That was a body scan \u2014 reading your state from the bottom up instead of the top down. The body often registers a feeling before the mind has words for it, so the scan can name what\u2019s happening earlier and more honestly than thinking can.",
+    runLive:
+      "Once today, before you decide how you\u2019re \u2018doing,\u2019 take a ten-second scan first. Let the body answer before the mind does. It\u2019s often the more honest report.",
+    notice:
+      "The tell: a vague feeling gets a location and a texture \u2014 \u2018off\u2019 becomes \u2018tight across the chest.\u2019 Once it has a place, it has a handle, and the body-first moves can work on it.",
+    whenHard:
+      "If you don\u2019t feel much, that\u2019s a real reading too \u2014 a quiet body is information, not a failed scan. And reading the body is trainable; the signal gets clearer with reps.",
+    deeperCut: {
+      why: "Bodily states feed directly into emotion \u2014 reading them accurately (interoception) is tied to better regulation, because you\u2019re working with the signal at its source instead of the story built on top of it.",
+      trap: "Rushing to fix the tension instead of reading it first. The scan is diagnosis, not treatment \u2014 name what\u2019s there before you change it.",
+      when: "When a feeling is vague or you\u2019re not sure what you feel \u2014 the body usually already knows.",
+      pairsWith: "Pairs with Naming a feeling \u2014 the scan finds where it lives; naming puts the word on it.",
+    },
+    levels: [
+      "Scan when prompted, slowly.",
+      "Scan quickly and accurately on your own.",
+      "Catch a body signal forming in real time and read it before it becomes a feeling you have to manage.",
+    ],
+    transfer:
+      "It\u2019s the same sweep a mechanic does listening to an engine before guessing at the fault, or a clinician does before treating. Reading the system at its source before acting on the surface symptom is what good diagnosis is \u2014 you just did it on yourself.",
+    comeBack:
+      "In a few days, run a scan from memory before re-reading \u2014 what were the checkpoints? Jaw, shoulders, chest, stomach. Recalling the route yourself is what makes the scan something you own, not something you read.",
   },
 ];
 
