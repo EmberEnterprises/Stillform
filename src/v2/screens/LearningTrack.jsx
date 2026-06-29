@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import LessonRunner from "./LessonRunner.jsx";
-import { LESSONS, getLesson } from "../lib/learningTrack.js";
+import { getLesson, getPopulatedChapters, getLessonsForChapter } from "../lib/learningTrack.js";
 
 /**
  * LearningTrack — the self-paced Track surface. The structured-proactive
@@ -38,35 +38,37 @@ export default function LearningTrack({ onExit }) {
           rule
         />
 
-        <section className="sf-sec">
-          <div className="sf-sec-head">
-            <span className="sf-sec-head-lbl">Lessons</span>
-            <div className="sf-sec-rule" />
-          </div>
-          <p className="sf-sec-lead">
-            Go at your own pace — one whenever you want a few minutes. Each is a small rep, then the
-            name for what you just did.
-          </p>
+        {getPopulatedChapters().map((chapter) => {
+          const lessons = getLessonsForChapter(chapter.id);
+          return (
+            <section className="sf-sec" key={chapter.id}>
+              <div className="sf-sec-head">
+                <span className="sf-sec-head-lbl">{chapter.title}</span>
+                <div className="sf-sec-rule" />
+              </div>
+              {chapter.blurb ? <p className="sf-sec-lead">{chapter.blurb}</p> : null}
 
-          {LESSONS.map((lesson, i) => (
-            <button
-              key={lesson.id}
-              type="button"
-              className="sf-sec-row"
-              aria-label={`Start lesson: ${lesson.title}`}
-              onClick={() => setActiveId(lesson.id)}
-            >
-              <span className="sf-sec-mark" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-              <span className="sf-sec-row-main">
-                <span className="sf-sec-row-top">
-                  <span className="sf-sec-name">{lesson.title}</span>
-                </span>
-                {lesson.transferLine ? <span className="sf-sec-sub">{lesson.transferLine}</span> : null}
-              </span>
-              <span className="sf-sec-arrow" aria-hidden="true">→</span>
-            </button>
-          ))}
-        </section>
+              {lessons.map((lesson, i) => (
+                <button
+                  key={lesson.id}
+                  type="button"
+                  className="sf-sec-row"
+                  aria-label={`Start lesson: ${lesson.title}`}
+                  onClick={() => setActiveId(lesson.id)}
+                >
+                  <span className="sf-sec-mark" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="sf-sec-row-main">
+                    <span className="sf-sec-row-top">
+                      <span className="sf-sec-name">{lesson.title}</span>
+                    </span>
+                    {lesson.transferLine ? <span className="sf-sec-sub">{lesson.transferLine}</span> : null}
+                  </span>
+                  <span className="sf-sec-arrow" aria-hidden="true">→</span>
+                </button>
+              ))}
+            </section>
+          );
+        })}
       </main>
     </>
   );

@@ -4,20 +4,32 @@ import Button from "../components/Button.jsx";
 import { getScienceEntry } from "../lib/scienceLibrary.js";
 
 /**
- * LessonRunner — runs one Learning Track lesson as the rep-then-name flow:
- * intro → rep (the user DOES it) → name (what you just did) → transfer (the
- * cross-domain beat — the payoff). Shares the home/Library design system.
+ * LessonRunner — runs one Learning Track lesson as a deep practice unit in two
+ * phases, preserving rep-before-name:
+ *
+ *   PHASE 1 "the drill"  — the move (intro) -> watch it once (worked example)
+ *                          -> the anchor rep (the user DOES it) -> drills
+ *                          (foundation, then take-it-further / harder reps).
+ *   PHASE 2 "the depth"  — what you just did (name) -> run it live -> what to
+ *                          notice -> when it's hard -> the deeper cut
+ *                          (why/trap/when/pairs) -> the levels it climbs ->
+ *                          where it carries (transfer + science link) ->
+ *                          come back (spaced retrieval, from memory).
+ *
+ * The depth is revealed only after the rep page, so the user does the move
+ * before reading what it was — the rep-then-name order is the pedagogy.
  *
  * Reps are not graded and not stored; the value is the doing. Continue is never
- * gated on input — some users will read, some will type, both are fine (autonomy).
+ * gated on input — some users read, some type, both are fine (autonomy). No
+ * scores, streaks, or points anywhere.
  *
- * @param {object} lesson — a LESSONS item
+ * @param {object} lesson — a LESSONS item (deep move-template)
  * @param {function(): void} onExit — back to the Track list
  */
-const STEPS = ["intro", "rep", "name", "transfer"];
+const PHASES = ["drill", "depth"];
 
 export default function LessonRunner({ lesson, onExit }) {
-  const [step, setStep] = useState(0);
+  const [phase, setPhase] = useState(0);
   const [word, setWord] = useState("");
   const [lineA, setLineA] = useState("");
   const [lineB, setLineB] = useState("");
@@ -28,11 +40,12 @@ export default function LessonRunner({ lesson, onExit }) {
     return null;
   }
 
-  const which = STEPS[step];
-  const last = step === STEPS.length - 1;
-  const advance = () => (last ? onExit() : setStep((s) => s + 1));
-
+  const which = PHASES[phase];
+  const last = phase === PHASES.length - 1;
+  const advance = () => (last ? onExit() : setPhase((p) => p + 1));
   const concept = getScienceEntry(lesson.conceptId);
+  const dc = lesson.deeperCut || {};
+  const drills = lesson.drills || {};
 
   return (
     <>
@@ -44,48 +57,116 @@ export default function LessonRunner({ lesson, onExit }) {
         </button>
 
         <div style={progressStyle}>
-          {String(step + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
+          {String(phase + 1).padStart(2, "0")} / {String(PHASES.length).padStart(2, "0")}
+          <span style={{ marginLeft: "12px", color: "var(--sf-text-faint)" }}>
+            {which === "drill" ? "the drill" : "the depth"}
+          </span>
         </div>
 
-        {which === "intro" && (
-          <EditorialBlock
-            label="Lesson"
-            headline={lesson.title}
-            headlineSize="md"
-            body={lesson.intro}
-            rule
-          />
-        )}
+        {which === "drill" && (
+          <>
+            <EditorialBlock label="The move" headline={lesson.title} headlineSize="md" body={lesson.intro} rule />
 
-        {which === "rep" && (
-          <section style={{ marginTop: "var(--sf-space-12)" }}>
-            <SectionLabel>Your turn</SectionLabel>
-            <Rep lesson={lesson} word={word} setWord={setWord} lineA={lineA} setLineA={setLineA} lineB={lineB} setLineB={setLineB} choice={choice} setChoice={setChoice} />
-          </section>
-        )}
-
-        {which === "name" && (
-          <section style={{ marginTop: "var(--sf-space-12)" }}>
-            <SectionLabel>What you just did</SectionLabel>
-            <p style={proseStyle}>{lesson.name}</p>
-          </section>
-        )}
-
-        {which === "transfer" && (
-          <section style={{ marginTop: "var(--sf-space-12)" }}>
-            <SectionLabel>Where it transfers</SectionLabel>
-            <p style={proseStyle}>{lesson.transfer}</p>
-            {concept ? (
-              <p style={footerStyle}>
-                The science behind it: <span style={{ color: "var(--sf-text-quiet)" }}>{concept.title}</span> — in the Library.
-              </p>
+            {lesson.workedExample ? (
+              <Section label="Watch it once">
+                <p style={proseStyle}>{lesson.workedExample}</p>
+              </Section>
             ) : null}
-          </section>
+
+            <Section label="Your turn">
+              <Rep lesson={lesson} word={word} setWord={setWord} lineA={lineA} setLineA={setLineA} lineB={lineB} setLineB={setLineB} choice={choice} setChoice={setChoice} />
+            </Section>
+
+            {(drills.foundation?.length || drills.further?.length) ? (
+              <Section label="Drills">
+                {drills.foundation?.length ? (
+                  <ul style={drillListStyle}>
+                    {drills.foundation.map((d, i) => (
+                      <li key={`f${i}`} style={drillItemStyle}>{d}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {drills.further?.length ? (
+                  <>
+                    <div style={subLabelStyle}>Take it further</div>
+                    <ul style={drillListStyle}>
+                      {drills.further.map((d, i) => (
+                        <li key={`x${i}`} style={drillItemStyle}>{d}</li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+              </Section>
+            ) : null}
+          </>
+        )}
+
+        {which === "depth" && (
+          <>
+            <Section label="What you just did">
+              <p style={proseStyle}>{lesson.name}</p>
+            </Section>
+
+            {lesson.runLive ? (
+              <Section label="Run it live">
+                <p style={proseStyle}>{lesson.runLive}</p>
+              </Section>
+            ) : null}
+
+            {lesson.notice ? (
+              <Section label="What to notice">
+                <p style={proseStyle}>{lesson.notice}</p>
+              </Section>
+            ) : null}
+
+            {lesson.whenHard ? (
+              <Section label="When it's hard">
+                <p style={proseStyle}>{lesson.whenHard}</p>
+              </Section>
+            ) : null}
+
+            {(dc.why || dc.trap || dc.when || dc.pairsWith) ? (
+              <Section label="The deeper cut">
+                {dc.why ? <DeepItem label="Why it works" body={dc.why} /> : null}
+                {dc.trap ? <DeepItem label="The trap" body={dc.trap} /> : null}
+                {dc.when ? <DeepItem label="When to use it" body={dc.when} /> : null}
+                {dc.pairsWith ? <DeepItem label="Pairs with" body={dc.pairsWith} /> : null}
+              </Section>
+            ) : null}
+
+            {lesson.levels?.length ? (
+              <Section label="The levels it climbs">
+                <ol style={levelListStyle}>
+                  {lesson.levels.map((lv, i) => (
+                    <li key={i} style={levelItemStyle}>
+                      <span style={levelNumStyle}>{String(i + 1).padStart(2, "0")}</span>
+                      <span>{lv}</span>
+                    </li>
+                  ))}
+                </ol>
+              </Section>
+            ) : null}
+
+            <Section label="Where it carries">
+              <p style={proseStyle}>{lesson.transfer}</p>
+              {concept ? (
+                <p style={footerStyle}>
+                  Where to check it: <span style={{ color: "var(--sf-text-quiet)" }}>{concept.title}</span> — in the Library.
+                </p>
+              ) : null}
+            </Section>
+
+            {lesson.comeBack ? (
+              <Section label="Come back">
+                <p style={proseStyle}>{lesson.comeBack}</p>
+              </Section>
+            ) : null}
+          </>
         )}
 
         <div style={{ marginTop: "var(--sf-space-48)" }}>
           <Button variant="primary" fullWidth onClick={advance}>
-            {which === "rep" && lesson.rep?.doneLabel ? lesson.rep.doneLabel : last ? "Finish" : "Continue"}
+            {which === "drill" ? (lesson.rep?.doneLabel ? lesson.rep.doneLabel : "Done — what was that?") : "Finish"}
           </Button>
         </div>
       </main>
@@ -93,11 +174,23 @@ export default function LessonRunner({ lesson, onExit }) {
   );
 }
 
-function SectionLabel({ children }) {
+function Section({ label, children }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "var(--sf-space-16)" }}>
-      <span style={labelStyle}>{children}</span>
-      <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg,var(--sf-accent-line),transparent)" }} />
+    <section style={{ marginTop: "var(--sf-space-32)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "var(--sf-space-16)" }}>
+        <span style={labelStyle}>{label}</span>
+        <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg,var(--sf-accent-line),transparent)" }} />
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function DeepItem({ label, body }) {
+  return (
+    <div style={{ marginBottom: "var(--sf-space-16)" }}>
+      <div style={deepLabelStyle}>{label}</div>
+      <p style={{ ...proseStyle, fontSize: "1.12rem" }}>{body}</p>
     </div>
   );
 }
@@ -172,6 +265,7 @@ const progressStyle = {
   fontFamily: "var(--sf-font-mono)",
   fontSize: "10px",
   letterSpacing: "0.16em",
+  textTransform: "uppercase",
   color: "var(--sf-text-faint)",
   marginBottom: "var(--sf-space-24)",
 };
@@ -182,6 +276,22 @@ const labelStyle = {
   textTransform: "uppercase",
   color: "var(--sf-accent)",
   whiteSpace: "nowrap",
+};
+const subLabelStyle = {
+  fontFamily: "var(--sf-font-mono)",
+  fontSize: "9px",
+  letterSpacing: "0.16em",
+  textTransform: "uppercase",
+  color: "var(--sf-text-faint)",
+  margin: "var(--sf-space-16) 0 var(--sf-space-12)",
+};
+const deepLabelStyle = {
+  fontFamily: "var(--sf-font-mono)",
+  fontSize: "9px",
+  letterSpacing: "0.16em",
+  textTransform: "uppercase",
+  color: "var(--sf-text-quiet)",
+  marginBottom: "6px",
 };
 const proseStyle = {
   fontFamily: "var(--sf-font-serif)",
@@ -197,6 +307,35 @@ const promptStyle = {
   lineHeight: 1.55,
   color: "var(--sf-text-secondary)",
   margin: "0 0 var(--sf-space-16)",
+};
+const drillListStyle = { listStyle: "none", padding: 0, margin: 0 };
+const drillItemStyle = {
+  fontFamily: "var(--sf-font-sans)",
+  fontSize: "1rem",
+  lineHeight: 1.55,
+  color: "var(--sf-text-secondary)",
+  padding: "0 0 var(--sf-space-16) 16px",
+  borderLeft: "1px solid var(--sf-accent-line)",
+  marginLeft: "2px",
+  marginBottom: "var(--sf-space-12)",
+};
+const levelListStyle = { listStyle: "none", padding: 0, margin: 0 };
+const levelItemStyle = {
+  display: "flex",
+  gap: "14px",
+  fontFamily: "var(--sf-font-serif)",
+  fontSize: "1.18rem",
+  lineHeight: 1.45,
+  color: "var(--sf-text-secondary)",
+  marginBottom: "var(--sf-space-12)",
+};
+const levelNumStyle = {
+  fontFamily: "var(--sf-font-mono)",
+  fontSize: "10px",
+  letterSpacing: "0.12em",
+  color: "var(--sf-accent)",
+  paddingTop: "6px",
+  flexShrink: 0,
 };
 const inputStyle = {
   width: "100%",
@@ -226,5 +365,5 @@ const footerStyle = {
   fontSize: "11px",
   lineHeight: 1.6,
   color: "var(--sf-text-faint)",
-  marginTop: "var(--sf-space-32)",
+  marginTop: "var(--sf-space-24)",
 };
