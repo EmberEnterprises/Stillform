@@ -22,6 +22,7 @@ import RiskProfileMirror from "./screens/RiskProfileMirror.jsx";
 import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
 import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
 import Vulnerabilities from "./screens/Vulnerabilities.jsx";
+import ProtectiveMoves from "./screens/ProtectiveMoves.jsx";
 import ThoughtRecord from "./screens/ThoughtRecord.jsx";
 import NarrativeArc from "./screens/NarrativeArc.jsx";
 import PracticeEvidence from "./screens/PracticeEvidence.jsx";
@@ -170,6 +171,7 @@ export default function AppV2() {
     if (screen === "prediction-mirror") return <PredictionErrorMirror onExit={() => setScreen("my-progress")} />;
     if (screen === "what-you-bet-on") return <WhatYouBetOnMirror onExit={() => setScreen("my-progress")} />;
     if (screen === "vulnerabilities") return <Vulnerabilities onExit={() => setScreen("my-progress")} />;
+    if (screen === "protective-moves") return <ProtectiveMoves onExit={() => setScreen("my-progress")} />;
     if (screen === "thought-record") return <ThoughtRecord onExit={() => setScreen("my-progress")} />;
     if (screen === "narrative-arc") return <NarrativeArc onExit={() => setScreen("my-progress")} />;
     if (screen === "practice-evidence") return <PracticeEvidence onExit={() => setScreen("my-progress")} />;
