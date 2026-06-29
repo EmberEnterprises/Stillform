@@ -486,6 +486,48 @@ export const SCIENCE_ENTRIES = [
       "Pielot et al. (2014, 2017) — attention-respectful design and long-term retention",
     ],
   },
+  // ── working with your vulnerabilities (the shadow side) ──
+  {
+    id: "everyone-has-them",
+    title: "Everyone has them",
+    oneLiner: "A blind spot isn\u2019t a verdict on you \u2014 it\u2019s standard equipment.",
+    whatItDoes:
+      "Lets you look at a charged part of yourself without the shame that usually makes you look away \u2014 because that looking-away is the thing that actually blocks the work.",
+    theScience:
+      "Self-compassion has three parts: self-kindness, common humanity, and mindfulness. Common humanity \u2014 knowing that failings and weak spots are part of being human, not yours alone \u2014 is what lowers shame and isolation, the two things that keep a person from examining their own material. And the harsh inner critic doesn\u2019t drive improvement the way it promises to; meeting yourself with some understanding supports more durable change than self-judgment does.",
+    sources: [
+      "Neff (2003) \u2014 self-compassion: self-kindness, common humanity, mindfulness \u2014 Self and Identity",
+      "Neff (2023) \u2014 common humanity reduces shame and isolation; self-compassion supports sustainable change \u2014 Annual Review of Psychology",
+    ],
+  },
+  {
+    id: "two-edges",
+    title: "The same trait, two edges",
+    oneLiner: "What tips you over and what makes you go all-in are usually one trait.",
+    whatItDoes:
+      "Shows a charged part of you as one thing with two edges \u2014 the cost and the strength \u2014 so you can keep the strength while you watch the cost, instead of trying to amputate the whole trait.",
+    theScience:
+      "The part that makes someone susceptible to harm under bad conditions is often the same part that makes them benefit disproportionately under good ones. Research on differential susceptibility found that the more sensitive aren\u2019t simply more fragile \u2014 they\u2019re more malleable in both directions, gaining more from supportive conditions than others do. Vantage sensitivity names that positive edge directly. One sensitivity, for better and for worse \u2014 one root, two outcomes depending on what it meets.",
+    sources: [
+      "Belsky & Pluess (2009) \u2014 differential susceptibility: the sensitive are more plastic, not just more vulnerable \u2014 Psychological Bulletin",
+      "Pluess & Belsky (2013) \u2014 vantage sensitivity: heightened response to positive experiences \u2014 Psychological Bulletin",
+      "Belsky, Bakermans-Kranenburg & van IJzendoorn (2007) \u2014 sensitivity operates \u2018for better and for worse\u2019 \u2014 Current Directions in Psychological Science",
+      "Aron & Aron (1997) \u2014 sensory processing sensitivity, one trait carrying both edges \u2014 Journal of Personality and Social Psychology",
+    ],
+  },
+  {
+    id: "work-with-it",
+    title: "Working with it, not around it",
+    oneLiner: "You don\u2019t get rid of a charged part \u2014 you stop letting it drive unseen.",
+    whatItDoes:
+      "Turns a vulnerability from something you avoid into something you can sit with on purpose \u2014 which loosens its grip more reliably than fighting or suppressing it.",
+    theScience:
+      "Trying to push a charged part down or steer around it tends to keep it in charge. The more workable move is acceptance \u2014 making room for the state instead of avoiding it \u2014 which reduces its pull without a fight. Sometimes the work isn\u2019t making a feeling shift; it\u2019s holding it without being run by it. That holding is the practice, not a failure of it.",
+    sources: [
+      "Hayes, Strosahl & Wilson (2011) \u2014 ACT; acceptance and willingness over avoidance",
+      "Neff (2023) \u2014 self-compassion as a productive way to meet distressing states \u2014 Annual Review of Psychology",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */

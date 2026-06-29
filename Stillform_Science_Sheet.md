@@ -802,3 +802,25 @@ INTEGRITY (all CFM): evidence the function is changing over the user's OWN basel
 - Salomon & Perkins (1989) — low-road vs. high-road transfer (mindful abstraction)
 
 **If they push back:** "The Learning Track isn't brain-training that promises to transfer everywhere — the evidence says that rarely works, and we won't claim it. It's built on what does: spaced retrieval, effortful practice at the edge, and explicitly abstracting each move so it can carry. The cross-domain beat is *teaching for transfer* — the one method shown to help — framed as a parallel that builds the abstraction, never a promise you'll get better at unrelated skills."
+
+
+---
+
+## Working with your vulnerabilities (the shadow side)
+
+**What it is.** A vulnerability is any charged part of how a person is built — a need, a sensitivity, a reflex — that can run them when it goes unseen. Everyone has them; they are standard human equipment, not a verdict on the person. The user-facing word for this is the "shadow side." That is a Jungian framing term, used here only as a metaphor — the empirical grounding is the work below, not Jung, and Jung is never cited as science.
+
+**Everyone has them — and shame is what blocks the work.** Self-compassion has three components: self-kindness, common humanity, and mindfulness. Common humanity — recognizing that failings and weak spots are part of being human and shared by everyone — directly lowers shame and isolation, which are the two things that make a person look away from their own material. Contrary to the intuition that a harsh inner critic drives improvement, the evidence runs the other way: self-compassion supports more sustainable change than self-judgment, and a large review dispels the myth that it undermines motivation.
+- Neff (2003) — self-compassion: self-kindness, common humanity, mindfulness — *Self and Identity*
+- Neff (2023) — common humanity reduces shame and isolation; self-compassion supports sustainable change and engenders well-being; dispels the "weak / undermines motivation" myths — *Annual Review of Psychology* 74:193–218
+
+**The same trait, two edges (the vulnerability is also the bright spot).** The part that tips a person over is usually the same part that makes them exceptional in the right conditions. Differential-susceptibility research shows that more sensitive individuals are not merely more "vulnerable" to adversity (the older diathesis-stress view) but more developmentally plastic — disproportionately likely to benefit from supportive, enriching conditions too. Vantage sensitivity names that positive edge specifically; sensory-processing sensitivity ("the highly sensitive person") captures one trait carrying both edges. The move the practice takes from this: you don't amputate a charged trait, you learn where its strength and its cost share a root — so you can keep the all-in while you watch the hijack.
+- Belsky & Pluess (2009) — differential susceptibility: the sensitive are not just more vulnerable to adversity but more plastic, benefiting more from good conditions — *Psychological Bulletin*
+- Pluess & Belsky (2013) — vantage sensitivity: individual differences in response to positive experiences — *Psychological Bulletin* 139(4):901–916
+- Belsky, Bakermans-Kranenburg & van IJzendoorn (2007) — environmental sensitivity operates "for better and for worse" — *Current Directions in Psychological Science*
+- Aron & Aron (1997) — sensory processing sensitivity / the highly sensitive person — *Journal of Personality and Social Psychology*
+
+**Working with it, not around it.** Looking at a charged part is not the same as fixing or removing it. The workable move is acceptance and willingness — making room for the state rather than avoiding or suppressing it — which loosens its grip more reliably than fighting it does. This is the same acceptance principle the practice already uses (Category B / sustained holding: sometimes the work is the holding, not the shifting).
+- Hayes, Strosahl & Wilson (2011) — ACT; acceptance and willingness over experiential avoidance
+
+**How Stillform uses this (practice-describing).** Both user and AI, never one or the other. Reframe can surface a charged trait the user's own material points to and reflect both its edges back as a suggestion (AI), and the user can name their own vulnerability and confirm or correct it (user). The Library holds the science; the Workshop's validated instruments let the user see their own leanings and work through them (ERQ — reappraisal vs. suppression; SRIS — self-reflection and insight).
