@@ -7,6 +7,7 @@ import HairlineDivider from "../../components/HairlineDivider.jsx";
 import { sendReframeMessage } from "../../lib/reframeApi.js";
 import { recordPrediction } from "../../lib/predictionLog.js";
 import { setPendingCandidate } from "../../lib/vulnerabilities.js";
+import { setPendingCandidate as setPendingMove } from "../../lib/protectiveMoves.js";
 import { getWatchListChips } from "../../lib/biasProfile.js";
 import { noteAiPatternDetection } from "../../lib/biasProfile.js";
 
@@ -79,6 +80,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
       maybeProposeTrigger(result.trigger);
       maybeStashVulnerability(result.surfaceVulnerability);
+      maybeStashProtectiveMove(result.surfaceProtectiveMove);
 
       setHistory([
         { role: "user", text: precisionName },
@@ -131,6 +133,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
     maybeProposeTrigger(result.trigger);
     maybeStashVulnerability(result.surfaceVulnerability);
+    maybeStashProtectiveMove(result.surfaceProtectiveMove);
 
     setHistory([
       ...nextHistory,
@@ -172,6 +175,15 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
   // already confirmed or previously rejected, and validates both edges.
   function maybeStashVulnerability(proposal) {
     if (proposal && typeof proposal === "object") setPendingCandidate(proposal);
+  }
+
+  // Stash an AI-proposed protective move (one move, both edges) as PENDING for the
+  // user to confirm/correct/reject later on the Protective Moves surface. Same
+  // passive discipline as the vulnerability stash — never shown mid-session
+  // (rumination guard); the lib refuses a move already confirmed/dismissed and
+  // validates both edges.
+  function maybeStashProtectiveMove(proposal) {
+    if (proposal && typeof proposal === "object") setPendingMove(proposal);
   }
 
   const handleConfirmTrigger = () => {

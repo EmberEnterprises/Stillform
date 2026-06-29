@@ -32,6 +32,7 @@ import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
 import { formatContextProfileForAI } from "./contextProfile.js";
 import { formatConfirmedFindingsForAI, formatReconsolidationMismatchForAI } from "./discoveryFindings.js";
 import { formatVulnerabilitiesForAI } from "./vulnerabilities.js";
+import { formatProtectiveMovesForAI } from "./protectiveMoves.js";
 import { getLatestBodyBioFilter } from "./signalLog.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
@@ -101,6 +102,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   const confirmedFindings = formatConfirmedFindingsForAI();
   const reconsolidationMismatch = formatReconsolidationMismatchForAI();
   const vulnerabilities = formatVulnerabilitiesForAI();
+  const protectiveMoves = formatProtectiveMovesForAI();
 
   try {
     const response = await fetch(REFRAME_API_URL, {
@@ -136,6 +138,9 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         // Vulnerabilities (June 29): the user's CONFIRMED charged traits + both
         // edges, so the AI is aware and never re-proposes one already named.
         vulnerabilities,
+        // Protective moves (June 29): the user's CONFIRMED defenses/threat
+        // reflexes + both edges (protected / costs now). Same discipline.
+        protectiveMoves,
         checkinContext: null,
         eodContext: null,
         sessionCount,
@@ -210,6 +215,18 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         const costEdge = typeof sv.cost_edge === "string" ? sv.cost_edge.trim() : "";
         const strengthEdge = typeof sv.strength_edge === "string" ? sv.strength_edge.trim() : "";
         return trait && costEdge && strengthEdge ? { trait, costEdge, strengthEdge } : null;
+      })(),
+      // surface_protective_move: an AI PROPOSAL (one move, both edges) the user
+      // confirms/corrects/rejects on the Protective Moves surface. Same discipline
+      // as surface_vulnerability — never asserted in prose; pending-stashed by the
+      // spine; null unless fully formed.
+      surfaceProtectiveMove: (() => {
+        const sm = data && data.surface_protective_move;
+        if (!sm || typeof sm !== "object") return null;
+        const move = typeof sm.move === "string" ? sm.move.trim() : "";
+        const protectedEdge = typeof sm.protected_edge === "string" ? sm.protected_edge.trim() : "";
+        const costEdge = typeof sm.cost_edge === "string" ? sm.cost_edge.trim() : "";
+        return move && protectedEdge && costEdge ? { move, protectedEdge, costEdge } : null;
       })(),
       log_prediction: logPrediction,
       distortion: data && typeof data.distortion === "string" ? data.distortion : null,
