@@ -824,3 +824,20 @@ INTEGRITY (all CFM): evidence the function is changing over the user's OWN basel
 - Hayes, Strosahl & Wilson (2011) — ACT; acceptance and willingness over experiential avoidance
 
 **How Stillform uses this (practice-describing).** Both user and AI, never one or the other. Reframe can surface a charged trait the user's own material points to and reflect both its edges back as a suggestion (AI), and the user can name their own vulnerability and confirm or correct it (user). The Library holds the science; the Workshop's validated instruments let the user see their own leanings and work through them (ERQ — reappraisal vs. suppression; SRIS — self-reflection and insight).
+
+
+---
+
+## How you protect yourself under pressure (defenses and threat reflexes)
+
+**What it is.** Under pressure everyone runs automatic protective moves — at the level of how they handle a threatening *truth* (the mind's defenses) and at the level of what the body does *first* when it reads threat (the threat reflex). These are standard human equipment, not flaws, and like any charged trait they carry two edges: the move that protected you once is often the move that costs you now. Stillform evaluates these with the rigor a top assessor would (the frameworks below are the real ones) and delivers them as *self-mastery* — never diagnosis, pathology, a "condition," or treatment. Clinical-grade evaluation; self-mastery delivery.
+
+**The mind's defenses.** The automatic ways a person handles a truth that's hard to face — deflecting, minimizing, explaining it away, turning it on someone else, retreating into analysis. Vaillant organized these empirically into a hierarchy from less to more adaptive, validated across decades of the Harvard longitudinal study; the *same* defense can serve or cost depending on which one it is and how rigidly it runs — the two-edges principle exactly. Honest caveat: the defense axis was dropped from DSM-5 over measurement burden — it's a well-studied framework, not settled nosology, and Stillform uses it for self-knowledge only, never diagnosis.
+- Vaillant (1977) — empirically-derived hierarchy of defenses (immature → mature), Harvard Grant Study longitudinal validation
+- Vaillant (1992) — defenses as unconscious mechanisms that reduce the disorganizing effects of sudden stress; adaptive or maladaptive by maturity
+
+**The body's threat reflex.** What the system does *first* when it reads threat — stand and fight, get away, go still, or smooth it over. The still/freeze reflex is real and documented (tonic immobility): involuntary and protective, not a failure of nerve. The smooth-it-over/appease pattern is clinically *described* (Walker) rather than lab-validated — Stillform names it carefully, in plain language, and flags the weaker grounding. Each reflex has two edges: the one that kept you safe is the one that can run you now. (Fight/flight physiology is already grounded in this sheet under autonomic flexibility.)
+- Moller et al. (2017) — tonic immobility, the involuntary still/freeze reflex, documented and protective
+- Walker (2013) — the appease/people-pleasing pattern as a protective strategy (clinically described, NOT empirically validated — flagged)
+
+**How Stillform uses this (practice-describing).** Both user and AI. Reframe can surface the protective move a person's own material points to (one move, both edges) as a suggestion; the user can also name their own. The work is to recognize the move as it runs, see both edges, and choose — never to delete the trait, never framed as a clinical finding. The evaluation is rigorous; the identity is self-mastery, not therapy.

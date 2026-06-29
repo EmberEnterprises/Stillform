@@ -528,6 +528,33 @@ export const SCIENCE_ENTRIES = [
       "Neff (2023) \u2014 self-compassion as a productive way to meet distressing states \u2014 Annual Review of Psychology",
     ],
   },
+  // ── how you protect yourself under pressure ──
+  {
+    id: "moves-under-pressure",
+    title: "The moves you make under pressure",
+    oneLiner: "When a truth is hard to face, you reach for a move \u2014 usually without noticing.",
+    whatItDoes:
+      "Names the automatic ways you handle a threatening truth \u2014 deflecting, minimizing, explaining it away, turning it on someone else, retreating into analysis \u2014 so you can catch the move as it runs instead of being run by it.",
+    theScience:
+      "These protective moves were organized into a hierarchy from less to more adaptive across decades of longitudinal research. The same move can serve you or cost you depending on which one it is and how rigidly it runs \u2014 none of them is a flaw, they\u2019re standard equipment. The work isn\u2019t to delete the move; it\u2019s to see it clearly enough to choose.",
+    sources: [
+      "Vaillant (1977) \u2014 empirically-derived hierarchy of defenses (less to more adaptive), Harvard longitudinal study",
+      "Vaillant (1992) \u2014 protective moves that reduce the shock of sudden stress; adaptive or costly by how they\u2019re used",
+    ],
+  },
+  {
+    id: "first-move-under-threat",
+    title: "What you do first under threat",
+    oneLiner: "Before you think, your system already picked a move: stand, leave, go still, or smooth it over.",
+    whatItDoes:
+      "Names your body\u2019s first reflex when it reads threat \u2014 squaring up, getting away, going still, or smoothing things over \u2014 so you can recognize your default and not mistake an old reflex for the only option.",
+    theScience:
+      "The first response to threat is automatic and bodily, not something you reason your way into. The go-still reflex in particular is involuntary and documented \u2014 protection, not weakness. Each reflex has two edges: the one that kept you safe once is the one that can run you now. Recognizing yours is the first move toward having a say in it.",
+    sources: [
+      "Moller et al. (2017) \u2014 the involuntary still/freeze reflex (tonic immobility), documented and protective",
+      "Walker (2013) \u2014 the smooth-it-over / appease pattern as a protective strategy (clinically described)",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */
