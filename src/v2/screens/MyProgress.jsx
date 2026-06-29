@@ -240,48 +240,55 @@ export default function MyProgress({ onExit, onNavigate }) {
 
         <ProgressEntry
           mark="07"
+          title="Body, or the story?"
+          description="When a feeling lands hard, a body running low — depleted, no sleep, in pain, a hormonal shift — colors the read. Check the body before you trust the story; see the moments it had a hand in."
+          onTap={() => handleNavigate("body-vs-story")}
+        />
+
+        <ProgressEntry
+          mark="08"
           title="Growth mirror"
           description="The four capacities Stillform trains — Sense, Settle, Seeing yourself, Seeing others — reflected back as you do the work."
           onTap={() => handleNavigate("capacities-mirror")}
         />
 
         <ProgressEntry
-          mark="08"
+          mark="09"
           title="Where You Lean"
           description="Where you take risk and where you hold back, across the parts of a life — a value-neutral picture of your shape, nothing to fix."
           onTap={() => handleNavigate("risk-profile")}
         />
 
         <ProgressEntry
-          mark="09"
+          mark="10"
           title="What Didn't Come True"
           description="What you were sure would go wrong that didn't — the disconfirmations your mind otherwise forgets to count."
           onTap={() => handleNavigate("prediction-mirror")}
         />
 
         <ProgressEntry
-          mark="10"
+          mark="11"
           title="What You Bet On"
           description="What you were sure of, next to what actually happened. The gap is the data."
           onTap={() => handleNavigate("what-you-bet-on")}
         />
 
         <ProgressEntry
-          mark="11"
+          mark="12"
           title="Thought Record"
           description="Take one thought, rate how much you believe it, look at the evidence, then re-rate. The drop is the work."
           onTap={() => handleNavigate("thought-record")}
         />
 
         <ProgressEntry
-          mark="12"
+          mark="13"
           title="Your Arc"
           description="The through-line of your practice — your own named moments, in order, with the patterns that recur and the predictions that didn't come true."
           onTap={() => handleNavigate("narrative-arc")}
         />
 
         <ProgressEntry
-          mark="13"
+          mark="14"
           title="Practice Evidence"
           description="Short exercises on the functions the practice trains — measured over time, against your own past, as honest evidence it's working."
           onTap={() => handleNavigate("practice-evidence")}
