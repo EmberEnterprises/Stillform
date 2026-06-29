@@ -182,6 +182,20 @@ export default function Spine({ onExit, onNavigate = null, forcedBeat = null, in
     // experienced if they crossed a beat boundary mid-flow.
     const mode = selfMode ? "self" : routeMode(selectedChip, precisionName);
 
+    // movesUsed — which Learning Track moves this session UNAMBIGUOUSLY
+    // involved (the "reached for it live" signal). INTEGRITY BAR (same as the
+    // discovery engine): record a move ONLY when the session unmistakably
+    // involved it; never guess. Today the one unambiguous signal is the Notice
+    // naming step → "naming a feeling" (the user named a precise feeling/chip
+    // every session). Breathing / body-scan / reframe moves are NOT recorded
+    // here yet — their tools don't report use, so claiming them would be a
+    // guess. When those tools record use, push their move ids here (and ONLY
+    // when unambiguous). Held-fuzzy on purpose, not forgotten.
+    const movesUsed = [];
+    if ((precisionName && precisionName.trim()) || selectedChip) {
+      movesUsed.push("naming-a-feeling");
+    }
+
     // The session is now committed. takeaway = USER's named takeaway;
     // surfacedFrame = what was surfaced during reframe (preserved for
     // downstream Mirror / Library / Pattern Disruption surfaces);
@@ -197,6 +211,7 @@ export default function Spine({ onExit, onNavigate = null, forcedBeat = null, in
       selfMode,
       conversationLength,
       beat,
+      movesUsed,
     });
 
     // KEYSTONE step 0 (signal log): stop discarding the discrete feel-state

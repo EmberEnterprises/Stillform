@@ -86,6 +86,11 @@ export function saveSession(session) {
       selfMode: !!session.selfMode,
       conversationLength: typeof session.conversationLength === "number" ? session.conversationLength : 0,
       beat: typeof session.beat === "string" ? session.beat : "main",
+      // movesUsed — Learning Track moves this session UNAMBIGUOUSLY involved
+      // (honest, deterministic; see Spine.deriveMovesUsed). Track-move ids.
+      movesUsed: Array.isArray(session.movesUsed)
+        ? session.movesUsed.filter((m) => typeof m === "string" && m).slice(0, 12)
+        : [],
     };
 
     const raw = localStorage.getItem(SESSIONS_KEY);

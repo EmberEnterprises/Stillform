@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import Button from "../components/Button.jsx";
 import { getScienceEntry } from "../lib/scienceLibrary.js";
+import { isWorkingOn, toggleWorkingOn, recordPractice, getPractice, getLiveUsage } from "../lib/trackProgress.js";
 
 /**
  * LessonRunner — runs one Learning Track lesson as a deep practice unit in two
@@ -34,6 +35,7 @@ export default function LessonRunner({ lesson, onExit }) {
   const [lineA, setLineA] = useState("");
   const [lineB, setLineB] = useState("");
   const [choice, setChoice] = useState("");
+  const [working, setWorking] = useState(() => (lesson ? isWorkingOn(lesson.id) : false));
 
   if (!lesson) {
     if (typeof onExit === "function") onExit();
@@ -42,7 +44,16 @@ export default function LessonRunner({ lesson, onExit }) {
 
   const which = PHASES[phase];
   const last = phase === PHASES.length - 1;
-  const advance = () => (last ? onExit() : setPhase((p) => p + 1));
+  const advance = () => {
+    if (last) {
+      recordPractice(lesson.id);
+      onExit();
+    } else {
+      setPhase((p) => p + 1);
+    }
+  };
+  const practice = getPractice(lesson.id);
+  const live = getLiveUsage(lesson.id);
   const concept = getScienceEntry(lesson.conceptId);
   const dc = lesson.deeperCut || {};
   const drills = lesson.drills || {};
@@ -161,6 +172,24 @@ export default function LessonRunner({ lesson, onExit }) {
                 <p style={proseStyle}>{lesson.comeBack}</p>
               </Section>
             ) : null}
+
+            <Section label="This move">
+              <button
+                type="button"
+                onClick={() => setWorking(toggleWorkingOn(lesson.id))}
+                aria-pressed={working}
+                style={markStyle(working)}
+              >
+                {working ? "\u2713 Working on this" : "Mark as working on this"}
+              </button>
+              {(practice.count > 0 || live.count > 0) ? (
+                <p style={tallyStyle}>
+                  {practice.count > 0 ? `Practiced here ${practice.count}\u00d7.` : ""}
+                  {practice.count > 0 && live.count > 0 ? " " : ""}
+                  {live.count > 0 ? `Reached for it in ${live.count} session${live.count === 1 ? "" : "s"}.` : ""}
+                </p>
+              ) : null}
+            </Section>
           </>
         )}
 
@@ -366,4 +395,22 @@ const footerStyle = {
   lineHeight: 1.6,
   color: "var(--sf-text-faint)",
   marginTop: "var(--sf-space-24)",
+};
+const markStyle = (on) => ({
+  background: "transparent",
+  border: `1px solid ${on ? "var(--sf-accent)" : "var(--sf-border-quiet)"}`,
+  borderRadius: "999px",
+  padding: "9px 18px",
+  fontFamily: "var(--sf-font-sans)",
+  fontSize: "0.95rem",
+  color: on ? "var(--sf-text-cream)" : "var(--sf-text-secondary)",
+  cursor: "pointer",
+  WebkitTapHighlightColor: "transparent",
+});
+const tallyStyle = {
+  fontFamily: "var(--sf-font-mono)",
+  fontSize: "11px",
+  letterSpacing: "0.06em",
+  color: "var(--sf-text-faint)",
+  marginTop: "var(--sf-space-16)",
 };

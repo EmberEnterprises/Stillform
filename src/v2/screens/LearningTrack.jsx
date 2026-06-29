@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import LessonRunner from "./LessonRunner.jsx";
-import { getLesson, getPopulatedChapters, getLessonsForChapter } from "../lib/learningTrack.js";
+import { LESSONS, getLesson, getPopulatedChapters, getLessonsForChapter } from "../lib/learningTrack.js";
+import { getMovesBuilding } from "../lib/trackProgress.js";
 
 /**
  * LearningTrack — the self-paced Track surface. The structured-proactive
@@ -21,6 +22,8 @@ export default function LearningTrack({ onExit }) {
     return <LessonRunner lesson={getLesson(activeId)} onExit={() => setActiveId(null)} />;
   }
 
+  const building = getMovesBuilding(LESSONS.map((l) => l.id));
+
   return (
     <>
       <div className="sf-home-aura" aria-hidden="true" />
@@ -37,6 +40,41 @@ export default function LearningTrack({ onExit }) {
           body="Short lessons where you don't read about a move — you do it once, then watch how your own mind did it. The same move turns out to run under learning almost anything."
           rule
         />
+
+        {building.length > 0 ? (
+          <section className="sf-sec">
+            <div className="sf-sec-head">
+              <span className="sf-sec-head-lbl">The moves you're building</span>
+              <div className="sf-sec-rule" />
+            </div>
+            {building.map((m) => {
+              const lesson = getLesson(m.id);
+              if (!lesson) return null;
+              const bits = [];
+              if (m.working) bits.push("working on");
+              if (m.practice.count > 0) bits.push(`practiced ${m.practice.count}\u00d7`);
+              if (m.live.count > 0) bits.push(`${m.live.count} session${m.live.count === 1 ? "" : "s"}`);
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  className="sf-sec-row"
+                  aria-label={`Open move: ${lesson.title}`}
+                  onClick={() => setActiveId(m.id)}
+                >
+                  <span className="sf-sec-mark" aria-hidden="true">{m.working ? "\u25c9" : "\u00b7"}</span>
+                  <span className="sf-sec-row-main">
+                    <span className="sf-sec-row-top">
+                      <span className="sf-sec-name">{lesson.title}</span>
+                    </span>
+                    {bits.length ? <span className="sf-sec-sub">{bits.join(" \u00b7 ")}</span> : null}
+                  </span>
+                  <span className="sf-sec-arrow" aria-hidden="true">→</span>
+                </button>
+              );
+            })}
+          </section>
+        ) : null}
 
         {getPopulatedChapters().map((chapter) => {
           const lessons = getLessonsForChapter(chapter.id);
