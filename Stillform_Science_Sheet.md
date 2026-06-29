@@ -806,9 +806,9 @@ INTEGRITY (all CFM): evidence the function is changing over the user's OWN basel
 
 ---
 
-## Working with your vulnerabilities (the shadow side)
+## Working with your vulnerabilities
 
-**What it is.** A vulnerability is any charged part of how a person is built — a need, a sensitivity, a reflex — that can run them when it goes unseen. Everyone has them; they are standard human equipment, not a verdict on the person. The user-facing word for this is the "shadow side." That is a Jungian framing term, used here only as a metaphor — the empirical grounding is the work below, not Jung, and Jung is never cited as science.
+**What it is.** A vulnerability is any charged part of how a person is built — a need, a sensitivity, a reflex — that can run them when it goes unseen. Everyone has them; they are standard human equipment, not a verdict on the person. Stillform does not use the word "shadow" for this — it reads as loaded / jargon language the product stays away from; the frame is simply *your vulnerabilities*. (The empirical grounding is the work below; Jung is never cited as science.)
 
 **Everyone has them — and shame is what blocks the work.** Self-compassion has three components: self-kindness, common humanity, and mindfulness. Common humanity — recognizing that failings and weak spots are part of being human and shared by everyone — directly lowers shame and isolation, which are the two things that make a person look away from their own material. Contrary to the intuition that a harsh inner critic drives improvement, the evidence runs the other way: self-compassion supports more sustainable change than self-judgment, and a large review dispels the myth that it undermines motivation.
 - Neff (2003) — self-compassion: self-kindness, common humanity, mindfulness — *Self and Identity*

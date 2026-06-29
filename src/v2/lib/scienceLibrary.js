@@ -486,7 +486,7 @@ export const SCIENCE_ENTRIES = [
       "Pielot et al. (2014, 2017) — attention-respectful design and long-term retention",
     ],
   },
-  // ── working with your vulnerabilities (the shadow side) ──
+  // ── working with your vulnerabilities ──
   {
     id: "everyone-has-them",
     title: "Everyone has them",
