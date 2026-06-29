@@ -343,7 +343,7 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
     finishClose(buildClosePayload());
   };
 
-  const handleBreathingComplete = () => { finishClose(buildClosePayload()); };
+  const handleBreathingComplete = () => { finishClose({ ...buildClosePayload(), breathingCompleted: true }); };
   const handleBreathingEndEarly = () => { finishClose(buildClosePayload()); };
 
   // ---------------- Render ----------------

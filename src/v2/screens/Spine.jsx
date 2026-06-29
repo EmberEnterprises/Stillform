@@ -106,6 +106,11 @@ export default function Spine({ onExit, onNavigate = null, forcedBeat = null, in
   // surface when the user takes the "Need the words for it?" ride-out at Close.
   const [scriptSeed, setScriptSeed] = useState(null);
   const [conversationLength, setConversationLength] = useState(0);
+  // Per-session flag: did the user enter the urge-surf "reset" fork this
+  // session? Used to record the "ride-the-urge" move at save IF the session
+  // is committed (reset → move → keep going → reframe → close). If they exit
+  // from the fork, no session saves and nothing is attributed — honest.
+  const resetUsedRef = useRef(false);
 
   const handleNoticeContinue = (text, chip, opts = {}) => {
     setPrecisionName(text);
@@ -118,6 +123,7 @@ export default function Spine({ onExit, onNavigate = null, forcedBeat = null, in
     }
     // Reset fork (Phase 6.3b): urge-surf for an acute compulsion pull.
     if (opts.reset) {
+      resetUsedRef.current = true;
       setStep("reset");
       return;
     }
@@ -185,15 +191,26 @@ export default function Spine({ onExit, onNavigate = null, forcedBeat = null, in
     // movesUsed — which Learning Track moves this session UNAMBIGUOUSLY
     // involved (the "reached for it live" signal). INTEGRITY BAR (same as the
     // discovery engine): record a move ONLY when the session unmistakably
-    // involved it; never guess. Today the one unambiguous signal is the Notice
-    // naming step → "naming a feeling" (the user named a precise feeling/chip
-    // every session). Breathing / body-scan / reframe moves are NOT recorded
-    // here yet — their tools don't report use, so claiming them would be a
-    // guess. When those tools record use, push their move ids here (and ONLY
-    // when unambiguous). Held-fuzzy on purpose, not forgotten.
+    // involved it; never guess. Recorded today:
+    //   • "naming-a-feeling"  — the Notice naming step (every session).
+    //   • "the-exhale-lever"  — breathing at Close was actually COMPLETED
+    //       (payload.breathingCompleted; set only on BreathingSession.onComplete,
+    //       NOT on skip or end-early — those are ambiguous, held).
+    //   • "ride-the-urge"     — the user entered the urge-surf "reset" fork
+    //       this session (resetUsedRef) and the session committed.
+    // STILL HELD (no clean signal reaches the save): body-scan (no body-scan
+    // tool in the spine save path), the quick-move "move" fork (ambiguous which
+    // move), reframe-as-"stepping-outside-a-thought" (clarity mode ≠ the defusion
+    // rep, fuzzy). Add ONLY when a tool reports unambiguous completion.
     const movesUsed = [];
     if ((precisionName && precisionName.trim()) || selectedChip) {
       movesUsed.push("naming-a-feeling");
+    }
+    if (payload && payload.breathingCompleted) {
+      movesUsed.push("the-exhale-lever");
+    }
+    if (resetUsedRef.current) {
+      movesUsed.push("ride-the-urge");
     }
 
     // The session is now committed. takeaway = USER's named takeaway;
