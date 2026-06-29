@@ -7,6 +7,7 @@ import MediationQueue from "../components/MediationQueue.jsx";
 import { getPendingProposals } from "../lib/mediationApi.js";
 import { getNamingGrowth } from "../lib/namingGrowth.js";
 import DiscoveryFindingCard from "../components/DiscoveryFindingCard.jsx";
+import { getPendingCandidate } from "../lib/vulnerabilities.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -40,6 +41,7 @@ export default function MyProgress({ onExit, onNavigate }) {
   const handleNavigate = (target) => {
     if (typeof onNavigate === "function") onNavigate(target);
   };
+  const pendingVuln = getPendingCandidate();
 
   return (
     <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
@@ -212,7 +214,9 @@ export default function MyProgress({ onExit, onNavigate }) {
         <ProgressEntry
           mark="04"
           title="Your Vulnerabilities"
-          description="The charged parts of how you're built — each shown with both its edges: where it tips you, and where it serves you. Named by you, or surfaced by Reframe from your own words for you to confirm."
+          description={pendingVuln
+            ? "Reframe noticed something — a charged part of you, with both its edges, waiting for you to look at."
+            : "The charged parts of how you're built — each shown with both its edges: where it tips you, and where it serves you. Named by you, or surfaced by Reframe from your own words for you to confirm."}
           onTap={() => handleNavigate("vulnerabilities")}
         />
 

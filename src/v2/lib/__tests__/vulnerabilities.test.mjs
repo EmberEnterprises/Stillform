@@ -15,6 +15,7 @@ const {
   getVulnerabilities, addUserVulnerability, confirmVulnerability, rejectCandidate,
   isConfirmed, isRejected, updateVulnerability, removeVulnerability,
   formatVulnerabilitiesForAI, vulnerabilityId,
+  setPendingCandidate, getPendingCandidate, clearPendingCandidate,
 } = await import("../vulnerabilities.js");
 
 let pass = 0, fail = 0;
@@ -86,6 +87,29 @@ const fmt = formatVulnerabilitiesForAI();
 ok("format non-null", typeof fmt === "string" && fmt.length > 0);
 ok("format caps at 5 lines", fmt.split("\n").length === 5);
 ok("format most-recent first", fmt.split("\n")[0].startsWith("T6 —"));
+
+// 10) pending AI candidate: stash, read, never re-nag, self-heal, clear
+reset();
+setPendingCandidate({ trait: "Need to be right", costEdge: "I dig in", strengthEdge: "I prepare hard" });
+ok("pending stored", getPendingCandidate()?.trait === "Need to be right");
+ok("pending blank → null", setPendingCandidate({ trait: "x", costEdge: "", strengthEdge: "y" }) === null);
+confirmVulnerability({ trait: "Need to be right", costEdge: "I dig in", strengthEdge: "I prepare hard", source: "ai" });
+ok("pending cleared on confirm", getPendingCandidate() === null);
+ok("no re-stash of confirmed", setPendingCandidate({ trait: "Need to be right", costEdge: "a", strengthEdge: "b" }) === null);
+
+reset();
+rejectCandidate({ trait: "Impatience", costEdge: "x", strengthEdge: "y" });
+ok("no stash of rejected", setPendingCandidate({ trait: "Impatience", costEdge: "x", strengthEdge: "y" }) === null);
+
+reset();
+setPendingCandidate({ trait: "Restless drive", costEdge: "burnout", strengthEdge: "output" });
+rejectCandidate(vulnerabilityId("Restless drive"));
+ok("reject clears pending (self-heal)", getPendingCandidate() === null);
+
+reset();
+setPendingCandidate({ trait: "Worry", costEdge: "c", strengthEdge: "s" });
+clearPendingCandidate();
+ok("clearPending works", getPendingCandidate() === null);
 
 console.log(`\nvulnerabilities.test: ${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

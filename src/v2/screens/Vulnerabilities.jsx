@@ -7,6 +7,8 @@ import {
   confirmVulnerability,
   rejectCandidate,
   removeVulnerability,
+  getPendingCandidate,
+  clearPendingCandidate,
 } from "../lib/vulnerabilities.js";
 
 /**
@@ -20,8 +22,9 @@ import {
  *   - the user can NAME their own (the authoring flow), and
  *   - Reframe can SURFACE one from the user's own material as a candidate the
  *     user confirms/corrects/rejects (the `candidate` prop).
- * The AI generation + Reframe-context wiring is staged for Arlin's live walk;
- * this surface already renders + stores both paths so it's ready for it.
+ * The AI path is live: Reframe surfaces a candidate (surface_vulnerability)
+ * from the user's own material; it stashes as pending and appears here for the
+ * user to confirm/correct/reject — never asserted, never shown mid-session.
  *
  * Reflection + authorship only — never asserts a vulnerability the user hasn't
  * confirmed. Empty state is honest and calm (no inflated type — substance).
@@ -37,7 +40,7 @@ export default function Vulnerabilities({ onExit, candidate = null }) {
   const [trait, setTrait] = useState("");
   const [cost, setCost] = useState("");
   const [strength, setStrength] = useState("");
-  const [cand, setCand] = useState(candidate);
+  const [cand, setCand] = useState(() => candidate || getPendingCandidate());
 
   const refresh = () => setList(getVulnerabilities());
   const resetForm = () => { setTrait(""); setCost(""); setStrength(""); setAuthoring(false); };
@@ -55,6 +58,7 @@ export default function Vulnerabilities({ onExit, candidate = null }) {
     if (!cand) return;
     confirmVulnerability({ ...cand, source: "ai" });
     try { window.plausible?.("Vulnerability Named", { props: { source: "ai-confirmed" } }); } catch {}
+    clearPendingCandidate();
     setCand(null);
     refresh();
   };
@@ -62,9 +66,10 @@ export default function Vulnerabilities({ onExit, candidate = null }) {
     if (!cand) return;
     setTrait(cand.trait || ""); setCost(cand.costEdge || ""); setStrength(cand.strengthEdge || "");
     setAuthoring(true);
+    clearPendingCandidate();
     setCand(null);
   };
-  const dismissCand = () => { if (cand) rejectCandidate(cand); setCand(null); };
+  const dismissCand = () => { if (cand) rejectCandidate(cand); clearPendingCandidate(); setCand(null); };
 
   const remove = (id) => { removeVulnerability(id); refresh(); };
 

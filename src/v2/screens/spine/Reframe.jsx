@@ -6,6 +6,7 @@ import MicButton from "../../components/MicButton.jsx";
 import HairlineDivider from "../../components/HairlineDivider.jsx";
 import { sendReframeMessage } from "../../lib/reframeApi.js";
 import { recordPrediction } from "../../lib/predictionLog.js";
+import { setPendingCandidate } from "../../lib/vulnerabilities.js";
 import { getWatchListChips } from "../../lib/biasProfile.js";
 import { noteAiPatternDetection } from "../../lib/biasProfile.js";
 
@@ -77,6 +78,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
       if (result.distortion) noteAiPatternDetection(result.distortion);
 
       maybeProposeTrigger(result.trigger);
+      maybeStashVulnerability(result.surfaceVulnerability);
 
       setHistory([
         { role: "user", text: precisionName },
@@ -128,6 +130,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
     if (result.distortion) noteAiPatternDetection(result.distortion); // 5.11(d)
 
     maybeProposeTrigger(result.trigger);
+    maybeStashVulnerability(result.surfaceVulnerability);
 
     setHistory([
       ...nextHistory,
@@ -161,6 +164,14 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
         ? proposal.label.trim()
         : "";
     if (lbl) setPendingTrigger(lbl);
+  }
+
+  // Stash an AI-proposed vulnerability (one trait, both edges) as PENDING for the
+  // user to confirm/correct/reject later on the Vulnerabilities surface. Passive:
+  // never shown mid-session (rumination guard). The lib refuses to stash a trait
+  // already confirmed or previously rejected, and validates both edges.
+  function maybeStashVulnerability(proposal) {
+    if (proposal && typeof proposal === "object") setPendingCandidate(proposal);
   }
 
   const handleConfirmTrigger = () => {

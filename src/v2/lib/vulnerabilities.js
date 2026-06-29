@@ -32,14 +32,15 @@ const MAX_LEN = 240;
 function readStore() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (!raw) return { confirmed: [], rejected: [] };
+    if (!raw) return { confirmed: [], rejected: [], pending: null };
     const s = JSON.parse(raw);
     return {
       confirmed: Array.isArray(s && s.confirmed) ? s.confirmed : [],
       rejected: Array.isArray(s && s.rejected) ? s.rejected : [],
+      pending: s && typeof s.pending === "object" ? s.pending : null,
     };
   } catch {
-    return { confirmed: [], rejected: [] };
+    return { confirmed: [], rejected: [], pending: null };
   }
 }
 
@@ -131,6 +132,7 @@ export function confirmVulnerability(fields) {
     store.confirmed.push(rec);
   }
   store.rejected = store.rejected.filter((r) => r !== rec.id);
+  if (store.pending && store.pending.id === rec.id) store.pending = null;
   writeStore(store);
   return rec;
 }
@@ -152,6 +154,49 @@ export function rejectCandidate(candidateOrId) {
   if (!id) return false;
   const store = readStore();
   if (!store.rejected.includes(id)) store.rejected.push(id);
+  if (store.pending && store.pending.id === id) store.pending = null;
+  return writeStore(store);
+}
+
+/**
+ * Stash an AI-proposed candidate as PENDING (not confirmed). Reframe surfaces
+ * one from the user's own material; it waits here until the user confirms /
+ * corrects / rejects it on the Vulnerabilities surface — never asserted, never
+ * shown mid-session. Refuses to stash a trait already confirmed or previously
+ * rejected (it must never re-nag). A newer valid proposal replaces an older
+ * un-acted one. Returns the stored candidate or null.
+ */
+export function setPendingCandidate(fields) {
+  const t = clean(fields && fields.trait);
+  const cost = clean(fields && fields.costEdge);
+  const strength = clean(fields && fields.strengthEdge);
+  if (!t || !cost || !strength) return null;
+  const id = vulnerabilityId(t);
+  if (isConfirmed(id) || isRejected(id)) return null;
+  const store = readStore();
+  store.pending = { id, trait: t, costEdge: cost, strengthEdge: strength, source: "ai", proposedAt: Date.now() };
+  writeStore(store);
+  return store.pending;
+}
+
+/** The pending AI candidate, or null. Self-heals: clears if since confirmed/rejected. */
+export function getPendingCandidate() {
+  const store = readStore();
+  const p = store.pending;
+  if (!p || !p.id || !p.trait || !p.costEdge || !p.strengthEdge) return null;
+  if (isConfirmed(p.id) || isRejected(p.id)) {
+    store.pending = null;
+    writeStore(store);
+    return null;
+  }
+  return p;
+}
+
+/** Clear the pending candidate (after the user acts on it). */
+export function clearPendingCandidate() {
+  const store = readStore();
+  if (store.pending == null) return false;
+  store.pending = null;
   return writeStore(store);
 }
 

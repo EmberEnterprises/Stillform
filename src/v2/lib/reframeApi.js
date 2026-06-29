@@ -31,6 +31,7 @@ import { formatTriggerProfileForAI } from "./triggerProfile.js";
 import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
 import { formatContextProfileForAI } from "./contextProfile.js";
 import { formatConfirmedFindingsForAI, formatReconsolidationMismatchForAI } from "./discoveryFindings.js";
+import { formatVulnerabilitiesForAI } from "./vulnerabilities.js";
 import { getLatestBodyBioFilter } from "./signalLog.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
@@ -99,6 +100,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   const priorSessions = formatRecentSessionsForAI();
   const confirmedFindings = formatConfirmedFindingsForAI();
   const reconsolidationMismatch = formatReconsolidationMismatchForAI();
+  const vulnerabilities = formatVulnerabilitiesForAI();
 
   try {
     const response = await fetch(REFRAME_API_URL, {
@@ -131,6 +133,9 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         priorSessions,
         confirmedFindings,
         reconsolidationMismatch,
+        // Vulnerabilities (June 29): the user's CONFIRMED charged traits + both
+        // edges, so the AI is aware and never re-proposes one already named.
+        vulnerabilities,
         checkinContext: null,
         eodContext: null,
         sessionCount,
@@ -195,6 +200,17 @@ export async function sendReframeMessage({ input, history = [], feelState = null
       question: data && typeof data.question === "string" ? data.question : undefined,
       next_step: data && typeof data.next_step === "string" ? data.next_step : undefined,
       trigger: data && typeof data.trigger === "string" && data.trigger.trim() ? data.trigger.trim() : null,
+      // surface_vulnerability: an AI PROPOSAL (one trait, both edges) the user
+      // confirms/corrects/rejects on the Vulnerabilities surface. Never asserted
+      // in prose; stashed as pending by the spine. null unless fully formed.
+      surfaceVulnerability: (() => {
+        const sv = data && data.surface_vulnerability;
+        if (!sv || typeof sv !== "object") return null;
+        const trait = typeof sv.trait === "string" ? sv.trait.trim() : "";
+        const costEdge = typeof sv.cost_edge === "string" ? sv.cost_edge.trim() : "";
+        const strengthEdge = typeof sv.strength_edge === "string" ? sv.strength_edge.trim() : "";
+        return trait && costEdge && strengthEdge ? { trait, costEdge, strengthEdge } : null;
+      })(),
       log_prediction: logPrediction,
       distortion: data && typeof data.distortion === "string" ? data.distortion : null,
       crisisDetected: !!(data && data.crisisDetected),
