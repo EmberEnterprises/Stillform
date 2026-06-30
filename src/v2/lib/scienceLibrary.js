@@ -607,6 +607,20 @@ export const SCIENCE_ENTRIES = [
       "Gross & John (2003) \u2014 reappraisal vs expressive suppression; reappraisers feel more positive / less negative emotion + closer relationships + no memory cost \u2014 JPSP 85(2):348\u2013362",
     ],
   },
+  // ── observer seat / self-distancing ──
+  {
+    id: "observer-seat",
+    title: "The observer seat",
+    oneLiner: "Step out of a thought and watch it, instead of being run by it.",
+    whatItDoes:
+      "There\u2019s a difference between being inside a thought and watching it. Inside, \u201cI\u2019m failing\u201d is just true. From a step back \u2014 \u201cI\u2019m having the thought that I\u2019m failing\u201d \u2014 it\u2019s one thought, passing through. The words don\u2019t change; your distance from them does, and that gap loosens the grip.",
+    theScience:
+      "Putting distance between yourself and a charged thought \u2014 seeing it as a thought you\u2019re having, or saying it to yourself from a step away \u2014 reliably lowers emotional reactivity. It\u2019s the move behind cognitive defusion and psychological self-distancing, and it\u2019s trainable.",
+    sources: [
+      "Kross & Ayduk (2011) \u2014 psychological distancing reduces emotional reactivity \u2014 JPSP",
+      "Han & Kim (2022) \u2014 meta-analysis of internet-based ACT confirming cognitive-defusion process effects \u2014 J Medical Internet Research",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */

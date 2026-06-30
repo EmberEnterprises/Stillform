@@ -25,6 +25,7 @@ import Vulnerabilities from "./screens/Vulnerabilities.jsx";
 import ProtectiveMoves from "./screens/ProtectiveMoves.jsx";
 import BodyVsStory from "./screens/BodyVsStory.jsx";
 import ReframeVsHold from "./screens/ReframeVsHold.jsx";
+import ObserverSeat from "./screens/ObserverSeat.jsx";
 import Strengths from "./screens/Strengths.jsx";
 import Values from "./screens/Values.jsx";
 import WindowRead from "./screens/WindowRead.jsx";
@@ -181,6 +182,7 @@ export default function AppV2() {
     if (screen === "strengths") return <Strengths onExit={() => setScreen("my-progress")} />;
     if (screen === "values") return <Values onExit={() => setScreen("my-progress")} />;
     if (screen === "reframe-vs-hold") return <ReframeVsHold onExit={() => setScreen("my-progress")} />;
+    if (screen === "observer-seat") return <ObserverSeat onExit={() => setScreen("my-progress")} />;
     if (screen === "window") return <WindowRead onExit={() => setScreen("my-progress")} />;
     if (screen === "thought-record") return <ThoughtRecord onExit={() => setScreen("my-progress")} />;
     if (screen === "narrative-arc") return <NarrativeArc onExit={() => setScreen("my-progress")} />;
