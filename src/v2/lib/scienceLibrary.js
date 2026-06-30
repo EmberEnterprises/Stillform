@@ -555,6 +555,32 @@ export const SCIENCE_ENTRIES = [
       "Walker (2013) \u2014 the smooth-it-over / appease pattern as a protective strategy (clinically described)",
     ],
   },
+  // ── what's strong in you (the bright pole) ──
+  {
+    id: "your-strengths",
+    title: "What's strong in you",
+    oneLiner: "The traits you can lean on \u2014 named on purpose, not left to chance.",
+    whatItDoes:
+      "Names a real strength of yours and where it already shows up, so it becomes something you can reach for deliberately instead of a thing that only happens by accident. Most self-knowledge watches for what tips you; this is the other pole.",
+    theScience:
+      "There\u2019s a whole classification of human strengths \u2014 built deliberately as the inverse of a disorder manual \u2014 cataloguing two dozen a person holds in varying degrees. A strength is often the bright edge of a charged trait: the all-in that overwhelms is the same all-in that gives fully. Naming it is how you keep the bright edge while you watch the cost.",
+    sources: [
+      "Peterson & Seligman (2004) \u2014 the VIA classification of character strengths (the inverse of a disorder manual); the strengths are the robust part, the virtue grouping more theoretical",
+    ],
+  },
+  {
+    id: "strength-on-purpose",
+    title: "Using a strength on purpose",
+    oneLiner: "Knowing a strength does little; using one deliberately moves something.",
+    whatItDoes:
+      "Turns a named strength into a move: pick one and use it in a new way where it fits. Not a personality badge \u2014 a deliberate act you can repeat.",
+    theScience:
+      "In a randomized study, people who used one of their signature strengths in a new way each day for a week showed lasting gains in well-being at six-month follow-up, and strengths use predicts increases in well-being over time. The effect is in the using, not the knowing \u2014 which is why the work attached to a strength is to spend it on purpose.",
+    sources: [
+      "Seligman et al. (2005) \u2014 signature-strength-in-a-new-way intervention; lasting well-being gains, RCT with six-month follow-up \u2014 American Psychologist 60(5):410\u2013421",
+      "Wood et al. (2011) \u2014 strengths use predicts increases in well-being over time \u2014 Personality and Individual Differences",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */

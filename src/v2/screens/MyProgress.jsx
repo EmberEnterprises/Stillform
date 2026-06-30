@@ -9,6 +9,7 @@ import { getNamingGrowth } from "../lib/namingGrowth.js";
 import DiscoveryFindingCard from "../components/DiscoveryFindingCard.jsx";
 import { getPendingCandidate } from "../lib/vulnerabilities.js";
 import { getPendingCandidate as getPendingMove } from "../lib/protectiveMoves.js";
+import { getPendingCandidate as getPendingStrength } from "../lib/strengths.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -44,6 +45,7 @@ export default function MyProgress({ onExit, onNavigate }) {
   };
   const pendingVuln = getPendingCandidate();
   const pendingMove = getPendingMove();
+  const pendingStrength = getPendingStrength();
 
   return (
     <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
@@ -247,48 +249,57 @@ export default function MyProgress({ onExit, onNavigate }) {
 
         <ProgressEntry
           mark="08"
+          title="What's strong in you"
+          description={pendingStrength
+            ? "Reframe noticed a strength of yours — where it shows, and a way to lean on it — waiting for you to confirm."
+            : "The bright pole — what you're genuinely good at, where it already shows, and one way to lean on it on purpose. Named by you, or surfaced by Reframe from your own words."}
+          onTap={() => handleNavigate("strengths")}
+        />
+
+        <ProgressEntry
+          mark="09"
           title="Growth mirror"
           description="The four capacities Stillform trains — Sense, Settle, Seeing yourself, Seeing others — reflected back as you do the work."
           onTap={() => handleNavigate("capacities-mirror")}
         />
 
         <ProgressEntry
-          mark="09"
+          mark="10"
           title="Where You Lean"
           description="Where you take risk and where you hold back, across the parts of a life — a value-neutral picture of your shape, nothing to fix."
           onTap={() => handleNavigate("risk-profile")}
         />
 
         <ProgressEntry
-          mark="10"
+          mark="11"
           title="What Didn't Come True"
           description="What you were sure would go wrong that didn't — the disconfirmations your mind otherwise forgets to count."
           onTap={() => handleNavigate("prediction-mirror")}
         />
 
         <ProgressEntry
-          mark="11"
+          mark="12"
           title="What You Bet On"
           description="What you were sure of, next to what actually happened. The gap is the data."
           onTap={() => handleNavigate("what-you-bet-on")}
         />
 
         <ProgressEntry
-          mark="12"
+          mark="13"
           title="Thought Record"
           description="Take one thought, rate how much you believe it, look at the evidence, then re-rate. The drop is the work."
           onTap={() => handleNavigate("thought-record")}
         />
 
         <ProgressEntry
-          mark="13"
+          mark="14"
           title="Your Arc"
           description="The through-line of your practice — your own named moments, in order, with the patterns that recur and the predictions that didn't come true."
           onTap={() => handleNavigate("narrative-arc")}
         />
 
         <ProgressEntry
-          mark="14"
+          mark="15"
           title="Practice Evidence"
           description="Short exercises on the functions the practice trains — measured over time, against your own past, as honest evidence it's working."
           onTap={() => handleNavigate("practice-evidence")}

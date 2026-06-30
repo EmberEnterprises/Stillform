@@ -841,3 +841,19 @@ INTEGRITY (all CFM): evidence the function is changing over the user's OWN basel
 - Walker (2013) — the appease/people-pleasing pattern as a protective strategy (clinically described, NOT empirically validated — flagged)
 
 **How Stillform uses this (practice-describing).** Both user and AI. Reframe can surface the protective move a person's own material points to (one move, both edges) as a suggestion; the user can also name their own. The work is to recognize the move as it runs, see both edges, and choose — never to delete the trait, never framed as a clinical finding. The evaluation is rigorous; the identity is self-mastery, not therapy.
+
+
+---
+
+## What's strong in you (strengths)
+
+**What it is.** The bright pole. Most self-knowledge work watches for what tips you; an honest evaluation also names what's *strong* — the traits you can deliberately lean on. Peterson and Seligman built a whole classification of these, on purpose as the inverse of a disorder manual: 24 character strengths a person holds in varying degrees. Stillform uses this as self-mastery — naming a real strength and using it on purpose — never a test you pass or fail. Honest caveat: the 24 strengths and their measurement are well-supported, but the higher-order six-virtue grouping is more theoretical (factor analyses find fewer factors), so Stillform leans on the strengths themselves, not the taxonomy.
+
+**Using a strength on purpose moves something.** It isn't just nice to know. In a randomized study, people asked to use one of their signature strengths in a new way each day for a week showed lasting gains in well-being at six-month follow-up; strengths use predicts increases in well-being over time. So the work attached to a named strength is concrete: pick one, use it deliberately where it fits.
+- Peterson & Seligman (2004) — Character Strengths and Virtues: the VIA classification, 24 strengths under 6 virtues (built deliberately as the inverse of a disorder manual); the strengths are the robust part, the virtue grouping is theoretical
+- Seligman et al. (2005) — using a signature strength in a new way each day for a week produced lasting well-being gains, RCT with six-month follow-up — American Psychologist 60(5):410–421
+- Wood et al. (2011) — strengths use predicts increases in well-being over time — Personality and Individual Differences
+
+**The tie to the two edges.** A strength is often the bright edge of a charged trait (see "the same trait, two edges" above): the all-in that overwhelms is the same all-in that gives fully. Naming the strength explicitly is how you keep the bright edge while you watch the cost — the positive pole the deficit surfaces don't reach on their own.
+
+**How Stillform uses this (practice-describing).** Both user and AI. The user names a strength, where it already shows, and one way to lean on it; Reframe can also surface a strength from the user's own material as a candidate to confirm. Self-mastery, plain language, never a score.
