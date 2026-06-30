@@ -594,6 +594,19 @@ export const SCIENCE_ENTRIES = [
       "Hayes, Strosahl & Wilson (2011) \u2014 ACT: values clarification (freely chosen directions) + committed action (value-driven behavior despite discomfort)",
     ],
   },
+  // ── reframing vs holding it in ──
+  {
+    id: "reframe-vs-hold",
+    title: "Reframing vs holding it in",
+    oneLiner: "Two ways to handle a hard feeling \u2014 and most people lean one way without noticing.",
+    whatItDoes:
+      "Names your default: do you reframe a hard feeling (change the read to change the feeling) or hold it in (feel it, but keep the lid on and carry it)? Seeing your lean is the first step to having a say in it.",
+    theScience:
+      "Across five studies, people who habitually reframe tended to feel more positive and less negative emotion, stay closer in their relationships, and paid no memory cost; people who habitually held it in got the reverse \u2014 less positive emotion, more negative, worse memory, less closeness. Holding it in isn\u2019t always wrong \u2014 sometimes it\u2019s the right call for the moment \u2014 but as a default it costs. Reframing is the trainable move, so the work is direct: when you catch yourself carrying something, that\u2019s the cue to reframe it.",
+    sources: [
+      "Gross & John (2003) \u2014 reappraisal vs expressive suppression; reappraisers feel more positive / less negative emotion + closer relationships + no memory cost \u2014 JPSP 85(2):348\u2013362",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */

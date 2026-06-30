@@ -869,3 +869,15 @@ INTEGRITY (all CFM): evidence the function is changing over the user's OWN basel
 **Why it's the lever.** A direction turns scattered effort into movement: when an action connects to a value you actually hold, it carries its own motivation. Paired with strengths (the bright pole), values give the practice forward motion — not just watching what tips you, but moving toward what matters. The work attached to a value is always a committed action: one concrete step toward it.
 
 **How Stillform uses this (practice-describing).** Both user and AI. The user names what they're moving toward, what living it looks like, and one step; Reframe can surface a direction it hears in the user's own words as a candidate to confirm — but the choosing stays the user's (autonomy is the point). Self-mastery, plain language, never prescribed.
+
+
+---
+
+## Reframing vs holding it in
+
+**What it is.** Two ways people handle a hard feeling. Reframing (cognitive reappraisal) changes the read to change the feeling — you reinterpret what's happening so it lands differently. Holding it in (expressive suppression) keeps the lid on — you feel it but don't let it show or move. Most people lean habitually toward one. Gross and John's five-study program found the lean matters: people who habitually reframe tend to feel more positive and less negative emotion, stay closer in their relationships, and pay no memory cost; people who habitually hold it in tend to feel less positive emotion, more negative, remember the moment worse, and feel less close to others. Honest nuance: holding it in isn't always wrong — sometimes it's the right move for the moment — but as a *default* it carries those costs, while reframing doesn't.
+- Gross & John (2003) — Individual Differences in Two Emotion Regulation Processes: reappraisal vs expressive suppression; reappraisers feel more positive / less negative emotion + closer relationships + no memory cost, suppressors the reverse — JPSP 85(2):348–362
+
+**Why it's workable.** Reframing is exactly what Stillform's Reframe does — it's the trainable move. So the work attached to this self-knowledge is direct: when you catch yourself holding something in and carrying it, that's the cue to reframe it instead. The tendency is a habit, and habits shift with reps. (The reappraisal mechanism itself is grounded elsewhere in this sheet — Ochsner & Gross 2005, Buhle 2014, Denny 2015.)
+
+**How Stillform uses this (practice-describing).** A self-read the user can see (which do you lean toward?) tied to the move they already have. Self-mastery, plain language — never "suppression is bad," never clinical. The ERQ instrument already measures the lean; this surfaces it as something to work.
