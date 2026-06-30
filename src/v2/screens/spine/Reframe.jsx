@@ -8,6 +8,9 @@ import { sendReframeMessage } from "../../lib/reframeApi.js";
 import { recordPrediction } from "../../lib/predictionLog.js";
 import { setPendingCandidate } from "../../lib/vulnerabilities.js";
 import { setPendingCandidate as setPendingMove } from "../../lib/protectiveMoves.js";
+import { setPendingCandidate as setPendingStrength } from "../../lib/strengths.js";
+import { setPendingCandidate as setPendingValue } from "../../lib/values.js";
+import { setPendingCandidate as setPendingWindow } from "../../lib/windowRead.js";
 import { getWatchListChips } from "../../lib/biasProfile.js";
 import { noteAiPatternDetection } from "../../lib/biasProfile.js";
 
@@ -81,6 +84,9 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
       maybeProposeTrigger(result.trigger);
       maybeStashVulnerability(result.surfaceVulnerability);
       maybeStashProtectiveMove(result.surfaceProtectiveMove);
+      maybeStashStrength(result.surfaceStrength);
+      maybeStashValue(result.surfaceValue);
+      maybeStashWindow(result.surfaceWindow);
 
       setHistory([
         { role: "user", text: precisionName },
@@ -134,6 +140,9 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
     maybeProposeTrigger(result.trigger);
     maybeStashVulnerability(result.surfaceVulnerability);
     maybeStashProtectiveMove(result.surfaceProtectiveMove);
+    maybeStashStrength(result.surfaceStrength);
+    maybeStashValue(result.surfaceValue);
+    maybeStashWindow(result.surfaceWindow);
 
     setHistory([
       ...nextHistory,
@@ -184,6 +193,15 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
   // validates both edges.
   function maybeStashProtectiveMove(proposal) {
     if (proposal && typeof proposal === "object") setPendingMove(proposal);
+  }
+  function maybeStashStrength(proposal) {
+    if (proposal && typeof proposal === "object") setPendingStrength(proposal);
+  }
+  function maybeStashValue(proposal) {
+    if (proposal && typeof proposal === "object") setPendingValue(proposal);
+  }
+  function maybeStashWindow(proposal) {
+    if (proposal && typeof proposal === "object") setPendingWindow(proposal);
   }
 
   const handleConfirmTrigger = () => {

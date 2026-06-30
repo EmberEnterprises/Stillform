@@ -33,6 +33,9 @@ import { formatContextProfileForAI } from "./contextProfile.js";
 import { formatConfirmedFindingsForAI, formatReconsolidationMismatchForAI } from "./discoveryFindings.js";
 import { formatVulnerabilitiesForAI } from "./vulnerabilities.js";
 import { formatProtectiveMovesForAI } from "./protectiveMoves.js";
+import { formatStrengthsForAI } from "./strengths.js";
+import { formatValuesForAI } from "./values.js";
+import { formatWindowReadForAI } from "./windowRead.js";
 import { getLatestBodyBioFilter } from "./signalLog.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
@@ -103,6 +106,9 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   const reconsolidationMismatch = formatReconsolidationMismatchForAI();
   const vulnerabilities = formatVulnerabilitiesForAI();
   const protectiveMoves = formatProtectiveMovesForAI();
+  const strengths = formatStrengthsForAI();
+  const values = formatValuesForAI();
+  const windowRead = formatWindowReadForAI();
 
   try {
     const response = await fetch(REFRAME_API_URL, {
@@ -141,6 +147,9 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         // Protective moves (June 29): the user's CONFIRMED defenses/threat
         // reflexes + both edges (protected / costs now). Same discipline.
         protectiveMoves,
+        strengths,
+        values,
+        windowRead,
         checkinContext: null,
         eodContext: null,
         sessionCount,
@@ -227,6 +236,32 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         const protectedEdge = typeof sm.protected_edge === "string" ? sm.protected_edge.trim() : "";
         const costEdge = typeof sm.cost_edge === "string" ? sm.cost_edge.trim() : "";
         return move && protectedEdge && costEdge ? { move, protectedEdge, costEdge } : null;
+      })(),
+      // surface_strength / surface_value / surface_window: AI PROPOSALS the user
+      // confirms/corrects/rejects on their surfaces. Never asserted in prose;
+      // pending-stashed by the spine; null unless fully formed.
+      surfaceStrength: (() => {
+        const ss = data && data.surface_strength;
+        if (!ss || typeof ss !== "object") return null;
+        const strength = typeof ss.strength === "string" ? ss.strength.trim() : "";
+        const whereItShows = typeof ss.where_it_shows === "string" ? ss.where_it_shows.trim() : "";
+        const leanInto = typeof ss.lean_into === "string" ? ss.lean_into.trim() : "";
+        return strength && whereItShows && leanInto ? { strength, whereItShows, leanInto } : null;
+      })(),
+      surfaceValue: (() => {
+        const sv = data && data.surface_value;
+        if (!sv || typeof sv !== "object") return null;
+        const value = typeof sv.value === "string" ? sv.value.trim() : "";
+        const lookLike = typeof sv.looks_like === "string" ? sv.looks_like.trim() : "";
+        const oneStep = typeof sv.one_step === "string" ? sv.one_step.trim() : "";
+        return value && lookLike && oneStep ? { value, lookLike, oneStep } : null;
+      })(),
+      surfaceWindow: (() => {
+        const sw = data && data.surface_window;
+        if (!sw || typeof sw !== "object") return null;
+        const tilt = ["revved", "flat", "shifts"].includes(sw.tilt) ? sw.tilt : null;
+        const earliestSignal = typeof sw.earliest_signal === "string" && sw.earliest_signal.trim() ? sw.earliest_signal.trim() : null;
+        return tilt || earliestSignal ? { tilt, earliestSignal } : null;
       })(),
       log_prediction: logPrediction,
       distortion: data && typeof data.distortion === "string" ? data.distortion : null,
