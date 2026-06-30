@@ -581,6 +581,19 @@ export const SCIENCE_ENTRIES = [
       "Wood et al. (2011) \u2014 strengths use predicts increases in well-being over time \u2014 Personality and Individual Differences",
     ],
   },
+  // ── what you're moving toward (the directional pole) ──
+  {
+    id: "your-values",
+    title: "What you're moving toward",
+    oneLiner: "A direction you choose turns scattered effort into movement.",
+    whatItDoes:
+      "Names where you're pointed \u2014 the kind of person you're moving toward being, by your own choosing \u2014 and one concrete step toward it. Strengths name what's strong now; this names the direction.",
+    theScience:
+      "Naming a freely chosen direction (values clarification) and taking value-driven steps even when it\u2019s uncomfortable (committed action) are two of the core processes behind psychological flexibility, with a deep evidence base. The point is that the direction is YOURS, not handed to you \u2014 when an action connects to a value you actually hold, it carries its own motivation. So the work attached to a value is always one concrete step.",
+    sources: [
+      "Hayes, Strosahl & Wilson (2011) \u2014 ACT: values clarification (freely chosen directions) + committed action (value-driven behavior despite discomfort)",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */

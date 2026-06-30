@@ -25,6 +25,7 @@ import Vulnerabilities from "./screens/Vulnerabilities.jsx";
 import ProtectiveMoves from "./screens/ProtectiveMoves.jsx";
 import BodyVsStory from "./screens/BodyVsStory.jsx";
 import Strengths from "./screens/Strengths.jsx";
+import Values from "./screens/Values.jsx";
 import WindowRead from "./screens/WindowRead.jsx";
 import ThoughtRecord from "./screens/ThoughtRecord.jsx";
 import NarrativeArc from "./screens/NarrativeArc.jsx";
@@ -177,6 +178,7 @@ export default function AppV2() {
     if (screen === "protective-moves") return <ProtectiveMoves onExit={() => setScreen("my-progress")} />;
     if (screen === "body-vs-story") return <BodyVsStory onExit={() => setScreen("my-progress")} />;
     if (screen === "strengths") return <Strengths onExit={() => setScreen("my-progress")} />;
+    if (screen === "values") return <Values onExit={() => setScreen("my-progress")} />;
     if (screen === "window") return <WindowRead onExit={() => setScreen("my-progress")} />;
     if (screen === "thought-record") return <ThoughtRecord onExit={() => setScreen("my-progress")} />;
     if (screen === "narrative-arc") return <NarrativeArc onExit={() => setScreen("my-progress")} />;

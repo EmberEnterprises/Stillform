@@ -857,3 +857,15 @@ INTEGRITY (all CFM): evidence the function is changing over the user's OWN basel
 **The tie to the two edges.** A strength is often the bright edge of a charged trait (see "the same trait, two edges" above): the all-in that overwhelms is the same all-in that gives fully. Naming the strength explicitly is how you keep the bright edge while you watch the cost — the positive pole the deficit surfaces don't reach on their own.
 
 **How Stillform uses this (practice-describing).** Both user and AI. The user names a strength, where it already shows, and one way to lean on it; Reframe can also surface a strength from the user's own material as a candidate to confirm. Self-mastery, plain language, never a score.
+
+
+---
+
+## What you're moving toward (values)
+
+**What it is.** The directional pole — the compass. Strengths name what's strong now; values name where you're *pointed*: the kind of person you're moving toward being, by your own choosing. In ACT this is two of the core processes — values clarification (naming freely chosen directions, yours and not driven by others) and committed action (taking value-driven steps even when it's uncomfortable). The evidence base for values-driven action supporting meaning and well-being is substantial (decades of RCTs across conditions). Stillform uses it as self-mastery — a direction you set and act on — never as therapy, and never values handed to you.
+- Hayes, Strosahl & Wilson (2011) — ACT: values clarification (freely chosen life directions) + committed action (value-driven behavior despite discomfort) as core processes of psychological flexibility
+
+**Why it's the lever.** A direction turns scattered effort into movement: when an action connects to a value you actually hold, it carries its own motivation. Paired with strengths (the bright pole), values give the practice forward motion — not just watching what tips you, but moving toward what matters. The work attached to a value is always a committed action: one concrete step toward it.
+
+**How Stillform uses this (practice-describing).** Both user and AI. The user names what they're moving toward, what living it looks like, and one step; Reframe can surface a direction it hears in the user's own words as a candidate to confirm — but the choosing stays the user's (autonomy is the point). Self-mastery, plain language, never prescribed.
