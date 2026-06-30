@@ -301,6 +301,120 @@ const ITEMS = [
     ),
   },
   {
+    id: "vulnerabilities",
+    q: "What is \u201cYour vulnerabilities\u201d?",
+    a: (
+      <>
+        Charged traits \u2014 a need, a sensitivity, a reflex \u2014 each seen as one trait with two
+        edges: where it tips you when it runs unseen, and where the same trait serves you. You name
+        them yourself, or confirm ones Stillform surfaces from your own words. Nothing is surfaced
+        without the work to move through it, and it stays on your device.
+      </>
+    ),
+  },
+  {
+    id: "protective-moves",
+    q: "What are \u201cYour protective moves\u201d?",
+    a: (
+      <>
+        The automatic moves you make under pressure \u2014 how you handle a hard truth (deflect, go
+        quiet, retreat into analysis) or your first reflex under threat. Each is held with both edges:
+        where it once protected you, and where the old reflex costs you now. Standard equipment, never
+        a flaw.
+      </>
+    ),
+  },
+  {
+    id: "your-window",
+    q: "What is \u201cYour window\u201d?",
+    a: (
+      <>
+        Your clear-thinking zone \u2014 and which way you tip when you're pushed past it (wound up, or
+        shut down), plus where activation tends to show up first in your body. The point is the
+        correction that matches your tilt: revved \u2192 settle, shut-down \u2192 re-engage.
+      </>
+    ),
+  },
+  {
+    id: "body-or-story",
+    q: "What is \u201cBody, or the story?\u201d",
+    a: (
+      <>
+        A quick check for when a feeling might be your body rather than a verdict about your life.
+        Depleted, short on sleep, in pain, or running hot, \u201cI can't handle this\u201d can be the
+        hardware talking. Naming which it is changes whether a sensation reads as danger or just tired.
+      </>
+    ),
+  },
+  {
+    id: "whats-strong",
+    q: "What is \u201cWhat's strong in you\u201d?",
+    a: (
+      <>
+        What you're genuinely good at, where it already shows, and one way to use it on purpose. Named
+        by you, or surfaced by Stillform from your own words. Not flattery \u2014 a real capacity to
+        lean on, and the bright counterweight to the harder surfaces.
+      </>
+    ),
+  },
+  {
+    id: "moving-toward",
+    q: "What is \u201cWhat you're moving toward\u201d?",
+    a: (
+      <>
+        A direction you choose to move toward, what living it looks like, and one concrete step. The
+        choosing stays yours \u2014 Stillform can reflect a direction it hears in your words, but never
+        prescribes one.
+      </>
+    ),
+  },
+  {
+    id: "reframe-or-hold",
+    q: "What is \u201cReframing, or holding it in?\u201d",
+    a: (
+      <>
+        Two ways to handle a hard feeling \u2014 reframe it (change the read so it lands differently)
+        or hold it in and carry it. Most people lean one way without noticing. Seeing your lean turns
+        the holding into a cue: when you catch yourself carrying something, that's the moment to
+        reframe it.
+      </>
+    ),
+  },
+  {
+    id: "observer-seat",
+    q: "What is \u201cThe observer seat\u201d?",
+    a: (
+      <>
+        A move for stepping out of a thought to watch it, instead of being run by it. You put in a
+        thought that's gripping you, and it hands the thought back from a step away. The words don't
+        change \u2014 your distance from them does, and that gap is where the choice lives.
+      </>
+    ),
+  },
+  {
+    id: "triggers-concentrate",
+    q: "What is \u201cWhere your triggers concentrate\u201d?",
+    a: (
+      <>
+        The layer above your triggers: across everything you've named, where the load pools, and which
+        triggers actually carry the weight. It's read from your own data, and it points the work \u2014
+        aim where it concentrates, start with what shows up most.
+      </>
+    ),
+  },
+  {
+    id: "how-this-works",
+    q: "What is \u201cHow this works\u201d?",
+    a: (
+      <>
+        The model underneath the practice, in plain terms: you build the vocabulary to read your own
+        mind, the reps wire new responses in so the work compounds instead of resetting, and working a
+        live trigger rewrites it instead of papering over it. It's why this builds rather than
+        maintains.
+      </>
+    ),
+  },
+  {
     id: "session",
     q: "How does a session work?",
     a: (
