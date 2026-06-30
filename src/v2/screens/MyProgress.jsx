@@ -221,6 +221,13 @@ export default function MyProgress({ onExit, onNavigate }) {
 
         <ProgressEntry
           mark="04"
+          title="Where your triggers concentrate"
+          description="The layer above your triggers — where the load pools across everything you've named, and which ones actually carry the weight. A map of where the reps pay off."
+          onTap={() => handleNavigate("trigger-meta")}
+        />
+
+        <ProgressEntry
+          mark="05"
           title="Your Vulnerabilities"
           description={pendingVuln
             ? "Reframe noticed something — a charged part of you, with both its edges, waiting for you to look at."
@@ -229,7 +236,7 @@ export default function MyProgress({ onExit, onNavigate }) {
         />
 
         <ProgressEntry
-          mark="05"
+          mark="06"
           title="Your protective moves"
           description={pendingMove
             ? "Reframe noticed something — a move you make under pressure, with both its edges, waiting for you to look at."
@@ -238,21 +245,21 @@ export default function MyProgress({ onExit, onNavigate }) {
         />
 
         <ProgressEntry
-          mark="06"
+          mark="07"
           title="Your window"
           description="The zone where you can think clearly — and which way you tip when you're pushed past it (too revved, or too shut-down), with the correction that matches. Plus your earliest signal: where you catch it first."
           onTap={() => handleNavigate("window")}
         />
 
         <ProgressEntry
-          mark="07"
+          mark="08"
           title="Body, or the story?"
           description="When a feeling lands hard, a body running low — depleted, no sleep, in pain, a hormonal shift — colors the read. Check the body before you trust the story; see the moments it had a hand in."
           onTap={() => handleNavigate("body-vs-story")}
         />
 
         <ProgressEntry
-          mark="08"
+          mark="09"
           title="What's strong in you"
           description={pendingStrength
             ? "Reframe noticed a strength of yours — where it shows, and a way to lean on it — waiting for you to confirm."
@@ -261,7 +268,7 @@ export default function MyProgress({ onExit, onNavigate }) {
         />
 
         <ProgressEntry
-          mark="09"
+          mark="10"
           title="What you're moving toward"
           description={pendingValue
             ? "Reframe heard a direction in your words — what it looks like, and a step — waiting for you to confirm."
@@ -270,14 +277,14 @@ export default function MyProgress({ onExit, onNavigate }) {
         />
 
         <ProgressEntry
-          mark="10"
+          mark="11"
           title="Reframing, or holding it in?"
           description="Two ways to handle a hard feeling — reframe it, or hold it in and carry it. See which way you lean, and turn the holding into the cue to reframe."
           onTap={() => handleNavigate("reframe-vs-hold")}
         />
 
         <ProgressEntry
-          mark="11"
+          mark="12"
           title="The observer seat"
           description={observerSeatCount > 0
             ? `Taken ${observerSeatCount} ${observerSeatCount === 1 ? "time" : "times"}. Step out of a thought and watch it instead of being run by it — the words don't change, your distance from them does.`
@@ -286,49 +293,49 @@ export default function MyProgress({ onExit, onNavigate }) {
         />
 
         <ProgressEntry
-          mark="12"
+          mark="13"
           title="Growth mirror"
           description="The four capacities Stillform trains — Sense, Settle, Seeing yourself, Seeing others — reflected back as you do the work."
           onTap={() => handleNavigate("capacities-mirror")}
         />
 
         <ProgressEntry
-          mark="13"
+          mark="14"
           title="Where You Lean"
           description="Where you take risk and where you hold back, across the parts of a life — a value-neutral picture of your shape, nothing to fix."
           onTap={() => handleNavigate("risk-profile")}
         />
 
         <ProgressEntry
-          mark="14"
+          mark="15"
           title="What Didn't Come True"
           description="What you were sure would go wrong that didn't — the disconfirmations your mind otherwise forgets to count."
           onTap={() => handleNavigate("prediction-mirror")}
         />
 
         <ProgressEntry
-          mark="15"
+          mark="16"
           title="What You Bet On"
           description="What you were sure of, next to what actually happened. The gap is the data."
           onTap={() => handleNavigate("what-you-bet-on")}
         />
 
         <ProgressEntry
-          mark="16"
+          mark="17"
           title="Thought Record"
           description="Take one thought, rate how much you believe it, look at the evidence, then re-rate. The drop is the work."
           onTap={() => handleNavigate("thought-record")}
         />
 
         <ProgressEntry
-          mark="17"
+          mark="18"
           title="Your Arc"
           description="The through-line of your practice — your own named moments, in order, with the patterns that recur and the predictions that didn't come true."
           onTap={() => handleNavigate("narrative-arc")}
         />
 
         <ProgressEntry
-          mark="18"
+          mark="19"
           title="Practice Evidence"
           description="Short exercises on the functions the practice trains — measured over time, against your own past, as honest evidence it's working."
           onTap={() => handleNavigate("practice-evidence")}

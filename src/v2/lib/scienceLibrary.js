@@ -621,6 +621,19 @@ export const SCIENCE_ENTRIES = [
       "Han & Kim (2022) \u2014 meta-analysis of internet-based ACT confirming cognitive-defusion process effects \u2014 J Medical Internet Research",
     ],
   },
+  // ── trigger meta-patterns ──
+  {
+    id: "trigger-meta-patterns",
+    title: "Where your triggers concentrate",
+    oneLiner: "Across everything that sets you off, where the load pools \u2014 and which ones carry the weight.",
+    whatItDoes:
+      "Your triggers rarely spread evenly. They gather in one or two areas, and a few of them do most of the firing. Reading that across your own data shows you where to aim the work instead of fighting everything at once.",
+    theScience:
+      "Seeing your own pattern \u2014 read from your own data rather than handed to you \u2014 is what puts a step between you and it. That earned distance is what turns a pattern into a map instead of one more thing to brace against.",
+    sources: [
+      "Kross & Ayduk (2011) \u2014 psychological distancing reduces emotional reactivity \u2014 JPSP",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */
