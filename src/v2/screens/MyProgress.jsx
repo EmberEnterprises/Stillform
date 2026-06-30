@@ -340,6 +340,13 @@ export default function MyProgress({ onExit, onNavigate }) {
           description="Short exercises on the functions the practice trains — measured over time, against your own past, as honest evidence it's working."
           onTap={() => handleNavigate("practice-evidence")}
         />
+
+        <ProgressEntry
+          mark="20"
+          title="How this works"
+          description="The model you're working inside — why naming sharpens you, why the reps compound, and why working a live trigger rewrites it instead of papering over it. The map you stand on."
+          onTap={() => handleNavigate("the-model")}
+        />
       </section>
 
       {/* Concierge — proposed updates (Arlin June 2: queue lives here AND

@@ -27,6 +27,7 @@ import BodyVsStory from "./screens/BodyVsStory.jsx";
 import ReframeVsHold from "./screens/ReframeVsHold.jsx";
 import ObserverSeat from "./screens/ObserverSeat.jsx";
 import TriggerMetaPatterns from "./screens/TriggerMetaPatterns.jsx";
+import FrameworkModel from "./screens/FrameworkModel.jsx";
 import Strengths from "./screens/Strengths.jsx";
 import Values from "./screens/Values.jsx";
 import WindowRead from "./screens/WindowRead.jsx";
@@ -185,6 +186,7 @@ export default function AppV2() {
     if (screen === "reframe-vs-hold") return <ReframeVsHold onExit={() => setScreen("my-progress")} />;
     if (screen === "observer-seat") return <ObserverSeat onExit={() => setScreen("my-progress")} />;
     if (screen === "trigger-meta") return <TriggerMetaPatterns onExit={() => setScreen("my-progress")} />;
+    if (screen === "the-model") return <FrameworkModel onExit={() => setScreen("my-progress")} />;
     if (screen === "window") return <WindowRead onExit={() => setScreen("my-progress")} />;
     if (screen === "thought-record") return <ThoughtRecord onExit={() => setScreen("my-progress")} />;
     if (screen === "narrative-arc") return <NarrativeArc onExit={() => setScreen("my-progress")} />;
