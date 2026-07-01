@@ -1870,6 +1870,7 @@ exports.handler = async function(event) {
       practiceEntryContext = null,
       sessionPrecision = null,
       bioFilter = null,
+      ambient = null,
       regulationType = null,
       sessionNotes = null,
       priorSessions = null,
@@ -2704,6 +2705,14 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (contextProfile) contextParts.push(contextProfile);
     if (confirmedFindings) contextParts.push(`CONFIRMED PATTERNS — patterns the app found in the user's OWN logged history by arithmetic (co-occurrence, never causation) AND THE USER HAS CONFIRMED land: ${confirmedFindings} You MAY surface ONE of these as an observation when it is genuinely relevant to what they are working right now — this is the one sanctioned exception to "never volunteer a pattern they did not raise," because the math found it and the user confirmed it. Rules: voice it as the observation it is ("these two tend to show up near each other" / "X tends to follow Y"), NEVER as causation or diagnosis; offer it, never insist; at most one, sparingly; never invent, extend, or combine findings beyond exactly what is listed here; the app owns the counts and history — do not fabricate numbers.`);
     if (priorSessions) contextParts.push(`PRIOR SESSIONS — what the user has worked through in earlier sessions (this is your continuity with them; reference it sparingly to show you remember a recurring thread, never re-litigate a past session, never quote it back verbatim; use only what these entries literally record — do not infer anything more about the user than they state):\n${priorSessions}`);
+    // AMBIENT (2026-07-01, Arlin's direction) — faint atmosphere, never a claim.
+    // Weather MAY gently soften your read; the moon phase is BACKGROUND ONLY.
+    if (ambient && (ambient.weather || ambient.moon)) {
+      const bits = [];
+      if (ambient.weather) bits.push(`Outside it is ${ambient.weather}.`);
+      if (ambient.moon) bits.push(`(Moon: ${ambient.moon}.)`);
+      contextParts.push(`AMBIENT CONTEXT — atmosphere only, not an explanation. ${bits.join(" ")} This is faint background that MAY gently shape your tone (a low-pressure, grey, or short-daylight day can quietly weigh on a person). HARD RULES: NEVER mention, name, or reference the moon phase in any form — it stays entirely invisible. NEVER tell the user their state is caused by the weather or the day; do not say "it's the weather" or attribute their feelings to any of this. Never volunteer any of it. The user names their own experience; you simply hold the room a touch more gently when the day is heavy. If in doubt, ignore it entirely.`);
+    }
     // PCE.2 — Reconsolidation loop. The prior-frame data ("locked in" / "next
     // move they set") already rides in PRIOR SESSIONS above; this turns the
     // reactivate-and-update into a deliberate move instead of leaving it to

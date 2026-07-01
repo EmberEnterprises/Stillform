@@ -189,6 +189,10 @@ exports.handler = async (event) => {
       })).filter(e => e.title)
     : [];
   const calendarSummary = String(payload.calendarSummary || "").slice(0, 400);
+  const ambientWeather = payload.ambient && typeof payload.ambient.weather === "string"
+    ? payload.ambient.weather.slice(0, 60) : "";
+  const ambientMoon = payload.ambient && typeof payload.ambient.moon === "string"
+    ? payload.ambient.moon.slice(0, 24) : "";
   // triggerProfile / biasProfile / signalProfile come pre-formatted from the
   // client (formatTriggerProfileForAI, etc.) — they're already strings.
   const triggerProfile = String(payload.triggerProfile || "").slice(0, 600);
@@ -221,6 +225,12 @@ exports.handler = async (event) => {
     contextLines.push(`Today's calendar events: ${eventsText}`);
   } else if (calendarSummary) {
     contextLines.push(`Today's calendar summary: ${calendarSummary}`);
+  }
+  if (ambientWeather || ambientMoon) {
+    const ab = [];
+    if (ambientWeather) ab.push(`Outside it is ${ambientWeather}.`);
+    if (ambientMoon) ab.push(`(Moon: ${ambientMoon}.)`);
+    contextLines.push(`Ambient context — atmosphere ONLY, never state it in the brief: ${ab.join(" ")} A heavy day (low pressure, grey, little daylight) MAY let you pitch the brief a touch more gently. HARD RULES: never mention the moon in any form; never tell the user their day or mood is caused by the weather; never write any of this into the brief text. It only, subtly, tempers your tone.`);
   }
   if (triggerProfile) contextLines.push(`Trigger Profile (specific people/contexts/moments the user has named as load-bearing): ${triggerProfile}`);
   if (matchedEventTriggers) contextLines.push(matchedEventTriggers);

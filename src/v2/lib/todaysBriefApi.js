@@ -45,6 +45,9 @@ function localDateKey(d = new Date()) {
  *   ({ date, mood, precision, beat }) written to stillform_checkin_today.
  * @returns {object} payload for POST /todays-brief
  */
+// Ambient (weather + moon) — faint background for the brief; moon never surfaced.
+import { getAmbientContext } from "./ambientSignals.js";
+
 export function gatherTodaysBriefInputs(checkinPayload = {}) {
   const safe = (fn, fallback) => {
     try { return fn(); } catch { return fallback; }
@@ -69,8 +72,11 @@ export function gatherTodaysBriefInputs(checkinPayload = {}) {
       : [];
   }, []);
 
+  const ambient = safe(() => getAmbientContext(), { weather: null, moon: null });
+
   return {
     morningMood: mood,
+    ambient,
     outcomeFocus: precision,
     triggerProfile,
     biasProfile,

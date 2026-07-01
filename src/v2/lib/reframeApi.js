@@ -37,6 +37,7 @@ import { formatStrengthsForAI } from "./strengths.js";
 import { formatValuesForAI } from "./values.js";
 import { formatWindowReadForAI } from "./windowRead.js";
 import { getCombinedBioFilter } from "./hardwareSignals.js";
+import { getAmbientContext } from "./ambientSignals.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
 
@@ -109,6 +110,8 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   const strengths = formatStrengthsForAI();
   const values = formatValuesForAI();
   const windowRead = formatWindowReadForAI();
+  // Ambient context (2026-07-01): weather + moon phase. Faint background only.
+  const ambient = getAmbientContext();
 
   try {
     const response = await fetch(REFRAME_API_URL, {
@@ -137,6 +140,9 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         // via hardwareSignals.getCombinedBioFilter — same vocabulary, de-duped;
         // native-fed, so on web it reduces to the StateCheck read.
         bioFilter: getCombinedBioFilter(),
+        // Ambient (2026-07-01): weather may gently color tone; the moon phase is
+        // BACKGROUND ONLY — the backend rule forbids naming or attributing it.
+        ambient,
         signalProfile: null,
         biasProfile,
         triggerProfile,
