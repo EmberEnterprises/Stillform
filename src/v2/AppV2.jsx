@@ -239,8 +239,6 @@ export default function AppV2() {
 
   return (
     <div className="sf-v2">
-      <div className="sf-cinema-vignette" aria-hidden="true" />
-      <div className="sf-cinema-grain" aria-hidden="true" />
       {!HEADERLESS.has(screen) ? <AppHeader onHome={goHome} onSignIn={goSignIn} /> : null}
       {renderScreen()}
     </div>
