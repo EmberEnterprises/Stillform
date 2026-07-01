@@ -426,6 +426,22 @@
   .sf-v2 .sf-home-aura{ animation:none; opacity:.5; }
 }
 
+/* ══ CINEMATIC LUXURY — app-wide filmic depth ════════════════════════
+   Two fixed, decorative, pointer-events:none layers on every screen:
+   a vignette that deepens the edges (sits BEHIND content, so it never
+   touches text or CTA contrast), and a faint film grain for analog tooth.
+   Restraint is the point — felt as depth on a dark brass ground, never
+   noticed as an effect. Home keeps its own richer aura + grain on top. */
+.sf-v2 .sf-cinema-vignette{
+  position:fixed; inset:0; pointer-events:none; z-index:-1;
+  background:radial-gradient(ellipse 120% 90% at 50% 38%,
+    transparent 50%, rgba(2,2,4,0.34) 84%, rgba(2,2,4,0.70) 100%);
+}
+.sf-v2 .sf-cinema-grain{
+  position:fixed; inset:0; pointer-events:none; z-index:58; opacity:.02; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='cn'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23cn)'/%3E%3C/svg%3E");
+}
+
 /* ══ v7 DRAWN HOME · Stage 2 — the living naming field ════════════════
    The naming field reads as an obviously-live text box (per v7): brass
    left edge, faint fill, a breathing brass underline, a brass caret, and
