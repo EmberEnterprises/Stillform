@@ -47,6 +47,8 @@ function localDateKey(d = new Date()) {
  */
 // Ambient (weather + moon) — faint background for the brief; moon never surfaced.
 import { getAmbientContext } from "./ambientSignals.js";
+import { getCombinedBioFilter } from "./hardwareSignals.js";
+import { getCalendarSummary } from "./calendarData.js";
 
 export function gatherTodaysBriefInputs(checkinPayload = {}) {
   const safe = (fn, fallback) => {
@@ -74,6 +76,26 @@ export function gatherTodaysBriefInputs(checkinPayload = {}) {
 
   const ambient = safe(() => getAmbientContext(), { weather: null, moon: null });
 
+  // Gap-close (2026-07-01): the brief now sees the same hardware read the AI does
+  // — the same-day StateCheck body-state merged with consent-gated HRV/sleep, as
+  // an array for the backend's bioFilter slot. (Was hardcoded [] — the brief wrote
+  // a "hardware" line while blind to the hardware.)
+  const bioFilter = safe(() => {
+    const s = getCombinedBioFilter();
+    return s ? s.split(",").map((t) => t.trim()).filter(Boolean) : [];
+  }, []);
+
+  // Gap-close: a neutral day-density line for the backend's calendarSummary
+  // fallback (getCalendarSummary was built but never called).
+  const calendarSummary = safe(() => {
+    const s = getCalendarSummary();
+    if (!s || !s.count) return "";
+    const parts = [`${s.count} event${s.count === 1 ? "" : "s"} today`];
+    if (typeof s.totalHours === "number" && s.totalHours > 0) parts.push(`~${s.totalHours}h scheduled`);
+    if (s.backToBack) parts.push("some back-to-back");
+    return parts.join(", ");
+  }, "");
+
   return {
     morningMood: mood,
     ambient,
@@ -82,9 +104,13 @@ export function gatherTodaysBriefInputs(checkinPayload = {}) {
     biasProfile,
     recentSessionsCount,
     calendarEvents,
+    calendarSummary,
+    bioFilter,
     // Fields v2's morning beat does not collect — empty, backend-safe:
     morningEnergy: "",
-    bioFilter: [],
+    // tensionAreas: body LOCATIONS (jaw/shoulders/chest) — no live source yet;
+    // same unpopulated field in the reframe path (signalProfile). Not an
+    // asymmetry — shared gap, flagged, not fabricated.
     tensionAreas: [],
     signalProfile: "",
   };

@@ -12,6 +12,7 @@ import { getPendingCandidate as getPendingMove } from "../lib/protectiveMoves.js
 import { getPendingCandidate as getPendingStrength } from "../lib/strengths.js";
 import { getPendingCandidate as getPendingValue } from "../lib/values.js";
 import { getObserverSeatCount } from "../lib/observerSeat.js";
+import { getOtherReadEffect } from "../lib/beliefRating.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -123,6 +124,27 @@ export default function MyProgress({ onExit, onNavigate }) {
           onTap={() => handleNavigate("post-event")}
         />
       </section>
+
+      {/* Other-read effect (2026-07-01, gap-close): a quiet, correlational
+          evidence line — belief change on thoughts where the user took the
+          "other read" vs where they didn't. Self-gating: null until BOTH
+          groups exist, so it never shows a lopsided or empty number. Framed as
+          observation, not proof. First-pass copy — Arlin's voice to set. */}
+      {(() => {
+        let eff = null;
+        try { eff = getOtherReadEffect(); } catch { eff = null; }
+        if (!eff) return null;
+        const pts = (v) => `${v > 0 ? "+" : ""}${v} pt${Math.abs(v) === 1 ? "" : "s"}`;
+        return (
+          <div style={{ margin: "var(--sf-space-8) 0 var(--sf-space-24)" }}>
+            <MonoLabel size="xs" tone="faint">
+              Other read &middot; belief changed {pts(eff.withOtherRead.avgDelta)} on average
+              where you took it, {pts(eff.withoutOtherRead.avgDelta)} where you didn&rsquo;t.
+              What you&rsquo;ve noticed, not proof.
+            </MonoLabel>
+          </div>
+        );
+      })()}
 
       {/* 5.12 L4 — one quiet line when >=1 watched pattern has retired
           ("gone quiet"). Derived live; reflect-not-score; renders nothing
