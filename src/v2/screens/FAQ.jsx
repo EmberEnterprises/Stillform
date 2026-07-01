@@ -552,4 +552,17 @@ const ITEMS = [
       </>
     ),
   },
+  {
+    id: "calendar",
+    q: "Can Stillform use my calendar?",
+    a: (
+      <>
+        If you want to. In Settings &rarr; Calendar you can import your schedule from a .ics file
+        (Google, Apple, and Outlook all export one). Stillform keeps only event titles and times, on
+        your device &mdash; never who&rsquo;s invited or any notes &mdash; and uses them to help
+        prepare your day. Disconnecting forgets everything. In the phone app this will connect to
+        your calendar directly; on the web you import the file.
+      </>
+    ),
+  },
 ];

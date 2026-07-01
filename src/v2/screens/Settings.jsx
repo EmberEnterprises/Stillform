@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import CollapsibleSection from "../components/CollapsibleSection.jsx";
+import CalendarImport from "../components/CalendarImport.jsx";
 import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import HairlineDivider from "../components/HairlineDivider.jsx";
@@ -169,6 +170,14 @@ export default function Settings({ onExit }) {
               </div>
             </>
           )}
+        </div>
+      </CollapsibleSection>
+
+      {/* CALENDAR — consent-gated .ics import (forward-compatible producer;
+          a native pull writes the same store later). First-pass copy = Arlin's. */}
+      <CollapsibleSection label="Calendar">
+        <div style={SECTION}>
+          <CalendarImport />
         </div>
       </CollapsibleSection>
 
