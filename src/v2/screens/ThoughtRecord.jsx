@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { recordBeliefRating } from "../lib/beliefRating.js";
+import { getOtherRead } from "../lib/otherReadApi.js";
 
 /**
  * ThoughtRecord — the CBT-conditioning layer's surface (Precision Framework
@@ -30,8 +31,24 @@ export default function ThoughtRecord({ onExit }) {
   const [evidence, setEvidence] = useState("");
   const [after, setAfter] = useState(70);
   const [saved, setSaved] = useState(false);
+  const [orLoading, setOrLoading] = useState(false);
+  const [orResult, setOrResult] = useState(null); // { arguable, otherRead, note, crisis, error }
 
   const advance = (next) => setStep(next);
+
+  const requestOtherRead = async () => {
+    if (orLoading || !thought.trim()) return;
+    setOrLoading(true);
+    try { window.plausible?.("Other Read Requested"); } catch {}
+    const r = await getOtherRead({ thought, evidence });
+    setOrResult(r);
+    setOrLoading(false);
+    try {
+      window.plausible?.("Other Read Returned", {
+        props: { outcome: r.error ? "error" : r.arguable ? "counter-read" : r.crisis ? "crisis" : "not-arguable" },
+      });
+    } catch {}
+  };
 
   const finish = () => {
     if (!saved) {
@@ -97,6 +114,39 @@ export default function ThoughtRecord({ onExit }) {
             rows={5}
             style={inputStyle}
           />
+
+          {/* the other read — optional devil's-advocate offer. yours to aim, not a verdict. */}
+          <div style={{ margin: "0.25rem 0 1rem" }}>
+            {!orResult && (
+              <button
+                type="button"
+                onClick={requestOtherRead}
+                disabled={orLoading || !thought.trim()}
+                style={ghostBtn(orLoading || !thought.trim())}
+              >
+                {orLoading ? "thinking…" : "Show me the strongest case for the other read"}
+              </button>
+            )}
+
+            {orResult && orResult.error && <p style={orNoteStyle}>{orResult.error}</p>}
+
+            {orResult && !orResult.error && orResult.arguable && (
+              <div style={orCardStyle}>
+                <MonoLabel>the other read — yours to weigh, not a verdict</MonoLabel>
+                <p style={orTextStyle}>{orResult.otherRead}</p>
+                {orResult.note && <p style={orNoteStyle}>{orResult.note}</p>}
+              </div>
+            )}
+
+            {orResult && !orResult.error && !orResult.arguable && (
+              <div style={orCardStyle}>
+                <p style={orTextStyle}>
+                  {orResult.note || "This one isn't a distortion to argue with — leave it be."}
+                </p>
+              </div>
+            )}
+          </div>
+
           <button type="button" onClick={() => advance("after")} style={ctaStyle(false)}>
             Continue
           </button>
@@ -194,6 +244,36 @@ const inputStyle = {
   resize: "vertical",
 };
 const numStyle = { fontSize: "2rem", fontWeight: 700, fontVariantNumeric: "tabular-nums" };
+const ghostBtn = (disabled) => ({
+  width: "100%",
+  padding: "0.7rem",
+  borderRadius: "10px",
+  border: "1px solid var(--sf-line, #ddd)",
+  background: "transparent",
+  color: disabled ? "var(--sf-ink-soft, #999)" : "var(--sf-ink, #333)",
+  font: "inherit",
+  fontSize: "0.9rem",
+  cursor: disabled ? "default" : "pointer",
+});
+const orCardStyle = {
+  marginTop: "0.5rem",
+  padding: "0.9rem 1rem",
+  borderRadius: "10px",
+  border: "1px solid var(--sf-line, #e2e2e2)",
+  background: "var(--sf-surface-quiet, rgba(0,0,0,0.02))",
+};
+const orTextStyle = {
+  margin: "0.4rem 0 0",
+  fontSize: "0.95rem",
+  lineHeight: 1.55,
+  color: "var(--sf-ink, #222)",
+};
+const orNoteStyle = {
+  margin: "0.5rem 0 0",
+  fontSize: "0.8rem",
+  lineHeight: 1.5,
+  color: "var(--sf-ink-soft, #888)",
+};
 const ctaStyle = (disabled) => ({
   width: "100%",
   padding: "0.85rem",
