@@ -16,7 +16,7 @@
  * Pure + fail-silent: parseIcs never throws; bad input yields [].
  */
 
-import { setCalendarEvents } from "./calendarData.js";
+import { setUpcomingEvents } from "./calendarData.js";
 
 /** Unescape an ICS TEXT value (\\, \; \, \n). */
 function unescapeText(s) {
@@ -108,12 +108,5 @@ export function parseIcs(text) {
  * dropped on import. Easy to change to a fixed TTL if she prefers.
  */
 export function importIcs(text) {
-  const parsed = parseIcs(text);
-  const cutoff = Date.now() - 24 * 60 * 60 * 1000; // keep today + forward
-  const forward = parsed.filter((e) => {
-    const ref = e.end || e.start;
-    const ms = Date.parse(ref);
-    return !Number.isFinite(ms) || ms >= cutoff;
-  });
-  return setCalendarEvents(forward);
+  return setUpcomingEvents(parseIcs(text));
 }

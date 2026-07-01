@@ -4,8 +4,10 @@ import {
   getCalendarConsent,
   setCalendarConsent,
   getCalendarEvents,
+  setUpcomingEvents,
 } from "../lib/calendarData.js";
 import { importIcs } from "../lib/icsImport.js";
+import { extractCalendarFromScreenshot } from "../lib/calendarScreenshotApi.js";
 
 /**
  * CalendarImport — the web-buildable, consent-gated calendar producer surface.
@@ -32,7 +34,8 @@ export default function CalendarImport() {
   const [count, setCount] = useState(() => getCalendarEvents().length);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteText, setPasteText] = useState("");
-  const [status, setStatus] = useState(null); // { kind: "ok" | "none", n }
+  const [status, setStatus] = useState(null); // { kind: "ok" | "none" | "err", n?, msg? }
+  const [busy, setBusy] = useState(false);
 
   function connect() {
     setCalendarConsent(true);
@@ -63,6 +66,28 @@ export default function CalendarImport() {
     afterImport(importIcs(pasteText));
     setPasteText(""); setPasteOpen(false);
   }
+  async function onScreenshot(e) {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = ""; // let the same image be re-picked
+    if (!file) return;
+    setBusy(true); setStatus(null);
+    try {
+      const dataUrl = await new Promise((res, rej) => {
+        const rd = new FileReader();
+        rd.onload = () => res(String(rd.result || ""));
+        rd.onerror = () => rej(new Error("read"));
+        rd.readAsDataURL(file);
+      });
+      const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
+      const { events, error } = await extractCalendarFromScreenshot({ imageBase64: base64, imageMime: file.type || "image/png" });
+      if (error && events.length === 0) setStatus({ kind: "err", msg: error });
+      else afterImport(setUpcomingEvents(events));
+    } catch {
+      setStatus({ kind: "err", msg: "Couldn't read that screenshot." });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (!connected) {
     return (
@@ -88,16 +113,27 @@ export default function CalendarImport() {
       {status && status.kind === "none" && (
         <p style={FAINT}>Nothing to import &mdash; no upcoming events found in that file.</p>
       )}
+      {status && status.kind === "err" && <p style={FAINT}>{status.msg}</p>}
 
       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginBottom: "var(--sf-space-12)" }}>
         <label style={IMPORT_BTN}>
           Import .ics file
           <input type="file" accept=".ics,text/calendar" onChange={onFile} style={{ display: "none" }} />
         </label>
+        <label style={{ ...IMPORT_BTN, opacity: busy ? 0.6 : 1 }}>
+          {busy ? "Reading\u2026" : "From a screenshot"}
+          <input type="file" accept="image/*" onChange={onScreenshot} disabled={busy} style={{ display: "none" }} />
+        </label>
         <button type="button" className="sf-link-quiet" onClick={() => setPasteOpen((v) => !v)}>
           {pasteOpen ? "Cancel" : "Paste .ics text"}
         </button>
       </div>
+
+      <p style={FAINT}>
+        A screenshot is read by AI to pull out titles and times &mdash; the image itself may show
+        more on screen (names, notes), so only send one you&rsquo;re comfortable sharing. Nothing
+        from the image is kept beyond titles and times.
+      </p>
 
       {pasteOpen && (
         <div style={{ marginBottom: "var(--sf-space-12)" }}>

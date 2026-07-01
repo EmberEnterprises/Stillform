@@ -179,3 +179,19 @@ export function getCalendarSummary(nowMs = Date.now()) {
 }
 
 export const _keys = { CONSENT_KEY, EVENTS_KEY, MAX_EVENTS };
+
+/**
+ * Store an imported event set, keeping only now-forward events (past events add
+ * nothing to anticipation and would eat the cap). Shared by every producer (ICS
+ * import, screenshot extract, native pull) so they store identically. Consent-
+ * gated via setCalendarEvents. Returns the stored events.
+ */
+export function setUpcomingEvents(events) {
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const forward = (Array.isArray(events) ? events : []).filter((e) => {
+    if (!e) return false;
+    const ms = Date.parse(e.end || e.start);
+    return !Number.isFinite(ms) || ms >= cutoff;
+  });
+  return setCalendarEvents(forward);
+}

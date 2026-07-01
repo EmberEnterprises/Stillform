@@ -558,7 +558,9 @@ const ITEMS = [
     a: (
       <>
         If you want to. In Settings &rarr; Calendar you can import your schedule from a .ics file
-        (Google, Apple, and Outlook all export one). Stillform keeps only event titles and times, on
+        (Google, Apple, and Outlook all export one), or from a screenshot of your calendar (read by
+        AI to pull out titles and times &mdash; only send one you&rsquo;re comfortable sharing).
+        Stillform keeps only event titles and times, on
         your device &mdash; never who&rsquo;s invited or any notes &mdash; and uses them to help
         prepare your day. Disconnecting forgets everything. In the phone app this will connect to
         your calendar directly; on the web you import the file.
