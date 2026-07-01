@@ -634,6 +634,20 @@ export const SCIENCE_ENTRIES = [
       "Kross & Ayduk (2011) \u2014 psychological distancing reduces emotional reactivity \u2014 JPSP",
     ],
   },
+  // ── the other read (devil's advocate / consider the opposite) ──
+  {
+    id: "the-other-read",
+    title: "The other read",
+    oneLiner: "The strongest case for the other way of seeing it \u2014 offered, never imposed.",
+    whatItDoes:
+      "When you're testing a belief, you can ask for the single strongest case for the opposite read, then weigh it and re-rate. You pick the belief, and you stay the judge \u2014 it's a tool you aim, not an argument you're handed.",
+    theScience:
+      "Actively considering the opposite corrects overconfident judgment better than just trying to be fair \u2014 it forces your mind to generate the evidence it was skipping. It's aimed only at beliefs worth testing, never at a value, a boundary, a grief, or a real read of a bad situation.",
+    sources: [
+      "Lord, Lepper & Preston (1984) \u2014 considering the opposite as a corrective strategy for judgment \u2014 JPSP 47(6):1231-1243",
+      "Mussweiler, Strack & Pfeiffer (2000) \u2014 considering the opposite reduces the anchoring effect \u2014 PSPB 26:1142-1150",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */
