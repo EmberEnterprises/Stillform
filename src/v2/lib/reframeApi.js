@@ -36,7 +36,7 @@ import { formatProtectiveMovesForAI } from "./protectiveMoves.js";
 import { formatStrengthsForAI } from "./strengths.js";
 import { formatValuesForAI } from "./values.js";
 import { formatWindowReadForAI } from "./windowRead.js";
-import { getLatestBodyBioFilter } from "./signalLog.js";
+import { getCombinedBioFilter } from "./hardwareSignals.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
 
@@ -133,7 +133,10 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         // populated from the latest SAME-DAY StateCheck body capture, mapped to
         // the backend's token vocabulary. Null when none / only "clear" / stale
         // (the backend already defaults safely on null — back-compat).
-        bioFilter: getLatestBodyBioFilter(),
+        // 2026-07-01: MERGED with consent-gated device health signals (HRV/sleep)
+        // via hardwareSignals.getCombinedBioFilter — same vocabulary, de-duped;
+        // native-fed, so on web it reduces to the StateCheck read.
+        bioFilter: getCombinedBioFilter(),
         signalProfile: null,
         biasProfile,
         triggerProfile,
