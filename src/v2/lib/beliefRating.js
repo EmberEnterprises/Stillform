@@ -17,6 +17,10 @@
  *                  only the initial rating was captured.
  *   delta        : after - before when both present (negative = precision
  *                  dropped), else null. Computed here, never by a caller.
+ *   usedOtherRead: true when an AI counter-case ("the other read") was shown to
+ *                  the person before they re-rated. Lets us later look at whether
+ *                  an offered counter-case moves belief more than self-generated
+ *                  evidence alone. Correlational only.
  */
 
 const STORAGE_KEY = "stillform_belief_ratings";
@@ -61,9 +65,9 @@ export function getBeliefRatings() {
  * self-report); `after` is optional (the re-rating). Returns the stored record,
  * or null if the input is unusable (fail-silent — never throws to the caller).
  *
- * @param {{thought: string, before: number, after?: number|null, evidence?: string}} input
+ * @param {{thought: string, before: number, after?: number|null, evidence?: string, usedOtherRead?: boolean}} input
  */
-export function recordBeliefRating({ thought, before, after = null, evidence = "" } = {}) {
+export function recordBeliefRating({ thought, before, after = null, evidence = "", usedOtherRead = false } = {}) {
   const cleanThought = typeof thought === "string" ? thought.trim() : "";
   const beforePct = clampPct(before);
   if (!cleanThought || beforePct === null) return null;
@@ -79,6 +83,7 @@ export function recordBeliefRating({ thought, before, after = null, evidence = "
     after: afterPct,
     delta,
     evidence: cleanEvidence,
+    usedOtherRead: usedOtherRead === true,
     markedAt: new Date().toISOString(),
   };
 
@@ -133,4 +138,34 @@ export function getRecentBeliefRatings(n = 5) {
 
 export function getBeliefRatingCount() {
   return getBeliefRatings().entries.length;
+}
+
+/**
+ * Honest signal: does an offered counter-case ("the other read") move belief
+ * more than self-generated evidence alone? Compares the average belief-drop of
+ * records where the other read was shown vs where it wasn't. Only records with
+ * a computed delta (both ratings present) count. Returns null when either side
+ * has nothing to compare.
+ *
+ * Correlational, NOT causal — people who ask for the other read may differ from
+ * those who don't, and this can't separate that out. A signal to look at, never
+ * proof. (A negative avgDelta means belief dropped, which is the intended move.)
+ *
+ * @returns {{withOtherRead:{n:number,avgDelta:number}, withoutOtherRead:{n:number,avgDelta:number}} | null}
+ */
+export function getOtherReadEffect() {
+  const { entries } = getBeliefRatings();
+  const withOR = [];
+  const withoutOR = [];
+  for (const e of entries) {
+    if (!e || typeof e.delta !== "number") continue;
+    (e.usedOtherRead === true ? withOR : withoutOR).push(e.delta);
+  }
+  if (withOR.length === 0 || withoutOR.length === 0) return null;
+  const avg = (a) => a.reduce((s, x) => s + x, 0) / a.length;
+  const round1 = (x) => Math.round(x * 10) / 10;
+  return {
+    withOtherRead: { n: withOR.length, avgDelta: round1(avg(withOR)) },
+    withoutOtherRead: { n: withoutOR.length, avgDelta: round1(avg(withoutOR)) },
+  };
 }

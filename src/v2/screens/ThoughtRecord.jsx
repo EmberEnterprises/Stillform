@@ -52,7 +52,7 @@ export default function ThoughtRecord({ onExit }) {
 
   const finish = () => {
     if (!saved) {
-      recordBeliefRating({ thought, before, after, evidence });
+      recordBeliefRating({ thought, before, after, evidence, usedOtherRead: !!(orResult && orResult.arguable) });
       setSaved(true);
       window.plausible?.("Thought Record Completed", { props: { direction: delta < 0 ? "dropped" : delta > 0 ? "held" : "flat" } });
     }
