@@ -111,8 +111,11 @@ function recentSignalTokens() {
   const tokens = new Set();
   signals.forEach((e) => {
     if (!e) return;
-    // keep entries with no timestamp (treat as recent); else gate by window
-    if (typeof e.loggedAt === "number" && e.loggedAt < cutoff) return;
+    // keep entries with no/unparseable timestamp (treat as recent); else gate
+    // by window. signalLog writes loggedAt as an ISO string; accept a numeric
+    // epoch too, for resilience.
+    const ts = typeof e.loggedAt === "number" ? e.loggedAt : Date.parse(e.loggedAt);
+    if (Number.isFinite(ts) && ts < cutoff) return;
     const bag = [e.chip, ...(Array.isArray(e.triggers) ? e.triggers : []), ...(Array.isArray(e.body) ? e.body : [])];
     bag.forEach((t) => {
       const v = typeof t === "string" ? t.trim().toLowerCase() : "";

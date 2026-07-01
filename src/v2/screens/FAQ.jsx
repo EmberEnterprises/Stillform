@@ -526,4 +526,30 @@ const ITEMS = [
       </>
     ),
   },
+  {
+    id: "step-out",
+    q: "The app said a pattern of mine looks active \u2014 what is that?",
+    a: (
+      <>
+        Once you\u2019ve confirmed a recurring pattern in your own entries (see \u201cSomething
+        surfaced\u201d), if one of its pieces shows up again in the last few days, Stillform may
+        offer \u2014 quietly, when you open it \u2014 to step out of that pattern for a minute. Stepping
+        out is a short sensory reset; it doesn\u2019t dig back into the loop. It\u2019s only ever an
+        offer: take it or tap \u201cNot now,\u201d and it won\u2019t keep asking.
+      </>
+    ),
+  },
+  {
+    id: "other-read",
+    q: "What is \u201cthe other read\u201d?",
+    a: (
+      <>
+        When you\u2019re testing how strongly you believe a thought \u2014 in the Thought Record, or
+        from Reframe \u2014 you can ask for the strongest honest case for reading it a different way.
+        It\u2019s optional, and you always decide what to do with it. It only engages a thought that
+        could genuinely be distorted; if what you named is a real boundary, a value, grief, or a
+        fair read of a hard situation, it leaves it alone rather than talk you out of it.
+      </>
+    ),
+  },
 ];

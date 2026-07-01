@@ -115,6 +115,7 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   useEffect(() => {
     if (loopOffer && loopOffer.findingId) {
       try { markStepOutOffered(loopOffer.findingId); } catch { /* fail-silent */ }
+      try { window.plausible?.("Step Out Offered"); } catch { /* non-fatal */ }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -166,12 +167,16 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   // open, and not during wind-down (no loop-chasing near sleep — CANON §10,
   // where the concierge layer is hidden too).
   const showStepOut = !!loopOffer && !offerHandled && !isWindDown;
-  const acceptStepOut = () => setStepOutOpen(true);
+  const acceptStepOut = () => {
+    setStepOutOpen(true);
+    try { window.plausible?.("Step Out Accepted"); } catch { /* non-fatal */ }
+  };
   const declineStepOut = () => {
     if (loopOffer) {
       try { markStepOutDismissed(loopOffer.findingId); } catch { /* fail-silent */ }
     }
     setOfferHandled(true);
+    try { window.plausible?.("Step Out Dismissed"); } catch { /* non-fatal */ }
   };
   const closeStepOut = () => {
     setStepOutOpen(false);
@@ -181,6 +186,7 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
     if (loopOffer) {
       try { markStepOutAccepted(loopOffer.findingId); } catch { /* fail-silent */ }
     }
+    try { window.plausible?.("Step Out Completed"); } catch { /* non-fatal */ }
   };
 
   const handleBegin = () => {
