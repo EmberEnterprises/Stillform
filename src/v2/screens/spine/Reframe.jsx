@@ -13,6 +13,7 @@ import { setPendingCandidate as setPendingValue } from "../../lib/values.js";
 import { setPendingCandidate as setPendingWindow } from "../../lib/windowRead.js";
 import { getWatchListChips } from "../../lib/biasProfile.js";
 import { noteAiPatternDetection } from "../../lib/biasProfile.js";
+import { getOtherRead } from "../../lib/otherReadApi.js";
 
 /**
  * Reframe — the middle step of the spine. AI metacognition partner.
@@ -52,6 +53,34 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
   // confirmedTrigger is set only when the user taps Confirm. Skippable.
   const [pendingTrigger, setPendingTrigger] = useState(null);
   const [confirmedTrigger, setConfirmedTrigger] = useState(null);
+
+  // The other read — optional, user-aimed devil's advocate (offer register).
+  const [orOpen, setOrOpen] = useState(false);
+  const [orTarget, setOrTarget] = useState("");
+  const [orLoading, setOrLoading] = useState(false);
+  const [orResult, setOrResult] = useState(null); // { arguable, otherRead, note, crisis, error }
+
+  function openOtherRead() {
+    const lastUser = [...history].reverse().find((m) => m.role === "user");
+    setOrTarget(lastUser?.text ? String(lastUser.text).trim().slice(0, 400) : "");
+    setOrResult(null);
+    setOrOpen(true);
+    try { window.plausible?.("Other Read Opened", { props: { surface: "reframe" } }); } catch {}
+  }
+  async function runOtherRead() {
+    const t = orTarget.trim();
+    if (orLoading || t.length < 4) return;
+    setOrLoading(true);
+    const r = await getOtherRead({ thought: t });
+    setOrResult(r);
+    setOrLoading(false);
+    try {
+      window.plausible?.("Other Read Returned", {
+        props: { surface: "reframe", outcome: r.error ? "error" : r.arguable ? "counter-read" : r.crisis ? "crisis" : "not-arguable" },
+      });
+    } catch {}
+  }
+  function closeOtherRead() { setOrOpen(false); setOrResult(null); setOrTarget(""); }
   const bottomRef = useRef(null);
 
   // Open the session — send the precision-name to the AI as the first turn.
@@ -425,6 +454,85 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
             >
               Reply first — then close
             </p>
+          ) : null}
+
+          {/* The other read — optional, user-aimed devil's advocate. Quiet by
+              design: never auto-fired, the user names the thought, and the
+              backend refuses to argue a feeling, a value, a boundary, grief, or
+              a real bad situation. */}
+          {initialized && userMessageCount >= 1 && !orOpen ? (
+            <button
+              type="button"
+              className="sf-link-quiet"
+              onClick={openOtherRead}
+              style={{ marginTop: "var(--sf-space-24)", color: "var(--sf-accent)" }}
+            >
+              Want the other read on a thought? ›
+            </button>
+          ) : null}
+
+          {orOpen ? (
+            <div
+              className="sf-fade-enter"
+              style={{
+                marginTop: "var(--sf-space-24)",
+                paddingTop: "var(--sf-space-16)",
+                borderTop: "1px solid var(--sf-hairline)",
+              }}
+            >
+              <p style={{ fontFamily: "var(--sf-serif)", fontSize: "17px", color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-12) 0" }}>
+                Which thought do you want to test?
+              </p>
+              <textarea
+                className="sf-textarea"
+                value={orTarget}
+                onChange={(e) => setOrTarget(e.target.value)}
+                placeholder="the belief, in a line — e.g. they're done with me"
+                rows={2}
+                aria-label="The thought to test"
+              />
+
+              {orResult && orResult.error ? (
+                <p style={{ fontFamily: "var(--sf-serif)", fontSize: "15px", color: "var(--sf-text-faint)", marginTop: "var(--sf-space-16)" }}>
+                  {orResult.error}
+                </p>
+              ) : null}
+
+              {orResult && !orResult.error && orResult.arguable ? (
+                <div style={{ marginTop: "var(--sf-space-16)" }}>
+                  <p style={{ fontFamily: "var(--sf-font-mono)", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sf-text-quiet)", margin: "0 0 var(--sf-space-12) 0" }}>
+                    The other read — yours to weigh
+                  </p>
+                  <p style={{ fontFamily: "var(--sf-serif)", fontSize: "17px", lineHeight: 1.55, color: "var(--sf-text)", margin: 0 }}>
+                    {orResult.otherRead}
+                  </p>
+                  {orResult.note ? (
+                    <p style={{ fontFamily: "var(--sf-serif)", fontSize: "14px", color: "var(--sf-text-faint)", marginTop: "var(--sf-space-12)" }}>{orResult.note}</p>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {orResult && !orResult.error && !orResult.arguable ? (
+                <p style={{ fontFamily: "var(--sf-serif)", fontSize: "17px", lineHeight: 1.55, color: "var(--sf-text-faint)", marginTop: "var(--sf-space-16)" }}>
+                  {orResult.note || "This one isn't a distortion to argue with — leave it be."}
+                </p>
+              ) : null}
+
+              <div style={{ display: "flex", alignItems: "center", gap: "var(--sf-space-16)", marginTop: "var(--sf-space-16)" }}>
+                {!orResult ? (
+                  <Button variant="ghost" onClick={runOtherRead} disabled={orLoading || orTarget.trim().length < 4}>
+                    {orLoading ? "Thinking…" : "Show the other read"}
+                  </Button>
+                ) : (
+                  <Button variant="ghost" onClick={() => setOrResult(null)}>
+                    Try another thought
+                  </Button>
+                )}
+                <button type="button" className="sf-link-quiet" onClick={closeOtherRead}>
+                  {orResult ? "Done" : "Never mind"}
+                </button>
+              </div>
+            </div>
           ) : null}
         </div>
       ) : null}
