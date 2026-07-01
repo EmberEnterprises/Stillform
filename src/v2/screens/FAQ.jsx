@@ -567,4 +567,18 @@ const ITEMS = [
       </>
     ),
   },
+  {
+    id: "weather",
+    q: "Does the weather affect what Stillform says?",
+    a: (
+      <>
+        Only quietly, and only if you turn it on. In Settings &rarr; Ambient weather you can let
+        Stillform check the day&rsquo;s conditions from your rough location &mdash; a low-pressure,
+        grey, or short-daylight day can weigh on a person, and the read can hold the room a little
+        more gently when it does. Your location is never stored, only the day&rsquo;s weather, on
+        your device; turning it off forgets it. Stillform will never tell you the weather is the
+        reason you feel a certain way &mdash; you always name your own experience.
+      </>
+    ),
+  },
 ];

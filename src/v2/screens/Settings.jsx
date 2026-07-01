@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import CollapsibleSection from "../components/CollapsibleSection.jsx";
 import CalendarImport from "../components/CalendarImport.jsx";
+import WeatherConsent from "../components/WeatherConsent.jsx";
 import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import HairlineDivider from "../components/HairlineDivider.jsx";
@@ -178,6 +179,15 @@ export default function Settings({ onExit }) {
       <CollapsibleSection label="Calendar">
         <div style={SECTION}>
           <CalendarImport />
+        </div>
+      </CollapsibleSection>
+
+      {/* AMBIENT WEATHER — opt-in producer (geolocation + free API). Off by
+          default; feeds the read/brief quietly. Moon side needs no user action.
+          First-pass copy = Arlin's. */}
+      <CollapsibleSection label="Ambient weather">
+        <div style={SECTION}>
+          <WeatherConsent />
         </div>
       </CollapsibleSection>
 

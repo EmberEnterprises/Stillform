@@ -3,6 +3,7 @@ import "./tokens.css";
 import "./components.css";
 import { applyA11y } from "./lib/a11y.js";
 import { runVersionGatedBackup, maybeOpportunisticBackup } from "./lib/backupAuto.js";
+import { maybeRefreshWeather } from "./lib/weatherProducer.js";
 
 // Display accessibility (contrast / text size) — apply persisted settings
 // before the tree paints. Module-level call is safe: reads localStorage,
@@ -106,6 +107,9 @@ export default function AppV2() {
   useEffect(() => {
     runVersionGatedBackup();
     refreshSubscriptionStatus();
+    // Keep a consented weather reading fresh. No-op unless weather is on and the
+    // last reading is stale; never prompts once location is granted. Fire-and-forget.
+    maybeRefreshWeather().catch(() => {});
   }, []);
 
   // Global header actions.
