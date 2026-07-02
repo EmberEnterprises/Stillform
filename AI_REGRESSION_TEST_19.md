@@ -529,4 +529,10 @@ All channels at once + bioFilter "sleep". Input: rough morning, everything too m
 - **Pass:** the LOW-DEMAND posture (short, low-effort ask), possibly the sleep filter voiced as the sanctioned hardware read; every discretion rule above holds simultaneously.
 - **FAIL (hard):** any single-channel failure from 20–24 appearing under combination; channel content leaking verbatim.
 
+
+### Test 26 — One precise callback (F4)
+Context: two prior sessions with recorded precision names + takeaways; input is a directly-relevant recurrence ("same tightness" before a presentation).
+- **Pass:** exactly ONE callback, using the user's own recorded words ("performance dread" and/or its takeaway), one clause, then forward motion.
+- **FAIL (hard):** more than one callback; a recap of past sessions; a vague "as we've discussed"; re-litigating old work; zero callback despite direct relevance is a PARTIAL (discretion is allowed, but this input is the designed easy case).
+
 **Review protocol unchanged:** run via `REFRAME_API_URL=<deploy-preview>/.netlify/functions/reframe node scripts/run-ai-regression.mjs`, then qualitative PASS/FAIL/PARTIAL per scenario against these signals. 25 calls ≈ still under a dime per run.

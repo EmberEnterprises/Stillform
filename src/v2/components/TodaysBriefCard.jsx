@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import CollapsibleSection from "./CollapsibleSection.jsx";
+import MonoLabel from "./MonoLabel.jsx";
 import { readTodaysBrief } from "../lib/todaysBriefApi.js";
 
 /**
@@ -13,6 +13,11 @@ import { readTodaysBrief } from "../lib/todaysBriefApi.js";
  * shows a quiet composing line and polls until the brief lands.
  *
  * Voice is server-enforced; this component only displays the four sections.
+ *
+ * F3 FLAGSHIP (Felt Layer, 2026-07-01): presentation elevated from a
+ * collapsible widget to the executive briefing it is — dateline, brass
+ * hairline frame, serif body. Restraint idiom: an event by composition, not
+ * size; no new data, no behavior change.
  */
 
 const SECTIONS = [
@@ -55,29 +60,68 @@ export default function TodaysBriefCard() {
   if (!brief && !pending) return null;
 
   const hasContent = brief && SECTIONS.some(({ key }) => brief[key]);
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long", month: "long", day: "numeric",
+  });
 
   return (
-    <div
+    <section
       className="sf-fade-enter sf-fade-enter--delay-1"
-      style={{ marginBottom: "var(--sf-space-32)" }}
+      aria-label="Today's brief"
+      style={{
+        border: "0.5px solid var(--sf-accent-line)",
+        padding: "var(--sf-space-24)",
+        marginBottom: "var(--sf-space-32)",
+      }}
     >
-      <CollapsibleSection label="Today's Brief" defaultOpen>
-        {!hasContent ? (
-          <p style={COMPOSING}>Composing from this morning&rsquo;s check-in&hellip;</p>
-        ) : (
-          SECTIONS.map(({ key, label }) =>
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          borderBottom: "0.5px solid var(--sf-border-hairline)",
+          paddingBottom: "var(--sf-space-12)",
+          marginBottom: "var(--sf-space-8)",
+        }}
+      >
+        <MonoLabel size="xs" tone="faint">The Brief</MonoLabel>
+        <span style={DATELINE}>{dateline}</span>
+      </header>
+
+      {!hasContent ? (
+        <p style={COMPOSING}>Composing from this morning&rsquo;s read&hellip;</p>
+      ) : (
+        <>
+          {SECTIONS.map(({ key, label }) =>
             brief[key] ? (
               <div key={key} style={ROW}>
                 <span style={LBL}>{label}</span>
                 <p style={TXT}>{brief[key]}</p>
               </div>
             ) : null
-          )
-        )}
-      </CollapsibleSection>
-    </div>
+          )}
+          <p style={FOOT}>Prepared from your own record, this morning.</p>
+        </>
+      )}
+    </section>
   );
 }
+
+const DATELINE = {
+  fontFamily: "var(--sf-font-mono)",
+  fontSize: "10px",
+  letterSpacing: "0.12em",
+  textTransform: "uppercase",
+  color: "var(--sf-text-faint)",
+};
+const FOOT = {
+  margin: "var(--sf-space-12) 0 0",
+  fontFamily: "var(--sf-font-serif)",
+  fontWeight: 300,
+  fontStyle: "italic",
+  fontSize: "12px",
+  color: "var(--sf-text-faint)",
+};
 
 const ROW = {
   padding: "var(--sf-space-16) 0",
@@ -94,10 +138,10 @@ const LBL = {
 };
 const TXT = {
   margin: 0,
-  fontFamily: "var(--sf-font-sans)",
+  fontFamily: "var(--sf-font-serif)",
   fontWeight: 300,
   fontSize: "15px",
-  lineHeight: 1.55,
+  lineHeight: 1.65,
   color: "var(--sf-text-cream)",
 };
 const COMPOSING = {

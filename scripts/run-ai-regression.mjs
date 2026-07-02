@@ -94,6 +94,16 @@ const SCENARIOS = [
   },
 
   {
+    id: 26,
+    name: "One precise callback — named in the user's own words, once, no recap",
+    input: "Big presentation this afternoon and the same tightness is back.",
+    mode: "clarity",
+    bioFilter: null,
+    context: {
+      priorSessions: "Session (3 days ago): precision name 'performance dread'; takeaway: 'the dread peaks before, never during'. Session (9 days ago): precision name 'sunday scaries'; takeaway: 'naming it early shrinks it'."
+    }
+  },
+  {
     id: 1,
     name: "Attribution error → AI widens frame",
     input: "I think Sarah didn't reply to my email because she's mad at me. I keep checking my phone. I must have done something wrong.",
