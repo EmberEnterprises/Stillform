@@ -546,6 +546,250 @@ export const LESSONS = [
     comeBack:
       "In a few days, run a scan from memory before re-reading \u2014 what were the checkpoints? Jaw, shoulders, chest, stomach. Recalling the route yourself is what makes the scan something you own, not something you read.",
   },
+  {
+    id: "catching-the-wander",
+    chapter: "stepping-back",
+    conceptId: "dmn",
+    title: "Catching the wander",
+    transferLine: "the same catch a driver makes noticing they\u2019ve drifted lanes",
+    intro:
+      "Your mind runs a background channel \u2014 replays, rehearsals, what-ifs. You can\u2019t switch it off. But you can catch it running, and the catch itself is the skill. Let\u2019s do one catch, now.",
+    workedExample:
+      "Watch it once: someone\u2019s reading a report and realizes they\u2019ve read the same paragraph three times \u2014 the mind was replaying this morning\u2019s meeting. The moment they NOTICE the replay, they\u2019re back. Nothing was fixed, nothing argued with. Just: caught it.",
+    rep: {
+      kind: "do",
+      prompt: "Sit for a few breaths and let your mind do whatever it does. Your only job: the instant you notice it has wandered somewhere \u2014 a replay, a plan, a worry \u2014 silently mark it: \u201cwandered.\u201d One catch is the rep. Then tap below.",
+      doneLabel: "Caught one",
+    },
+    drills: {
+      foundation: [
+        "Catch the wander once during an ordinary task today \u2014 dishes, a walk, an email.",
+        "When you catch it, notice WHERE it went: past replay or future rehearsal. Just notice which.",
+      ],
+      further: [
+        "Catch it mid-conversation \u2014 the moment you realize you\u2019re composing your reply instead of listening.",
+        "Catch the quiet version: the wander that feels like \u2018thinking something through\u2019 but is really the same loop on its third lap.",
+      ],
+    },
+    name: "That was catching the default mode \u2014 the brain\u2019s resting circuit that runs mind-wandering and rumination. You can\u2019t stop it starting. Catching it running is the whole move, and the catch gets faster with reps.",
+    runLive:
+      "Next time you notice you\u2019ve read a paragraph twice or lost the thread of what someone said \u2014 that\u2019s the wander, already caught. Mark it and come back. That\u2019s the move in the wild.",
+    notice:
+      "The tell it\u2019s working: the gap between when the mind leaves and when you notice gets shorter. First it\u2019s minutes. With reps it\u2019s seconds.",
+    whenHard:
+      "If you sit down to catch a wander and the mind won\u2019t wander \u2014 that\u2019s fine, and it\u2019s temporary. Watching FOR the wander is itself the focused state. It will slip eventually; the catch still counts.",
+    deeperCut: {
+      why: "Task-focused attention and the wandering circuit suppress each other \u2014 which is why a counted breath can interrupt a rumination loop. Catching the wander recruits the task side on demand.",
+      trap: "Judging the wander \u2014 \u2018I\u2019m so distracted\u2019 \u2014 is just more wandering, now about you. The rep is the neutral catch, not the verdict.",
+      when: "Anytime. It\u2019s the most portable rep in the track \u2014 no tool, no pause, no privacy needed.",
+      pairsWith: "Pairs with Meeting the noticer \u2014 the catch shows you the wander; the noticer is what did the catching.",
+    },
+    levels: [
+      "Catch one wander when you\u2019re sitting still and looking for it.",
+      "Catch one mid-task, unprompted.",
+      "Catch one under load \u2014 mid-conflict, mid-deadline \u2014 while the pull to stay in the loop is strong.",
+    ],
+    transfer:
+      "It\u2019s the same catch underneath a lot of skill \u2014 a driver noticing the drift, a chess player noticing they\u2019ve stopped calculating and started hoping. Every craft has a version of \u2018notice you\u2019ve left the task.\u2019 You just trained the raw form of it.",
+    comeBack:
+      "Come back in a few days \u2014 and don\u2019t re-read this first. Ask yourself from memory: what counts as the rep? The recall effort is what files it.",
+  },
+  {
+    id: "letting-it-pass",
+    chapter: "stepping-back",
+    conceptId: "mct",
+    title: "Letting a thought pass",
+    transferLine: "the same restraint a fisherman has watching a fish he isn\u2019t going to take",
+    intro:
+      "Most thoughts don\u2019t need an answer. But answering is a reflex \u2014 a thought arrives and you engage: argue, plan, fix. There\u2019s another option almost nobody practices: watch it arrive, and let it leave. Once, now.",
+    workedExample:
+      "Watch it once: the thought \u201cI should check if she replied\u201d arrives. Normally: phone\u2019s already in hand. This time the person just \u2026 watches it sit there. Doesn\u2019t argue it\u2019s irrational, doesn\u2019t obey it. Ten seconds later it\u2019s gone on its own, like weather.",
+    rep: {
+      kind: "do",
+      prompt: "Wait for the next thought to arrive \u2014 any thought. Don\u2019t answer it, don\u2019t push it away, don\u2019t follow it. Just watch it the way you\u2019d watch a car pass your window. When it\u2019s moved on by itself, tap below.",
+      doneLabel: "It passed",
+    },
+    drills: {
+      foundation: [
+        "Let one low-stakes thought pass today \u2014 an urge to check, a small \u2018I should\u2019.",
+        "Notice the difference in your hands and jaw between answering a thought and letting it pass.",
+      ],
+      further: [
+        "Let a sticky one pass \u2014 a thought that usually gets a full internal debate. You\u2019re not agreeing with it; you\u2019re declining the meeting.",
+        "When a worry arrives at a bad time, tell it \u2018later\u2019 \u2014 and actually give it two minutes later, on your schedule. Postponing is a form of passing.",
+      ],
+    },
+    name: "That\u2019s detached mindfulness \u2014 the core move of metacognitive work. You changed your relationship to the thought instead of its content: \u2018I\u2019m having this thought\u2019 rather than \u2018I am this thought.\u2019 No argument was needed.",
+    runLive:
+      "Next time a thought demands an immediate internal response \u2014 a replay, a defense, a checking urge \u2014 try declining once. Watch it instead. Most of them leave on their own.",
+    notice:
+      "The tell it\u2019s working: thoughts start feeling like events that happen TO the room, not orders addressed to you.",
+    whenHard:
+      "Some thoughts won\u2019t pass \u2014 they circle back harder. That\u2019s information, not failure: a thought that insists is usually carrying a real signal, and it\u2019s a candidate for the actual work (Reframe), not for passing. Letting-pass is for the traffic, not the freight.",
+    deeperCut: {
+      why: "Working on your RELATIONSHIP to thoughts \u2014 rather than debating each one\u2019s content \u2014 is the metacognitive layer. One skill covers ten thousand thoughts; content-work has to be done one thought at a time.",
+      trap: "\u2018Letting it pass\u2019 can quietly become suppression \u2014 pushing it away and calling it detachment. Passing is open-handed: the thought is allowed to be there. It just isn\u2019t obeyed.",
+      when: "Traffic thoughts: urges, replays, small what-ifs. Not for grief, not for real decisions \u2014 those deserve the full work.",
+      pairsWith: "Pairs with Catching the wander \u2014 the catch notices you\u2019ve been taken; letting-pass is how you decline being taken in the first place.",
+    },
+    levels: [
+      "Let one neutral thought pass while sitting quietly.",
+      "Let a mildly charged one pass \u2014 an urge or small worry \u2014 mid-day.",
+      "Under load, watch a hot thought arrive and hold the watching stance for even three seconds before choosing your response.",
+    ],
+    transfer:
+      "It\u2019s the same restraint underneath good judgment everywhere \u2014 the negotiator who hears the provocation and doesn\u2019t take the bait, the editor who lets a first idea pass to see if a better one is behind it. Not every arrival deserves an answer. You just practiced the raw form.",
+    comeBack:
+      "Come back in a few days \u2014 from memory first: what\u2019s the difference between letting a thought pass and pushing it away? If you can answer that cold, it\u2019s filing.",
+  },
+  {
+    id: "the-mismatch-move",
+    chapter: "stepping-back",
+    conceptId: "reconsolidation",
+    title: "The mismatch move",
+    transferLine: "the same update a scientist runs when the data contradicts the model",
+    intro:
+      "Some reads don\u2019t fade with time \u2014 \u201cI freeze under pressure,\u201d \u201cpeople leave.\u201d They\u2019re old learning, and old learning doesn\u2019t update from argument. It updates from contradiction, held while the read is warm. Let\u2019s run the shape of it once.",
+    workedExample:
+      "Watch it once: the read is \u201cI go blank when it matters.\u201d The person recalls it \u2014 actually lets it be felt for a beat \u2014 and then holds ONE lived moment against it: the night the deploy broke and they were the one who stayed clear. Both are true in the room at once. The old read has to sit in the same space as the moment that contradicts it \u2014 and that\u2019s the condition under which it can change.",
+    rep: {
+      kind: "twoline",
+      prompt1: "A read about yourself that keeps recurring \u2014 write it the way it says itself.",
+      placeholder1: "the recurring read",
+      prompt2: "One specific lived moment \u2014 real, yours \u2014 that doesn\u2019t fit it.",
+      placeholder2: "the moment that doesn\u2019t fit",
+    },
+    drills: {
+      foundation: [
+        "Run the pair again on the same read tomorrow \u2014 same read, a DIFFERENT moment that doesn\u2019t fit. Contradictions compound.",
+        "Notice the felt \u2018click\u2019 or friction when both lines are in view at once. That friction is the working part, not a problem.",
+      ],
+      further: [
+        "Run it while the read is actually active \u2014 right after it fires \u2014 not from a calm distance. Warm is when it updates.",
+        "Take a read someone gave you long ago and find the moment your own record contradicts it.",
+      ],
+    },
+    name: "That\u2019s the mismatch move \u2014 the shape memory reconsolidation research points at. A recalled read, met with a felt contradiction while it\u2019s active, can update the learning itself \u2014 not just add a rehearsed comeback on top.",
+    runLive:
+      "The live version matters most: next time the old read FIRES \u2014 in the moment, heart rate up \u2014 hold your contradicting moment against it right there. Warm beats calm for this one move.",
+    notice:
+      "The tell it\u2019s working: the read starts arriving with less authority \u2014 same words, weaker voltage. Eventually it arrives as a memory of a belief, not a belief.",
+    whenHard:
+      "If no contradicting moment comes, don\u2019t invent one \u2014 a manufactured contradiction updates nothing. Ask the app\u2019s own record: your sessions and logs often hold the moment you can\u2019t recall. And some reads are accurate; those aren\u2019t for this move, they\u2019re for the work.",
+    deeperCut: {
+      why: "Recalled-and-active is the state in which old learning is editable; the felt contradiction, delivered in that window, is the working ingredient. Argument from a calm distance mostly bounces off.",
+      trap: "Turning it into a debate \u2014 prosecuting the old read with logic. The move isn\u2019t winning the argument; it\u2019s holding two true things in one space and letting the mismatch do the work.",
+      when: "Recurring reads with history behind them. For a one-off distorted thought, the ordinary Reframe work is the right tool.",
+      pairsWith: "Pairs with Reframe itself \u2014 Reframe finds the new read; the mismatch move is how a new read gets under an old one.",
+    },
+    levels: [
+      "Run the pair on paper, calm, for a mild read.",
+      "Run it on a read with real history, and feel the friction without flinching to one side.",
+      "Run it live \u2014 inside the minutes after the read fires \u2014 and hold both.",
+    ],
+    transfer:
+      "It\u2019s the same update underneath real learning anywhere \u2014 the scientist holding the anomaly against the model, the coach replaying the loss against \u2018we always choke.\u2019 Beliefs that meet their counter-evidence while activated are the ones that actually move.",
+    comeBack:
+      "Come back in a few days \u2014 recall first: what are the two ingredients, and which state does the read need to be in? Then re-read to check yourself.",
+  },
+  {
+    id: "body-before-story",
+    chapter: "the-body",
+    conceptId: "body-first",
+    title: "Body before story",
+    transferLine: "the same order a pilot runs \u2014 instruments first, interpretation second",
+    intro:
+      "When something hits, the mind starts writing the story immediately \u2014 who did what, what it means. The body knew first, and it speaks plainer. The move: read the body BEFORE you read the story. Once, now.",
+    workedExample:
+      "Watch it once: a message lands badly. The story engine spins up \u2014 \u201cthey\u2019re annoyed with me.\u201d The person pauses and checks the instruments instead: jaw tight, breath high, shoulders up. THAT\u2019s the data. The story was one interpretation of it \u2014 and reading the body first made it visible as an interpretation.",
+    rep: {
+      kind: "twoline",
+      prompt1: "Right now: what is your body doing? Sensation words only \u2014 tight, warm, buzzing, heavy.",
+      placeholder1: "the body, in sensation words",
+      prompt2: "Now the story that was waiting to be written about it \u2014 one line.",
+      placeholder2: "the story it was about to become",
+    },
+    drills: {
+      foundation: [
+        "Once today, when a feeling arrives, name the body first \u2014 three sensation words before any story words.",
+        "Notice which comes to you more easily, body or story. No fixing; just notice the default order.",
+      ],
+      further: [
+        "Mid-conversation, do a silent instrument check \u2014 jaw, shoulders, breath \u2014 without leaving the conversation.",
+        "When you\u2019re too activated to think straight, skip the story entirely: body words, then breath, and only then decide if the story needs writing at all.",
+      ],
+    },
+    name: "That\u2019s the body-first path. Outside a certain zone of activation, the thinking work \u2014 naming, reframing \u2014 barely lands; the body has to settle first. Reading the body before the story is how you check which zone you\u2019re in.",
+    runLive:
+      "Next spike: instruments first. Three sensation words before a single story word. If the instruments read \u2018far outside the zone,\u2019 that\u2019s your cue for breath work before any thinking work.",
+    notice:
+      "The tell it\u2019s working: stories start arriving with a label on them \u2014 \u2018this is my read, written while my jaw was tight\u2019 \u2014 instead of arriving as plain fact.",
+    whenHard:
+      "If the body reads as \u2018nothing\u2019 \u2014 blank, numb \u2014 that\u2019s a reading too, and a meaningful one: shutdown is outside the zone on the low side. Don\u2019t force sensation; note \u2018flat\u2019 and be gentle with the thinking work for now.",
+    deeperCut: {
+      why: "There\u2019s a window of activation inside which higher-order work is possible; outside it, analysis mostly fails. The body is the fastest honest gauge of where you are relative to that window.",
+      trap: "Turning the body-read into a story about the body \u2014 \u2018my chest is tight, something must be wrong with me.\u2019 Sensation words only. The story engine will try to annex anything.",
+      when: "First seconds after impact, before the story sets. Also any time thinking feels like wading \u2014 check the instruments; you may be outside the zone.",
+      pairsWith: "Pairs with Naming a feeling \u2014 body-first tells you WHETHER the naming work can land yet; naming is the first move once it can.",
+    },
+    levels: [
+      "Read the body on request, calm.",
+      "Read it inside the first minute of a real spike, before the story finishes writing.",
+      "Make it the default order under load \u2014 instruments first, every time it matters.",
+    ],
+    transfer:
+      "It\u2019s the same discipline underneath every high-stakes craft \u2014 the pilot trusting instruments over the feeling that the horizon moved, the medic checking vitals before the patient\u2019s theory. Data before interpretation. You carry the instruments everywhere; this rep is learning to read them first.",
+    comeBack:
+      "Come back in a few days \u2014 recall first: what\u2019s the order, and what kind of words count as a body read?",
+  },
+  {
+    id: "shifting-gears",
+    chapter: "the-body",
+    conceptId: "autonomic-flexibility",
+    title: "Shifting gears",
+    transferLine: "the same range an athlete trains \u2014 fast recovery, not just fast effort",
+    intro:
+      "The capacity underneath all of this isn\u2019t staying calm \u2014 it\u2019s SHIFTING: moving cleanly between effort and recovery, activation and rest. That range is trainable, and every deliberate shift is a rep. Do one down-shift now.",
+    workedExample:
+      "Watch it once: end of a charged call. Instead of carrying the charge into the next thing, the person takes sixty seconds and shifts down on purpose \u2014 long exhales, shoulders released. Then into the next meeting clean. The skill wasn\u2019t avoiding the charge; it was the gear change after.",
+    rep: {
+      kind: "breath",
+      prompt: "Wherever your system is right now, shift it one gear down on purpose: breathe in through your nose, then out through your mouth twice as long, three times. Feel for the shift itself \u2014 that\u2019s the thing being trained. Then tap below.",
+      doneLabel: "Shifted",
+    },
+    drills: {
+      foundation: [
+        "One deliberate down-shift today at a transition \u2014 after a call, before walking in the door.",
+        "Notice your recovery time after the next small spike: how long until baseline? Just notice; the number isn\u2019t a grade.",
+      ],
+      further: [
+        "Train the other direction too: before something that needs energy, shift UP on purpose \u2014 quicker breaths, posture up, then go. Range is both directions.",
+        "Chain it: full effort in a hard moment, then a clean deliberate down-shift after \u2014 the full gear cycle, on purpose.",
+      ],
+    },
+    name: "That\u2019s autonomic flexibility \u2014 your nervous system\u2019s ability to move between activation and recovery. It\u2019s among the strongest markers of resilience, and it trains like a muscle: every deliberate shift is a rep, and the sessions here have been training it all along.",
+    runLive:
+      "Put one deliberate gear change at a real transition today \u2014 the commute\u2019s end, the meeting\u2019s end. Transitions are where the reps hide.",
+    notice:
+      "The tell it\u2019s working over weeks: spikes still come, but the RETURN gets faster. Recovery speed, not calm, is the metric that moves.",
+    whenHard:
+      "If a down-shift won\u2019t take \u2014 system stays revved \u2014 don\u2019t fight it into submission. Do the three exhales, accept whatever partial shift happens, and let it be a rep anyway. Range builds from attempts, not from perfect landings.",
+    deeperCut: {
+      why: "Flexibility between fight-or-flight and rest-and-digest \u2014 not the absence of activation \u2014 is what tracks with resilience. A system that can rev is fine; a system that can\u2019t come back down is the problem being trained away.",
+      trap: "Chasing calm as the goal. Calm is a state; flexibility is a capacity. Training only the down-shift builds half the range.",
+      when: "Transitions, recoveries, and on-ramps \u2014 any seam between two different demands on you.",
+      pairsWith: "Pairs with the breathing patterns you already run \u2014 they\u2019re the mechanism; this lesson is what they\u2019re building underneath.",
+    },
+    levels: [
+      "One clean deliberate down-shift, calm conditions.",
+      "A down-shift inside two minutes of a real spike.",
+      "The full cycle on demand \u2014 up for the thing that needs you, down clean after \u2014 in one day, on purpose.",
+    ],
+    transfer:
+      "It\u2019s the same range underneath elite performance anywhere \u2014 the athlete whose heart rate drops between points, the surgeon who\u2019s fully on in the field and fully off at the sink. The skill was never staying level; it was owning the gearbox. That\u2019s what the practice has been building.",
+    comeBack:
+      "Come back in a few days \u2014 recall first: what\u2019s actually being trained \u2014 the calm, or the shift? If your answer is the shift, it\u2019s in.",
+  },
 ];
 
 /** Lookup one lesson by id, or null. */
