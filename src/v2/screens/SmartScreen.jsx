@@ -15,6 +15,8 @@ import TodaysBriefCard from "../components/TodaysBriefCard.jsx";
 import EodArtifactCard from "../components/EodArtifactCard.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
 import StepOutOffer from "../components/StepOutOffer.jsx";
+import ProofMoment from "../components/ProofMoment.jsx";
+import { getPendingProofMoment, markProofMomentShown } from "../lib/feltMoments.js";
 import StepOutOverlay from "./StepOutOverlay.jsx";
 import {
   getActiveLoopOffer,
@@ -75,7 +77,7 @@ import {
  *
  * @param {function(): void} onBeginSession — opens the spine.
  */
-export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
+export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onOpenProgress = null }) {
   const [beat, setBeat] = useState(() => getBeatOverride() || getCurrentBeat());
   const [thread, setThread] = useState(() => getTodayThread(beat));
   const [sessionCount, setSessionCount] = useState(() => getSessionCount());
@@ -167,6 +169,25 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
   // open, and not during wind-down (no loop-chasing near sleep — CANON §10,
   // where the concierge layer is hidden too).
   const showStepOut = !!loopOffer && !offerHandled && !isWindDown;
+
+  // F1 Proof Moment (Felt Layer, 2026-07-01): the next unshown "first",
+  // delivered as the lead editorial event. Step Out OUTRANKS it (interrupt
+  // beats celebration) — when Step Out shows, the moment is NOT claimed and
+  // waits for a clean open. Marked shown on render (it was delivered);
+  // "Noted" only dismisses. One per day max, once ever per moment (lib-gated).
+  const [proofMoment, setProofMoment] = React.useState(null);
+  const [momentDismissed, setMomentDismissed] = React.useState(false);
+  React.useEffect(() => {
+    if (showStepOut || isWindDown) return;
+    let m = null;
+    try { m = getPendingProofMoment(); } catch { m = null; }
+    if (m) {
+      setProofMoment(m);
+      try { markProofMomentShown(m.id); } catch { /* fail-silent */ }
+      try { window.plausible?.("Proof Moment Shown", { props: { moment: m.id } }); } catch { /* */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const acceptStepOut = () => {
     setStepOutOpen(true);
     try { window.plausible?.("Step Out Accepted"); } catch { /* non-fatal */ }
@@ -207,6 +228,16 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null }) {
             patternLabel={loopOffer.label}
             onAccept={acceptStepOut}
             onDecline={declineStepOut}
+          />
+        ) : null}
+
+        {/* F1 Proof Moment — the designed "first" event. Never alongside
+            Step Out (effect above doesn't claim one when Step Out shows). */}
+        {!showStepOut && proofMoment && !momentDismissed ? (
+          <ProofMoment
+            moment={proofMoment}
+            onAcknowledge={() => setMomentDismissed(true)}
+            onNavigate={onOpenProgress ? () => onOpenProgress() : null}
           />
         ) : null}
 

@@ -37,7 +37,7 @@ export default function Home({ onEnterPractice, onNavigate }) {
 
       <AppHeader onSignIn={() => nav("paywall")} />
 
-      <SmartScreen onEnterPractice={onEnterPractice} onOpenRoadmap={() => nav("roadmap")} />
+      <SmartScreen onEnterPractice={onEnterPractice} onOpenRoadmap={() => nav("roadmap")} onOpenProgress={() => nav("progress")} />
 
       <div className="sf-fade-enter sf-fade-enter--delay-2">
         <HomeFooter onNavigate={nav} />
