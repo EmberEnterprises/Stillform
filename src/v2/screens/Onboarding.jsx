@@ -5,6 +5,9 @@ import { tagTrigger } from "../lib/triggerProfile.js";
 import { setTilt, setEarliestSignal } from "../lib/windowRead.js";
 import { addChipToWatchList } from "../lib/biasProfile.js";
 import { addUserProtectiveMove } from "../lib/protectiveMoves.js";
+import { getA11y, setA11y } from "../lib/a11y.js";
+import CalendarImport from "../components/CalendarImport.jsx";
+import WeatherConsent from "../components/WeatherConsent.jsx";
 
 /**
  * Onboarding — the front door (CANON "Onboarding & Calibration", locked May 28;
@@ -30,9 +33,58 @@ import { addUserProtectiveMove } from "../lib/protectiveMoves.js";
  * with use."
  */
 
+
+/* ── The Read: deterministic synthesis of the five beats into one portrait.
+      The Liven-class reveal done honestly — precise engine, provisional claim.
+      Own-words answers are woven verbatim; skipped beats are omitted, never
+      guessed. ── */
+const READ_FRAGMENTS = {
+  trigger: {
+    "rewrite": "Your day tips at the sudden rewrite — not pressure itself, but the moment a plan you built has to rebuild",
+    "ambiguity": "Your day tips on ambiguous signals from people — the unread space between what was said and what was meant",
+    "overload": "Your day tips at the arithmetic — the moment demand visibly outgrows the hours, before anything has gone wrong",
+  },
+  signal: {
+    "grip": "and your body reports it first through the grip — jaw and shoulders holding on before the thought forms",
+    "breath": "and your body reports it first through the breath — shallow and high before you know why",
+    "gut": "and your body reports it first through the gut — the drop that files its report before the mind opens the case",
+  },
+  lean: {
+    "worst-case": "Under load, your thinking leans toward the worst-case preview, rendered in full detail",
+    "mind-reading": "Under load, your thinking leans into other people's heads — certain of what they think, with no data",
+    "all-or-nothing": "Under load, the middle of your scale disappears — right or ruined, nothing between",
+  },
+  tilt: {
+    "revved": "Your system idles warm, so the down-shift is your highest-leverage trained move",
+    "flat": "Your system idles low, so the up-shift is your trained move — and \u201ccalm\u201d means something different for you",
+    "shifts": "Your idle moves day to day, so the first useful question each morning is which system showed up",
+  },
+  anchor: {
+    "shrink": "And you already carry a working move: when it's too big, you shrink it to the one next true thing.",
+    "step-out": "And you already carry a working move: you step out and let the noise settle before you decide.",
+    "talk": "And you already carry a working move: you talk it into having edges until it stops being a blur.",
+  },
+};
+
+function composeRead(answers) {
+  const part = (id) => {
+    const a = answers[id];
+    if (!a) return null;
+    if (a.key === "own") {
+      const lead = { trigger: "Your day tips at", signal: "Your body's first report:", lean: "Under load, your thinking leans:", tilt: "Your baseline, in your words:", anchor: "And what carries you, in your words:" }[id];
+      return `${lead} \u201c${a.named}\u201d`;
+    }
+    return (READ_FRAGMENTS[id] && READ_FRAGMENTS[id][a.key]) || null;
+  };
+  const s1 = [part("trigger"), part("signal")].filter(Boolean).join(", ");
+  const rest = [part("lean"), part("tilt"), part("anchor")].filter(Boolean);
+  return [s1 ? s1 + "." : null, ...rest.map((r) => (r.endsWith(".") ? r : r + "."))].filter(Boolean);
+}
+
 const BEATS = [
   {
     id: "trigger",
+    norm: "Nothing rare in that. Every mind has a tipping point — most people just never find out where theirs is. You now know yours.",
     kicker: "01 · Where it starts",
     q: "When your day tips, where does it usually start?",
     options: [
@@ -40,25 +92,26 @@ const BEATS = [
         label: "The plan changes without warning, and everything I'd arranged in my head has to rebuild.",
         sharpened: "So it's not “stress” — it's the sudden rewrite. The moment the plan moves and the structure you built has to move with it.",
         write: () => tagTrigger("plans changing without warning"),
-        named: "plans changing without warning",
+        key: "rewrite", named: "plans changing without warning",
       },
       {
         label: "Someone's tone shifts — a short reply, a look — and I start reading into it.",
         sharpened: "So it's not “people” — it's the ambiguous signal. The unread space between what they said and what they meant.",
         write: () => tagTrigger("ambiguous tone from people"),
-        named: "ambiguous tone from people",
+        key: "ambiguity", named: "ambiguous tone from people",
       },
       {
         label: "The list gets longer than the day, and I can feel myself starting to run.",
         sharpened: "So it's not “busy” — it's the arithmetic. The moment demand visibly outgrows the hours, before anything has actually gone wrong.",
         write: () => tagTrigger("demand outgrowing the day"),
-        named: "demand outgrowing the day",
+        key: "overload", named: "demand outgrowing the day",
       },
     ],
     otherWrite: (text) => tagTrigger(text),
   },
   {
     id: "signal",
+    norm: "Every body does this — the signal always arrives before the story. Most people override it for years. You just located yours.",
     kicker: "02 · Where it lands",
     q: "Before you've named anything, where does your body tell you first?",
     options: [
@@ -66,25 +119,26 @@ const BEATS = [
         label: "Jaw and shoulders — things start holding on without me deciding to.",
         sharpened: "That's your earliest instrument: the grip arrives before the thought does. Worth knowing it reports first.",
         write: () => setEarliestSignal("jaw and shoulders tighten", "calibration"),
-        named: "jaw and shoulders tighten first",
+        key: "grip", named: "jaw and shoulders tighten first",
       },
       {
         label: "Chest and breath — it gets shallow and high before I notice why.",
         sharpened: "That's your earliest instrument: the breath climbs before the story forms. It will always report first if you listen for it.",
         write: () => setEarliestSignal("breath goes shallow and high", "calibration"),
-        named: "breath goes shallow first",
+        key: "breath", named: "breath goes shallow first",
       },
       {
         label: "Stomach — something drops or knots before I know what it's about.",
         sharpened: "That's your earliest instrument: the gut files its report before the mind opens the case. Early, and honest.",
         write: () => setEarliestSignal("stomach drops or knots", "calibration"),
-        named: "stomach reports first",
+        key: "gut", named: "stomach reports first",
       },
     ],
     otherWrite: (text) => setEarliestSignal(text, "calibration"),
   },
   {
     id: "lean",
+    norm: "Every mind leans under load — all of them, without exception. A lean isn't a flaw; it's standard equipment. Seeing yours is the entire advantage.",
     kicker: "03 · Which way it leans",
     q: "When it's loud in your head, which way does the thinking usually lean?",
     options: [
@@ -92,25 +146,26 @@ const BEATS = [
         label: "Straight to the worst version — I can see the whole disaster before anything's happened.",
         sharpened: "The lean has a name: the mind runs the worst case as a preview, in full detail. Naming the preview is how you stop mistaking it for a forecast.",
         write: () => addChipToWatchList({ chipId: "d_catastrophizing", source: "calibration" }),
-        named: "runs the worst-case preview",
+        key: "worst-case", named: "runs the worst-case preview",
       },
       {
         label: "Into their heads — I'm sure I know what they're thinking about me.",
         sharpened: "The lean has a name: reading minds with total confidence and no data. Naming it is how the certainty loosens.",
         write: () => addChipToWatchList({ chipId: "d_mind_reading", source: "calibration" }),
-        named: "reads minds with confidence",
+        key: "mind-reading", named: "reads minds with confidence",
       },
       {
         label: "All-or-nothing — if it isn't right, it's ruined; if I slipped once, it's who I am.",
         sharpened: "The lean has a name: the middle of the scale disappears under load. Naming the missing middle is how it comes back.",
         write: () => addChipToWatchList({ chipId: "d_all_or_nothing", source: "calibration" }),
-        named: "loses the middle of the scale",
+        key: "all-or-nothing", named: "loses the middle of the scale",
       },
     ],
     otherWrite: null, // a typed lean shouldn't force a catalog chip — honest skip
   },
   {
     id: "tilt",
+    norm: "There's no correct idle. Warm, low, moving — each is just a nervous system with a setting. Knowing the setting is what most people never get.",
     kicker: "04 · Your baseline",
     q: "Most days, before anything happens — where does your system idle?",
     options: [
@@ -118,25 +173,26 @@ const BEATS = [
         label: "Revved — I run warm. It doesn't take much to tip me into more.",
         sharpened: "A warm idle isn't a flaw — it's a setting. It means the down-shift is your highest-leverage move, and the practice trains exactly that.",
         write: () => setTilt("revved", "calibration"),
-        named: "idles warm (revved)",
+        key: "revved", named: "idles warm (revved)",
       },
       {
         label: "Flat — I run low. Getting up to speed costs me more than staying calm does.",
         sharpened: "A low idle isn't a flaw — it's a setting. It means the up-shift is your trained move, and knowing that changes what “calm” even means for you.",
         write: () => setTilt("flat", "calibration"),
-        named: "idles low (flat)",
+        key: "flat", named: "idles low (flat)",
       },
       {
         label: "It swings — some days warm, some days flat, and I can't always tell which one woke up.",
         sharpened: "A moving idle is its own read: the first useful question each day is “which system showed up.” The morning check exists for exactly that.",
         write: () => setTilt("shifts", "calibration"),
-        named: "idle shifts day to day",
+        key: "shifts", named: "idle shifts day to day",
       },
     ],
     otherWrite: null,
   },
   {
     id: "anchor",
+    norm: "This one matters: you didn't arrive empty-handed. Whatever the noise says, something has been working — you just named it.",
     kicker: "05 · What carries you",
     q: "You've been through hard stretches before. What actually got you through?",
     options: [
@@ -144,19 +200,19 @@ const BEATS = [
         label: "I break it down — when it's too big, I find the one next thing and do that.",
         sharpened: "You already own a protective move: shrinking the frame to the next true step. You've used it; the noise just makes it easy to forget you have it.",
         write: () => addUserProtectiveMove({ move: "shrink it to the one next thing", protectedEdge: "keeps you moving when the whole is too big", costEdge: "can defer the bigger look" }),
-        named: "shrinks it to the next step",
+        key: "shrink", named: "shrinks it to the next step",
       },
       {
         label: "I go quiet and get alone for a while — the noise settles when I step out of the room.",
         sharpened: "You already own a protective move: withdrawing to reset. You've used it; it works. The practice just makes it deliberate instead of a retreat.",
         write: () => addUserProtectiveMove({ move: "step out and let it settle", protectedEdge: "protects the read from the room's noise", costEdge: "can look like disappearing to others" }),
-        named: "steps out to settle",
+        key: "step-out", named: "steps out to settle",
       },
       {
         label: "I talk it through with someone I trust until it stops being a blur.",
         sharpened: "You already own a protective move: thinking out loud until it has edges. You've used it — the practice gives you a second place to do it, on demand.",
         write: () => addUserProtectiveMove({ move: "talk it into having edges", protectedEdge: "turns a blur into something workable", costEdge: "waits on someone being available" }),
-        named: "talks it into having edges",
+        key: "talk", named: "talks it into having edges",
       },
     ],
     otherWrite: (text) => addUserProtectiveMove({ move: text, protectedEdge: "what has carried you before", costEdge: "" }),
@@ -170,6 +226,7 @@ export default function Onboarding({ onComplete }) {
   const [otherOpen, setOtherOpen] = useState(false);
   const [otherText, setOtherText] = useState("");
   const [namedSoFar, setNamedSoFar] = useState([]); // the visible assembling profile
+  const [answers, setAnswers] = useState({}); // beatId -> { key | "own", named } — feeds The Read
 
   const fire = (e, props) => { try { window.plausible?.(e, props ? { props } : undefined); } catch { /* */ } };
 
@@ -179,6 +236,7 @@ export default function Onboarding({ onComplete }) {
     try { opt.write(); } catch { /* fail-silent — never block the door */ }
     setPicked(opt);
     setNamedSoFar((s) => [...s, opt.named]);
+    setAnswers((a) => ({ ...a, [beat.id]: { key: opt.key, named: opt.named } }));
     fire("Calibration Beat Answered", { beat: beat.id, kind: "option" });
   }
 
@@ -192,6 +250,7 @@ export default function Onboarding({ onComplete }) {
       named: text.length > 42 ? text.slice(0, 42) + "…" : text,
     });
     setNamedSoFar((s) => [...s, text.length > 42 ? text.slice(0, 42) + "…" : text]);
+    setAnswers((a) => ({ ...a, [beat.id]: { key: "own", named: text } }));
     setOtherOpen(false); setOtherText("");
     fire("Calibration Beat Answered", { beat: beat.id, kind: "own-words" });
   }
@@ -199,14 +258,14 @@ export default function Onboarding({ onComplete }) {
   function nextBeat() {
     setPicked(null); setOtherOpen(false);
     if (beatIndex + 1 < BEATS.length) setBeatIndex(beatIndex + 1);
-    else { setPhase("concierge"); fire("Calibration Completed"); }
+    else { setPhase("read"); fire("Calibration Completed"); }
   }
 
   function skipBeat() {
     setPicked(null); setOtherOpen(false);
     fire("Calibration Beat Skipped", { beat: beat.id });
     if (beatIndex + 1 < BEATS.length) setBeatIndex(beatIndex + 1);
-    else setPhase("concierge");
+    else setPhase("read");
   }
 
   /* ── FRAME ── */
@@ -290,6 +349,7 @@ export default function Onboarding({ onComplete }) {
           ) : (
             <>
               <p style={SHARP}>{picked.sharpened}</p>
+              {beat.norm && <p style={NORM}>{beat.norm}</p>}
               <Button variant="primary" onClick={nextBeat}>
                 {beatIndex + 1 < BEATS.length ? "Next" : "Finish the rep"}
               </Button>
@@ -309,6 +369,38 @@ export default function Onboarding({ onComplete }) {
     );
   }
 
+  /* ── THE READ — the synthesis reveal ── */
+  if (phase === "read") {
+    const lines = composeRead(answers);
+    return (
+      <main className="sf-page sf-page--hero">
+        <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
+          <MonoLabel size="xs" tone="faint">Your starting read</MonoLabel>
+          {lines.length > 0 ? (
+            <>
+              {lines.map((l) => (
+                <p key={l} style={READLINE}>{l}</p>
+              ))}
+              <p style={NORM}>
+                Five answers, one coherent shape — and none of it rare. This is a starting read, not
+                a verdict: it sharpens with use, and everything in it stays yours to correct. The
+                practice exists to make it more precise than any questionnaire ever could.
+              </p>
+            </>
+          ) : (
+            <p style={BODY}>
+              You kept your cards close — fair. The read builds from practice instead; nothing here
+              is ever guessed on your behalf.
+            </p>
+          )}
+          <Button variant="primary" onClick={() => { setPhase("concierge"); fire("Read Shown", { beats: lines.length }); }}>
+            Continue
+          </Button>
+        </article>
+      </main>
+    );
+  }
+
   /* ── CONCIERGE INTRO ── */
   if (phase === "concierge") {
     return (
@@ -322,26 +414,37 @@ export default function Onboarding({ onComplete }) {
             day.
           </p>
           <p style={BODY}>
-            If you want it to see more, you can connect your calendar and the day’s weather now
-            in Settings — each one optional, each one off until you turn it on, each one
-            forgettable. Health signals arrive with the phone version. Nothing is required; the
-            practice works either way.
+            If you want it to see more, connect it here — each one optional, off until you turn it
+            on, and forgettable. Health signals arrive with the phone version. Nothing is required;
+            the practice works either way.
           </p>
+          <div style={CONSENT_BLOCK}>
+            <MonoLabel size="xs" tone="faint">Calendar</MonoLabel>
+            <CalendarImport />
+          </div>
+          <div style={CONSENT_BLOCK}>
+            <MonoLabel size="xs" tone="faint">Ambient weather</MonoLabel>
+            <WeatherConsent />
+          </div>
           <Button variant="primary" onClick={() => setPhase("personal")}>Continue</Button>
         </article>
       </main>
     );
   }
 
-  /* ── PERSONALIZATION ── */
+  /* ── PERSONALIZATION — real, wired controls only ── */
   return (
     <main className="sf-page sf-page--hero">
       <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
-        <MonoLabel size="xs" tone="faint">Last thing</MonoLabel>
+        <MonoLabel size="xs" tone="faint">Make it yours</MonoLabel>
         <p style={BODY}>
+          Two display settings, applied instantly — both changeable anytime in Settings, along with
+          everything else. The calibration carried the weight; the rest is comfort.
+        </p>
+        <A11yToggle label="Larger text" k="textSize" onVal="large" />
+        <A11yToggle label="Higher contrast" k="contrast" onVal="high" />
+        <p style={{ ...BODY, marginTop: "var(--sf-space-24)" }}>
           The practice fits best at a consistent time — most people anchor it to the morning.
-          Reminders and every setting live in Settings, changeable anytime. The calibration you
-          just did carried the weight; there’s nothing else to fill in.
         </p>
         <Button
           variant="primary"
@@ -351,6 +454,24 @@ export default function Onboarding({ onComplete }) {
         </Button>
       </article>
     </main>
+  );
+}
+
+/* Real a11y toggle — same store the Settings screen drives (applied app-wide). */
+function A11yToggle({ label, k, onVal }) {
+  const [val, setVal] = React.useState(() => getA11y()[k]);
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "var(--sf-space-12) 0", borderBottom: "0.5px solid var(--sf-border-hairline)" }}>
+      <span style={{ ...BODY, margin: 0 }}>{label}</span>
+      <button
+        type="button"
+        className="sf-link-quiet"
+        aria-pressed={val === onVal}
+        onClick={() => { const next = setA11y(k, val === onVal ? "default" : onVal); setVal(next[k]); }}
+      >
+        {val === onVal ? "On" : "Off"}
+      </button>
+    </div>
   );
 }
 
@@ -383,6 +504,19 @@ const SHARP = {
 const STRIP = {
   marginTop: "var(--sf-space-32)", paddingTop: "var(--sf-space-16)",
   borderTop: "0.5px solid var(--sf-border-hairline)",
+};
+const NORM = {
+  fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic",
+  fontSize: "13px", lineHeight: 1.65, color: "var(--sf-text-faint)",
+  margin: "0 0 var(--sf-space-24)",
+};
+const READLINE = {
+  fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "16px",
+  lineHeight: 1.75, color: "var(--sf-text-primary)", margin: "0 0 var(--sf-space-12)",
+};
+const CONSENT_BLOCK = {
+  border: "0.5px solid var(--sf-border-hairline)", padding: "var(--sf-space-16)",
+  marginBottom: "var(--sf-space-16)",
 };
 const STRIP_LINE = {
   fontFamily: "var(--sf-font-mono)", fontSize: "11px", letterSpacing: "0.04em",
