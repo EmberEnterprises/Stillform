@@ -1,7 +1,7 @@
 import React from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
-import { getCapacitiesSummary, hasAnyResult } from "../lib/capacitiesProfile.js";
+import { getCapacitiesSummary, hasAnyResult, getGrowthRead, getRetakeInvitation } from "../lib/capacitiesProfile.js";
 
 /**
  * CapacitiesMirror — the Bias Profile's CAPACITIES surface (Step 3b).
@@ -10,14 +10,13 @@ import { getCapacitiesSummary, hasAnyResult } from "../lib/capacitiesProfile.js"
  * reflects back the four capacities Stillform trains, in loop order:
  * Sense → Settle → See yourself → See others.
  *
- * WHAT THIS BUILDS NOW (and what it deliberately doesn't):
- *   - The mirror surface itself, the four-capacity framing, and the honest
- *     empty state — which is the real state for every current user, because
- *     no capacity instrument (maia2/erq/sris/iri) is built yet. CD-Quest is
- *     the only instrument, and it feeds the pattern-work watch list, not this
- *     surface. So today this screen mostly says "not yet measured."
- *   - A generic baseline→latest growth read (take count + first/latest dates)
- *     for when takes DO exist. It does NOT interpret the inner result object.
+ * 2026-07-01 (longitudinal spine, Arlin's go): all four capacity instruments
+ * (maia2/erq/sris/iri) are BUILT and live in the Workshop — the header note
+ * below about "no instrument yet" was stale and is corrected. This surface now
+ * also renders the GROWTH DELTA (what moved between baseline and latest —
+ * reading titles + facet-level word shifts, never numbers) and the season
+ * re-take invitation (>=90 days since the last take; invites only, never
+ * auto-runs). First-pass copy — Arlin's voice to set.
  *
  *   The per-subscale nuance (ERQ suppression, IRI Personal Distress, MAIA-2
  *   Not-Worrying, SRIS reflection-without-insight) is intentionally NOT here.
@@ -95,6 +94,42 @@ export default function CapacitiesMirror({ onExit }) {
                   {lr.title && <p style={readingTitleStyle}>{lr.title}</p>}
                   <p style={readingBodyStyle}>{lr.body}</p>
                   <p style={measureStyle}>{measureLine}</p>
+                  {/* Growth delta (2026-07-01): WHAT moved, not just that it did.
+                      Qualitative per framing law — titles + facet words, no numbers. */}
+                  {(() => {
+                    let g = null;
+                    try { g = getGrowthRead(capacity.instrument); } catch { g = null; }
+                    if (!g || (!g.moved && g.facetShifts.length === 0)) return null;
+                    return (
+                      <p style={growthStyle}>
+                        {g.moved && g.from.title
+                          ? `When first measured this read as \u201c${g.from.title.toLowerCase()}\u201d \u2014 it doesn\u2019t anymore.`
+                          : null}
+                        {g.facetShifts.length > 0 && (
+                          <>
+                            {g.moved && g.from.title ? " " : ""}
+                            {g.facetShifts
+                              .map((s) => `${s.label} has moved ${s.from} \u2192 ${s.to}`)
+                              .join("; ")}
+                            {"."}
+                          </>
+                        )}
+                      </p>
+                    );
+                  })()}
+                  {/* Season re-take invitation (2026-07-01): invites only, never
+                      auto-runs. Self-gating on >=90 days since the last take. */}
+                  {(() => {
+                    let inv = null;
+                    try { inv = getRetakeInvitation(capacity.instrument); } catch { inv = null; }
+                    if (!inv) return null;
+                    return (
+                      <p style={inviteStyle}>
+                        It&rsquo;s been a season since this was measured. A fresh read &mdash; from
+                        the Workshop, when you want it &mdash; is how the mirror stays honest.
+                      </p>
+                    );
+                  })()}
                 </>
               ) : taken ? (
                 <>
@@ -104,7 +139,7 @@ export default function CapacitiesMirror({ onExit }) {
               ) : (
                 <>
                   <p style={framingStyle}>{CAPACITY_FRAMING[capacity.id]}</p>
-                  <p style={emptyStyle}>Not yet measured — its Workshop check arrives with the practice.</p>
+                  <p style={emptyStyle}>Not yet measured — its check is in the Workshop, when you want it.</p>
                 </>
               )}
             </div>
@@ -176,6 +211,27 @@ const measureStyle = {
   letterSpacing: "0.04em",
   color: "var(--sf-text-primary)",
   margin: "var(--sf-space-12) 0 0",
+};
+
+// Growth delta — the quiet "what moved" line. Serif, faint, no numbers ever.
+const growthStyle = {
+  fontFamily: "var(--sf-font-serif)",
+  fontWeight: 300,
+  fontSize: "14px",
+  lineHeight: 1.6,
+  color: "var(--sf-text-secondary)",
+  margin: "var(--sf-space-8) 0 0",
+};
+
+// Season re-take invitation — fainter still; an offer, not a nudge-badge.
+const inviteStyle = {
+  fontFamily: "var(--sf-font-serif)",
+  fontWeight: 300,
+  fontStyle: "italic",
+  fontSize: "13px",
+  lineHeight: 1.6,
+  color: "var(--sf-text-faint)",
+  margin: "var(--sf-space-8) 0 0",
 };
 
 const emptyStyle = {

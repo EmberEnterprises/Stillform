@@ -581,4 +581,16 @@ const ITEMS = [
       </>
     ),
   },
+  {
+    id: "remeasure",
+    q: "Why would I take a Workshop check more than once?",
+    a: (
+      <>
+        Because the practice changes the thing being measured. The first take is your baseline; a
+        later take shows what&rsquo;s actually moved &mdash; in words, never scores. The Growth
+        mirror keeps both and tells you what shifted. After a season or so it will quietly note
+        that a fresh read is available; whether and when to take one is always yours.
+      </>
+    ),
+  },
 ];

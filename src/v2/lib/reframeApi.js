@@ -38,6 +38,7 @@ import { formatValuesForAI } from "./values.js";
 import { formatWindowReadForAI } from "./windowRead.js";
 import { getCombinedBioFilter } from "./hardwareSignals.js";
 import { getAmbientContext } from "./ambientSignals.js";
+import { formatCapacitiesForAI } from "./capacitiesProfile.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
 
@@ -112,6 +113,9 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   const windowRead = formatWindowReadForAI();
   // Ambient context (2026-07-01): weather + moon phase. Faint background only.
   const ambient = getAmbientContext();
+  // Capacities (2026-07-01, longitudinal spine): the instruments' internal-only
+  // aiSteer + latest reading keys — finally consumed. Null until a take exists.
+  const capacities = formatCapacitiesForAI();
 
   try {
     const response = await fetch(REFRAME_API_URL, {
@@ -149,6 +153,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         contextProfile,
         priorSessions,
         confirmedFindings,
+        capacities,
         reconsolidationMismatch,
         // Vulnerabilities (June 29): the user's CONFIRMED charged traits + both
         // edges, so the AI is aware and never re-proposes one already named.

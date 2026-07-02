@@ -139,3 +139,94 @@ export function getCapacitiesSummary() {
     };
   });
 }
+
+/* ── The longitudinal spine (2026-07-01, Arlin's go — the 1yr+ retention build).
+      Three pure reads on the take history that already exists. ────────────── */
+
+// First-pass default (flagged for Arlin): a "season" between re-takes.
+const RETAKE_DAYS = 90;
+
+/**
+ * getGrowthRead — WHAT moved between the baseline take and the latest, for one
+ * instrument. Null until there are >= 2 takes (no growth story from one point).
+ * Qualitative only, per the framing law: reading titles and facet level words,
+ * never numbers or scores.
+ *
+ * @returns {?{
+ *   moved: boolean,                       // reading-level change
+ *   from: {key:string, title:string},     // baseline reading
+ *   to:   {key:string, title:string},     // latest reading
+ *   facetShifts: Array<{label:string, from:string, to:string}>, // e.g. low → high
+ *   firstAt: string, latestAt: string,
+ * }}
+ */
+export function getGrowthRead(instrumentId) {
+  const h = getInstrumentHistory(instrumentId);
+  if (h.length < 2) return null;
+  const first = h[0];
+  const latest = h[h.length - 1];
+  const fr = first?.results?.reading || null;
+  const lr = latest?.results?.reading || null;
+  if (!fr || !lr || !fr.key || !lr.key) return null;
+
+  const facetShifts = [];
+  const firstFacets = Array.isArray(first?.results?.facets) ? first.results.facets : [];
+  const latestFacets = Array.isArray(latest?.results?.facets) ? latest.results.facets : [];
+  for (const lf of latestFacets) {
+    if (!lf || !lf.id) continue;
+    const ff = firstFacets.find((f) => f && f.id === lf.id);
+    if (ff && ff.level && lf.level && ff.level !== lf.level) {
+      facetShifts.push({ label: lf.label || lf.id, from: ff.level, to: lf.level });
+    }
+  }
+
+  return {
+    moved: fr.key !== lr.key,
+    from: { key: fr.key, title: fr.title || "" },
+    to: { key: lr.key, title: lr.title || "" },
+    facetShifts,
+    firstAt: first.takenAt,
+    latestAt: latest.takenAt,
+  };
+}
+
+/**
+ * getRetakeInvitation — invite (never auto-run) a re-take when the latest take
+ * of an instrument is a season old. Null when never taken or still recent.
+ * The user-initiated law holds: this only says "it's been a while."
+ *
+ * @returns {?{ daysSince: number }}
+ */
+export function getRetakeInvitation(instrumentId, nowMs = Date.now()) {
+  const latest = getLatestResult(instrumentId);
+  if (!latest || !latest.takenAt) return null;
+  const takenMs = new Date(latest.takenAt).getTime();
+  if (!Number.isFinite(takenMs)) return null;
+  const daysSince = Math.floor((nowMs - takenMs) / (24 * 60 * 60 * 1000));
+  return daysSince >= RETAKE_DAYS ? { daysSince } : null;
+}
+
+/**
+ * formatCapacitiesForAI — the instruments' internal-only steer, finally
+ * consumed. One compact line per TAKEN capacity: the latest relationship-level
+ * reading key, plus the instrument's aiSteer when it set one, plus a moved-flag
+ * when the read has changed since baseline. Null when nothing has been taken.
+ * NEVER surfaced to the user; the backend carries the discretion rule.
+ */
+export function formatCapacitiesForAI() {
+  const lines = [];
+  for (const cap of CAPACITIES) {
+    const latest = getLatestResult(cap.instrument);
+    const reading = latest?.results?.reading;
+    if (!reading || !reading.key) continue;
+    let line = `${cap.loopLayer}: ${reading.key}`;
+    const steer = latest?.results?.aiSteer;
+    if (typeof steer === "string" && steer.trim()) line += ` (${steer.trim()})`;
+    const growth = getGrowthRead(cap.instrument);
+    if (growth && growth.moved) line += ` [moved from ${growth.from.key} since ${String(growth.firstAt).slice(0, 10)}]`;
+    lines.push(line);
+  }
+  return lines.length ? lines.join("; ") : null;
+}
+
+export const _spine = { RETAKE_DAYS };

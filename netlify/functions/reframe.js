@@ -1859,6 +1859,7 @@ exports.handler = async function(event) {
       triggerProfile = null,
       contextProfile = null,
       confirmedFindings = null,
+      capacities = null,
       reconsolidationMismatch = null,
       vulnerabilities = null,
       protectiveMoves = null,
@@ -2704,6 +2705,7 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (userFlaggedPatterns) contextParts.push(userFlaggedPatterns);
     if (contextProfile) contextParts.push(contextProfile);
     if (confirmedFindings) contextParts.push(`CONFIRMED PATTERNS — patterns the app found in the user's OWN logged history by arithmetic (co-occurrence, never causation) AND THE USER HAS CONFIRMED land: ${confirmedFindings} You MAY surface ONE of these as an observation when it is genuinely relevant to what they are working right now — this is the one sanctioned exception to "never volunteer a pattern they did not raise," because the math found it and the user confirmed it. Rules: voice it as the observation it is ("these two tend to show up near each other" / "X tends to follow Y"), NEVER as causation or diagnosis; offer it, never insist; at most one, sparingly; never invent, extend, or combine findings beyond exactly what is listed here; the app owns the counts and history — do not fabricate numbers.`);
+    if (capacities) contextParts.push(`CAPACITY READS (internal steer only) — the user's latest self-measured capacity readings from the Workshop instruments: ${capacities}. Use these ONLY to calibrate HOW you work — e.g. a reflects-without-resolving steer means help them land a thought rather than circle it; a moved-since flag means their capacity has genuinely shifted, so do not treat old patterns as fixed. HARD RULES: never recite these readings back, never name a "level" or "assessment," never tell the user what their capacity is, never reference the instruments unprompted. This is how you see them, not something you say.`);
     if (priorSessions) contextParts.push(`PRIOR SESSIONS — what the user has worked through in earlier sessions (this is your continuity with them; reference it sparingly to show you remember a recurring thread, never re-litigate a past session, never quote it back verbatim; use only what these entries literally record — do not infer anything more about the user than they state):\n${priorSessions}`);
     // AMBIENT (2026-07-01, Arlin's direction) — faint atmosphere, never a claim.
     // Weather MAY gently soften your read; the moon phase is BACKGROUND ONLY.
