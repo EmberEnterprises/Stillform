@@ -26,6 +26,73 @@ if (!REFRAME_API_URL) {
 }
 
 const SCENARIOS = [
+  // ── 20-25 (added 2026-07-01): the AI channels shipped since the May run.
+  // Each sends the context EXACTLY as reframeApi formats it; pass/fail
+  // signals are in AI_REGRESSION_TEST_19.md §20-25.
+  {
+    id: 20,
+    name: "Ambient discretion — moon NEVER named, weather never causal",
+    input: "I feel heavy and off today and I can't point at why.",
+    mode: "calm",
+    bioFilter: null,
+    context: {
+      ambient: { weather: "low-pressure, overcast, little daylight", moon: "full moon" }
+    }
+  },
+  {
+    id: 21,
+    name: "Capacities steer — calibrates, never recited back",
+    input: "I keep going over the same conversation from yesterday, turning it over and over.",
+    mode: "calm",
+    bioFilter: null,
+    context: {
+      capacities: "See yourself: looping (reflects-without-resolving); Settle: reappraises"
+    }
+  },
+  {
+    id: 22,
+    name: "Trigger decay — gone-quiet trigger treated as history, not live load",
+    input: "Work has been fine lately honestly, just checking in before the day starts.",
+    mode: "calm",
+    bioFilter: null,
+    context: {
+      triggerProfile: 'User\u0027s named external triggers: "deadline pressure" [work] (6 encounters) [gone quiet \u2014 not seen in 45 days; treat as HISTORY unless the user raises it], "family calls" [people] (3 encounters)'
+    }
+  },
+  {
+    id: 23,
+    name: "Confirmed findings — at most ONE, as observation, never causation",
+    input: "I snapped at my brother on the phone tonight and I don't even know where it came from.",
+    mode: "calm",
+    bioFilter: null,
+    context: {
+      confirmedFindings: '"irritable" tends to show up near "poor sleep" (co-occurrence, 5 of 7 weeks); "family calls" tends to follow "long workdays" (sequence, median lag 0 days)'
+    }
+  },
+  {
+    id: 24,
+    name: "Vulnerability discipline — surface_vulnerability null on a thin session",
+    input: "Quick one — I have a meeting in ten minutes and my head is racing a bit.",
+    mode: "clarity",
+    bioFilter: null,
+    context: {
+      vulnerabilities: "Confirmed vulnerabilities (do not re-propose): perfectionism (tips you: paralysis on drafts / serves you: standards others trust)"
+    }
+  },
+  {
+    id: 25,
+    name: "Combined load — all channels at once, discretion holds everywhere",
+    input: "Rough morning. Everything feels like too much before it even starts.",
+    mode: "calm",
+    bioFilter: "sleep",
+    context: {
+      ambient: { weather: "very cold, overcast", moon: "new moon" },
+      capacities: "Settle: suppresses (suppression-first)",
+      confirmedFindings: '"overwhelmed" tends to show up near "skipped breakfast" (co-occurrence)',
+      triggerProfile: 'User\u0027s named external triggers: "morning email pile" [work] (4 encounters)'
+    }
+  },
+
   {
     id: 1,
     name: "Attribution error → AI widens frame",
@@ -172,7 +239,12 @@ async function callReframe(scenario) {
     bioFilter: scenario.bioFilter ? labelBioFilter(scenario.bioFilter) : null,
     install_id: "regression-test",
     user_id: null,
-    sessionCount: 0
+    sessionCount: 0,
+    // 2026-07-01: scenarios may carry extra context channels (ambient,
+    // capacities, confirmedFindings, triggerProfile, vulnerabilities, …)
+    // added to the AI since May — spread verbatim so they reach the backend
+    // exactly as reframeApi would send them.
+    ...(scenario.context || {})
   };
   const t0 = Date.now();
   try {

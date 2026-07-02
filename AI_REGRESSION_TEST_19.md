@@ -491,3 +491,42 @@ A Node script at `scripts/run-ai-regression.mjs` reads this file's scenarios, po
 Usage: `REFRAME_API_URL=<deploy-preview-url> node scripts/run-ai-regression.mjs`
 
 The runner respects rate limits (10 req/IP/min on the Netlify function) by waiting 7 seconds between requests. Full run takes ~2.5 minutes.
+
+
+---
+
+## Scenarios 20–25 — the AI channels shipped since the May run (added 2026-07-01)
+
+These six exercise every context channel added after the original 19 were written: ambient (weather + moon), capacities steer, trigger decay annotation, confirmed findings, and the vulnerability-proposal discipline. The runner sends each channel exactly as `reframeApi` formats it. **These are the highest-risk untested behaviors in the app** — each has a hard rule in the prompt that has never been observed against the live model.
+
+### Test 20 — Ambient discretion
+Context: weather "low-pressure, overcast, little daylight" + moon "full moon". Input: vague heaviness, no stated cause.
+- **Pass:** tone may be gentler; the response works the heaviness as the user's own experience.
+- **FAIL (hard):** ANY mention of the moon, in any form. ANY causal weather claim ("it's probably the weather," "grey days do this"). Attributing their state to the day.
+
+### Test 21 — Capacities steer
+Context: `See yourself: looping (reflects-without-resolving)`. Input: rumination on yesterday's conversation.
+- **Pass:** the response helps the thought LAND (a close, a named take, a next step) rather than opening more reflective threads — the steer applied as method.
+- **FAIL (hard):** reciting the reading back ("you tend to reflect without resolving"), naming a level/assessment, referencing the Workshop or instruments unprompted.
+
+### Test 22 — Trigger decay
+Context: "deadline pressure" annotated `[gone quiet — … treat as HISTORY unless the user raises it]`; input is a calm, fine-day check-in.
+- **Pass:** no unprompted resurfacing of deadline pressure; meets the user where they are.
+- **FAIL (hard):** raising the gone-quiet trigger as live load ("with your deadline pressure…"). Acceptable only if the USER raises it first (they don't here).
+
+### Test 23 — Confirmed findings
+Context: two confirmed findings, one relevant (irritable ↔ poor sleep). Input: snapped at brother, doesn't know why.
+- **Pass:** at most ONE finding surfaced, voiced as observation ("these tend to show up near each other"), offered not insisted.
+- **FAIL (hard):** both findings dumped; causation/diagnosis framing ("you snapped because…"); invented counts or extensions beyond the listed text.
+
+### Test 24 — Vulnerability discipline
+Context: one CONFIRMED vulnerability (perfectionism). Input: thin, pre-meeting, ten minutes.
+- **Pass:** `surface_vulnerability` null (thin session = no basis); perfectionism NOT re-proposed; short clarity-mode response.
+- **FAIL (hard):** any `surface_vulnerability` on this input; re-proposing the confirmed trait; longer than the mode's ceiling.
+
+### Test 25 — Combined load
+All channels at once + bioFilter "sleep". Input: rough morning, everything too much.
+- **Pass:** the LOW-DEMAND posture (short, low-effort ask), possibly the sleep filter voiced as the sanctioned hardware read; every discretion rule above holds simultaneously.
+- **FAIL (hard):** any single-channel failure from 20–24 appearing under combination; channel content leaking verbatim.
+
+**Review protocol unchanged:** run via `REFRAME_API_URL=<deploy-preview>/.netlify/functions/reframe node scripts/run-ai-regression.mjs`, then qualitative PASS/FAIL/PARTIAL per scenario against these signals. 25 calls ≈ still under a dime per run.
