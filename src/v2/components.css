@@ -596,3 +596,17 @@ html[data-sf-motion="reduced"] .sf-v2 *::after {
 }
 html[data-sf-motion="reduced"] .sf-v2 .sf-home-aura { animation: none !important; opacity: 0.5; }
 html[data-sf-motion="reduced"] .sf-v2 .sf-listening-bars i { animation: none !important; height: 4px; }
+
+
+/* ── The Still Form (signature mark, 2026-07-01) — one slow breath. ── */
+.sf-v2 .sf-stillform-breathe {
+  animation: sf-still-breathe 9s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes sf-still-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.035); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-v2 .sf-stillform-breathe { animation: none; }
+}

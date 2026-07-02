@@ -16,6 +16,7 @@ import EodArtifactCard from "../components/EodArtifactCard.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
 import StepOutOffer from "../components/StepOutOffer.jsx";
 import ProofMoment from "../components/ProofMoment.jsx";
+import StillFormMark from "../components/StillFormMark.jsx";
 import { getPendingProofMoment, markProofMomentShown } from "../lib/feltMoments.js";
 import StepOutOverlay from "./StepOutOverlay.jsx";
 import {
@@ -217,6 +218,11 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
   return (
     <main className="sf-page sf-page--hero">
       <article className="sf-fade-enter" style={{ width: "100%" }}>
+
+        {/* THE STILL FORM — the signature object: the user's record made
+            visible, breathing once every nine seconds. Grows deterministically
+            with the practice (sessions/findings/capacities/triggers). */}
+        <StillFormMark />
 
         {/* Step Out — the pattern-interrupt offer. Lead element of the
             concierge composition when a confirmed loop is active (quieter
