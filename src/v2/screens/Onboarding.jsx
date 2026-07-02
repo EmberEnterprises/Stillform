@@ -66,6 +66,56 @@ const READ_FRAGMENTS = {
   },
 };
 
+
+/* ── The SEEN layer (Arlin, 2026-07-01: "felt seen right after the calibration,
+      not just using the app"). Reflection replays what they said; being seen is
+      the connection they DIDN'T say. Two deterministic cross-beat insights:
+      trigger×signal (how their alarm actually works) and trigger×anchor (their
+      own move already answers their own trigger — the strongest hit). Curated
+      per pair; own-words/skips fall back gracefully, never guessed. ── */
+const SEEN_TRIGGER_SIGNAL = {
+  "rewrite|grip": "Put those together and it's one system: you hold plans the way you hold your jaw — and when a plan is taken, the body braces to keep something from moving. It was never \u201ctension.\u201d It was structure, defended.",
+  "rewrite|breath": "Put those together: when the plan goes, your breath goes first — the body rationing air for a rebuild it hasn't been told about yet. You don't lose calm; you start preparing before you've agreed to.",
+  "rewrite|gut": "Put those together: the gut votes on the new plan before the mind has read it. That drop isn't dread — it's your fastest evaluator reporting that the ground moved.",
+  "ambiguity|grip": "Put those together and it's one system: an unread signal from someone, and the body braces for a verdict that hasn't been given. The grip is you holding a conversation that hasn't happened.",
+  "ambiguity|breath": "Put those together: the breath climbs while you're still parsing their tone — your system readying an answer to a question nobody asked yet. That's not anxiety; that's over-preparation.",
+  "ambiguity|gut": "Put those together: the gut reads the room before the mind finishes the sentence. It's usually reacting to the ambiguity itself — the not-knowing — not to what they actually meant.",
+  "overload|grip": "Put those together and it's one system: the list outgrows the day, and the body starts carrying it — literally, in the jaw and shoulders. You've been holding the schedule with your muscles.",
+  "overload|breath": "Put those together: when demand outgrows the hours, your breath shortens as if to save time. The system speeds everything, including the one thing that works better slow.",
+  "overload|gut": "Put those together: the arithmetic lands in the gut before you've done it consciously. It's not that you can't handle the load — it's that your body counts faster than you do.",
+};
+const SEEN_TRIGGER_ANCHOR = {
+  "rewrite|shrink": "And look at the pair you just named: what tips you is losing the structure — and the move that carries you is rebuilding it, one true step. You've been treating yourself correctly all along. The practice just makes it deliberate.",
+  "rewrite|step-out": "And look at the pair: what tips you is the sudden rewrite — and what carries you is stepping out until the new shape settles. You already knew the rebuild needs quiet. Now it's a move, not a retreat.",
+  "rewrite|talk": "And look at the pair: what tips you is the plan dissolving — and what carries you is talking the new one into having edges. You rebuild out loud. That's not a dependency; it's your method.",
+  "ambiguity|shrink": "And look at the pair: what tips you is the unread space between people — and what carries you is shrinking to the one next true thing. You already know the antidote to ambiguity is one concrete act.",
+  "ambiguity|step-out": "And look at the pair: what tips you is other people's static — and what carries you is stepping out of its range. You've been protecting your read from the room for years. Now it has a name.",
+  "ambiguity|talk": "And look at the pair: what tips you is not knowing what they meant — and what carries you is saying it out loud until it has edges. You resolve ambiguity by making language do its job. Keep that.",
+  "overload|shrink": "And look at the pair you just named: what tips you is the list outgrowing the day — and what carries you is shrinking it to the one next thing. Your own move is the exact counter to your own trigger. You built that yourself.",
+  "overload|step-out": "And look at the pair: what tips you is the arithmetic — and what carries you is stepping out of it long enough to see it whole. Distance is how you count. That's a strategy, not an escape.",
+  "overload|talk": "And look at the pair: what tips you is everything at once — and what carries you is talking it into a line, one thing after another. You serialize the overwhelm. That's a real skill wearing a casual name.",
+};
+
+function composeSeen(answers) {
+  const t = answers.trigger, s = answers.signal, a = answers.anchor;
+  const lines = [];
+  if (t && s && t.key !== "own" && s.key !== "own") {
+    const hit = SEEN_TRIGGER_SIGNAL[`${t.key}|${s.key}`];
+    if (hit) lines.push(hit);
+  }
+  if (t && a && t.key !== "own" && a.key !== "own") {
+    const hit = SEEN_TRIGGER_ANCHOR[`${t.key}|${a.key}`];
+    if (hit) lines.push(hit);
+  }
+  // Own-words fallback: still make the connection move, on their material.
+  if (lines.length === 0 && t && a) {
+    lines.push(
+      `And notice the pair you just named: what tips you \u2014 \u201c${t.named}\u201d \u2014 and what carries you \u2014 \u201c${a.named}\u201d \u2014 are already in conversation. You walked in with both halves. The practice is learning to run them on purpose.`
+    );
+  }
+  return lines;
+}
+
 function composeRead(answers) {
   const part = (id) => {
     const a = answers[id];
@@ -381,6 +431,16 @@ export default function Onboarding({ onComplete }) {
               {lines.map((l) => (
                 <p key={l} style={READLINE}>{l}</p>
               ))}
+              {composeSeen(answers).length > 0 && (
+                <div style={{ borderTop: "0.5px solid var(--sf-accent-line)", paddingTop: "var(--sf-space-16)", marginTop: "var(--sf-space-8)" }}>
+                  <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
+                    What this adds up to
+                  </MonoLabel>
+                  {composeSeen(answers).map((l) => (
+                    <p key={l.slice(0, 24)} style={READLINE}>{l}</p>
+                  ))}
+                </div>
+              )}
               <p style={NORM}>
                 Five answers, one coherent shape — and none of it rare. This is a starting read, not
                 a verdict: it sharpens with use, and everything in it stays yours to correct. The
