@@ -1,3 +1,5 @@
+
+import { patternConfidence } from "./biasProfile.js";
 /*
  * triggerProfile.js — Stillform's Trigger Profile data layer.
  *
@@ -212,6 +214,23 @@ export function incrementTriggerEncounter(id) {
   return profile.triggers[idx];
 }
 
+
+/**
+ * getTriggerDecay — the trigger's derived life-cycle tier, on the SAME engine
+ * and thresholds the bias watch list uses (biasProfile.patternConfidence):
+ * provisional → emerging → confirmed → quieting → retired. Nothing stored;
+ * a fresh tag via tagTrigger bumps lastSeen and the tier walks back to
+ * confirmed on its own. This is how discovery becomes evidence of change —
+ * a trigger that stops firing is a finding, not a stale row.
+ */
+export function getTriggerDecay(entry, sessionsArg) {
+  try {
+    return patternConfidence(entry, sessionsArg);
+  } catch {
+    return { tier: "provisional", count: (entry && entry.encounterCount) || 0, quiet: null };
+  }
+}
+
 /**
  * Tag a trigger for the current session (keystone trigger-tagging, June 18 2026):
  * create-or-match the label, then mark one encounter. This is the path that
@@ -260,7 +279,16 @@ export function formatTriggerProfileForAI(limit = 8) {
         const count = t.encounterCount || 0;
         const countLabel =
           count === 0 ? "" : ` (${count} encounter${count === 1 ? "" : "s"})`;
-        return `"${t.label}" [${t.category}]${countLabel}`;
+        // Decay annotation (2026-07-01): a confirmed trigger that has gone
+        // quiet is flagged so the model stops treating it as live load.
+        const decay = getTriggerDecay(t);
+        const quietLabel =
+          decay.tier === "retired"
+            ? ` [gone quiet — not seen in ${decay.quiet?.daysSince ?? "many"} days; treat as HISTORY unless the user raises it]`
+            : decay.tier === "quieting"
+            ? ` [quieting — not seen recently]`
+            : "";
+        return `"${t.label}" [${t.category}]${countLabel}${quietLabel}`;
       })
       .join(", ");
     return `User's named external triggers: ${formatted}`;

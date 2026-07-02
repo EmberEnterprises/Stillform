@@ -13,6 +13,7 @@ import { getPendingCandidate as getPendingStrength } from "../lib/strengths.js";
 import { getPendingCandidate as getPendingValue } from "../lib/values.js";
 import { getObserverSeatCount } from "../lib/observerSeat.js";
 import { getOtherReadEffect } from "../lib/beliefRating.js";
+import { getTriggerProfile, getTriggerDecay } from "../lib/triggerProfile.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -171,6 +172,35 @@ export default function MyProgress({ onExit, onNavigate }) {
             {retiredCount === 1
               ? "1 pattern has gone quiet since you started watching it."
               : `${retiredCount} patterns have gone quiet since you started watching them.`}
+          </div>
+        );
+      })()}
+
+      {/* Trigger decay (2026-07-01, retention batch): the same arc for named
+          triggers — the SAME engine and thresholds as the bias line above.
+          Self-gating; renders nothing until a confirmed trigger retires. */}
+      {(() => {
+        let quietTriggers = [];
+        try {
+          quietTriggers = getTriggerProfile().triggers.filter(
+            (t) => getTriggerDecay(t).tier === "retired"
+          );
+        } catch { quietTriggers = []; }
+        if (quietTriggers.length < 1) return null;
+        return (
+          <div
+            style={{
+              fontFamily: "var(--sf-font-serif)",
+              fontStyle: "italic",
+              fontSize: "15px",
+              lineHeight: 1.5,
+              color: "var(--sf-text-secondary)",
+              marginBottom: "var(--sf-space-24)",
+            }}
+          >
+            {quietTriggers.length === 1
+              ? `A trigger you named — “${quietTriggers[0].label}” — has gone quiet.`
+              : `${quietTriggers.length} triggers you named have gone quiet.`}
           </div>
         );
       })()}

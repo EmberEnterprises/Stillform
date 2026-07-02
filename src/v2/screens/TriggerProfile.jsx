@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
-import {
+import { getTriggerDecay,
   getTriggerProfile,
   addTrigger,
   updateTrigger,
@@ -335,6 +335,15 @@ function TriggerEntryRow({ entry, onEdit, onDelete, isConfirmingDelete, onConfir
         }}
       >
         {formatEncounterCount(entry.encounterCount)} · {formatLastSeen(entry.lastSeen, entry.encounterCount)}
+        {(() => {
+          // Decay tier (2026-07-01): a confirmed trigger that has stopped firing
+          // reads as change, not a stale row. Words only; re-detection walks it
+          // back to live on its own.
+          const decay = getTriggerDecay(entry);
+          if (decay.tier === "retired") return <> · gone quiet</>;
+          if (decay.tier === "quieting") return <> · quieting</>;
+          return null;
+        })()}
       </div>
 
       {isConfirmingDelete ? (
