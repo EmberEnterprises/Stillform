@@ -255,40 +255,39 @@ export default function MyProgress({ onExit, onNavigate }) {
         );
       })()}
 
-      <section className="sf-sec">
+      {/* F2 PORTRAIT (Felt Layer, 2026-07-01): the former single 'diagnostic
+          stack' regrouped into a portrait of the person — who you are / how
+          you process / the evidence / about. All 20 entries preserved;
+          hierarchy only, nothing removed. */}
+      <section className="sf-sec" style={{ marginBottom: "var(--sf-space-32)" }}>
         <div className="sf-sec-head">
-          <span className="sf-sec-head-lbl">Your diagnostic stack</span>
+          <span className="sf-sec-head-lbl">Who you are</span>
           <div className="sf-sec-rule" />
         </div>
-
         <ProgressEntry
           mark="01"
           title="Context Profile"
           description="Ambient conditions you've noticed correlate with how you feel — weather, hydration, the kind of conversation you just left."
           onTap={() => handleNavigate("context-profile")}
         />
-
         <ProgressEntry
           mark="02"
           title="Trigger Profile"
           description="External situations you've named as consistently hitting hard — performance reviews, hard conversations, certain people."
           onTap={() => handleNavigate("trigger-profile")}
         />
-
         <ProgressEntry
           mark="03"
           title="Bias Profile"
           description="Recurring shapes your thinking takes — the patterns you've put on a watch list for the Reframe AI to notice and help loosen over time."
           onTap={() => handleNavigate("bias-profile")}
         />
-
         <ProgressEntry
           mark="04"
           title="Where your triggers concentrate"
           description="The layer above your triggers — where the load pools across everything you've named, and which ones actually carry the weight. A map of where the reps pay off."
           onTap={() => handleNavigate("trigger-meta")}
         />
-
         <ProgressEntry
           mark="05"
           title="Your Vulnerabilities"
@@ -297,7 +296,6 @@ export default function MyProgress({ onExit, onNavigate }) {
             : "The charged parts of how you're built — each shown with both its edges: where it tips you, and where it serves you. Named by you, or surfaced by Reframe from your own words for you to confirm."}
           onTap={() => handleNavigate("vulnerabilities")}
         />
-
         <ProgressEntry
           mark="06"
           title="Your protective moves"
@@ -306,21 +304,6 @@ export default function MyProgress({ onExit, onNavigate }) {
             : "The moves you make under pressure — each shown with both its edges: where it protected you, and where it costs you now. Named by you, or surfaced by Reframe from your own words for you to confirm."}
           onTap={() => handleNavigate("protective-moves")}
         />
-
-        <ProgressEntry
-          mark="07"
-          title="Your window"
-          description="The zone where you can think clearly — and which way you tip when you're pushed past it (too revved, or too shut-down), with the correction that matches. Plus your earliest signal: where you catch it first."
-          onTap={() => handleNavigate("window")}
-        />
-
-        <ProgressEntry
-          mark="08"
-          title="Body, or the story?"
-          description="When a feeling lands hard, a body running low — depleted, no sleep, in pain, a hormonal shift — colors the read. Check the body before you trust the story; see the moments it had a hand in."
-          onTap={() => handleNavigate("body-vs-story")}
-        />
-
         <ProgressEntry
           mark="09"
           title="What's strong in you"
@@ -329,7 +312,6 @@ export default function MyProgress({ onExit, onNavigate }) {
             : "The bright pole — what you're genuinely good at, where it already shows, and one way to lean on it on purpose. Named by you, or surfaced by Reframe from your own words."}
           onTap={() => handleNavigate("strengths")}
         />
-
         <ProgressEntry
           mark="10"
           title="What you're moving toward"
@@ -338,14 +320,37 @@ export default function MyProgress({ onExit, onNavigate }) {
             : "The compass — a direction you choose to move toward, what living it looks like, and one step. Named by you, or surfaced by Reframe from your own words. The choosing stays yours."}
           onTap={() => handleNavigate("values")}
         />
+        <ProgressEntry
+          mark="14"
+          title="Where You Lean"
+          description="Where you take risk and where you hold back, across the parts of a life — a value-neutral picture of your shape, nothing to fix."
+          onTap={() => handleNavigate("risk-profile")}
+        />
+      </section>
 
+      <section className="sf-sec" style={{ marginBottom: "var(--sf-space-32)" }}>
+        <div className="sf-sec-head">
+          <span className="sf-sec-head-lbl">How you process</span>
+          <div className="sf-sec-rule" />
+        </div>
+        <ProgressEntry
+          mark="07"
+          title="Your window"
+          description="The zone where you can think clearly — and which way you tip when you're pushed past it (too revved, or too shut-down), with the correction that matches. Plus your earliest signal: where you catch it first."
+          onTap={() => handleNavigate("window")}
+        />
+        <ProgressEntry
+          mark="08"
+          title="Body, or the story?"
+          description="When a feeling lands hard, a body running low — depleted, no sleep, in pain, a hormonal shift — colors the read. Check the body before you trust the story; see the moments it had a hand in."
+          onTap={() => handleNavigate("body-vs-story")}
+        />
         <ProgressEntry
           mark="11"
           title="Reframing, or holding it in?"
           description="Two ways to handle a hard feeling — reframe it, or hold it in and carry it. See which way you lean, and turn the holding into the cue to reframe."
           onTap={() => handleNavigate("reframe-vs-hold")}
         />
-
         <ProgressEntry
           mark="12"
           title="The observer seat"
@@ -354,56 +359,56 @@ export default function MyProgress({ onExit, onNavigate }) {
             : "Step out of a thought and watch it instead of being run by it. The words don't change — your distance from them does, and that gap is where the choice lives."}
           onTap={() => handleNavigate("observer-seat")}
         />
+      </section>
 
+      <section className="sf-sec" style={{ marginBottom: "var(--sf-space-32)" }}>
+        <div className="sf-sec-head">
+          <span className="sf-sec-head-lbl">The evidence</span>
+          <div className="sf-sec-rule" />
+        </div>
         <ProgressEntry
           mark="13"
           title="Growth mirror"
           description="The four capacities Stillform trains — Sense, Settle, Seeing yourself, Seeing others — reflected back as you do the work."
           onTap={() => handleNavigate("capacities-mirror")}
         />
-
-        <ProgressEntry
-          mark="14"
-          title="Where You Lean"
-          description="Where you take risk and where you hold back, across the parts of a life — a value-neutral picture of your shape, nothing to fix."
-          onTap={() => handleNavigate("risk-profile")}
-        />
-
         <ProgressEntry
           mark="15"
           title="What Didn't Come True"
           description="What you were sure would go wrong that didn't — the disconfirmations your mind otherwise forgets to count."
           onTap={() => handleNavigate("prediction-mirror")}
         />
-
         <ProgressEntry
           mark="16"
           title="What You Bet On"
           description="What you were sure of, next to what actually happened. The gap is the data."
           onTap={() => handleNavigate("what-you-bet-on")}
         />
-
         <ProgressEntry
           mark="17"
           title="Thought Record"
           description="Take one thought, rate how much you believe it, look at the evidence, then re-rate. The drop is the work."
           onTap={() => handleNavigate("thought-record")}
         />
-
         <ProgressEntry
           mark="18"
           title="Your Arc"
           description="The through-line of your practice — your own named moments, in order, with the patterns that recur and the predictions that didn't come true."
           onTap={() => handleNavigate("narrative-arc")}
         />
-
         <ProgressEntry
           mark="19"
           title="Practice Evidence"
           description="Short exercises on the functions the practice trains — measured over time, against your own past, as honest evidence it's working."
           onTap={() => handleNavigate("practice-evidence")}
         />
+      </section>
 
+      <section className="sf-sec" style={{ marginBottom: "var(--sf-space-32)" }}>
+        <div className="sf-sec-head">
+          <span className="sf-sec-head-lbl">About the practice</span>
+          <div className="sf-sec-rule" />
+        </div>
         <ProgressEntry
           mark="20"
           title="How this works"
