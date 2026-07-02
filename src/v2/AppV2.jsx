@@ -19,6 +19,7 @@ import ContextProfile from "./screens/ContextProfile.jsx";
 import TriggerProfile from "./screens/TriggerProfile.jsx";
 import BiasProfile from "./screens/BiasProfile.jsx";
 import CapacitiesMirror from "./screens/CapacitiesMirror.jsx";
+import SeasonReview from "./screens/SeasonReview.jsx";
 import RiskProfileMirror from "./screens/RiskProfileMirror.jsx";
 import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
 import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
@@ -169,6 +170,7 @@ export default function AppV2() {
             }
             // Phase 7d: Pre-event Brief — standalone artifact screen.
             else if (target === "pre-event-brief") setScreen("pre-event-brief");
+            else if (target === "season-review") setScreen("season-review");
           }}
         />
       );
@@ -179,6 +181,7 @@ export default function AppV2() {
     if (screen === "trigger-profile") return <TriggerProfile onExit={() => setScreen("my-progress")} />;
     if (screen === "bias-profile") return <BiasProfile onExit={() => setScreen("my-progress")} />;
     if (screen === "capacities-mirror") return <CapacitiesMirror onExit={() => setScreen("my-progress")} />;
+    if (screen === "season-review") return <SeasonReview onExit={() => setScreen("my-progress")} />;
     if (screen === "risk-profile") return <RiskProfileMirror onExit={() => setScreen("my-progress")} />;
     if (screen === "prediction-mirror") return <PredictionErrorMirror onExit={() => setScreen("my-progress")} />;
     if (screen === "what-you-bet-on") return <WhatYouBetOnMirror onExit={() => setScreen("my-progress")} />;

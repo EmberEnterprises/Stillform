@@ -582,6 +582,19 @@ const ITEMS = [
     ),
   },
   {
+    id: "season-review",
+    q: "What is “Read the season”?",
+    a: (
+      <>
+        A look back over your last three months of practice, written from your own record &mdash;
+        sessions done, thoughts tested, capacities that moved, triggers that have gone quiet, and
+        what you named about yourself along the way. It appears in My Progress once a season holds
+        enough work to read honestly, and it&rsquo;s computed on your device from data you already
+        have &mdash; nothing new is collected.
+      </>
+    ),
+  },
+  {
     id: "remeasure",
     q: "Why would I take a Workshop check more than once?",
     a: (

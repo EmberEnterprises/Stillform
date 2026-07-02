@@ -14,6 +14,7 @@ import { getPendingCandidate as getPendingValue } from "../lib/values.js";
 import { getObserverSeatCount } from "../lib/observerSeat.js";
 import { getOtherReadEffect } from "../lib/beliefRating.js";
 import { getTriggerProfile, getTriggerDecay } from "../lib/triggerProfile.js";
+import { getSeasonReview } from "../lib/seasonReview.js";
 
 /**
  * MyProgress — landing surface for the diagnostic stack + practice
@@ -118,6 +119,16 @@ export default function MyProgress({ onExit, onNavigate }) {
           glyph="↗"
           onTap={() => handleNavigate("pre-event-brief")}
         />
+        {/* Season review (2026-07-01, batch 2/3): self-gating — the entry only
+            exists once the last 90 days hold enough practice to read honestly. */}
+        {getSeasonReview() !== null && (
+          <ProgressEntry
+            title="Read the season"
+            description="A look back over the last three months — what you did, what moved, what's gone quiet. Written from your own record."
+            glyph="◑"
+            onTap={() => handleNavigate("season-review")}
+          />
+        )}
         <ProgressEntry
           title="Break down something that just happened"
           description="A meeting, a call, a moment — while it's fresh. What worked, what didn't, what to keep for next time."
