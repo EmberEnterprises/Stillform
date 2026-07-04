@@ -6,6 +6,7 @@ import { setTilt, setEarliestSignal } from "../lib/windowRead.js";
 import { addChipToWatchList } from "../lib/biasProfile.js";
 import { addUserProtectiveMove } from "../lib/protectiveMoves.js";
 import { getA11y, setA11y } from "../lib/a11y.js";
+import { saveStartingRead } from "../lib/startingRead.js";
 import CalendarImport from "../components/CalendarImport.jsx";
 import WeatherConsent from "../components/WeatherConsent.jsx";
 
@@ -453,7 +454,7 @@ export default function Onboarding({ onComplete }) {
               is ever guessed on your behalf.
             </p>
           )}
-          <Button variant="primary" onClick={() => { setPhase("concierge"); fire("Read Shown", { beats: lines.length }); }}>
+          <Button variant="primary" onClick={() => { try { saveStartingRead({ portrait: lines, seen: composeSeen(answers) }); } catch { /* */ } setPhase("concierge"); fire("Read Shown", { beats: lines.length }); }}>
             Continue
           </Button>
         </article>

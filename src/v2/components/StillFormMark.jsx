@@ -3,6 +3,8 @@ import { getSessionCount } from "../lib/sessions.js";
 import { getConfirmedFindings } from "../lib/discoveryFindings.js";
 import { getCapacitiesSummary } from "../lib/capacitiesProfile.js";
 import { getTriggerProfile } from "../lib/triggerProfile.js";
+import { getBiasProfile } from "../lib/biasProfile.js";
+import { getProtectiveMoves } from "../lib/protectiveMoves.js";
 
 /**
  * StillFormMark — the signature object (2026-07-01, Arlin: "it doesn't feel
@@ -42,17 +44,35 @@ export default function StillFormMark() {
   const findings = safe(() => getConfirmedFindings().length, 0);
   const capacities = safe(() => getCapacitiesSummary().filter((c) => c.taken).length, 0);
   const triggers = safe(() => getTriggerProfile().triggers.length, 0);
+  const chips = safe(() => getBiasProfile().watchList.length, 0);
+  const moves = safe(() => getProtectiveMoves().length, 0);
 
-  const seed = 7 + sessions * 31 + findings * 131 + capacities * 517 + triggers * 97;
+  const seed = 7 + sessions * 31 + findings * 131 + capacities * 517 + triggers * 97 + chips * 211 + moves * 389;
   const r = rng(seed);
 
   const S = 200, C = S / 2;
   const paths = [];
 
+  // Breathing core — a soft brass light inside the ring, swelling with the
+  // breath. Presence, not decoration.
+  paths.push(
+    <circle key="core" cx={C} cy={C} r={30} fill="url(#sfCoreGlow)"
+      className="sf-still-core" />
+  );
+
   // Base ring — always present. The still point.
   paths.push(
     <circle key="base" cx={C} cy={C} r={54} fill="none"
       stroke="var(--sf-accent-line)" strokeWidth="0.75" />
+  );
+
+  // The ember — a short arc of brighter brass traveling the ring, slowly.
+  // Circumference of r=54 ≈ 339.3; a ~26px arc of light, the rest dark.
+  paths.push(
+    <circle key="ember" cx={C} cy={C} r={54} fill="none"
+      stroke="var(--sf-accent)" strokeWidth="1"
+      strokeDasharray="26 313.3" strokeLinecap="round"
+      className="sf-still-ember" opacity="0.8" />
   );
 
   // Session depth: faint inner rings, one per ~8 sessions (cap 5) — the
@@ -101,6 +121,30 @@ export default function StillFormMark() {
     );
   }
 
+  // Watched patterns: short inner arcs (cap 4) — what they're watching.
+  for (let i = 0; i < Math.min(4, chips); i++) {
+    const start = r() * Math.PI * 2;
+    const span = 0.5 + r() * 0.6;
+    const rr = 40 - i * 4;
+    const x1 = C + Math.cos(start) * rr, y1 = C + Math.sin(start) * rr;
+    const x2 = C + Math.cos(start + span) * rr, y2 = C + Math.sin(start + span) * rr;
+    paths.push(
+      <path key={`ch-${i}`} d={`M ${x1} ${y1} A ${rr} ${rr} 0 0 1 ${x2} ${y2}`}
+        fill="none" stroke="var(--sf-accent-line)" strokeWidth="0.4" opacity="0.5" />
+    );
+  }
+
+  // Protective moves: a slightly brighter anchor node inside the ring (cap 3)
+  // — what carries them, held close to the center.
+  for (let i = 0; i < Math.min(3, moves); i++) {
+    const ang = r() * Math.PI * 2;
+    const x = C + Math.cos(ang) * 20, y = C + Math.sin(ang) * 20;
+    paths.push(
+      <circle key={`mv-${i}`} cx={x} cy={y} r={1.5}
+        fill="var(--sf-accent)" opacity="0.7" />
+    );
+  }
+
   return (
     <div
       aria-hidden="true"
@@ -108,7 +152,14 @@ export default function StillFormMark() {
       style={{ display: "flex", justifyContent: "center", margin: "0 0 var(--sf-space-24)" }}
     >
       <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`} className="sf-stillform-breathe">
-        {paths}
+        <defs>
+          <radialGradient id="sfCoreGlow">
+            <stop offset="0%" stopColor="var(--sf-accent)" stopOpacity="0.14" />
+            <stop offset="60%" stopColor="var(--sf-accent)" stopOpacity="0.05" />
+            <stop offset="100%" stopColor="var(--sf-accent)" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <g className="sf-still-drift">{paths}</g>
       </svg>
     </div>
   );

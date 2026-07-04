@@ -17,6 +17,7 @@ import { getBeatConfig } from "../lib/beatConfig.js";
 import StepOutOffer from "../components/StepOutOffer.jsx";
 import ProofMoment from "../components/ProofMoment.jsx";
 import StillFormMark from "../components/StillFormMark.jsx";
+import StartingReadCard from "../components/StartingReadCard.jsx";
 import { getPendingProofMoment, markProofMomentShown } from "../lib/feltMoments.js";
 import StepOutOverlay from "./StepOutOverlay.jsx";
 import {
@@ -246,6 +247,10 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             onNavigate={onOpenProgress ? () => onOpenProgress() : null}
           />
         ) : null}
+
+        {/* Day-one bridge: the calibration Read lives here until the real
+            record (the first brief) takes over. Self-gating. */}
+        <StartingReadCard />
 
         {/* Today engine — quiet device-context readout (calendar / HRV /
             sleep) with honest states only, no fabricated data. Receding so

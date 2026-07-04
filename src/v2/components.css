@@ -598,15 +598,45 @@ html[data-sf-motion="reduced"] .sf-v2 .sf-home-aura { animation: none !important
 html[data-sf-motion="reduced"] .sf-v2 .sf-listening-bars i { animation: none !important; height: 4px; }
 
 
-/* ── The Still Form (signature mark, 2026-07-01) — one slow breath. ── */
+/* ── The Still Form (signature mark) — alive, not loud (Arlin: 'make it look
+      alive', 2026-07-02). Four quiet motions: a readable breath, a swelling
+      core light, a brass ember traveling the ring, and a barely-perceptible
+      drift so it is never frozen. All off under reduced motion. ── */
 .sf-v2 .sf-stillform-breathe {
-  animation: sf-still-breathe 9s ease-in-out infinite;
+  animation: sf-still-breathe 7s ease-in-out infinite;
   transform-origin: center;
 }
 @keyframes sf-still-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.035); opacity: 1; }
+  0%, 100% { transform: scale(0.985); opacity: 0.82; }
+  50% { transform: scale(1.055); opacity: 1; }
+}
+.sf-v2 .sf-still-core {
+  animation: sf-still-core 7s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes sf-still-core {
+  0%, 100% { opacity: 0.55; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+.sf-v2 .sf-still-ember {
+  animation: sf-still-ember 14s linear infinite;
+  transform-origin: center;
+}
+@keyframes sf-still-ember {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.sf-v2 .sf-still-drift {
+  animation: sf-still-drift 150s linear infinite;
+  transform-origin: center;
+}
+@keyframes sf-still-drift {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sf-v2 .sf-stillform-breathe { animation: none; }
+  .sf-v2 .sf-stillform-breathe,
+  .sf-v2 .sf-still-core,
+  .sf-v2 .sf-still-ember,
+  .sf-v2 .sf-still-drift { animation: none; }
 }
