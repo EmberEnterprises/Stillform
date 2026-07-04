@@ -96,12 +96,13 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
   const [listenLive, setListenLive] = useState(false);
   const idleRef = useRef(null);
 
-  // Focus the textarea on mount — the practice starts when the user can write.
+  // GUIDED-FIRST: no autofocus — popping the keyboard over the choices was
+  // the anti-guided move (the chips are the first step now, not the blank).
   useEffect(() => {
     if (textareaRef.current) {
       // Small delay so the fade-enter animation feels considered, not jumpy.
-      const t = setTimeout(() => textareaRef.current?.focus(), 350);
-      return () => clearTimeout(t);
+      // autofocus removed (guided-first) — ref retained for chip-tap focusing.
+      return undefined;
     }
   }, []);
 
@@ -201,29 +202,18 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
         />
       </div>
 
-      <div
-        className="sf-fade-enter sf-fade-enter--delay-1 sf-naming-field"
-        style={{ marginTop: "var(--sf-space-48)" }}
-      >
-        <textarea
-          ref={textareaRef}
-          className="sf-textarea"
-          value={text}
-          onChange={handleType}
-          placeholder={placeholder}
-          rows={2}
-          aria-label="Name what is present"
-        />
-      </div>
-
+      {/* GUIDED-FIRST (Arlin, 2026-07-02: "we need for this to be more
+          guided"). Choices lead — one tap is a complete first step; typing is
+          the optional path, never the demand. Mirrors the onboarding pattern:
+          options first, "say it your way" second. */}
       {chips.length > 0 ? (
         <div
-          className="sf-fade-enter sf-fade-enter--delay-2"
-          style={{ marginTop: "var(--sf-space-32)" }}
+          className="sf-fade-enter sf-fade-enter--delay-1"
+          style={{ marginTop: "var(--sf-space-48)" }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "2px", marginBottom: "var(--sf-space-12)" }}>
             <MonoLabel size="xs" tone="faint" style={{ display: "block" }}>
-              Start here if you're stuck
+              Tap what's closest
             </MonoLabel>
             <InfoDot onClick={() => setShowChipGuide(true)} label="these states" />
           </div>
@@ -242,6 +232,24 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
           </div>
         </div>
       ) : null}
+
+      <div
+        className="sf-fade-enter sf-fade-enter--delay-2 sf-naming-field"
+        style={{ marginTop: "var(--sf-space-24)" }}
+      >
+        <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+          Or say it your way
+        </MonoLabel>
+        <textarea
+          ref={textareaRef}
+          className="sf-textarea"
+          value={text}
+          onChange={handleType}
+          placeholder={placeholder}
+          rows={2}
+          aria-label="Name what is present"
+        />
+      </div>
 
       <InfoModal
         open={!!infoChip}
