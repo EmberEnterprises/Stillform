@@ -4,6 +4,7 @@ import "./components.css";
 import { applyA11y } from "./lib/a11y.js";
 import { runVersionGatedBackup, maybeOpportunisticBackup } from "./lib/backupAuto.js";
 import { maybeRefreshWeather } from "./lib/weatherProducer.js";
+import { maybeSeedDemo } from "./lib/demoSeed.js";
 
 // Display accessibility (contrast / text size) — apply persisted settings
 // before the tree paints. Module-level call is safe: reads localStorage,
@@ -107,6 +108,9 @@ export default function AppV2() {
 
   // Phase 8c: warm subscription status; A4: version-gated auto-backup.
   useEffect(() => {
+    // ?seed=demo — Arlin's walk tool: plant a three-month record so the
+    // month-six app can be felt. Refuses real records unless forced.
+    maybeSeedDemo();
     runVersionGatedBackup();
     refreshSubscriptionStatus();
     // Keep a consented weather reading fresh. No-op unless weather is on and the
