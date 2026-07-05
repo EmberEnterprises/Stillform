@@ -366,6 +366,12 @@ export default function MyProgress({ onExit, onNavigate }) {
           <span className="sf-sec-head-lbl">The evidence</span>
           <div className="sf-sec-rule" />
         </div>
+                <ProgressEntry
+          title="Your naming, day by day"
+          description="Every state you've named, in your words — the raw record the practice is built from."
+          glyph="◱"
+          onTap={() => handleNavigate("naming-ledger")}
+        />
         <ProgressEntry
           mark="13"
           title="Growth mirror"

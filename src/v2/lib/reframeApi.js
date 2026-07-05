@@ -39,6 +39,7 @@ import { formatWindowReadForAI } from "./windowRead.js";
 import { getCombinedBioFilter } from "./hardwareSignals.js";
 import { getAmbientContext } from "./ambientSignals.js";
 import { formatCapacitiesForAI } from "./capacitiesProfile.js";
+import { getWindowRead } from "./windowRead.js";
 
 const REFRAME_API_URL = "/.netlify/functions/reframe";
 
@@ -147,7 +148,9 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         // Ambient (2026-07-01): weather may gently color tone; the moon phase is
         // BACKGROUND ONLY — the backend rule forbids naming or attributing it.
         ambient,
-        signalProfile: null,
+        // 0c (2026-07-02): the calibration's signal beat is the producer —
+        // the user's named earliest body signal, or null.
+        signalProfile: (() => { try { return getWindowRead().earliestSignal || null; } catch { return null; } })(),
         biasProfile,
         triggerProfile,
         contextProfile,

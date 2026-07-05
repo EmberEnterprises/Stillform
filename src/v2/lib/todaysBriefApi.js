@@ -49,6 +49,7 @@ function localDateKey(d = new Date()) {
 import { getAmbientContext } from "./ambientSignals.js";
 import { getCombinedBioFilter } from "./hardwareSignals.js";
 import { getCalendarSummary } from "./calendarData.js";
+import { getWindowRead } from "./windowRead.js";
 
 export function gatherTodaysBriefInputs(checkinPayload = {}) {
   const safe = (fn, fallback) => {
@@ -112,7 +113,7 @@ export function gatherTodaysBriefInputs(checkinPayload = {}) {
     // same unpopulated field in the reframe path (signalProfile). Not an
     // asymmetry — shared gap, flagged, not fabricated.
     tensionAreas: [],
-    signalProfile: "",
+    signalProfile: safe(() => getWindowRead().earliestSignal || "", ""),
   };
 }
 

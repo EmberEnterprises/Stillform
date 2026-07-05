@@ -1,3 +1,4 @@
+import { buildSessionSummary } from "../lib/sessionSummary.js";
 import React from "react";
 import BrassCross from "../components/BrassCross.jsx";
 import CollapsibleSection from "../components/CollapsibleSection.jsx";
@@ -157,6 +158,10 @@ export default function CrisisResources({ onExit }) {
           Reaching out is not a failure of the practice. It is the strongest read
           of the moment there is.
         </p>
+
+      {/* 0b (2026-07-02): the June-15 handoff summary, finally wired — OPT-IN
+          only, generated the moment THEY tap, never auto-surfaced. */}
+      <HandoffSummary />
       </main>
     </>
   );
@@ -203,3 +208,30 @@ const NOTE_BLOCK = {
 const INLINE_LINK = {
   color: "var(--sf-accent)", textDecoration: "underline", textUnderlineOffset: "3px",
 };
+
+
+function HandoffSummary() {
+  const [text, setText] = React.useState(null);
+  if (text === null) {
+    return (
+      <section style={{ marginTop: "var(--sf-space-24)" }}>
+        <button
+          type="button"
+          className="sf-link-quiet"
+          onClick={() => {
+            let s = "";
+            try { s = buildSessionSummary() || ""; } catch { s = ""; }
+            setText(s || "Nothing on record yet — the summary builds from your practice.");
+          }}
+        >
+          If you're about to talk to someone — a plain summary of what you've been working through, to have in hand
+        </button>
+      </section>
+    );
+  }
+  return (
+    <section style={{ marginTop: "var(--sf-space-24)", border: "0.5px solid var(--sf-border-hairline)", padding: "var(--sf-space-16)" }}>
+      <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.7, color: "var(--sf-text-secondary)", whiteSpace: "pre-wrap", margin: 0 }}>{text}</p>
+    </section>
+  );
+}
