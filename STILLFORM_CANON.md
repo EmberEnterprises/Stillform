@@ -525,3 +525,9 @@ The onboarding front door was built greenfield (no first-run existed). From the 
 ---
 
 *ARA Embers LLC · Stillform Canon · May 14, 2026*
+
+
+## Epistemic Doctrine (Arlin, July 2 2026 — governs every AI surface)
+The user is never the sole source of truth, and neither is the AI. The user supplies the information; the AI acknowledges it and brings it forth; the user is meant to UNDERSTAND it — both, always. Delivery is SUGGESTIVE, never deterministic: forced information kills receptivity; meeting in the middle leaves the user authority over who they are while the AI helps them frame their mind — producing responsible responses and genuine adjustment in how they see things. That is the integrity of the product.
+CRAFT RULE — the one failure mode: suggestive must never decay into vague. FIRM ON THE RECORD, SOFT ON THE MEANING ("your last five Sundays had this shape" = confident arithmetic; "does tonight feel like that, or different?" = theirs). Hedged data kills credibility; asserted interpretation becomes judgment.
+(ARLIN'S EPISTEMIC DOCTRINE — this section is the canonical statement; the Master Todo forecast entry defers to it.)
