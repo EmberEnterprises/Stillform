@@ -527,7 +527,7 @@ The onboarding front door was built greenfield (no first-run existed). From the 
 *ARA Embers LLC · Stillform Canon · May 14, 2026*
 
 
-## Epistemic Doctrine (Arlin, July 2 2026 — governs every AI surface)
+## Epistemic Doctrine (Arlin — standing since at least April 9 2026; full canonical articulation July 2 2026, prompted by a Claude drift from it)
 The user is never the sole source of truth, and neither is the AI. The user supplies the information; the AI acknowledges it and brings it forth; the user is meant to UNDERSTAND it — both, always. Delivery is SUGGESTIVE, never deterministic: forced information kills receptivity; meeting in the middle leaves the user authority over who they are while the AI helps them frame their mind — producing responsible responses and genuine adjustment in how they see things. That is the integrity of the product.
 CRAFT RULE — the one failure mode: suggestive must never decay into vague. FIRM ON THE RECORD, SOFT ON THE MEANING ("your last five Sundays had this shape" = confident arithmetic; "does tonight feel like that, or different?" = theirs). Hedged data kills credibility; asserted interpretation becomes judgment.
-(ARLIN'S EPISTEMIC DOCTRINE — this section is the canonical statement; the Master Todo forecast entry defers to it.)
+(ARLIN'S EPISTEMIC DOCTRINE — this section is the canonical statement; the Master Todo forecast entry defers to it. PROVENANCE: this has been Arlin's rule from the start — April 9 2026 on record: automatic reframe + MANUAL validation, 'the confirmation step puts the human back in the driver's seat'; silent adaptation ruled manipulative, ''here's what I noticed — your call''; and the standing both-rule: every feature is both user and AI, AI suggests/surfaces, user names/confirms. July 2 is the date it was written down whole, not the date it was invented.)
