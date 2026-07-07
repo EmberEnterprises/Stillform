@@ -16,6 +16,16 @@
 **CLAUDE DRAFTS (Arlin approves): Data Safety form answers (location approximate/foreground-weather-only + AI chat content — aligned to the Termly draft); IARC content-rating answers; location-permission justification; store CATEGORY recommendation = Productivity or Lifestyle, NOT Health (framing law + avoids Google's health-app policy tier); store listing (title, short/full description in the framing, screenshots list, 1024x500 feature graphic, 512 icon); target-audience declaration (18+/not-for-children — avoids Families policy); ads declaration = none.**
 **SEQUENCE: web finish → pre-native gate → signed AAB + Play App Signing → internal testing track → pre-launch report → production.**
 
+**== STORE-COMPLIANCE ADDITIONS (researched + verified 2026-07-02 after Arlin's challenge 'did you check and research or did you just guess?' — the from-memory list had missed these SEVEN) ==**
+1. **SDK/API DEADLINES ARE HARD + LAND BEFORE OUR LAUNCH: iOS 26 SDK required since Apr 28 2026; Android targetSdk 36 required Aug 31 2026** — native builds must target both from day one.
+2. **Apple privacy manifest (PrivacyInfo.xcprivacy)** — top-tier rejection cause; add to iOS build gate, declaring every API category the app touches.
+3. **REVIEWER DEMO ACCESS: magic-code email login LOCKS REVIEWERS OUT** — build a review path (demo account or review-code bypass) + supply credentials in App Review notes / Play pre-review. Rejection-level without it.
+4. **AI DISCLOSURE (2026 mandatory)** — declare AI-generated content in both stores' questionnaires; align with the framing law (AI as infrastructure).
+5. **STATE AGE-VERIFICATION LAWS (TX/UT/LA live 2026)** — disclosure language must cover platform age signals; fold into the Termly session.
+6. **SUBSCRIPTION TRANSPARENCY SPEC (Apple 2026): full cost + renewal terms + cancellation flow visible BEFORE payment; free-trial renewal price visible BEFORE the Subscribe tap** — exact paywall requirements; merge into the ToS/paywall blocker.
+7. **WRAPPER-REJECTION RISK** — native build must visibly exercise native capabilities (haptics, local notifications, offline record) so it doesn't read as a website in a shell; already in plan, now a named store reason.
+**(Also noted: Play Catalog Access third-party listing-sharing program — an opt-out setting to decide when the Play listing is created.)**
+
 **== TABLE-STAKES GAPS (audited 2026-07-02, Arlin: 'what do we not have that are common for other apps') ==**
 **TIER 1 — STORE/LEGAL REQUIRED, MISSING (add to launch blockers, Claude builds):**
 1. **ACCOUNT DELETION — in-app.** Both stores require it for apps with sign-in; nowhere in the app today. Build: Settings entry -> confirm -> server-side delete (Supabase user + record) + local wipe; plus a web deletion path for Play's Data Safety form.
