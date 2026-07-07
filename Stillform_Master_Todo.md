@@ -16,6 +16,14 @@
 **CLAUDE DRAFTS (Arlin approves): Data Safety form answers (location approximate/foreground-weather-only + AI chat content — aligned to the Termly draft); IARC content-rating answers; location-permission justification; store CATEGORY recommendation = Productivity or Lifestyle, NOT Health (framing law + avoids Google's health-app policy tier); store listing (title, short/full description in the framing, screenshots list, 1024x500 feature graphic, 512 icon); target-audience declaration (18+/not-for-children — avoids Families policy); ads declaration = none.**
 **SEQUENCE: web finish → pre-native gate → signed AAB + Play App Signing → internal testing track → pre-launch report → production.**
 
+**== TABLE-STAKES GAPS (audited 2026-07-02, Arlin: 'what do we not have that are common for other apps') ==**
+**TIER 1 — STORE/LEGAL REQUIRED, MISSING (add to launch blockers, Claude builds):**
+1. **ACCOUNT DELETION — in-app.** Both stores require it for apps with sign-in; nowhere in the app today. Build: Settings entry -> confirm -> server-side delete (Supabase user + record) + local wipe; plus a web deletion path for Play's Data Safety form.
+2. **TERMS OF SERVICE.** No ToS anywhere; subscription purchase requires ToS + auto-renew disclosure near the buy button. Arlin: Termly can generate ToS alongside the privacy policy — same session as the privacy paste. Claude: link it at Paywall + Settings.
+3. **MANAGE/CANCEL SUBSCRIPTION.** No LS customer-portal link in-app. Build: Settings 'Manage subscription' -> LS portal URL (needs the LS portal link from Arlin with the checkout URLs).
+**TIER 2 — EXPECTED (mostly already flagged): data export ('download my record' — verify the Settings trace, else build), reminders (inside settings-depth flag), EOD-artifact share (craft queue), optional app lock (native biometric later).**
+**TIER 3 — DELIBERATE ABSENCES (canon, do NOT build): streaks/gamification, light mode, social, ads.**
+
 **== GOOGLE PLAY GATE (verified current 2026-07-02, sources: Play Console Help + 2026 policy guides) ==**
 **FORK IN THE ROAD — ARLIN CHECKS FIRST: Play Console account type. PERSONAL (created after Nov 13 2023) = mandatory closed test, 12+ opted-in testers for 14 CONTINUOUS days before production access — and 2026 review checks real engagement + feedback-driven changes, not ghost installs. ORGANIZATION account = EXEMPT, publishes straight to production. Arlin has LLC + DUNS — if registered as org, the entire tester gate vanishes. If personal: the 14-day clock is a schedule item (start it the moment the first native build exists; Ava + recruits; updates during the window do NOT reset it).**
 **BUILD SIDE (Claude): AAB format via Capacitor + Play App Signing + current target API level; pre-native gate items first.**
