@@ -175,7 +175,7 @@ const BEATS = [
       },
       {
         label: "Chest and breath — it gets shallow and high before I notice why.",
-        sharpened: "That's your earliest instrument: the breath climbs before the story forms. It will always report first if you listen for it.",
+        sharpened: "That's your earliest instrument: the breath climbs before the story forms. It tends to report first, if you listen for it.",
         write: () => setEarliestSignal("breath goes shallow and high", "calibration"),
         key: "breath", named: "breath goes shallow first",
       },
