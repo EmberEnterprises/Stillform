@@ -886,3 +886,29 @@ INTEGRITY (all CFM): evidence the function is changing over the user's OWN basel
 **Why it's workable.** Reframing is exactly what Stillform's Reframe does — it's the trainable move. So the work attached to this self-knowledge is direct: when you catch yourself holding something in and carrying it, that's the cue to reframe it instead. The tendency is a habit, and habits shift with reps. (The reappraisal mechanism itself is grounded elsewhere in this sheet — Ochsner & Gross 2005, Buhle 2014, Denny 2015.)
 
 **How Stillform uses this (practice-describing).** A self-read the user can see (which do you lean toward?) tied to the move they already have. Self-mastery, plain language — never "suppression is bad," never clinical. The ERQ instrument already measures the lean; this surfaces it as something to work.
+
+## Resolution, Not Forgiveness (Reappraisal Posture)
+
+The app's stance when hurt involves another person: resolution (settled in oneself, guard intact) rather than forgiveness (granted to the other, guard dropped). Grounded in the emotion-regulation literature:
+
+- Gross, J. J., & Levenson, R. W. (1993). Emotional suppression: Physiology, self-report, and expressive behavior. Journal of Personality and Social Psychology, 64(6), 970-986. — suppression leaves negative feeling intact while RAISING physiological activation.
+- Gross, J. J., & Levenson, R. W. (1997). Hiding feelings: The acute effects of inhibiting negative and positive emotion. Journal of Abnormal Psychology, 106(1), 95-103.
+- Gross, J. J., & John, O. P. (2003). Individual differences in two emotion regulation processes. Journal of Personality and Social Psychology, 85(2), 348-362. — habitual reappraisal vs. habitual suppression outcome profiles.
+- Longitudinal evidence (APA Emotion, 2023): habitual suppression shows a robust bidirectional link with depression/anxiety symptoms over time.
+- Mechanism note: reappraisal preserves/enhances memory via deeper processing (levels-of-processing) — the WORK is the active ingredient; skipping it is suppression by another name.
+- Boundary (protects users): reappraisal is validated for everyday negative emotion; for abuse or ongoing harm the healthy move is naming + distance, NOT reappraisal. The Resolution posture and The Re-Read both refuse that ground and route out.
+
+## Becoming (Evidence-of-Self)
+
+Surfacing concrete logged evidence of a quality the user is moving toward — never bare trait affirmation.
+
+- Wood, J. V., Perunovic, W. Q. E., & Lee, J. W. (2009). Positive self-statements: Power for some, peril for others. Psychological Science, 20(7), 860-866 (PubMed 19493324). — global positive self-statements BACKFIRE at low self-esteem; the naive mirror-affirmation version is proven harmful and is NOT built.
+- Steele, C. M. (1988). The psychology of self-affirmation. Advances in Experimental Social Psychology, 21, 261-302. — affirming VALUES (not flattering self-judgments) reduces threat processing and builds resilience.
+- Design consequence: the mechanic cites specific logged instances ("here is the moment you acted with courage"), closing the belief-gap with evidence the user generated — never decreeing "you are X."
+
+## Philosophy Lessons (Effortful Abstract Reasoning)
+
+Learning Track lane: structured effortful reasoning on hard questions as genuinely new complex material.
+
+- Chapman, S. B., & Mudar, R. A. (2014). Enhancement of cognitive and neural functions through complex reasoning training. Frontiers in Systems Neuroscience, 8:69. — complex/gist-reasoning training produces cognitive gains and measurable neural change (blood flow/connectivity); effortful, novel, sustained engagement is the plasticity condition.
+- Claim discipline: framed as capacity/practice in reasoning — NEVER "philosophy rewires your brain" or broad far-transfer (same overclaim family as brain-games/learning-styles, both banned).
