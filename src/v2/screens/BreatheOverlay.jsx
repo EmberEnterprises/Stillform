@@ -287,7 +287,7 @@ function DoneState({ onClose }) {
           fontFamily: "var(--sf-font-serif, serif)",
           fontSize: "var(--sf-text-display-md, 28px)",
           lineHeight: 1.2,
-          fontWeight: 400,
+          fontWeight: 300,
           color: "var(--sf-text-cream, #EDE8DC)",
           letterSpacing: "-0.01em",
         }}

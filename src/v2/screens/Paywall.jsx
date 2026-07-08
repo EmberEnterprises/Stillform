@@ -76,7 +76,7 @@ function planStyle(selected) {
     padding: "var(--sf-space-16)",
     borderRadius: "12px",
     border: `1px solid ${selected ? "var(--sf-accent-line)" : "var(--sf-border-quiet)"}`,
-    background: selected ? "var(--sf-surface-raised)" : "transparent",
+    background: selected ? "var(--sf-accent-glow)" : "transparent",
     cursor: "pointer",
     marginBottom: "var(--sf-space-12)",
     transition: "border-color 160ms ease, background 160ms ease",

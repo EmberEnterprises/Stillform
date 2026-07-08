@@ -216,7 +216,7 @@ function BeliefSlider({ value, onChange }) {
       />
       <div style={{ display: "flex", justifyContent: "space-between", opacity: 0.5, fontSize: "0.7rem" }}>
         <span>not at all</span>
-        <span style={{ opacity: 1, fontWeight: 600, fontSize: "1rem" }}>{value}%</span>
+        <span style={{ opacity: 1, fontWeight: 300, fontSize: "1rem" }}>{value}%</span>
         <span>completely</span>
       </div>
     </div>
@@ -227,7 +227,7 @@ function BeliefSlider({ value, onChange }) {
 const backStyle = {
   background: "none",
   border: "none",
-  color: "var(--sf-ink-soft, #888)",
+  color: "var(--sf-text-quiet)",
   fontSize: "0.85rem",
   cursor: "pointer",
   padding: "0 0 var(--sf-space-16, 16px)",
@@ -237,9 +237,9 @@ const inputStyle = {
   margin: "0.75rem 0 1rem",
   padding: "0.75rem",
   borderRadius: "8px",
-  border: "1px solid var(--sf-line, #ddd)",
-  background: "var(--sf-surface, #fff)",
-  color: "var(--sf-ink, #111)",
+  border: "1px solid var(--sf-border-hairline)",
+  background: "var(--sf-ground-elev)",
+  color: "var(--sf-text-primary)",
   font: "inherit",
   resize: "vertical",
 };
@@ -248,9 +248,9 @@ const ghostBtn = (disabled) => ({
   width: "100%",
   padding: "0.7rem",
   borderRadius: "10px",
-  border: "1px solid var(--sf-line, #ddd)",
+  border: "1px solid var(--sf-border-hairline)",
   background: "transparent",
-  color: disabled ? "var(--sf-ink-soft, #999)" : "var(--sf-ink, #333)",
+  color: disabled ? "var(--sf-text-quiet)" : "var(--sf-text-primary)",
   font: "inherit",
   fontSize: "0.9rem",
   cursor: disabled ? "default" : "pointer",
@@ -259,29 +259,29 @@ const orCardStyle = {
   marginTop: "0.5rem",
   padding: "0.9rem 1rem",
   borderRadius: "10px",
-  border: "1px solid var(--sf-line, #e2e2e2)",
-  background: "var(--sf-surface-quiet, rgba(0,0,0,0.02))",
+  border: "1px solid var(--sf-border-hairline)",
+  background: "var(--sf-ground-elev-2))",
 };
 const orTextStyle = {
   margin: "0.4rem 0 0",
   fontSize: "0.95rem",
   lineHeight: 1.55,
-  color: "var(--sf-ink, #222)",
+  color: "var(--sf-text-primary)",
 };
 const orNoteStyle = {
   margin: "0.5rem 0 0",
   fontSize: "0.8rem",
   lineHeight: 1.5,
-  color: "var(--sf-ink-soft, #888)",
+  color: "var(--sf-text-quiet)",
 };
 const ctaStyle = (disabled) => ({
   width: "100%",
   padding: "0.85rem",
   borderRadius: "10px",
   border: "none",
-  background: disabled ? "var(--sf-line, #ccc)" : "var(--sf-ink, #111)",
-  color: disabled ? "var(--sf-ink-soft, #888)" : "var(--sf-surface, #fff)",
+  background: disabled ? "var(--sf-border-hairline)" : "var(--sf-text-primary)",
+  color: disabled ? "var(--sf-text-quiet)" : "var(--sf-ground-elev)",
   font: "inherit",
-  fontWeight: 600,
+  fontWeight: 300,
   cursor: disabled ? "default" : "pointer",
 });

@@ -164,28 +164,28 @@ export default function AffectLabelingRound({ onExit }) {
 
 /* ── styles (mirror/ThoughtRecord idiom) ── */
 const backStyle = {
-  background: "none", border: "none", color: "var(--sf-ink-soft, #888)",
+  background: "none", border: "none", color: "var(--sf-text-quiet)",
   fontSize: "0.85rem", cursor: "pointer", padding: "0 0 var(--sf-space-16, 16px)",
 };
 const chipWrapStyle = { display: "flex", flexWrap: "wrap", gap: "0.5rem", margin: "1rem 0" };
 const chipStyle = {
   padding: "0.55rem 0.95rem", borderRadius: "999px",
-  border: "1px solid var(--sf-line, #ddd)", background: "var(--sf-surface, #fff)",
-  color: "var(--sf-ink, #111)", font: "inherit", cursor: "pointer",
+  border: "1px solid var(--sf-border-hairline)", background: "var(--sf-ground-elev)",
+  color: "var(--sf-text-primary)", font: "inherit", cursor: "pointer",
 };
 const skipStyle = {
   display: "block", margin: "0.5rem auto 0", background: "none", border: "none",
-  color: "var(--sf-ink-soft, #999)", fontSize: "0.8rem", cursor: "pointer", padding: "0.5rem",
+  color: "var(--sf-text-quiet)", fontSize: "0.8rem", cursor: "pointer", padding: "0.5rem",
 };
 const factBlock = { margin: "0.25rem 0 1rem" };
 const factLine = { margin: "0.2rem 0 0", fontSize: "1.1rem", fontVariantNumeric: "tabular-nums" };
 const voiceSlot = {
   margin: "1.25rem 0", padding: "0.75rem", borderRadius: "8px",
-  border: "1px dashed var(--sf-line, #ccc)", opacity: 0.7,
+  border: "1px dashed var(--sf-border-hairline)", opacity: 0.7,
 };
 const ctaStyle = (disabled) => ({
   width: "100%", padding: "0.85rem", borderRadius: "10px", border: "none",
-  background: disabled ? "var(--sf-line, #ccc)" : "var(--sf-ink, #111)",
-  color: disabled ? "var(--sf-ink-soft, #888)" : "var(--sf-surface, #fff)",
-  font: "inherit", fontWeight: 600, cursor: disabled ? "default" : "pointer",
+  background: disabled ? "var(--sf-border-hairline)" : "var(--sf-text-primary)",
+  color: disabled ? "var(--sf-text-quiet)" : "var(--sf-ground-elev)",
+  font: "inherit", fontWeight: 300, cursor: disabled ? "default" : "pointer",
 });

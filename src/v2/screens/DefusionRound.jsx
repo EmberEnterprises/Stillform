@@ -138,23 +138,23 @@ export default function DefusionRound({ onExit }) {
 
 /* ── styles ── */
 const backStyle = {
-  background: "none", border: "none", color: "var(--sf-ink-soft, #888)",
+  background: "none", border: "none", color: "var(--sf-text-quiet)",
   fontSize: "0.85rem", cursor: "pointer", padding: "0 0 var(--sf-space-16, 16px)",
 };
 const inputStyle = {
   width: "100%", margin: "0.75rem 0 0.5rem", padding: "0.75rem", borderRadius: "8px",
-  border: "1px solid var(--sf-line, #ddd)", background: "var(--sf-surface, #fff)",
-  color: "var(--sf-ink, #111)", font: "inherit", resize: "vertical",
+  border: "1px solid var(--sf-border-hairline)", background: "var(--sf-ground-elev)",
+  color: "var(--sf-text-primary)", font: "inherit", resize: "vertical",
 };
 const factBlock = { margin: "0.25rem 0 1rem" };
 const factLine = { margin: "0.2rem 0 0", fontSize: "1.1rem", fontVariantNumeric: "tabular-nums" };
 const voiceSlot = {
   margin: "1.25rem 0", padding: "0.75rem", borderRadius: "8px",
-  border: "1px dashed var(--sf-line, #ccc)", opacity: 0.7,
+  border: "1px dashed var(--sf-border-hairline)", opacity: 0.7,
 };
 const ctaStyle = (disabled) => ({
   width: "100%", padding: "0.85rem", borderRadius: "10px", border: "none",
-  background: disabled ? "var(--sf-line, #ccc)" : "var(--sf-ink, #111)",
-  color: disabled ? "var(--sf-ink-soft, #888)" : "var(--sf-surface, #fff)",
-  font: "inherit", fontWeight: 600, cursor: disabled ? "default" : "pointer",
+  background: disabled ? "var(--sf-border-hairline)" : "var(--sf-text-primary)",
+  color: disabled ? "var(--sf-text-quiet)" : "var(--sf-ground-elev)",
+  font: "inherit", fontWeight: 300, cursor: disabled ? "default" : "pointer",
 });

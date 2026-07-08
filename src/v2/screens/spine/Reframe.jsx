@@ -679,7 +679,7 @@ function Turn({ role, text, question, log_prediction, mode, taken_apart, shape, 
           <WorkLabel>THE SHAPE</WorkLabel>
           <p style={{ margin: 0, fontSize: "15px", lineHeight: 1.6, color: "var(--sf-text-primary)" }}>
             {shape.line}
-            {shape.watch_label ? <> <b style={{ color: "var(--sf-accent)", fontWeight: 500 }}>{shape.watch_label}</b> — yours.</> : null}
+            {shape.watch_label ? <> <b style={{ color: "var(--sf-accent)", fontWeight: 300 }}>{shape.watch_label}</b> — yours.</> : null}
           </p>
           <ShapeMeta label={shape.watch_label} />
         </div>
@@ -698,7 +698,7 @@ function Turn({ role, text, question, log_prediction, mode, taken_apart, shape, 
           fontFamily: "var(--sf-font-serif)",
           fontSize: "20px",
           lineHeight: 1.5,
-          fontWeight: 400,
+          fontWeight: 300,
           whiteSpace: "pre-wrap",
         }}
       >
@@ -708,7 +708,7 @@ function Turn({ role, text, question, log_prediction, mode, taken_apart, shape, 
         <div style={{ borderTop: "1px solid var(--sf-border-hairline)", padding: "var(--sf-space-16) 0 var(--sf-space-8)", marginTop: "var(--sf-space-12)" }}>
           <WorkLabel>ON RECORD</WorkLabel>
           <p style={{ margin: 0, fontSize: "14.5px", lineHeight: 1.6, color: "var(--sf-text-quiet)" }}>
-            <b style={{ color: "var(--sf-text-primary)", fontWeight: 500 }}>"{log_prediction.text}"</b>
+            <b style={{ color: "var(--sf-text-primary)", fontWeight: 300 }}>"{log_prediction.text}"</b>
             {typeof log_prediction.confidence === "number" ? ` — at ${log_prediction.confidence}.` : " — your call, on the table."}
           </p>
           {logged ? (

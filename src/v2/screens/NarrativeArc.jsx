@@ -102,7 +102,7 @@ export default function NarrativeArc({ onExit }) {
 const backStyle = {
   background: "none",
   border: "none",
-  color: "var(--sf-ink-soft, #888)",
+  color: "var(--sf-text-quiet)",
   fontSize: "0.85rem",
   cursor: "pointer",
   padding: "0 0 var(--sf-space-16, 16px)",
@@ -112,7 +112,7 @@ const beatItemStyle = {
   display: "flex",
   gap: "0.75rem",
   padding: "0.6rem 0",
-  borderTop: "1px solid var(--sf-line, #eee)",
+  borderTop: "1px solid var(--sf-border-hairline)",
   alignItems: "baseline",
 };
 const beatDateStyle = {

@@ -174,7 +174,7 @@ const backStyle = {
 const titleStyle = {
   fontFamily: "var(--sf-font-serif)",
   fontSize: "18px",
-  fontWeight: 400,
+  fontWeight: 300,
   color: "var(--sf-text-primary)",
   lineHeight: 1.3,
   margin: "0 0 var(--sf-space-8)",
@@ -191,7 +191,7 @@ const framingStyle = {
 const readingTitleStyle = {
   fontFamily: "var(--sf-font-serif)",
   fontSize: "16px",
-  fontWeight: 400,
+  fontWeight: 300,
   color: "var(--sf-text-cream)",
   lineHeight: 1.4,
   margin: "0 0 var(--sf-space-8)",

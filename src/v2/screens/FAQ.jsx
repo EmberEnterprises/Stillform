@@ -157,7 +157,7 @@ const SECTION = {
 const QUESTION = {
   fontSize: "17px",
   lineHeight: 1.4,
-  fontWeight: 600,
+  fontWeight: 300,
   margin: "8px 0 12px",
 };
 
@@ -249,7 +249,7 @@ const CHEV = {
 const QTEXT = {
   fontFamily: "var(--sf-font-serif)",
   fontSize: "19px",
-  fontWeight: 400,
+  fontWeight: 300,
   lineHeight: 1.3,
   color: "var(--sf-text-cream)",
 };

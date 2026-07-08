@@ -144,7 +144,7 @@ const domainRowStyle = {
 const domainLabelStyle = {
   fontFamily: "var(--sf-font-serif)",
   fontSize: "17px",
-  fontWeight: 400,
+  fontWeight: 300,
   color: "var(--sf-text-primary)",
   lineHeight: 1.3,
 };

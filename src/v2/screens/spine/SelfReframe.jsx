@@ -101,7 +101,7 @@ export default function SelfReframe({ precisionName, onContinue, onExit }) {
             fontFamily: "var(--sf-font-serif)",
             fontSize: "var(--sf-text-display-sm)",
             lineHeight: "var(--sf-leading-display)",
-            fontWeight: 400,
+            fontWeight: 300,
             color: "var(--sf-text-cream)",
             letterSpacing: "-0.01em",
           }}

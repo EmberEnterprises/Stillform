@@ -450,7 +450,7 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
                 fontFamily: "var(--sf-font-serif)",
                 fontSize: "20px",
                 lineHeight: 1.4,
-                fontWeight: 400,
+                fontWeight: 300,
                 color: "var(--sf-text-cream)",
               }}
             >

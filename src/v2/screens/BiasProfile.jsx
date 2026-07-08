@@ -302,7 +302,7 @@ function WatchRow({
           style={{
             fontFamily: "var(--sf-font-serif)",
             fontSize: "18px",
-            fontWeight: 400,
+            fontWeight: 300,
             color: "var(--sf-text-primary)",
             lineHeight: 1.3,
           }}
@@ -412,7 +412,7 @@ function CatalogRow({ chip, onInfo, onAdd, added }) {
           style={{
             fontFamily: "var(--sf-font-serif)",
             fontSize: "16px",
-            fontWeight: 400,
+            fontWeight: 300,
             color: added ? "var(--sf-text-faint)" : "var(--sf-text-primary)",
             lineHeight: 1.3,
           }}

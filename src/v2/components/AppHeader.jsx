@@ -22,7 +22,7 @@ export default function AppHeader({ onHome, onSignIn }) {
   const wordmark = (
     <>
       <span style={{ fontWeight: 300 }}>Still</span>
-      <span style={{ fontWeight: 400, fontStyle: "italic", color: "var(--sf-accent)" }}>form</span>
+      <span style={{ fontWeight: 300, fontStyle: "italic", color: "var(--sf-accent)" }}>form</span>
     </>
   );
   const wordmarkStyle = {

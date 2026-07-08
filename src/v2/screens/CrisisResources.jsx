@@ -174,7 +174,7 @@ const BACK_BTN = {
   marginBottom: "var(--sf-space-24)", WebkitTapHighlightColor: "transparent",
 };
 const H1 = {
-  fontFamily: "var(--sf-font-serif)", fontSize: "32px", fontWeight: 400,
+  fontFamily: "var(--sf-font-serif)", fontSize: "32px", fontWeight: 300,
   lineHeight: 1.15, color: "var(--sf-text-cream)", margin: "var(--sf-space-8) 0 var(--sf-space-12)",
 };
 const LEAD = {
@@ -190,7 +190,7 @@ const LINE = {
 };
 const LINE_MAIN = { flex: 1, minWidth: 0, display: "flex", flexDirection: "column" };
 const NAME = {
-  fontFamily: "var(--sf-font-serif)", fontSize: "18px", fontWeight: 400,
+  fontFamily: "var(--sf-font-serif)", fontSize: "18px", fontWeight: 300,
   lineHeight: 1.3, color: "var(--sf-text-cream)",
 };
 const NOTE = {
@@ -198,7 +198,7 @@ const NOTE = {
   lineHeight: 1.5, color: "var(--sf-text-faint)", marginTop: "3px",
 };
 const NUM = {
-  flexShrink: 0, fontFamily: "var(--sf-font-sans)", fontSize: "14px", fontWeight: 500,
+  flexShrink: 0, fontFamily: "var(--sf-font-sans)", fontSize: "14px", fontWeight: 300,
   color: "var(--sf-accent)", whiteSpace: "nowrap",
 };
 const NOTE_BLOCK = {

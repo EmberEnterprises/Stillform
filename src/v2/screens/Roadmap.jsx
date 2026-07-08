@@ -161,7 +161,7 @@ const H1 = {
   fontFamily: "var(--sf-font-serif)",
   fontSize: "var(--sf-text-display-sm, 28px)",
   lineHeight: 1.2,
-  fontWeight: 400,
+  fontWeight: 300,
 };
 
 const SECTION = { marginBottom: "var(--sf-space-24)" };
@@ -172,7 +172,7 @@ const STAT_LINE = {
   fontFamily: "var(--sf-font-serif)",
   fontSize: "20px",
   lineHeight: 1.35,
-  fontWeight: 400,
+  fontWeight: 300,
 };
 
 const BODY = {

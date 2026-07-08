@@ -67,7 +67,7 @@ function ExerciseRow({ title, note, progress, unit, onTap }) {
   return (
     <button type="button" onClick={onTap} aria-label={title} style={rowStyle}>
       <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 600 }}>{title}</div>
+        <div style={{ fontWeight: 300 }}>{title}</div>
         <div style={{ fontSize: "0.8rem", opacity: 0.65, marginTop: "0.2rem" }}>{note}</div>
         {progress.count > 0 && (
           <div style={{ fontSize: "0.75rem", opacity: 0.5, marginTop: "0.35rem" }}>
@@ -83,12 +83,12 @@ function ExerciseRow({ title, note, progress, unit, onTap }) {
 
 /* ── styles ── */
 const backStyle = {
-  background: "none", border: "none", color: "var(--sf-ink-soft, #888)",
+  background: "none", border: "none", color: "var(--sf-text-quiet)",
   fontSize: "0.85rem", cursor: "pointer", padding: "0 0 var(--sf-space-16, 16px)",
 };
 const rowStyle = {
   display: "flex", alignItems: "center", gap: "0.75rem", width: "100%",
   textAlign: "left", padding: "1rem 0", background: "none",
-  border: "none", borderTop: "1px solid var(--sf-line, #eee)",
-  color: "var(--sf-ink, #111)", font: "inherit", cursor: "pointer",
+  border: "none", borderTop: "1px solid var(--sf-border-hairline)",
+  color: "var(--sf-text-primary)", font: "inherit", cursor: "pointer",
 };

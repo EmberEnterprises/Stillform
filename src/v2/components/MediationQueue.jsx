@@ -129,7 +129,7 @@ const CARD = {
 const H3 = {
   margin: "var(--sf-space-8) 0",
   color: "var(--sf-text-primary)",
-  fontFamily: "var(--sf-font-sans)", fontSize: "17px", fontWeight: 500,
+  fontFamily: "var(--sf-font-sans)", fontSize: "17px", fontWeight: 300,
 };
 
 const REASONING = {
@@ -157,7 +157,7 @@ const APPROVE = {
   minHeight: "44px", padding: "0 var(--sf-space-20)",
   background: "var(--sf-text-primary, #F4F2EC)", color: "var(--sf-ground-deep, #08080A)",
   border: "none", borderRadius: "10px",
-  fontFamily: "var(--sf-font-sans)", fontSize: "15px", fontWeight: 600,
+  fontFamily: "var(--sf-font-sans)", fontSize: "15px", fontWeight: 300,
   cursor: "pointer", WebkitTapHighlightColor: "transparent",
 };
 

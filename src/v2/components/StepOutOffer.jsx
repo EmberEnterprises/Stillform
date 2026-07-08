@@ -53,7 +53,7 @@ export default function StepOutOffer({ patternLabel = null, onAccept, onDecline 
             fontFamily: "var(--sf-font-serif)",
             fontSize: "20px",
             lineHeight: 1.4,
-            fontWeight: 400,
+            fontWeight: 300,
             color: "var(--sf-text-cream)",
           }}
         >
@@ -68,7 +68,7 @@ export default function StepOutOffer({ patternLabel = null, onAccept, onDecline 
           fontFamily: "var(--sf-font-serif)",
           fontSize: "17px",
           lineHeight: 1.45,
-          fontWeight: 400,
+          fontWeight: 300,
           color: "var(--sf-accent)",
         }}
       >

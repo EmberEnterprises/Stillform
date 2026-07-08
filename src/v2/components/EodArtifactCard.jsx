@@ -61,7 +61,7 @@ export default function EodArtifactCard() {
 const ARTIFACT = {
   margin: "var(--sf-space-8) 0 0",
   fontFamily: "var(--sf-font-serif)",
-  fontWeight: 400,
+  fontWeight: 300,
   fontSize: "20px",
   lineHeight: 1.4,
   color: "var(--sf-text-cream)",

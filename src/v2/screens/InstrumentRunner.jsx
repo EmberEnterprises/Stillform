@@ -388,7 +388,7 @@ function OptionButton({ label, selected, onClick }) {
         textAlign: "left",
         padding: "var(--sf-space-16)",
         marginBottom: "var(--sf-space-8)",
-        background: selected ? "var(--sf-surface-raised, rgba(184,134,43,0.08))" : "transparent",
+        background: selected ? "var(--sf-accent-glow)" : "transparent",
         border: selected
           ? "1px solid var(--sf-accent, #B8862B)"
           : "1px solid var(--sf-border-quiet)",
@@ -836,7 +836,7 @@ const backStyle = {
 const chipLabelStyle = {
   fontFamily: "var(--sf-font-serif)",
   fontSize: "18px",
-  fontWeight: 400,
+  fontWeight: 300,
   color: "var(--sf-text-primary)",
   lineHeight: 1.3,
 };

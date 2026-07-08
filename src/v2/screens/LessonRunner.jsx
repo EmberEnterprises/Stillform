@@ -328,7 +328,7 @@ const proseStyle = {
   lineHeight: 1.5,
   color: "var(--sf-text-secondary)",
   margin: 0,
-  fontWeight: 400,
+  fontWeight: 300,
 };
 const promptStyle = {
   fontFamily: "var(--sf-font-sans)",
