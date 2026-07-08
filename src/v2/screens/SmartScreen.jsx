@@ -471,6 +471,9 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
           onComplete={completeStepOut}
         />
       </article>
+      {/* Item 6 (spec §2.8, web scope): the focus offer — a suggestion,
+          never control; native hooks come at native time. */}
+      <FocusModeLine active={isWindDown} />
     </main>
   );
 }
