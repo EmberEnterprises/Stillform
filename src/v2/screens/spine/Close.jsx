@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { draftStatement } from "../../lib/reframeApi.js";
+import { getPref, hasExplicitPref } from "../../lib/userPrefs.js";
 import EditorialBlock from "../../components/EditorialBlock.jsx";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
@@ -807,6 +808,12 @@ export function deriveMicroCredit(n) {
  * -------------------------------------------------------------------- */
 function resolveBreathingPattern(offer) {
   if (!offer) return null;
+  // Item 9: the user's EXPLICIT default-pattern pick beats the beat offer —
+  // a dial the user owns. The shipped default never overrides (design wins
+  // unless the user actually chose).
+  try {
+    if (hasExplicitPref("practice.defaultBreathing")) return getPref("practice.defaultBreathing");
+  } catch { /* fall through to the beat design */ }
   if (offer === "deep-regulate") return "deep-regulate";
   if (offer === "cyclic-sighing") return "cyclic-sighing";
   if (offer === "quick-reset") return "quick-reset";

@@ -32,6 +32,7 @@
 import { getCalendarEvents, getCalendarSummary } from "./calendarData.js";
 import { getTriggerProfile } from "./triggerProfile.js";
 import { getLatestBodyBioFilter } from "./signalLog.js";
+import { getPref } from "./userPrefs.js";
 
 const DISMISS_KEY = "stillform_v2_concierge_event_dismissed"; // { [eventKey]: iso }
 const SPEAK_AHEAD_MIN = 90;  // start speaking up to 90 min before the event
@@ -131,6 +132,10 @@ export function dismissEventOffer(key) {
  * standard — adaptation is backing off, not escalating.
  */
 export function getConciergeVolume(nowMs = Date.now()) {
+  // The user's master dial (item 9): "soft" is a FLOOR the user owns — it
+  // wins over the arithmetic. There is deliberately no "loud" (adaptation
+  // only ever backs off; Arlin's doctrine).
+  try { if (getPref("concierge.volume") === "soft") return "soft"; } catch { /* default: adaptive */ }
   let depleted = false;
   try {
     const bio = getLatestBodyBioFilter(); // comma-joined tokens or null

@@ -7,6 +7,7 @@ import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import HairlineDivider from "../components/HairlineDivider.jsx";
 import { getA11y, setA11y } from "../lib/a11y.js";
+import { getPref, setPref } from "../lib/userPrefs.js";
 
 /**
  * Settings — the user's setup surface.
@@ -46,6 +47,15 @@ export default function Settings({ onExit }) {
   const [cleared, setCleared] = useState(false);
   const [summary, setSummary] = useState(() => readDeviceSummary());
   const [a11y, setA11yState] = useState(() => getA11y());
+  // Item 9 (settings depth): the dials the user owns. Defaults = shipped
+  // behavior; every default flagged for Arlin's picks in userPrefs.js.
+  const [prefs, setPrefs] = useState(() => ({
+    breathing: getPref("practice.defaultBreathing"),
+    volume: getPref("concierge.volume"),
+  }));
+  const pickPref = (path, key, value) => {
+    if (setPref(path, value)) setPrefs((p) => ({ ...p, [key]: value }));
+  };
 
   function toggleA11y(k, onVal) {
     const next = setA11y(k, a11y[k] === onVal ? "default" : onVal);
@@ -127,6 +137,67 @@ export default function Settings({ onExit }) {
               aria-label="Toggle reduced motion"
             >
               {a11y.motion === "reduced" ? "On" : "Off"}
+            </button>
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* THE PRACTICE (item 9) — the user's default breathing pattern.
+          Explicit pick beats the beat-driven offer; untouched = design wins. */}
+      <CollapsibleSection label="The practice">
+        <div style={SECTION}>
+          <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-12)" }}>
+            The breath the practice reaches for first. Until you choose, each part of the day offers its own.
+          </p>
+          {[
+            ["quick-reset", "Quick Reset", "~1 minute — a fast settle"],
+            ["deep-regulate", "Deep Regulate", "~3 minutes — a full downshift"],
+            ["cyclic-sighing", "Cyclic Sighing", "~5 minutes — the deepest lever"],
+          ].map(([id, name, desc]) => (
+            <div style={ROW} key={id}>
+              <span style={{ color: "var(--sf-text-primary)" }}>{name}
+                <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>{desc}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => pickPref("practice.defaultBreathing", "breathing", id)}
+                style={prefs.breathing === id ? TOGGLE_ON : TOGGLE_OFF}
+                aria-pressed={prefs.breathing === id}
+                aria-label={`Default to ${name}`}
+              >
+                {prefs.breathing === id ? "Default" : "Set"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </CollapsibleSection>
+
+      {/* THE CONCIERGE (item 9) — the master volume the user owns. Two
+          options by design: adaptive (shipped) or always-soft. No "loud" —
+          adaptation only ever backs off (Arlin's doctrine). */}
+      <CollapsibleSection label="The concierge">
+        <div style={SECTION}>
+          <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-12)" }}>
+            How the app speaks up — the meeting prompts, the pattern forecasts, the evening offers. It always backs off on a heavy day; here you can make soft the rule.
+          </p>
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>Reads the day
+              <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>softer when you're low</span>
+            </span>
+            <button type="button" onClick={() => pickPref("concierge.volume", "volume", "adaptive")}
+              style={prefs.volume === "adaptive" ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={prefs.volume === "adaptive"} aria-label="Concierge reads the day">
+              {prefs.volume === "adaptive" ? "On" : "Set"}
+            </button>
+          </div>
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>Always soft
+              <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>one gentle line, easy to pass</span>
+            </span>
+            <button type="button" onClick={() => pickPref("concierge.volume", "volume", "soft")}
+              style={prefs.volume === "soft" ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={prefs.volume === "soft"} aria-label="Concierge always soft">
+              {prefs.volume === "soft" ? "On" : "Set"}
             </button>
           </div>
         </div>
