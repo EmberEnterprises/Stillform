@@ -31,6 +31,7 @@ import { formatTriggerProfileForAI } from "./triggerProfile.js";
 import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
 import { formatContextProfileForAI } from "./contextProfile.js";
 import { formatConfirmedFindingsForAI, formatReconsolidationMismatchForAI } from "./discoveryFindings.js";
+import { formatBecomingForAI } from "./becoming.js";
 import { formatVulnerabilitiesForAI } from "./vulnerabilities.js";
 import { formatProtectiveMovesForAI } from "./protectiveMoves.js";
 import { formatStrengthsForAI } from "./strengths.js";
@@ -106,6 +107,10 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   const contextProfile = formatContextProfileForAI();
   const priorSessions = formatRecentSessionsForAI();
   const confirmedFindings = formatConfirmedFindingsForAI();
+  // Becoming (Arlin 2026-07-08): directions the user chose + their confirmed
+  // moments. Honest-empty null when nothing named; fail-silent.
+  let becomingContext = null;
+  try { becomingContext = formatBecomingForAI(); } catch { becomingContext = null; }
   const reconsolidationMismatch = formatReconsolidationMismatchForAI();
   const vulnerabilities = formatVulnerabilitiesForAI();
   const protectiveMoves = formatProtectiveMovesForAI();
@@ -156,6 +161,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         contextProfile,
         priorSessions,
         confirmedFindings,
+        becomingContext,
         capacities,
         reconsolidationMismatch,
         // Vulnerabilities (June 29): the user's CONFIRMED charged traits + both

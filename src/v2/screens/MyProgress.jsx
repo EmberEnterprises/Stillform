@@ -144,6 +144,14 @@ export default function MyProgress({ onExit, onNavigate }) {
           glyph="⟲"
           onTap={() => handleNavigate("re-read")}
         />
+        {/* Becoming (Arlin 2026-07-08 spec): directions + logged evidence —
+            never bare trait claims (Wood 2009). */}
+        <ProgressEntry
+          title="Who you're becoming"
+          description="Name the qualities you're moving toward. The record answers with real moments where you already acted with them."
+          glyph="◈"
+          onTap={() => handleNavigate("becoming")}
+        />
       </section>
 
       {/* Other-read effect (2026-07-01, gap-close): a quiet, correlational
