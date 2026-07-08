@@ -15,6 +15,7 @@ import TodaysBriefCard from "../components/TodaysBriefCard.jsx";
 import EodArtifactCard from "../components/EodArtifactCard.jsx";
 import LearnNudge from "../components/LearnNudge.jsx";
 import PreEventOffer from "../components/PreEventOffer.jsx";
+import ForecastCard from "../components/ForecastCard.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
 import StepOutOffer from "../components/StepOutOffer.jsx";
 import ProofMoment from "../components/ProofMoment.jsx";
@@ -351,6 +352,11 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             firing on its own — deterministic, earned (trigger-match or
             user-marked only), state-adaptive volume, per-event dismissal. */}
         <PreEventOffer onOpenBrief={onOpenPreEventBrief} />
+
+        {/* Forecast-and-verify (ARLIN'S canonical spec): the threshold
+            question from her own confirmed pattern, the follow-up, and the
+            double-gated possible-break reflection. Arithmetic only. */}
+        <ForecastCard onEnterPractice={onEnterPractice} />
 
         <TodaysBriefCard />
 
