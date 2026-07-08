@@ -32,6 +32,7 @@ import { getSessionCount, formatRecentSessionsForAI } from "./sessions.js";
 import { formatContextProfileForAI } from "./contextProfile.js";
 import { formatConfirmedFindingsForAI, formatReconsolidationMismatchForAI } from "./discoveryFindings.js";
 import { formatBecomingForAI } from "./becoming.js";
+import { getPref } from "./userPrefs.js";
 import { formatVulnerabilitiesForAI } from "./vulnerabilities.js";
 import { formatProtectiveMovesForAI } from "./protectiveMoves.js";
 import { formatStrengthsForAI } from "./strengths.js";
@@ -111,6 +112,12 @@ export async function sendReframeMessage({ input, history = [], feelState = null
   // moments. Honest-empty null when nothing named; fail-silent.
   let becomingContext = null;
   try { becomingContext = formatBecomingForAI(); } catch { becomingContext = null; }
+  // Item 9 depth: the user's AI dials — directness (validated enum) and how
+  // they want to be addressed (their word, optional). Fail-silent defaults.
+  let aiDirectness = "standard";
+  let addressAs = "";
+  try { aiDirectness = getPref("ai.directness") || "standard"; } catch { /* default */ }
+  try { addressAs = getPref("ai.addressAs") || ""; } catch { /* default */ }
   const reconsolidationMismatch = formatReconsolidationMismatchForAI();
   const vulnerabilities = formatVulnerabilitiesForAI();
   const protectiveMoves = formatProtectiveMovesForAI();
@@ -162,6 +169,8 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         priorSessions,
         confirmedFindings,
         becomingContext,
+        aiDirectness,
+        addressAs,
         capacities,
         reconsolidationMismatch,
         // Vulnerabilities (June 29): the user's CONFIRMED charged traits + both

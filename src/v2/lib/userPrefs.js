@@ -30,14 +30,39 @@ const KEY = "stillform_v2_prefs";
 
 export const PREF_DEFAULTS = {
   practice: { defaultBreathing: "quick-reset" },
-  concierge: { volume: "adaptive" },
-  sensory: { audioCues: true },
+  ai: { directness: "standard" },
+  concierge: {
+    volume: "adaptive",
+    meetingPrompts: true,
+    forecasts: true,
+    eveningDecompression: true,
+    lessonNudges: true,
+  },
 };
 
 const VALID = {
   "practice.defaultBreathing": ["quick-reset", "deep-regulate", "cyclic-sighing"],
+  // AI directness: how straight the Reframe voice lands. "gentle" = more
+  // space, softer edges; "direct" = fewer cushions, straighter naming.
+  // Doctrine unchanged at every setting: suggestive never deterministic.
+  "ai.directness": ["gentle", "standard", "direct"],
   "concierge.volume": ["adaptive", "soft"],
-  "sensory.audioCues": [true, false],
+  // Per-voice switches: each concierge voice individually silenceable —
+  // consent granular, never all-or-nothing.
+  "concierge.meetingPrompts": [true, false],
+  "concierge.forecasts": [true, false],
+  "concierge.eveningDecompression": [true, false],
+  "concierge.lessonNudges": [true, false],
+  // NOTE (honesty): sensory.audioCues was REMOVED 2026-07-08 — nothing in v2
+  // consumes audio; a toggle controlling nothing is theater. Re-add with the
+  // first real sound consumer.
+};
+
+// Free-text prefs (validated by shape, not enum).
+const TEXT_PREFS = {
+  // How the AI addresses the user — their word, used sparingly and only
+  // when natural. Empty = no name used (the shipped behavior).
+  "ai.addressAs": { maxLen: 24 },
 };
 
 function read() {
@@ -54,9 +79,13 @@ function read() {
 /** One pref by dotted path, with the shipped default as fallback. */
 export function getPref(path) {
   const [ns, name] = String(path || "").split(".");
-  if (!ns || !name || !(path in VALID)) return undefined;
+  if (!ns || !name) return undefined;
   const stored = read();
   const v = stored && stored[ns] ? stored[ns][name] : undefined;
+  if (path in TEXT_PREFS) {
+    return typeof v === "string" ? v.slice(0, TEXT_PREFS[path].maxLen) : "";
+  }
+  if (!(path in VALID)) return undefined;
   if (VALID[path].includes(v)) return v;
   return PREF_DEFAULTS[ns][name];
 }
@@ -68,17 +97,25 @@ export function getPref(path) {
  */
 export function hasExplicitPref(path) {
   const [ns, name] = String(path || "").split(".");
-  if (!ns || !name || !(path in VALID)) return false;
+  if (!ns || !name) return false;
   const stored = read();
   const v = stored && stored[ns] ? stored[ns][name] : undefined;
+  if (path in TEXT_PREFS) return typeof v === "string" && v.trim().length > 0;
+  if (!(path in VALID)) return false;
   return VALID[path].includes(v);
 }
 
 /** Set one pref by dotted path. Invalid values are refused (returns false). */
 export function setPref(path, value) {
   const [ns, name] = String(path || "").split(".");
-  if (!ns || !name || !(path in VALID)) return false;
-  if (!VALID[path].includes(value)) return false;
+  if (!ns || !name) return false;
+  if (path in TEXT_PREFS) {
+    if (typeof value !== "string") return false;
+    value = value.trim().slice(0, TEXT_PREFS[path].maxLen);
+  } else {
+    if (!(path in VALID)) return false;
+    if (!VALID[path].includes(value)) return false;
+  }
   const stored = read();
   if (!stored[ns] || typeof stored[ns] !== "object") stored[ns] = {};
   stored[ns][name] = value;

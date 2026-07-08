@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { getPref } from "../lib/userPrefs.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import {
   getActiveForecast,
@@ -31,6 +32,8 @@ import { getPriorFrame } from "../lib/priorFrame.js";
  * @param {function(): void} onEnterPractice — the get-ahead route
  */
 export default function ForecastCard({ onEnterPractice }) {
+  // Item 9 depth: this voice is individually silenceable (concierge.forecasts).
+  try { if (getPref("concierge.forecasts") === false) return null; } catch { /* default: on */ }
   const [followUp, setFollowUp] = useState(() => {
     try { return getPendingFollowUp(); } catch { return null; }
   });

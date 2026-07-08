@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { getPref } from "../lib/userPrefs.js";
 import {
   getDecompressionCandidate,
   dismissDecompression,
@@ -22,6 +23,8 @@ import {
  * @param {function(): void} onEnterPractice — the set-it-down route
  */
 export default function EodDecompressCard({ active = false, onEnterPractice }) {
+  // Item 9 depth: this voice is individually silenceable (concierge.eveningDecompression).
+  try { if (getPref("concierge.eveningDecompression") === false) return null; } catch { /* default: on */ }
   const [candidate, setCandidate] = useState(() => {
     if (!active) return null;
     try { return getDecompressionCandidate(); } catch { return null; }

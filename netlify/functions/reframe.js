@@ -1860,6 +1860,8 @@ exports.handler = async function(event) {
       contextProfile = null,
       confirmedFindings = null,
       becomingContext = null,
+      aiDirectness = null,
+      addressAs = null,
       capacities = null,
       reconsolidationMismatch = null,
       vulnerabilities = null,
@@ -2718,6 +2720,15 @@ THE CRAFT RULE — firm on the record, soft on the meaning: state their own docu
     if (userFlaggedPatterns) contextParts.push(userFlaggedPatterns);
     if (contextProfile) contextParts.push(contextProfile);
     if (becomingContext && typeof becomingContext === "string") contextParts.push(String(becomingContext).slice(0, 2200));
+    // USER DIALS (item 9): directness shapes DELIVERY only — the doctrine
+    // (suggestive never deterministic, never a verdict) holds at every
+    // setting. addressAs = their chosen word, used sparingly when natural.
+    if (aiDirectness === "gentle") contextParts.push("DELIVERY DIAL (user's setting): GENTLE — more space, softer edges, land observations with extra room. Every doctrine rule still holds.");
+    else if (aiDirectness === "direct") contextParts.push("DELIVERY DIAL (user's setting): DIRECT — fewer cushions, straighter naming, get to it. Still suggestive never deterministic; a straighter OFFER, never a verdict.");
+    if (addressAs && typeof addressAs === "string") {
+      const cleanName = String(addressAs).slice(0, 24).replace(/["\n\r]/g, "");
+      if (cleanName.trim()) contextParts.push(`ADDRESS: the user asked to be addressed as "${cleanName.trim()}". Use it sparingly and only where natural — never every message, never performative.`);
+    }
     if (confirmedFindings) contextParts.push(`CONFIRMED PATTERNS — patterns the app found in the user's OWN logged history by arithmetic (co-occurrence, never causation) AND THE USER HAS CONFIRMED land: ${confirmedFindings} You MAY surface ONE of these as an observation when it is genuinely relevant to what they are working right now — this is the one sanctioned exception to "never volunteer a pattern they did not raise," because the math found it and the user confirmed it. Rules: voice it as the observation it is ("these two tend to show up near each other" / "X tends to follow Y"), NEVER as causation or diagnosis; offer it, never insist; at most one, sparingly; never invent, extend, or combine findings beyond exactly what is listed here; the app owns the counts and history — do not fabricate numbers.`);
     if (capacities) contextParts.push(`CAPACITY READS (internal steer only) — the user's latest self-measured capacity readings from the Workshop instruments: ${capacities}. Use these ONLY to calibrate HOW you work — e.g. a reflects-without-resolving steer means help them land a thought rather than circle it; a moved-since flag means their capacity has genuinely shifted, so do not treat old patterns as fixed. HARD RULES: never recite these readings back, never name a "level" or "assessment," never tell the user what their capacity is, never reference the instruments unprompted. This is how you see them, not something you say.`);
     if (priorSessions) contextParts.push(`PRIOR SESSIONS — what the user has worked through in earlier sessions (this is your continuity with them; use only what these entries literally record — do not infer anything more about the user than they state):\n${priorSessions}\nTHE ONE PRECISE CALLBACK (felt-continuity rule): when — and ONLY when — a prior thread is directly relevant to what they are working RIGHT NOW, you may make exactly ONE precise callback in the session: name the prior thread using the user's OWN recorded words (their precision name or takeaway, e.g. "the same edge you named before the board call"), in a single clause, then move forward. HARD LIMITS: at most one per session; never a recap or summary of a past session; never re-litigate or re-open old work; never a vague "as we've discussed"; if nothing is directly relevant, make NO callback at all — a forced callback reads as surveillance, a precise one reads as being known.`);

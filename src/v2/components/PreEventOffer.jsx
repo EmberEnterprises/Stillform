@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { getPref } from "../lib/userPrefs.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import {
   getUpcomingEventOffer,
@@ -26,6 +27,8 @@ import {
  * @param {function(): void} onOpenBrief — routes to the Pre-event Brief
  */
 export default function PreEventOffer({ onOpenBrief }) {
+  // Item 9 depth: this voice is individually silenceable (concierge.meetingPrompts).
+  try { if (getPref("concierge.meetingPrompts") === false) return null; } catch { /* default: on */ }
   const [offer, setOffer] = useState(() => {
     try { return getUpcomingEventOffer(); } catch { return null; }
   });

@@ -52,7 +52,20 @@ export default function Settings({ onExit }) {
   const [prefs, setPrefs] = useState(() => ({
     breathing: getPref("practice.defaultBreathing"),
     volume: getPref("concierge.volume"),
+    directness: getPref("ai.directness"),
+    addressAs: getPref("ai.addressAs"),
+    meetingPrompts: getPref("concierge.meetingPrompts"),
+    forecasts: getPref("concierge.forecasts"),
+    eveningDecompression: getPref("concierge.eveningDecompression"),
+    lessonNudges: getPref("concierge.lessonNudges"),
   }));
+  // Scan pace: the existing key BodyScan already reads — one source of truth.
+  const [scanPace, setScanPace] = useState(() => {
+    try { return localStorage.getItem("stillform_scan_pace") || "standard"; } catch { return "standard"; }
+  });
+  const pickScanPace = (v) => {
+    try { localStorage.setItem("stillform_scan_pace", v); setScanPace(v); } catch { /* fail-silent */ }
+  };
   const pickPref = (path, key, value) => {
     if (setPref(path, value)) setPrefs((p) => ({ ...p, [key]: value }));
   };
@@ -169,6 +182,59 @@ export default function Settings({ onExit }) {
               </button>
             </div>
           ))}
+          <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)", margin: "var(--sf-space-16) 0 var(--sf-space-12)" }}>
+            Body Scan pace — how long each hold runs.
+          </p>
+          {[["fast", "Fast", "~half-length holds"], ["standard", "Standard", "the full holds"], ["slow", "Slow", "longer, deeper holds"]].map(([id, name, desc]) => (
+            <div style={ROW} key={`pace-${id}`}>
+              <span style={{ color: "var(--sf-text-primary)" }}>{name}
+                <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>{desc}</span>
+              </span>
+              <button type="button" onClick={() => pickScanPace(id)}
+                style={scanPace === id ? TOGGLE_ON : TOGGLE_OFF}
+                aria-pressed={scanPace === id} aria-label={`Scan pace ${name}`}>
+                {scanPace === id ? "On" : "Set"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </CollapsibleSection>
+
+      {/* THE AI (item 9 depth) — delivery dials the user owns. The doctrine
+          holds at every setting; these shape delivery, never the rules. */}
+      <CollapsibleSection label="The AI">
+        <div style={SECTION}>
+          <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-12)" }}>
+            How the Reframe voice lands. Same honesty at every setting — this shapes the delivery, never the rules.
+          </p>
+          {[["gentle", "Gentle", "more space, softer edges"], ["standard", "Standard", "the shipped voice"], ["direct", "Direct", "fewer cushions, straighter naming"]].map(([id, name, desc]) => (
+            <div style={ROW} key={`dir-${id}`}>
+              <span style={{ color: "var(--sf-text-primary)" }}>{name}
+                <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>{desc}</span>
+              </span>
+              <button type="button" onClick={() => pickPref("ai.directness", "directness", id)}
+                style={prefs.directness === id ? TOGGLE_ON : TOGGLE_OFF}
+                aria-pressed={prefs.directness === id} aria-label={`AI directness ${name}`}>
+                {prefs.directness === id ? "On" : "Set"}
+              </button>
+            </div>
+          ))}
+          <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)", margin: "var(--sf-space-16) 0 var(--sf-space-8)" }}>
+            What should it call you? Optional — used sparingly, only where natural.
+          </p>
+          <input
+            type="text"
+            value={prefs.addressAs}
+            onChange={(e) => pickPref("ai.addressAs", "addressAs", e.target.value)}
+            placeholder="your name, or nothing"
+            aria-label="How the AI addresses you"
+            maxLength={24}
+            style={{
+              width: "100%", boxSizing: "border-box", padding: "10px 12px",
+              background: "var(--sf-ground-elev)", border: "0.5px solid var(--sf-border-hairline)",
+              color: "var(--sf-text-primary)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px",
+            }}
+          />
         </div>
       </CollapsibleSection>
 
@@ -200,6 +266,26 @@ export default function Settings({ onExit }) {
               {prefs.volume === "soft" ? "On" : "Set"}
             </button>
           </div>
+          <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)", margin: "var(--sf-space-16) 0 var(--sf-space-12)" }}>
+            Each voice, individually. Off means that voice stays silent — everything else keeps working.
+          </p>
+          {[
+            ["concierge.meetingPrompts", "meetingPrompts", "Meeting prompts", "ahead of flagged events"],
+            ["concierge.forecasts", "forecasts", "Pattern forecasts", "when your own pattern is live"],
+            ["concierge.eveningDecompression", "eveningDecompression", "Evening set-down", "the day's heaviest moment, at close"],
+            ["concierge.lessonNudges", "lessonNudges", "Lesson nudges", "the next rep, when earned"],
+          ].map(([path, key, name, desc]) => (
+            <div style={ROW} key={key}>
+              <span style={{ color: "var(--sf-text-primary)" }}>{name}
+                <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>{desc}</span>
+              </span>
+              <button type="button" onClick={() => pickPref(path, key, !prefs[key])}
+                style={prefs[key] ? TOGGLE_ON : TOGGLE_OFF}
+                aria-pressed={!!prefs[key]} aria-label={`Toggle ${name}`}>
+                {prefs[key] ? "On" : "Off"}
+              </button>
+            </div>
+          ))}
         </div>
       </CollapsibleSection>
 

@@ -16,7 +16,6 @@ ok("defaults = shipped behavior (nothing changes until a dial moves)", () => {
   reset();
   assert.strictEqual(up.getPref("practice.defaultBreathing"), "quick-reset");
   assert.strictEqual(up.getPref("concierge.volume"), "adaptive");
-  assert.strictEqual(up.getPref("sensory.audioCues"), true);
 });
 
 ok("set + get round-trips a valid value", () => {
@@ -38,4 +37,27 @@ ok("unknown paths are refused, corrupt storage falls back to defaults", () => {
   assert.strictEqual(up.getPref("practice.defaultBreathing"), "quick-reset");
 });
 
-console.log(`userPrefs: ${passed}/4 pass`);
+ok("per-voice concierge switches default ON, round-trip OFF", () => {
+  reset();
+  assert.strictEqual(up.getPref("concierge.forecasts"), true);
+  assert.strictEqual(up.setPref("concierge.forecasts", false), true);
+  assert.strictEqual(up.getPref("concierge.forecasts"), false);
+});
+
+ok("ai.directness validated; addressAs is free text, trimmed and capped", () => {
+  reset();
+  assert.strictEqual(up.setPref("ai.directness", "direct"), true);
+  assert.strictEqual(up.setPref("ai.directness", "brutal"), false);
+  assert.strictEqual(up.getPref("ai.addressAs"), "");
+  assert.strictEqual(up.setPref("ai.addressAs", "  Arlin  "), true);
+  assert.strictEqual(up.getPref("ai.addressAs"), "Arlin");
+  assert.strictEqual(up.hasExplicitPref("ai.addressAs"), true);
+});
+
+ok("removed audioCues pref is dead: unknown path refused", () => {
+  reset();
+  assert.strictEqual(up.setPref("sensory.audioCues", true), false);
+  assert.strictEqual(up.getPref("sensory.audioCues"), undefined);
+});
+
+console.log(`userPrefs: ${passed}/7 pass`);

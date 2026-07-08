@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { getPref } from "../lib/userPrefs.js";
 import { LESSONS, getLesson } from "../lib/learningTrack.js";
 import { getNextLessonNudge, dismissLessonNudge } from "../lib/trackProgress.js";
 
@@ -17,6 +18,8 @@ import { getNextLessonNudge, dismissLessonNudge } from "../lib/trackProgress.js"
  * @param {function(): void} onOpenLearn — routes to the Library's Learn tab
  */
 export default function LearnNudge({ onOpenLearn }) {
+  // Item 9 depth: this voice is individually silenceable (concierge.lessonNudges).
+  try { if (getPref("concierge.lessonNudges") === false) return null; } catch { /* default: on */ }
   const [nudge, setNudge] = useState(() => {
     try {
       return getNextLessonNudge(LESSONS);
