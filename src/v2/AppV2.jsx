@@ -249,6 +249,7 @@ export default function AppV2() {
           if (target === "progress") setScreen("my-progress");
           else if (target === "library") setScreen("library");
           else if (target === "library-learn") setScreen("library-learn");
+          else if (target === "pre-event-brief") setScreen("pre-event-brief");
           else if (target === "settings") setScreen("settings");
           else if (target === "faq") setScreen("faq");
           else if (target === "crisis-resources") setScreen("crisis-resources");

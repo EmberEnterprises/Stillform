@@ -14,6 +14,7 @@ import TodayEngine from "../components/TodayEngine.jsx";
 import TodaysBriefCard from "../components/TodaysBriefCard.jsx";
 import EodArtifactCard from "../components/EodArtifactCard.jsx";
 import LearnNudge from "../components/LearnNudge.jsx";
+import PreEventOffer from "../components/PreEventOffer.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
 import StepOutOffer from "../components/StepOutOffer.jsx";
 import ProofMoment from "../components/ProofMoment.jsx";
@@ -80,7 +81,7 @@ import {
  *
  * @param {function(): void} onBeginSession — opens the spine.
  */
-export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onOpenProgress = null, onOpenLearn = null }) {
+export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onOpenProgress = null, onOpenLearn = null, onOpenPreEventBrief = null }) {
   const [beat, setBeat] = useState(() => getBeatOverride() || getCurrentBeat());
   const [thread, setThread] = useState(() => getTodayThread(beat));
   const [sessionCount, setSessionCount] = useState(() => getSessionCount());
@@ -346,6 +347,11 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
         {/* Today's Brief — the morning artifact, re-readable all day (Arlin:
             "on the home screen"). Self-gates: renders nothing until generated.
             Sits in the daily-context zone, just above the naming surface. */}
+        {/* The anticipatory concierge (Arlin 2026-07-08): the meeting prompt,
+            firing on its own — deterministic, earned (trigger-match or
+            user-marked only), state-adaptive volume, per-event dismissal. */}
+        <PreEventOffer onOpenBrief={onOpenPreEventBrief} />
+
         <TodaysBriefCard />
 
         {/* Learn nudge — the Track's one EARNED concierge offer (self-gating:
