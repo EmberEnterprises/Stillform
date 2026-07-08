@@ -648,6 +648,18 @@ export const SCIENCE_ENTRIES = [
       "Mussweiler, Strack & Pfeiffer (2000) \u2014 considering the opposite reduces the anchoring effect \u2014 PSPB 26:1142-1150",
     ],
   },
+  {
+    id: "complex-reasoning",
+    title: "Hard questions",
+    oneLiner: "Structured effortful reasoning on questions with no easy answer \u2014 practice for the machinery itself.",
+    whatItDoes:
+      "A lane of lessons built on old, hard questions \u2014 not for the answers, but for the reps: holding two positions at once, building the other side's best case, separating a thing from your model of it. The reasoning is the workout.",
+    theScience:
+      "Sustained, effortful reasoning over complex, abstract material \u2014 extracting the gist, weighing frames, integrating across positions \u2014 is the kind of genuinely demanding engagement associated with measurable cognitive gains and neural change in adults. The claim is honest and narrow: this trains the reasoning you practice and builds capacity through effort \u2014 not \u201csmarter at everything,\u201d and not a shortcut.",
+    sources: [
+      "Chapman & Mudar (2014) \u2014 enhancement of cognitive and neural functions through complex reasoning training \u2014 Frontiers in Systems Neuroscience 8:69",
+    ],
+  },
 ];
 
 /** Lookup one entry by id, or null. */

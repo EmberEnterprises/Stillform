@@ -57,6 +57,11 @@ export const CHAPTERS = [
     title: "The body",
     blurb: "The levers you carry in your own physiology \u2014 the fastest, most portable way to shift a state.",
   },
+  {
+    id: "hard-questions",
+    title: "Hard questions",
+    blurb: "Old questions with no easy answer \u2014 practiced not for the answers, but for what holding them builds. The reasoning is the workout.",
+  },
 ];
 
 export const LESSONS = [
@@ -789,6 +794,150 @@ export const LESSONS = [
       "It\u2019s the same range underneath elite performance anywhere \u2014 the athlete whose heart rate drops between points, the surgeon who\u2019s fully on in the field and fully off at the sink. The skill was never staying level; it was owning the gearbox. That\u2019s what the practice has been building.",
     comeBack:
       "Come back in a few days \u2014 recall first: what\u2019s actually being trained \u2014 the calm, or the shift? If your answer is the shift, it\u2019s in.",
+  },,
+  {
+    id: "the-steelman",
+    chapter: "hard-questions",
+    conceptId: "complex-reasoning",
+    title: "The steelman",
+    transferLine: "the same move a good lawyer makes preparing the other side\u2019s case",
+    intro:
+      "Anyone can knock down a weak version of an idea they dislike. The harder rep \u2014 the one that builds something \u2014 is constructing the STRONGEST version of a position you don\u2019t hold. Philosophers call it steelmanning. Let\u2019s run it once.",
+    workedExample:
+      "Watch it once: someone believes \u201cworking from home is better, full stop.\u201d The steelman of the other side isn\u2019t \u201csome bosses like offices.\u201d It\u2019s: \u201cspontaneous, unplanned contact between people who wouldn\u2019t schedule a meeting is where a real share of new ideas come from \u2014 and it doesn\u2019t survive scheduling.\u201d Notice: building that didn\u2019t change their mind. It changed what their mind could see.",
+    rep: {
+      kind: "word",
+      prompt: "Take one opinion you actually hold. Now write the single strongest sentence FOR the other side \u2014 the version their smartest defender would give.",
+      placeholder: "the other side\u2019s best sentence",
+    },
+    drills: {
+      foundation: [
+        "Steelman a preference \u2014 something low-stakes you like or dislike. Build the honest case for the opposite taste.",
+        "Take a belief from someone you know and state it better than they usually do.",
+      ],
+      further: [
+        "Steelman a position that mildly irritates you. The irritation is the resistance \u2014 the rep is worth more there.",
+        "Write the steelman, then find the ONE point in it you can\u2019t actually refute. Sit with that point for a beat.",
+      ],
+    },
+    name: "That was steelmanning \u2014 effortful perspective construction. You didn\u2019t switch sides; you built the other side\u2019s best case with your own hands. The mind that can do that on demand is harder to trap, harder to anchor, and much harder to spiral.",
+    runLive:
+      "Next disagreement you\u2019re in \u2014 today, this week \u2014 before answering, silently build their best case in one sentence. Then respond. Watch what it does to the temperature.",
+    notice:
+      "The tell that it worked: the other position stops sounding stupid and starts sounding wrong-but-serious \u2014 or occasionally, quietly, partly right. Either way you\u2019re now reasoning instead of defending.",
+    whenHard:
+      "If you can\u2019t find a strong version, you\u2019ve likely only ever met the weak one. That\u2019s not a dead end \u2014 it\u2019s the discovery. Ask: what would the smartest person who believes this say?",
+    deeperCut: {
+      why: "Constructing the opposite case forces your mind to generate evidence it was skipping \u2014 the same corrective that loosens anchored and overconfident judgment. The effort of the construction is the active ingredient.",
+      trap: "Steelmanning can slide into capitulating \u2014 building their case and abandoning yours by default. The rep is holding BOTH: their best case and your own, at once, and weighing.",
+      when: "Best before an argument, a decision, or a strong take you\u2019re about to commit to. Worst as a weapon (\u201cI steelmanned you and you\u2019re still wrong\u201d is just condescension with extra steps).",
+      pairsWith: "Pairs with the other read in your Thought Record \u2014 same move, aimed at your own beliefs instead of someone else\u2019s.",
+    },
+    levels: [
+      "Steelman a low-stakes preference.",
+      "Steelman a position you argue against often.",
+      "Steelman a position that touches something you care about \u2014 and hold both cases without dropping either.",
+    ],
+    transfer:
+      "It\u2019s the same move underneath serious work everywhere \u2014 a lawyer preparing the other side\u2019s case before their own, a scientist designing the experiment that could kill their hypothesis, a founder writing the memo against their launch. The skill isn\u2019t agreement. It\u2019s being able to build what you\u2019d have to answer.",
+    comeBack:
+      "Come back in a few days \u2014 and before re-reading, try to recall: what was the move? Build first, judge second. Pulling it from memory files it deeper than re-reading ever will.",
+  },
+  {
+    id: "the-map-and-the-territory",
+    chapter: "hard-questions",
+    conceptId: "complex-reasoning",
+    title: "The map and the territory",
+    transferLine: "the same distinction a pilot holds between the instruments and the sky",
+    intro:
+      "An old, sharp distinction: the map is not the territory. Your account of a thing \u2014 any thing \u2014 is a model of it, not the thing itself. Useful, compressed, and always missing something. Let\u2019s catch one map in the act.",
+    workedExample:
+      "Watch it once: \u201cthe meeting went badly.\u201d That\u2019s a map \u2014 four words standing in for forty minutes. The territory held: two hard questions, one answered well; a colleague\u2019s distracted face (their territory: a sick kid at home); a decision that actually advanced. The map \u201cbadly\u201d isn\u2019t false \u2014 it\u2019s COMPRESSED, and the compression chose what to keep.",
+    rep: {
+      kind: "word",
+      prompt: "Take one summary you\u2019ve made today \u2014 of an event, a person, yourself. Name ONE real detail the summary dropped.",
+      placeholder: "what the map left out",
+    },
+    drills: {
+      foundation: [
+        "Take a one-word read of your day so far (\u201cfine,\u201d \u201crough\u201d). List two details of the territory it compressed away.",
+        "Find a place where two people hold different maps of the same event \u2014 and name what each map kept.",
+      ],
+      further: [
+        "Take a map you\u2019ve carried for years \u2014 about a person, a place, yourself. Ask: when was this last updated against the territory?",
+        "Catch a map masquerading as territory \u2014 a summary being treated as the thing itself \u2014 in something you read or say today.",
+      ],
+    },
+    name: "That was map-territory separation \u2014 catching the difference between a thing and your model of it. Every strong reaction you\u2019ve ever had was a reaction to a map. Knowing that doesn\u2019t make maps wrong; it makes them CHECKABLE.",
+    runLive:
+      "Next time a summary lands hard today \u2014 yours or someone else\u2019s \u2014 ask one question of it: what did this map leave out? Not to dismiss it. To check it.",
+    notice:
+      "The tell that it worked: a beat of looseness. The account is still there, but it\u2019s an account now \u2014 something held, not something you\u2019re inside.",
+    whenHard:
+      "If map and territory feel identical \u2014 if \u201cthat\u2019s just what happened\u201d \u2014 that\u2019s the signal the map is old and load-bearing. Start smaller: find one dropped detail. One is enough to prove there\u2019s a difference.",
+    deeperCut: {
+      why: "A model that knows it\u2019s a model can update; one that thinks it\u2019s reality cannot. The entire practice of reframing rests on this one distinction \u2014 the story of the event is not the event.",
+      trap: "\u201cIt\u2019s all just maps\u201d can curdle into \u201cnothing is real / every read is equally valid.\u201d No \u2014 the territory is real and some maps fit it better. The rep is checking, not dissolving.",
+      when: "Strongest at the moment a summary hardens \u2014 \u201cthey\u2019re selfish,\u201d \u201cI failed,\u201d \u201cit\u2019s ruined.\u201d The harder the map, the more the check is worth.",
+      pairsWith: "Pairs with Spot a repeat \u2014 a recurring pattern is a map your history drew; this lesson is how you hold it lightly enough to test.",
+    },
+    levels: [
+      "Find one detail a fresh summary dropped.",
+      "Catch an old map \u2014 one you\u2019ve carried a while \u2014 and check it against current territory.",
+      "Hold a hard moment as map-plus-territory WHILE it\u2019s happening \u2014 reacting to the event, not only to your account of it.",
+    ],
+    transfer:
+      "It\u2019s the same discipline everywhere precision matters \u2014 a pilot trusting instruments while knowing they aren\u2019t the sky, a doctor holding a diagnosis as a model that new labs can overturn, an engineer who knows the diagram is not the machine. Expertise isn\u2019t having better maps only \u2014 it\u2019s never forgetting they\u2019re maps.",
+    comeBack:
+      "Come back in a few days \u2014 recall first, re-read second: what\u2019s the distinction? If you can rebuild it from memory and find one fresh example, the concept is yours now, not the page\u2019s.",
+  },
+  {
+    id: "the-ship-of-theseus",
+    chapter: "hard-questions",
+    conceptId: "complex-reasoning",
+    title: "The ship of Theseus",
+    transferLine: "the same both-at-once hold a physicist keeps on light being wave and particle",
+    intro:
+      "The oldest identity puzzle there is: a ship has every plank replaced, one by one, over years. Is it the same ship? There\u2019s no trick answer coming \u2014 the value is in what your mind has to DO to hold the question. Let\u2019s hold it.",
+    workedExample:
+      "Watch the machinery: say YES, same ship \u2014 then identity is continuity, the unbroken thread of it, not the wood. Say NO, different ship \u2014 then identity is material, and it changed the day the first plank did. Both answers are coherent. Both cost something. The rep isn\u2019t picking \u2014 it\u2019s feeling exactly WHERE each one bends.",
+    rep: {
+      kind: "word",
+      prompt: "Hold both answers for a beat \u2014 same ship, different ship. Then name, in a few words, what \u201cthe same\u201d would have to MEAN for your answer to hold.",
+      placeholder: "what \u201cthe same\u201d means here",
+    },
+    drills: {
+      foundation: [
+        "Run the puzzle on something you own that\u2019s been repaired and re-repaired. Same thing, or its successor \u2014 and by what definition?",
+        "A band with no original members plays under the old name. Same band? Name the definition your answer relies on.",
+      ],
+      further: [
+        "Run it on a friendship that\u2019s changed completely over ten years. What carried \u2014 and is the carrying enough?",
+        "Hold both answers on something that matters to you, without collapsing to either, for a full minute. The discomfort is the rep.",
+      ],
+    },
+    name: "That was sustained abstract reasoning \u2014 holding two coherent, incompatible frames at once and probing what each one is made of. Most minds grab the first workable answer and stop. You just practiced NOT stopping \u2014 and that tolerance for the unresolved is a capacity, and it grows.",
+    runLive:
+      "Next time a question today wants a fast verdict \u2014 same or different, good or bad, right or wrong \u2014 hold both readings for one extra beat before choosing. Just one beat longer than comfortable.",
+    notice:
+      "The tell that it worked: mild strain, like a held stretch \u2014 and then the question getting more interesting instead of more annoying. That shift IS the capacity building.",
+    whenHard:
+      "If holding both feels intolerable \u2014 if your mind demands the answer NOW \u2014 notice that demand as an event. That urgency is worth watching: a lot of bad conclusions exist only because sitting with the question felt worse.",
+    deeperCut: {
+      why: "Effortful reasoning over abstract material with no retrievable answer forces integration and frame-shifting \u2014 the demanding, novel, sustained kind of engagement associated with real cognitive gains. The strain is the point.",
+      trap: "Don\u2019t weaponize the puzzle into relativism \u2014 \u201cnothing is really anything.\u201d The lesson is that \u201csame\u201d has multiple rigorous definitions, not zero. Precision, not dissolution.",
+      when: "Best when rested and curious \u2014 this is a workout, not a rescue. On a depleted day, the body lessons serve better; come back to this one sharp.",
+      pairsWith: "Pairs with The map and the territory \u2014 \u201cthe same ship\u201d is a map question in disguise: which features did YOUR map of identity choose to keep?",
+    },
+    levels: [
+      "Hold both answers on an object.",
+      "Hold both on something with stakes \u2014 a relationship, a place, a role.",
+      "Notice a real decision that secretly turns on what \u201cthe same\u201d means \u2014 and make the definition explicit before deciding.",
+    ],
+    transfer:
+      "It\u2019s the same both-at-once hold that serious thinking demands everywhere \u2014 a physicist keeping wave AND particle in hand, a judge weighing two lines of precedent that both apply, a translator carrying two languages\u2019 truths across one sentence. The capacity to keep incompatible frames alive without panic is what hard problems are actually solved with.",
+    comeBack:
+      "Come back in a few days \u2014 don\u2019t re-read; re-ASK. Pose the ship to yourself cold and watch what your mind does differently this time. The difference is the training showing.",
   },
 ];
 
