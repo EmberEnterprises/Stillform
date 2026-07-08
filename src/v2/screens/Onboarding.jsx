@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
+import StillFormMark from "../components/StillFormMark.jsx";
 import { tagTrigger } from "../lib/triggerProfile.js";
 import { setTilt, setEarliestSignal } from "../lib/windowRead.js";
 import { addChipToWatchList } from "../lib/biasProfile.js";
@@ -323,13 +324,19 @@ export default function Onboarding({ onComplete }) {
   if (phase === "frame") {
     return (
       <main className="sf-page sf-page--hero">
-        <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
-          <MonoLabel size="xs" tone="faint">Stillform</MonoLabel>
-          <p style={H}>You already know who you are. The noise makes it hard to hear.</p>
-          <p style={BODY}>
-            Stillform is a practice in metacognition — seeing how your own mind processes, and
-            expanding what it can do. Not calm as a product. Capacity, with composure as the thing
-            you feel along the way.
+        <article className="sf-fade-enter" style={{ maxWidth: 560, textAlign: "center" }}>
+          {/* The Still Form, alive from the first screen (flag 3, Arlin's scope
+              lock). Day one it breathes as the simple base ring — honest: a
+              new record, nothing faked. The form IS the promise. */}
+          <StillFormMark />
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginTop: "var(--sf-space-24)" }}>
+            Stillform
+          </MonoLabel>
+          <p style={{ ...H, textAlign: "center" }}>
+            You already know who you are. The noise makes it hard to hear.
+          </p>
+          <p style={{ ...NORM, textAlign: "center" }}>
+            This form is yours. It grows as your record does — no two are alike.
           </p>
           <Button variant="primary" onClick={() => { setPhase("how"); fire("Onboarding Started"); }}>Begin</Button>
         </article>
@@ -343,14 +350,12 @@ export default function Onboarding({ onComplete }) {
       <main className="sf-page sf-page--hero">
         <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
           <MonoLabel size="xs" tone="faint">How it works</MonoLabel>
-          <p style={BODY}>
-            Short daily reps — name the state, read the body, work the thought. The record
-            compounds: your patterns, your triggers, your capacities, measured against your own
-            past and no one else's. The app pays attention so you can spend yours where it counts.
+          <p style={H}>
+            A practice in seeing how your own mind works — and expanding what it can do.
           </p>
           <p style={BODY}>
-            First: five questions. Not an intake — a first rep. Each answer gets sharpened one
-            level in front of you. That sharpening is the practice, performed once, on you.
+            It starts with five questions. Not an intake — a first rep. Watch what happens
+            to your first answer.
           </p>
           <Button variant="primary" onClick={() => setPhase("cal")}>Run the first rep</Button>
         </article>
@@ -423,40 +428,52 @@ export default function Onboarding({ onComplete }) {
   /* ── THE READ — the synthesis reveal ── */
   if (phase === "read") {
     const lines = composeRead(answers);
+    const seen = composeSeen(answers);
+    let delay = 0;
+    const next = () => `${(delay += 350)}ms`; // staggered arrival, one line at a time
     return (
       <main className="sf-page sf-page--hero">
-        <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
-          <MonoLabel size="xs" tone="faint">Your starting read</MonoLabel>
+        <article style={{ maxWidth: 560 }}>
+          {/* The arrival (flag 3): the form they met on screen one returns to
+              receive the read — their answers, given shape. Staggered reveal;
+              honest empty state if they kept their cards close. */}
+          <div className="sf-fade-enter" style={{ textAlign: "center", marginBottom: "var(--sf-space-24)" }}>
+            <StillFormMark />
+          </div>
+          <MonoLabel size="xs" tone="faint" className="sf-fade-enter" style={{ animationDelay: next() }}>
+            Your starting read
+          </MonoLabel>
           {lines.length > 0 ? (
             <>
               {lines.map((l) => (
-                <p key={l} style={READLINE}>{l}</p>
+                <p key={l} className="sf-fade-enter" style={{ ...READLINE, animationDelay: next() }}>{l}</p>
               ))}
-              {composeSeen(answers).length > 0 && (
-                <div style={{ borderTop: "0.5px solid var(--sf-accent-line)", paddingTop: "var(--sf-space-16)", marginTop: "var(--sf-space-8)" }}>
+              {seen.length > 0 && (
+                <div className="sf-fade-enter" style={{ borderTop: "0.5px solid var(--sf-accent-line)", paddingTop: "var(--sf-space-16)", marginTop: "var(--sf-space-8)", animationDelay: next() }}>
                   <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
                     What this adds up to
                   </MonoLabel>
-                  {composeSeen(answers).map((l) => (
+                  {seen.map((l) => (
                     <p key={l.slice(0, 24)} style={READLINE}>{l}</p>
                   ))}
                 </div>
               )}
-              <p style={NORM}>
-                Five answers, one coherent shape — and none of it rare. This is a starting read, not
-                a verdict: it sharpens with use, and everything in it stays yours to correct. The
-                practice exists to make it more precise than any questionnaire ever could.
+              <p className="sf-fade-enter" style={{ ...NORM, animationDelay: next() }}>
+                A starting read, not a verdict — it sharpens with use, and every line stays yours
+                to correct.
               </p>
             </>
           ) : (
-            <p style={BODY}>
+            <p className="sf-fade-enter" style={{ ...BODY, animationDelay: next() }}>
               You kept your cards close — fair. The read builds from practice instead; nothing here
               is ever guessed on your behalf.
             </p>
           )}
-          <Button variant="primary" onClick={() => { try { saveStartingRead({ portrait: lines, seen: composeSeen(answers) }); } catch { /* */ } setPhase("concierge"); fire("Read Shown", { beats: lines.length }); }}>
-            Continue
-          </Button>
+          <div className="sf-fade-enter" style={{ animationDelay: next() }}>
+            <Button variant="primary" onClick={() => { try { saveStartingRead({ portrait: lines, seen: composeSeen(answers) }); } catch { /* */ } setPhase("concierge"); fire("Read Shown", { beats: lines.length }); }}>
+              Continue
+            </Button>
+          </div>
         </article>
       </main>
     );
@@ -469,15 +486,10 @@ export default function Onboarding({ onComplete }) {
         <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
           <MonoLabel size="xs" tone="faint">The concierge</MonoLabel>
           <p style={BODY}>
-            That read is provisional — a starting point that sharpens with use. What sharpens it
-            is repetition, and the app removes the friction of returning: a morning brief prepared
-            from your own record, preparation before the moments that matter, a quiet close to the
-            day.
-          </p>
-          <p style={BODY}>
-            If you want it to see more, connect it here — each one optional, off until you turn it
-            on, and forgettable. Health signals arrive with the phone version. Nothing is required;
-            the practice works either way.
+            The read sharpens with use — and the app removes the friction of returning: a morning
+            brief from your own record, preparation before the moments that matter, a quiet close
+            to the day. Connect what you want it to see. Each one optional, off until you turn it
+            on; the practice works either way.
           </p>
           <div style={CONSENT_BLOCK}>
             <MonoLabel size="xs" tone="faint">Calendar</MonoLabel>
