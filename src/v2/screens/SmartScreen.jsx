@@ -16,6 +16,8 @@ import EodArtifactCard from "../components/EodArtifactCard.jsx";
 import LearnNudge from "../components/LearnNudge.jsx";
 import PreEventOffer from "../components/PreEventOffer.jsx";
 import ForecastCard from "../components/ForecastCard.jsx";
+import EodDecompressCard from "../components/EodDecompressCard.jsx";
+import FocusModeLine from "../components/FocusModeLine.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
 import StepOutOffer from "../components/StepOutOffer.jsx";
 import ProofMoment from "../components/ProofMoment.jsx";
@@ -367,6 +369,10 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
 
         {/* EOD artifact — the evening read, re-readable on the home (Arlin:
             home + inline at close). Self-gates until generated at evening close. */}
+        {/* Item 6 (spec §2.1): the evening set-it-down — the day's heaviest
+            ended event, EOD window only (canon §10 keeps it off wind-down). */}
+        <EodDecompressCard active={beat === "eod"} onEnterPractice={onEnterPractice} />
+
         <EodArtifactCard />
 
         {/* The naming surface IS the home practice — rendered inline, not a
