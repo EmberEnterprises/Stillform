@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BodyScan from "./BodyScan.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import InstrumentRunner from "./InstrumentRunner.jsx";
 import CDQUEST, { score as cdquestScore } from "../lib/instruments/cdquest.js";
@@ -55,6 +56,9 @@ export default function Library({ onExit, initialTab }) {
   const [activeId, setActiveId] = useState(null);
   const [activeScienceId, setActiveScienceId] = useState(null);
   const [activeLessonId, setActiveLessonId] = useState(null);
+  const [scanOpen, setScanOpen] = useState(false);
+
+  if (scanOpen) return <BodyScan onExit={() => setScanOpen(false)} />;
 
   const active = activeId ? INSTRUMENTS.find((e) => e.id === activeId) : null;
   if (active) {
@@ -128,6 +132,26 @@ export default function Library({ onExit, initialTab }) {
             Short, structured takes that show how your mind works under pressure. No scores, no
             judgment — take one whenever you want a closer look.
           </p>
+
+          {/* Body Scan (ARLIN'S CALL 2026-07-08: restore, NOT on home).
+              Six areas, firm-pressure anchors, timed holds — attention
+              training on the body's channel. */}
+          <button
+            type="button"
+            className="sf-sec-row"
+            aria-label="Run the Body Scan"
+            onClick={() => setScanOpen(true)}
+          >
+            <span className="sf-sec-mark" aria-hidden="true">{"\u25C9"}</span>
+            <span className="sf-sec-row-main">
+              <span className="sf-sec-row-top">
+                <span className="sf-sec-name">Body Scan</span>
+                <span className="sf-sec-meta">~5 min</span>
+              </span>
+              <span className="sf-sec-sub">Six areas, one at a time — precise attention with a firm-pressure anchor. Read the hardware directly.</span>
+            </span>
+            <span className="sf-sec-arrow" aria-hidden="true">{"\u2192"}</span>
+          </button>
 
           {INSTRUMENTS.map(({ id, instrument }, i) => (
             <button

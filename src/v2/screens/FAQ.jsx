@@ -419,7 +419,7 @@ const ITEMS = [
     q: "How does a session work?",
     a: (
       <>
-        Open the app and it meets you where the day is — a brief check-in, a guided reframe, and a
+        Open the app and it meets you where the day is — a brief State Check, a guided reframe, and a
         close. You can start a quick breathing reset any time, too. Most sessions take a few minutes.
       </>
     ),
@@ -452,7 +452,7 @@ const ITEMS = [
     q: "What is Today's Brief?",
     a: (
       <>
-        After your morning check-in, Stillform composes a short brief for the day &mdash; your
+        After your morning State Check, Stillform composes a short brief for the day &mdash; your
         hardware (the state you&rsquo;re carrying), the risks worth seeing, a move or two, and how
         to recover. It&rsquo;s built from what you named plus your own patterns, and the brief
         is kept on your home screen so you can re-read it through the day. Collapse it any time.
