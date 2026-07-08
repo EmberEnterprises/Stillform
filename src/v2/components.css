@@ -296,6 +296,36 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ── sf-tabs — quiet tab row for multi-section surfaces (Library).
+   Mono labels on a single hairline; the active tab carries a brass
+   underline drawn as a 0.5px-weight rule, never a filled pill. ── */
+.sf-tabs {
+  display: flex;
+  gap: var(--sf-space-24);
+  border-bottom: 0.5px solid var(--sf-border-hairline);
+  margin-bottom: var(--sf-space-24);
+}
+.sf-tab {
+  background: transparent;
+  border: none;
+  padding: 10px 2px 12px;
+  margin-bottom: -0.5px;
+  font-family: var(--sf-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sf-text-faint);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color 160ms ease, border-color 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.sf-tab:hover { color: var(--sf-text-quiet); }
+.sf-tab[aria-selected="true"] {
+  color: var(--sf-accent);
+  border-bottom-color: var(--sf-accent);
+}
+
 .sf-v2 .sf-thread-text {
   font-family: var(--sf-font-serif);
   font-size: 17px;
