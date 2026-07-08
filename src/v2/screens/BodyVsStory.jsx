@@ -77,7 +77,7 @@ export default function BodyVsStory({ onExit }) {
           <p style={readbackStyle}>
             {pickedLow
               ? "Then some of this may be the body, not the whole truth. You've named it — that's the move. Hold the story lightly, and re-read it once you're restored."
-              : "Then the read's probably clean — you can trust the conclusion. Naming it was still the move; that's the part that makes the read honest."}
+              : "Then the read's probably clean — the conclusion likely deserves its weight. Naming it was still the move; that's the part that makes the read honest."}
           </p>
         )}
       </section>

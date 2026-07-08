@@ -786,7 +786,7 @@ export function deriveMicroCredit(n) {
   if (n === 10)  return { count: 10,  milestone: "ten",          label: "Ten reps named." };
   if (n === 25)  return { count: 25,  milestone: "twenty-five",  label: "Twenty-five reps named." };
   if (n === 50)  return { count: 50,  milestone: "fifty",        label: "Fifty reps named." };
-  if (n === 100) return { count: 100, milestone: "hundred",      label: "One hundred reps named — different than the day you started." };
+  if (n === 100) return { count: 100, milestone: "hundred",      label: "One hundred reps named — a hundred reps between you and the day you started." };
   if (n > 100 && n % 100 === 0) {
     return { count: n, milestone: "multiple-of-100", label: `${n} reps named.` };
   }
