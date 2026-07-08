@@ -13,6 +13,7 @@ import Notice from "./spine/Notice.jsx";
 import TodayEngine from "../components/TodayEngine.jsx";
 import TodaysBriefCard from "../components/TodaysBriefCard.jsx";
 import EodArtifactCard from "../components/EodArtifactCard.jsx";
+import LearnNudge from "../components/LearnNudge.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
 import StepOutOffer from "../components/StepOutOffer.jsx";
 import ProofMoment from "../components/ProofMoment.jsx";
@@ -79,7 +80,7 @@ import {
  *
  * @param {function(): void} onBeginSession — opens the spine.
  */
-export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onOpenProgress = null }) {
+export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onOpenProgress = null, onOpenLearn = null }) {
   const [beat, setBeat] = useState(() => getBeatOverride() || getCurrentBeat());
   const [thread, setThread] = useState(() => getTodayThread(beat));
   const [sessionCount, setSessionCount] = useState(() => getSessionCount());
@@ -346,6 +347,11 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             "on the home screen"). Self-gates: renders nothing until generated.
             Sits in the daily-context zone, just above the naming surface. */}
         <TodaysBriefCard />
+
+        {/* Learn nudge — the Track's one EARNED concierge offer (self-gating:
+            only when the user has engaged with the Track and a concrete next
+            lesson exists; dismissal remembered). Proactive-when-earned. */}
+        <LearnNudge onOpenLearn={onOpenLearn} />
 
         {/* EOD artifact — the evening read, re-readable on the home (Arlin:
             home + inline at close). Self-gates until generated at evening close. */}

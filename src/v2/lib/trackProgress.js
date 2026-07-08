@@ -24,6 +24,12 @@ import { getSessions } from "./sessions.js";
 
 const WORKING_KEY = "stillform_v2_track_working_on"; // string[] of move ids
 const PRACTICE_KEY = "stillform_v2_track_practice";  // { [id]: { count, last } }
+const NUDGE_KEY = "stillform_v2_track_nudge";        // { dismissedAt }
+
+/* Re-offer window after a dismissal. The nudge respects a "not now": it stays
+ * quiet for this long unless the user practices again (new engagement resets
+ * the conversation). Concierge doctrine: earned + dismissible, never naggy. */
+const NUDGE_QUIET_DAYS = 5;
 
 function readJSON(key, fallback) {
   try {
@@ -76,6 +82,9 @@ export function recordPractice(id) {
   const store = readJSON(PRACTICE_KEY, {});
   const prev = store && typeof store === "object" && store[id] ? store[id] : { count: 0, last: null };
   store[id] = { count: (prev.count || 0) + 1, last: new Date().toISOString() };
+  // New engagement clears any nudge dismissal — deterministic re-engagement
+  // (no timestamp comparison; the act of practicing reopens the conversation).
+  try { localStorage.removeItem(NUDGE_KEY); } catch { /* fail-silent */ }
   return writeJSON(PRACTICE_KEY, store);
 }
 
@@ -155,4 +164,61 @@ export function getMovesBuilding(allIds) {
     return b.practice.count - a.practice.count;
   });
   return out;
+}
+
+/* ---- the earned next-lesson nudge (concierge, Learn) ---- */
+
+/**
+ * The one home nudge the Track earns. Deterministic, and it only speaks when
+ * it genuinely has something (concierge doctrine, corrected 2026-07-08):
+ *
+ *   EARNED  — the user has actually engaged with the Track (practiced at least
+ *             one lesson, or marked a move "working on"). A user who has never
+ *             touched the Track is NEVER nudged — that would be a push.
+ *   REAL    — there is a concrete next lesson (unpracticed, in registry order;
+ *             a "working on" move that hasn't been practiced yet leads).
+ *   POLITE  — a dismissal is remembered: quiet for NUDGE_QUIET_DAYS unless the
+ *             user practices again (new engagement reopens the conversation).
+ *
+ * @param {Array<{id:string}>} allLessons — the LESSONS registry (ordered)
+ * @returns {{ id:string }|null} the next lesson to offer, or null (honest-empty)
+ */
+export function getNextLessonNudge(allLessons) {
+  if (!Array.isArray(allLessons) || allLessons.length === 0) return null;
+
+  const practice = readJSON(PRACTICE_KEY, {});
+  const working = getWorkingOn();
+
+  const practicedIds = Object.keys(practice).filter(
+    (id) => practice[id] && practice[id].count > 0
+  );
+  const engaged = practicedIds.length > 0 || working.length > 0;
+  if (!engaged) return null; // never nudge someone who hasn't opted into the Track
+
+  // Dismissal memory — quiet for the window. Any new practice CLEARS this key
+  // (see recordPractice), so re-engagement deterministically reopens the nudge.
+  const nudgeState = readJSON(NUDGE_KEY, null);
+  if (nudgeState && nudgeState.dismissedAt) {
+    const quietUntil = new Date(
+      new Date(nudgeState.dismissedAt).getTime() + NUDGE_QUIET_DAYS * 24 * 60 * 60 * 1000
+    ).toISOString();
+    if (new Date().toISOString() < quietUntil) return null;
+  }
+
+  const isPracticed = (id) => practicedIds.includes(id);
+
+  // A marked-but-unpracticed move leads (the user named it; honor that first).
+  for (const id of working) {
+    if (!isPracticed(id) && allLessons.some((l) => l && l.id === id)) return { id };
+  }
+  // Otherwise: the first unpracticed lesson in registry order.
+  for (const l of allLessons) {
+    if (l && l.id && !isPracticed(l.id)) return { id: l.id };
+  }
+  return null; // everything practiced — nothing honest to offer
+}
+
+/** Remember a dismissal so the nudge goes quiet (see NUDGE_QUIET_DAYS). */
+export function dismissLessonNudge() {
+  writeJSON(NUDGE_KEY, { dismissedAt: new Date().toISOString() });
 }

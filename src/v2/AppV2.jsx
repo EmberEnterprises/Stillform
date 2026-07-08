@@ -207,6 +207,7 @@ export default function AppV2() {
     if (screen === "practice-evidence") return <PracticeEvidence onExit={() => setScreen("my-progress")} />;
 
     if (screen === "library") return <Library onExit={() => setScreen("home")} />;
+    if (screen === "library-learn") return <Library initialTab="learn" onExit={() => setScreen("home")} />;
 
     if (screen === "pre-event-brief") {
       return <PreEventBrief onDone={() => setScreen("home")} onExit={() => setScreen("my-progress")} />;
@@ -241,6 +242,7 @@ export default function AppV2() {
           if (target === "home-refresh") { setHomeNonce((n) => n + 1); return; }
           if (target === "progress") setScreen("my-progress");
           else if (target === "library") setScreen("library");
+          else if (target === "library-learn") setScreen("library-learn");
           else if (target === "settings") setScreen("settings");
           else if (target === "faq") setScreen("faq");
           else if (target === "crisis-resources") setScreen("crisis-resources");
