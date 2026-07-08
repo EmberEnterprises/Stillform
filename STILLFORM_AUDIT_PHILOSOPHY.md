@@ -375,6 +375,8 @@ These checks are necessary but insufficient. They catch syntax/structure bugs bu
 
 The 35 audits stay (state integrity, build green, preflight green, sync key parity, component reachability, debug leak, useEffect cleanup, banned phrases, encryption boundaries, etc.). They're the floor, not the ceiling.
 
+**BUILT != COMPLETE (added 2026-07-08, Arlin's directive) — sharpens the "component reachability" floor check into a standing completion bar:** a feature is NOT done until it is built AND wired into live routing AND reachable by a real user, verified by tracing imports from the app root (main.jsx / AppV2) — never inferred from file existence, a green build, or passing tests. This is exactly the "feature presence vs fidelity" failure the war stories warn about: the Learning Track subsystem sat marked BUILT for weeks while reachable from nowhere. Reachability is a completion gate, not just a floor audit.
+
 ### Question 2.1: "Did all 35 hygiene audits pass?"
 - **Evidence:** Output of each audit script + grep results captured.
 - **Pass:** Every audit returns clean.
