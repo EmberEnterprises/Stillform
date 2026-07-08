@@ -32,7 +32,7 @@ function loadPos() {
   return null;
 }
 
-export default function QuickBreathe({ onTap }) {
+export default function QuickBreathe({ onTap, onOpenInfo }) {
   const btnRef = useRef(null);
   const [pos, setPos] = useState(null); // {x,y} left/top px; null until measured
   const posRef = useRef(null);
@@ -144,6 +144,7 @@ export default function QuickBreathe({ onTap }) {
     : { right: `${MARGIN}px`, bottom: `${MARGIN}px` };
 
   return (
+    <>
     <button
       ref={btnRef}
       type="button"
@@ -186,5 +187,38 @@ export default function QuickBreathe({ onTap }) {
         Quick Breathe
       </MonoLabel>
     </button>
+    {/* The info affordance (Arlin's design 2026-07-08): a small \u24D8 riding
+        the pill — how it works + the duration being entirely the user's.
+        Own tap handler; never triggers the pill's drag/open. */}
+    {typeof onOpenInfo === "function" && pos && (
+      <button
+        type="button"
+        aria-label="About Quick Breathe"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => { e.stopPropagation(); onOpenInfo(); }}
+        style={{
+          position: "fixed",
+          left: `${pos.x - 12}px`,
+          top: `${pos.y - 12}px`,
+          width: "24px",
+          height: "24px",
+          borderRadius: "50%",
+          background: "var(--sf-ground-elev)",
+          border: "1px solid var(--sf-border-hairline)",
+          color: "var(--sf-text-faint)",
+          fontFamily: "var(--sf-font-serif)",
+          fontStyle: "italic",
+          fontSize: "13px",
+          lineHeight: 1,
+          cursor: "pointer",
+          zIndex: 11,
+          WebkitTapHighlightColor: "transparent",
+          padding: 0,
+        }}
+      >
+        i
+      </button>
+    )}
+    </>
   );
 }
