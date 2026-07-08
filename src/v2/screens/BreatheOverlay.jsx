@@ -51,7 +51,7 @@ const PHASES = [
 
 const TARGET_CYCLES = 23; // Full Balban 2023 protocol (~5 min at 13s/cycle)
 
-export default function BreatheOverlay({ open, onClose }) {
+export default function BreatheOverlay({ open, onClose, onOpenBodyScan }) {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [cycleCount, setCycleCount] = useState(0);
   const [done, setDone] = useState(false);
@@ -156,7 +156,7 @@ export default function BreatheOverlay({ open, onClose }) {
       </button>
 
       {done ? (
-        <DoneState onClose={onClose} />
+        <DoneState onClose={onClose} onDeeper={onOpenBodyScan} />
       ) : (
         <ActiveState phase={phase} cycleCount={cycleCount} onStop={onClose} />
       )}
@@ -278,7 +278,7 @@ function ActiveState({ phase, cycleCount, onStop }) {
  * restrained — single line, single Return button, no engagement
  * affordances ("how did that feel," "track your practice," etc.).
  * -------------------------------------------------------------------- */
-function DoneState({ onClose }) {
+function DoneState({ onClose, onDeeper }) {
   return (
     <>
       <h2
@@ -314,6 +314,30 @@ function DoneState({ onClose }) {
       >
         Return
       </button>
+      {/* The deeper option (Arlin's design 2026-07-08): the quick breath just
+          finished — the honest moment to offer the next rung. Quiet, below,
+          never during the breath itself. */}
+      {typeof onDeeper === "function" && (
+        <button
+          type="button"
+          onClick={onDeeper}
+          className="sf-link-quiet"
+          style={{
+            marginTop: "var(--sf-space-24, 24px)",
+            background: "transparent",
+            border: "none",
+            color: "var(--sf-text-faint)",
+            fontFamily: "var(--sf-font-serif, serif)",
+            fontStyle: "italic",
+            fontWeight: 300,
+            fontSize: "14px",
+            cursor: "pointer",
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          Need something deeper? Run a quick Body Scan {"\u2192"}
+        </button>
+      )}
     </>
   );
 }

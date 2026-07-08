@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AppHeader from "../components/AppHeader.jsx";
 import QuickBreathe from "../components/QuickBreathe.jsx";
+import BodyScan from "./BodyScan.jsx";
 import HomeFooter from "../components/HomeFooter.jsx";
 import SmartScreen from "./SmartScreen.jsx";
 import BreatheOverlay from "./BreatheOverlay.jsx";
@@ -28,7 +29,10 @@ import BreatheOverlay from "./BreatheOverlay.jsx";
  */
 export default function Home({ onEnterPractice, onNavigate }) {
   const [breatheOpen, setBreatheOpen] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
   const nav = onNavigate || (() => {});
+  if (scanOpen) return <BodyScan onExit={() => setScanOpen(false)} />;
+
 
   return (
     <>
@@ -45,7 +49,7 @@ export default function Home({ onEnterPractice, onNavigate }) {
 
       <QuickBreathe onTap={() => setBreatheOpen(true)} />
 
-      <BreatheOverlay open={breatheOpen} onClose={() => setBreatheOpen(false)} />
+      <BreatheOverlay open={breatheOpen} onClose={() => setBreatheOpen(false)} onOpenBodyScan={() => { setBreatheOpen(false); setScanOpen(true); }} />
     </>
   );
 }
