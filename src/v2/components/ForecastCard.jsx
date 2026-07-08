@@ -6,6 +6,7 @@ import {
   getPendingFollowUp,
   recordFollowUpOutcome,
 } from "../lib/forecastLoop.js";
+import { getPriorFrame } from "../lib/priorFrame.js";
 
 /**
  * ForecastCard — FORECAST-AND-VERIFY on the home (Arlin's canonical spec).
@@ -41,6 +42,15 @@ export default function ForecastCard({ onEnterPractice }) {
     } catch { return null; }
   });
   const [breakLine, setBreakLine] = useState(null);
+
+  // PCE.2 (the reconsolidation bridge): when the pattern is live, resurface
+  // the frame THEY landed on last time — their own stored lock-in, token-
+  // matched, deterministic. Reactivating the prior frame beside the fresh
+  // moment is what lets it update instead of running untouched.
+  const prior = (() => {
+    if (!forecast) return null;
+    try { return getPriorFrame(forecast); } catch { return null; }
+  })();
 
   const answer = (feel) => {
     if (!followUp) return;
@@ -99,6 +109,12 @@ export default function ForecastCard({ onEnterPractice }) {
           <div className="sf-sec-rule" />
         </div>
         <p style={LINE}>{forecast.question}</p>
+        {prior && (prior.lockIn || prior.nextMove) && (
+          <p style={PRIOR}>
+            Last time this came up ({prior.when}), you landed on:{" "}
+            <span style={PRIOR_FRAME}>“{prior.lockIn || prior.nextMove}”</span>
+          </p>
+        )}
         <div style={{ display: "flex", gap: "var(--sf-space-12)", marginTop: "var(--sf-space-8)", alignItems: "center" }}>
           {typeof onEnterPractice === "function" && (
             <button type="button" className="sf-link-quiet" onClick={onEnterPractice}>
@@ -116,6 +132,21 @@ export default function ForecastCard({ onEnterPractice }) {
   return null;
 }
 
+const PRIOR = {
+  fontFamily: "var(--sf-font-serif)",
+  fontWeight: 300,
+  fontStyle: "italic",
+  fontSize: "13px",
+  lineHeight: 1.6,
+  color: "var(--sf-text-faint)",
+  margin: "0 0 var(--sf-space-8)",
+};
+const PRIOR_FRAME = {
+  fontStyle: "normal",
+  color: "var(--sf-text-secondary)",
+  borderLeft: "0.5px solid var(--sf-accent-line)",
+  paddingLeft: "8px",
+};
 const LINE = {
   fontFamily: "var(--sf-font-serif)",
   fontWeight: 300,

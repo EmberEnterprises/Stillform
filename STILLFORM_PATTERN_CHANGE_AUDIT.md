@@ -62,7 +62,9 @@ Determination: the science backing is complete. Nothing to add on the science si
   reframeApi.js:97/123, wired this session). The reconsolidation *input* is present.
 - Closing takeaway (Close.jsx names what landed).
 
-**NOT BUILT — the *conversion* half (insight → enacted change):**
+**CORRECTION 2026-07-08 (verified against live code, not this doc):** PCE.1 is BUILT — Close.jsx carries the nextMove + lock-in beats (lines ~74-430), sessions.js persists takeaway/nextMove/lockIn, Spine saves them, and formatRecentSessionsForAI already feeds prior lock-ins to the AI (PCE.2's AI half). The genuinely missing piece was ONLY the user-visible reactivation — built today as priorFrame.js + the ForecastCard prior-frame line ("Last time this came up, you landed on: ..."). The section below is preserved as the original audit state:
+
+**NOT BUILT — the *conversion* half (insight → enacted change) [STALE as of 2026-07-08, see correction above]:**
 1. **Structured Reframe close — `next move` + `lock in`.** Verified deferred: Reframe.jsx
    lines 24–27 — *"The Reframe Step 2 sub-beats (pick where you are now → name what
    shifted → pick a next move → lock in) are deferred to a later phase."* Tracked nowhere
