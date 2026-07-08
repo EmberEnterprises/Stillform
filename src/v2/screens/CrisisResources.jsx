@@ -174,7 +174,7 @@ const BACK_BTN = {
   marginBottom: "var(--sf-space-24)", WebkitTapHighlightColor: "transparent",
 };
 const H1 = {
-  fontFamily: "var(--sf-font-serif)", fontSize: "32px", fontWeight: 300,
+  fontFamily: "var(--sf-font-serif)", fontSize: "var(--sf-text-display-md)", fontWeight: 300,
   lineHeight: 1.15, color: "var(--sf-text-cream)", margin: "var(--sf-space-8) 0 var(--sf-space-12)",
 };
 const LEAD = {

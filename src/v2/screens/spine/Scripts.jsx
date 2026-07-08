@@ -176,7 +176,7 @@ export default function Scripts({ seed = "", onDone, onExit }) {
                       ? "1px solid var(--sf-text-primary)"
                       : "0.5px solid var(--sf-border-quiet)",
                     background: active ? "var(--sf-text-primary)" : "transparent",
-                    color: active ? "var(--sf-ground-base, #0b0b0c)" : "var(--sf-text-secondary)",
+                    color: active ? "var(--sf-ground-deep)" : "var(--sf-text-secondary)",
                     fontFamily: "var(--sf-font-mono)",
                     fontSize: "12px",
                     letterSpacing: "0.04em",

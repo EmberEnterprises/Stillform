@@ -8,7 +8,7 @@ import React, { useState } from "react";
  * chevron on one baseline), with a brass chevron that rotates on open. Brass
  * stays to the rule + chevron (≤5%). One system across every secondary page.
  *
- * NOTE: padding uses real spacing tokens (no var(--sf-space-20) — that token
+ * NOTE: padding uses real spacing tokens (no 20px — that token
  * does not exist; it was silently collapsing header padding to zero and
  * cramming the sections together).
  */
@@ -25,7 +25,7 @@ export default function CollapsibleSection({ label, defaultOpen = false, childre
           display: "flex",
           alignItems: "center",
           gap: "var(--sf-space-12)",
-          padding: "var(--sf-space-20, 20px) 0",
+          padding: "20px 0",
           background: "none",
           border: "none",
           cursor: "pointer",

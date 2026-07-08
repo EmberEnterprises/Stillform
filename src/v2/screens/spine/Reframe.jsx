@@ -338,18 +338,18 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
           style={{
             marginTop: "var(--sf-space-24)",
             paddingTop: "var(--sf-space-16)",
-            borderTop: "1px solid var(--sf-hairline)",
+            borderTop: "1px solid var(--sf-border-hairline)",
           }}
         >
           <p
             style={{
-              fontFamily: "var(--sf-serif)",
+              fontFamily: "var(--sf-font-serif)",
               fontSize: "17px",
               color: "var(--sf-text-faint)",
               margin: "0 0 var(--sf-space-12) 0",
             }}
           >
-            Tag this as <span style={{ color: "var(--sf-text)" }}>{pendingTrigger}</span>?
+            Tag this as <span style={{ color: "var(--sf-text-primary)" }}>{pendingTrigger}</span>?
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}>
             <Button variant="ghost" onClick={handleConfirmTrigger}>Yes, tag it</Button>
@@ -365,7 +365,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
           className="sf-fade-enter"
           style={{
             marginTop: "var(--sf-space-24)",
-            fontFamily: "var(--sf-serif)",
+            fontFamily: "var(--sf-font-serif)",
             fontSize: "15px",
             color: "var(--sf-text-faint)",
           }}
@@ -477,10 +477,10 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
               style={{
                 marginTop: "var(--sf-space-24)",
                 paddingTop: "var(--sf-space-16)",
-                borderTop: "1px solid var(--sf-hairline)",
+                borderTop: "1px solid var(--sf-border-hairline)",
               }}
             >
-              <p style={{ fontFamily: "var(--sf-serif)", fontSize: "17px", color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-12) 0" }}>
+              <p style={{ fontFamily: "var(--sf-font-serif)", fontSize: "17px", color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-12) 0" }}>
                 Which thought do you want to test?
               </p>
               <textarea
@@ -493,7 +493,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
               />
 
               {orResult && orResult.error ? (
-                <p style={{ fontFamily: "var(--sf-serif)", fontSize: "15px", color: "var(--sf-text-faint)", marginTop: "var(--sf-space-16)" }}>
+                <p style={{ fontFamily: "var(--sf-font-serif)", fontSize: "15px", color: "var(--sf-text-faint)", marginTop: "var(--sf-space-16)" }}>
                   {orResult.error}
                 </p>
               ) : null}
@@ -503,17 +503,17 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
                   <p style={{ fontFamily: "var(--sf-font-mono)", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sf-text-quiet)", margin: "0 0 var(--sf-space-12) 0" }}>
                     The other read — yours to weigh
                   </p>
-                  <p style={{ fontFamily: "var(--sf-serif)", fontSize: "17px", lineHeight: 1.55, color: "var(--sf-text)", margin: 0 }}>
+                  <p style={{ fontFamily: "var(--sf-font-serif)", fontSize: "17px", lineHeight: 1.55, color: "var(--sf-text-primary)", margin: 0 }}>
                     {orResult.otherRead}
                   </p>
                   {orResult.note ? (
-                    <p style={{ fontFamily: "var(--sf-serif)", fontSize: "14px", color: "var(--sf-text-faint)", marginTop: "var(--sf-space-12)" }}>{orResult.note}</p>
+                    <p style={{ fontFamily: "var(--sf-font-serif)", fontSize: "14px", color: "var(--sf-text-faint)", marginTop: "var(--sf-space-12)" }}>{orResult.note}</p>
                   ) : null}
                 </div>
               ) : null}
 
               {orResult && !orResult.error && !orResult.arguable ? (
-                <p style={{ fontFamily: "var(--sf-serif)", fontSize: "17px", lineHeight: 1.55, color: "var(--sf-text-faint)", marginTop: "var(--sf-space-16)" }}>
+                <p style={{ fontFamily: "var(--sf-font-serif)", fontSize: "17px", lineHeight: 1.55, color: "var(--sf-text-faint)", marginTop: "var(--sf-space-16)" }}>
                   {orResult.note || "This one isn't a distortion to argue with — leave it be."}
                 </p>
               ) : null}

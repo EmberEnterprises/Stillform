@@ -431,7 +431,7 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             <div
               className="sf-thread-divider"
               aria-hidden="true"
-              style={{ marginBottom: "var(--sf-space-20)" }}
+              style={{ marginBottom: "20px" }}
             />
             <MonoLabel
               size="xs"

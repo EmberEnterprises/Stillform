@@ -211,7 +211,7 @@ export default function AccountSection() {
 const INPUT = {
   background: "var(--sf-ground-elev, #111114)",
   border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.14))",
-  borderRadius: "var(--sf-radius-md, 12px)",
+  borderRadius: "12px",
   color: "var(--sf-text-primary)",
   fontFamily: "var(--sf-font-sans)",
   fontSize: "16px",

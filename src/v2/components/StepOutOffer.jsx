@@ -64,7 +64,7 @@ export default function StepOutOffer({ patternLabel = null, onAccept, onDecline 
       <p
         style={{
           margin: 0,
-          marginBottom: "var(--sf-space-20)",
+          marginBottom: "20px",
           fontFamily: "var(--sf-font-serif)",
           fontSize: "17px",
           lineHeight: 1.45,

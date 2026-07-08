@@ -192,7 +192,7 @@ const SEARCH = {
   lineHeight: 1.5,
   outline: "none",
   marginTop: "var(--sf-space-24)",
-  marginBottom: "var(--sf-space-20)",
+  marginBottom: "20px",
 };
 
 const CHIPS = {

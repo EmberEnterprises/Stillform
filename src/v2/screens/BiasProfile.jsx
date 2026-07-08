@@ -354,7 +354,7 @@ function WatchRow({
           </Button>
         </div>
       ) : (
-        <div style={{ display: "flex", gap: "var(--sf-space-20)", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
         {justCaught ? (
           <span
             style={{

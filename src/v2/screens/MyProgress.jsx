@@ -265,7 +265,7 @@ export default function MyProgress({ onExit, onNavigate }) {
                 </div>
               </div>
             ) : null}
-            <p style={{ margin: 0, fontFamily: "var(--sf-font-sans)", fontSize: "var(--sf-text-body-sm, 14px)", lineHeight: "var(--sf-leading-body)", color: "var(--sf-text-quiet)", fontWeight: 300 }}>
+            <p style={{ margin: 0, fontFamily: "var(--sf-font-sans)", fontSize: "14px", lineHeight: "var(--sf-leading-body)", color: "var(--sf-text-quiet)", fontWeight: 300 }}>
               {g.headline}
             </p>
           </section>

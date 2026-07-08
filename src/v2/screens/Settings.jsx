@@ -255,7 +255,7 @@ const BACK_BTN = {
 const INPUT = {
   background: "var(--sf-ground-elev, #111114)",
   border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.14))",
-  borderRadius: "var(--sf-radius-md, 12px)",
+  borderRadius: "12px",
   color: "var(--sf-text-primary)",
   fontFamily: "var(--sf-font-sans)",
   fontSize: "16px",
@@ -279,7 +279,7 @@ const ROW = {
 const TOGGLE_BASE = {
   minWidth: "64px",
   minHeight: "40px",
-  borderRadius: "var(--sf-radius-md, 12px)",
+  borderRadius: "12px",
   fontFamily: "var(--sf-font-mono)",
   fontSize: "12px",
   letterSpacing: "0.06em",

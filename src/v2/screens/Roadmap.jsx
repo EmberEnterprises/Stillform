@@ -87,7 +87,7 @@ export default function Roadmap({ onExit }) {
           {namedCount > 0 && (
             <section style={SECTION}>
               <HairlineDivider />
-              <div style={{ marginTop: "var(--sf-space-20)" }}>
+              <div style={{ marginTop: "20px" }}>
                 <MonoLabel size="xs" tone="faint">PATTERNS</MonoLabel>
                 <p style={STAT_LINE}>
                   {namedCount} named
@@ -108,7 +108,7 @@ export default function Roadmap({ onExit }) {
           {baseline && (
             <section style={SECTION}>
               <HairlineDivider />
-              <div style={{ marginTop: "var(--sf-space-20)" }}>
+              <div style={{ marginTop: "20px" }}>
                 <MonoLabel size="xs" tone="faint">BASELINE</MonoLabel>
                 <p style={STAT_LINE}>{baseline.label}</p>
                 {graduations > 0 && (
@@ -122,7 +122,7 @@ export default function Roadmap({ onExit }) {
           )}
 
           <HairlineDivider />
-          <p style={{ ...NOTE, marginTop: "var(--sf-space-20)" }}>
+          <p style={{ ...NOTE, marginTop: "20px" }}>
             You did the work. The structure held it. The map is just what
             that built.
           </p>
@@ -188,7 +188,7 @@ const NOTE = {
   margin: 0,
   color: "var(--sf-text-quiet)",
   fontFamily: "var(--sf-font-sans)",
-  fontSize: "var(--sf-text-body-sm, 14px)",
+  fontSize: "14px",
   lineHeight: "var(--sf-leading-body)",
   fontWeight: 300,
 };

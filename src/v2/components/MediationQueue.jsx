@@ -123,7 +123,7 @@ const CLOSE_BTN = {
 
 const CARD = {
   padding: "var(--sf-space-16) 0",
-  borderTop: "0.5px solid var(--sf-border, rgba(255,255,255,0.06))",
+  borderTop: "0.5px solid var(--sf-border-hairline))",
 };
 
 const H3 = {
@@ -135,7 +135,7 @@ const H3 = {
 const REASONING = {
   margin: "0 0 var(--sf-space-8)",
   color: "var(--sf-text-cream)",
-  fontFamily: "var(--sf-font-sans)", fontSize: "var(--sf-text-body-sm, 14px)",
+  fontFamily: "var(--sf-font-sans)", fontSize: "14px",
   lineHeight: "var(--sf-leading-body)", fontWeight: 300,
 };
 
@@ -147,14 +147,14 @@ const EVIDENCE = {
 
 const NOTE = {
   margin: 0, color: "var(--sf-text-quiet)",
-  fontFamily: "var(--sf-font-sans)", fontSize: "var(--sf-text-body-sm, 14px)",
+  fontFamily: "var(--sf-font-sans)", fontSize: "14px",
   lineHeight: "var(--sf-leading-body)", fontWeight: 300,
 };
 
 const ROW = { display: "flex", gap: "var(--sf-space-12)" };
 
 const APPROVE = {
-  minHeight: "44px", padding: "0 var(--sf-space-20)",
+  minHeight: "44px", padding: "0 20px",
   background: "var(--sf-text-primary, #F4F2EC)", color: "var(--sf-ground-deep, #08080A)",
   border: "none", borderRadius: "10px",
   fontFamily: "var(--sf-font-sans)", fontSize: "15px", fontWeight: 300,
@@ -162,7 +162,7 @@ const APPROVE = {
 };
 
 const DECLINE = {
-  minHeight: "44px", padding: "0 var(--sf-space-20)",
+  minHeight: "44px", padding: "0 20px",
   background: "transparent", color: "var(--sf-text-quiet)",
   border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.10))",
   borderRadius: "10px",
