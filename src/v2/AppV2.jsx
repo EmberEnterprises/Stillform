@@ -40,6 +40,7 @@ import NarrativeArc from "./screens/NarrativeArc.jsx";
 import PracticeEvidence from "./screens/PracticeEvidence.jsx";
 import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
+import ReRead from "./screens/ReRead.jsx";
 import Paywall from "./screens/Paywall.jsx";
 import Onboarding from "./screens/Onboarding.jsx";
 import Settings from "./screens/Settings.jsx";
@@ -167,6 +168,7 @@ export default function AppV2() {
             else if (target === "what-you-bet-on") setScreen("what-you-bet-on");
             else if (target === "thought-record") setScreen("thought-record");
             else if (target === "narrative-arc") setScreen("narrative-arc");
+            else if (target === "re-read") setScreen("re-read");
             else if (target === "practice-evidence") setScreen("practice-evidence");
             // Phase 6.4c: post-event reflection — launch spine in post-event beat.
             else if (target === "post-event") {
@@ -208,6 +210,7 @@ export default function AppV2() {
 
     if (screen === "library") return <Library onExit={() => setScreen("home")} />;
     if (screen === "library-learn") return <Library initialTab="learn" onExit={() => setScreen("home")} />;
+    if (screen === "re-read") return <ReRead onExit={() => setScreen("my-progress")} onNavigate={(t) => { if (t === "crisis-resources") setScreen("crisis-resources"); }} />;
 
     if (screen === "pre-event-brief") {
       return <PreEventBrief onDone={() => setScreen("home")} onExit={() => setScreen("my-progress")} />;

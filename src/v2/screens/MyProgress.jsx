@@ -135,6 +135,15 @@ export default function MyProgress({ onExit, onNavigate }) {
           glyph="↺"
           onTap={() => handleNavigate("post-event")}
         />
+        {/* The Re-Read (Arlin 2026-07-02 spec; build go 2026-07-08): a memory,
+            read wider at the moment of recall. Self-selected only; the heavier-
+            than-a-re-read exit routes to CrisisResources from inside. */}
+        <ProgressEntry
+          title="Re-read a memory"
+          description="A moment you carry in a one-sided telling. Open it, see the wider frame, and put back a version that costs less to hold."
+          glyph="⟲"
+          onTap={() => handleNavigate("re-read")}
+        />
       </section>
 
       {/* Other-read effect (2026-07-01, gap-close): a quiet, correlational
