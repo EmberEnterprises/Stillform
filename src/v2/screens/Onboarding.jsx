@@ -76,26 +76,26 @@ const READ_FRAGMENTS = {
       own move already answers their own trigger — the strongest hit). Curated
       per pair; own-words/skips fall back gracefully, never guessed. ── */
 const SEEN_TRIGGER_SIGNAL = {
-  "rewrite|grip": "Put those together and it's one system: you hold plans the way you hold your jaw — and when a plan is taken, the body braces to keep something from moving. It was never \u201ctension.\u201d It was structure, defended.",
-  "rewrite|breath": "Put those together: when the plan goes, your breath goes first — the body rationing air for a rebuild it hasn't been told about yet. You don't lose calm; you start preparing before you've agreed to.",
-  "rewrite|gut": "Put those together: the gut votes on the new plan before the mind has read it. That drop isn't dread — it's your fastest evaluator reporting that the ground moved.",
-  "ambiguity|grip": "Put those together and it's one system: an unread signal from someone, and the body braces for a verdict that hasn't been given. The grip is you holding a conversation that hasn't happened.",
-  "ambiguity|breath": "Put those together: the breath climbs while you're still parsing their tone — your system readying an answer to a question nobody asked yet. That's not anxiety; that's over-preparation.",
+  "rewrite|grip": "Put those together and it's one system: you hold plans the way you hold your jaw — and when a plan is taken, the body braces to keep something from moving. It may never have been \u201ctension\u201d at all \u2014 it reads like structure, defended.",
+  "rewrite|breath": "Put those together: when the plan goes, your breath goes first — the body rationing air for a rebuild it hasn't been told about yet. It's less losing calm, more starting to prepare before you've agreed to.",
+  "rewrite|gut": "Put those together: the gut votes on the new plan before the mind has read it. That drop may not be dread — it moves like your fastest evaluator reporting the ground shifted.",
+  "ambiguity|grip": "Put those together and it's one system: an unread signal from someone, and the body braces for a verdict that hasn't been given. The grip looks a lot like holding a conversation that hasn't happened yet.",
+  "ambiguity|breath": "Put those together: the breath climbs while you're still parsing their tone — your system readying an answer to a question nobody asked yet. That may be less anxiety than over-preparation.",
   "ambiguity|gut": "Put those together: the gut reads the room before the mind finishes the sentence. It's usually reacting to the ambiguity itself — the not-knowing — not to what they actually meant.",
-  "overload|grip": "Put those together and it's one system: the list outgrows the day, and the body starts carrying it — literally, in the jaw and shoulders. You've been holding the schedule with your muscles.",
+  "overload|grip": "Put those together and it's one system: the list outgrows the day, and the body starts carrying it — literally, in the jaw and shoulders. It's as if you've been holding the schedule with your muscles.",
   "overload|breath": "Put those together: when demand outgrows the hours, your breath shortens as if to save time. The system speeds everything, including the one thing that works better slow.",
   "overload|gut": "Put those together: the arithmetic lands in the gut before you've done it consciously. It's not that you can't handle the load — it's that your body counts faster than you do.",
 };
 const SEEN_TRIGGER_ANCHOR = {
-  "rewrite|shrink": "And look at the pair you just named: what tips you is losing the structure — and the move that carries you is rebuilding it, one true step. You've been treating yourself correctly all along. The practice just makes it deliberate.",
-  "rewrite|step-out": "And look at the pair: what tips you is the sudden rewrite — and what carries you is stepping out until the new shape settles. You already knew the rebuild needs quiet. Now it's a move, not a retreat.",
-  "rewrite|talk": "And look at the pair: what tips you is the plan dissolving — and what carries you is talking the new one into having edges. You rebuild out loud. That's not a dependency; it's your method.",
-  "ambiguity|shrink": "And look at the pair: what tips you is the unread space between people — and what carries you is shrinking to the one next true thing. You already know the antidote to ambiguity is one concrete act.",
-  "ambiguity|step-out": "And look at the pair: what tips you is other people's static — and what carries you is stepping out of its range. You've been protecting your read from the room for years. Now it has a name.",
-  "ambiguity|talk": "And look at the pair: what tips you is not knowing what they meant — and what carries you is saying it out loud until it has edges. You resolve ambiguity by making language do its job. Keep that.",
+  "rewrite|shrink": "And look at the pair you just named: what tips you is losing the structure — and the move that carries you is rebuilding it, one true step. It looks like you've been treating yourself correctly all along \u2014 the practice just makes it deliberate.",
+  "rewrite|step-out": "And look at the pair: what tips you is the sudden rewrite — and what carries you is stepping out until the new shape settles. Some part of you seems to have known the rebuild needs quiet. Named, it can be a move instead of a retreat.",
+  "rewrite|talk": "And look at the pair: what tips you is the plan dissolving — and what carries you is talking the new one into having edges. You rebuild out loud. That reads less like a dependency, more like a method.",
+  "ambiguity|shrink": "And look at the pair: what tips you is the unread space between people — and what carries you is shrinking to the one next true thing. You seem to already know the antidote to ambiguity: one concrete act.",
+  "ambiguity|step-out": "And look at the pair: what tips you is other people's static — and what carries you is stepping out of its range. It looks like you've been protecting your read from the room for years. Now it has a name.",
+  "ambiguity|talk": "And look at the pair: what tips you is not knowing what they meant — and what carries you is saying it out loud until it has edges. You seem to resolve ambiguity by making language do its job. Worth keeping.",
   "overload|shrink": "And look at the pair you just named: what tips you is the list outgrowing the day — and what carries you is shrinking it to the one next thing. Your own move is the exact counter to your own trigger. You built that yourself.",
-  "overload|step-out": "And look at the pair: what tips you is the arithmetic — and what carries you is stepping out of it long enough to see it whole. Distance is how you count. That's a strategy, not an escape.",
-  "overload|talk": "And look at the pair: what tips you is everything at once — and what carries you is talking it into a line, one thing after another. You serialize the overwhelm. That's a real skill wearing a casual name.",
+  "overload|step-out": "And look at the pair: what tips you is the arithmetic — and what carries you is stepping out of it long enough to see it whole. Distance may simply be how you count \u2014 a strategy, not an escape.",
+  "overload|talk": "And look at the pair: what tips you is everything at once — and what carries you is talking it into a line, one thing after another. You seem to serialize the overwhelm \u2014 which looks like a real skill wearing a casual name.",
 };
 
 function composeSeen(answers) {
