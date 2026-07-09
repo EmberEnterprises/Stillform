@@ -14,6 +14,25 @@
   to = "/icon-192.png"
   status = 200
 
+# THE LINK POLICY (Arlin 2026-07-08): the app never ships raw external links —
+# every outbound destination goes through this first-party /go/ layer. A moved
+# target = a one-line fix HERE, zero stale copies in the wild. Crisis links
+# are the highest-stakes case; keep these current above all.
+[[redirects]]
+  from = "/go/helpline"
+  to = "https://findahelpline.com"
+  status = 302
+
+[[redirects]]
+  from = "/go/helpline-am"
+  to = "https://findahelpline.com/countries/am"
+  status = 302
+
+[[redirects]]
+  from = "/go/cvv"
+  to = "https://www.cvv.org.br"
+  status = 302
+
 # Bootstrap files should always come fresh to avoid stale PWA startup loops.
 [[headers]]
   for = "/index.html"
