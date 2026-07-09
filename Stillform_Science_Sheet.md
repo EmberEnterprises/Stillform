@@ -912,3 +912,10 @@ Learning Track lane: structured effortful reasoning on hard questions as genuine
 
 - Chapman, S. B., & Mudar, R. A. (2014). Enhancement of cognitive and neural functions through complex reasoning training. Frontiers in Systems Neuroscience, 8:69. — complex/gist-reasoning training produces cognitive gains and measurable neural change (blood flow/connectivity); effortful, novel, sustained engagement is the plasticity condition.
 - Claim discipline: framed as capacity/practice in reasoning — NEVER "philosophy rewires your brain" or broad far-transfer (same overclaim family as brain-games/learning-styles, both banned).
+
+## Wind-Down Anchor (Bedtime Writing)
+
+The Wind-Down asks for tomorrow's anchor at day's close — writing what's ahead offloads it before sleep.
+
+- Scullin, M. K., Krueger, M. L., Ballard, H. K., Pruett, N., & Bliwise, D. L. (2018). The effects of bedtime writing on difficulty falling asleep: A polysomnographic study comparing to-do lists and completed activity lists. Journal of Experimental Psychology: General, 147(1), 139–146. doi:10.1037/xge0000374 (web-verified 2026-07-08: 57 adults, randomized, polysomnography; to-do-list writers fell asleep faster than completed-list writers)
+- Claim discipline: single well-controlled study — stated at its true size in-app ("settles the mind toward sleep faster," no universal promise, no precise-minutes claim in user copy); the effect size lives here, not in the interface.

@@ -128,7 +128,7 @@ export default function WindDown({ onReturnHome }) {
             headlineSize="lg"
             body="One person, moment, or stretch of tomorrow that's worth being deliberate about."
             labelInfoTitle="Wind-down"
-            labelInfoBody="Writing tomorrow's anchor at end-of-day reduces sleep onset latency by ~10 minutes vs writing about completed tasks (Scullin 2018). Forward-direction work closes the day cleanly — your brain consolidates what gets rehearsed last (Walker, Stickgold). Tomorrow's anchor surfaces next morning so the day opens where this one ended."
+            labelInfoBody="Writing tomorrow's anchor at end-of-day settles the mind toward sleep faster than reviewing what's done \u2014 unfinished things stop circling once they're written down. Forward-direction work closes the day cleanly, and the anchor surfaces next morning so the day opens where this one ended. The research behind this lives in the science room."
           />
         </div>
 
