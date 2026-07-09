@@ -68,7 +68,7 @@ export default function Home({ onEnterPractice, onNavigate }) {
               About a minute · no typing · stop whenever you want. A physiological sigh, paced: breathe in, a small top-off inhale, then a long slow exhale. The extended out-breath is the lever — it settles the system faster than any other single move.
             </p>
             <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.65, color: "var(--sf-text-primary)", margin: "0 0 var(--sf-space-16)" }}>
-              The length is completely up to you. There's no target count — run it as long as feels right and stop with the \u00d7 whenever you're done.
+              The length is completely up to you — most runs land around a minute, no typing ever. There's no target count; run it as long as feels right and stop with the \u00d7 whenever you're done.
             </p>
             <button
               type="button"

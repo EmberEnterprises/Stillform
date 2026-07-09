@@ -156,7 +156,11 @@ export default function ReRead({ onExit, onNavigate }) {
               ))}
             </div>
           )}
-          {error && <p style={{ ...NORM, color: "var(--sf-text-faint)" }}>{error}</p>}
+          {error && (
+            <p style={{ ...NORM, color: "var(--sf-text-faint)" }}>
+              {error} Your words are safe in the box above — nothing was lost.
+            </p>
+          )}
           <div style={{ marginTop: "var(--sf-space-16)" }}>
             <Button variant="primary" onClick={run} disabled={busy || memory.trim().length < 12}>
               {busy ? "Reading…" : "Open the wider read"}

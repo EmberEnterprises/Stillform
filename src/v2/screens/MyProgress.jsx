@@ -140,7 +140,7 @@ export default function MyProgress({ onExit, onNavigate }) {
             than-a-re-read exit routes to CrisisResources from inside. */}
         <ProgressEntry
           title="Re-read a memory"
-          description="A moment you carry in a one-sided telling. Open it, see the wider frame, and put back a version that costs less to hold."
+          description="A moment you carry in a one-sided telling. Open it, see the wider frame, and put back a version that costs less to hold. ~5 minutes, written."
           glyph="⟲"
           onTap={() => handleNavigate("re-read")}
         />
