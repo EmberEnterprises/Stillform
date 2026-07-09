@@ -250,6 +250,10 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
           rows={2}
           aria-label="Name what is present"
         />
+          <div style={{ marginTop: "var(--sf-space-8)", display: "flex", justifyContent: "flex-end" }}>
+            {/* W4: the mic, everywhere there's a field. */}
+            <MicButton onTranscript={(t) => setText((d) => (d ? d + " " : "") + t.trim())} />
+          </div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "var(--sf-space-8)" }}>
             <MicButton onTranscript={(t) => setText((v) => (v ? v + " " : "") + t.trim())} />
           </div>
