@@ -98,8 +98,18 @@ export default function ReRead({ onExit, onNavigate }) {
             rule
           />
           <p style={NORM}>
-            You choose the memory — the practice never digs. Start with something manageable;
+            You choose the memory — the practice never digs. This works on the smaller
+            weights: the slights and stings that are safe to hold. Start manageable;
             this is a widening, not an excavation.
+          </p>
+          {/* Arlin's directive 2026-07-08: the warning + the therapist line, in the
+              app's own voice — her lane definition: self-mastery on the small,
+              the deep belongs with someone who can hold it. */}
+          <p style={{ ...NORM, color: "var(--sf-text-faint)", fontSize: "13px" }}>
+            A caution worth taking seriously: some memories carry more charge than
+            expected once opened. Anything heavy — trauma, loss, what still shakes
+            you — deserves a therapist, who can hold what a practice like this
+            can't know the depth of. This tool is self-mastery, not treatment.
           </p>
           <Button variant="primary" onClick={() => setBeat("tell")}>Choose a memory</Button>
           {heavierExit}
