@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { recordBreathe, getTodayBreatheCount } from "../lib/breatheLog.js";
 
 /**
  * BreatheOverlay — the Quick Breathe surface.
@@ -80,7 +81,12 @@ export default function BreatheOverlay({ open, onClose }) {
           cycles += 1;
           setCycleCount(cycles);
           if (cycles >= TARGET_CYCLES) {
-            setDone(true);
+            // W2 (2026-07-09): the most-used practice enters the record —
+            // and the ending is HELD (the exhale-linger, F3): 2.4s of
+            // deliberate stillness before anything returns. Cheap timers
+            // snap shut; this one doesn't.
+            try { recordBreathe({ patternId: "cyclic-sighing", cycles }); } catch { /* fail-silent */ }
+            timeoutId = setTimeout(() => setDone(true), 2400);
             return; // stop the chain
           }
         }
@@ -279,6 +285,14 @@ function ActiveState({ phase, cycleCount, onStop }) {
  * affordances ("how did that feel," "track your practice," etc.).
  * -------------------------------------------------------------------- */
 function DoneState({ onClose }) {
+  // W2: the record acknowledges — a fact, quietly. No praise, no streaks.
+  let ackLine = "It's in your record.";
+  try {
+    const n = getTodayBreatheCount();
+    if (n === 2) ackLine = "Second today \u00b7 it's in your record.";
+    else if (n === 3) ackLine = "Third today \u00b7 it's in your record.";
+    else if (n > 3) ackLine = `${n} today \u00b7 it's in your record.`;
+  } catch { /* the default line stands */ }
   return (
     <>
       <h2
@@ -294,6 +308,18 @@ function DoneState({ onClose }) {
       >
         Done.
       </h2>
+      <p
+        style={{
+          margin: "var(--sf-space-12, 12px) 0 0",
+          fontFamily: "var(--sf-font-serif, serif)",
+          fontWeight: 300,
+          fontStyle: "italic",
+          fontSize: "13px",
+          color: "var(--sf-text-faint, rgba(237,232,220,0.45))",
+        }}
+      >
+        {ackLine}
+      </p>
       <button
         type="button"
         onClick={onClose}
