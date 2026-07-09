@@ -10,7 +10,7 @@
 - **P6 SEASONAL DARK:** early-sunset window → the evening dip anticipated.
 - **P7 CLEAREST WINDOW:** the day's best uninterrupted stretch, named for the real work.
 - **P8 TIME-OF-DAY DIP:** signal-log clustering by hour (double-gated like the forecast loop) → the 3pm known before 3pm.
-- **P9 DAY-OF-WEEK PATTERN:** rough-Monday history earns a Sunday-evening word (same gate).
+- **P9 DAY-OF-WEEK PATTERN:** a rough-day-of-week history in THEIR record earns an eve-of word — their record decides which day; no-default-week applies (same double gate).
 - **P10 IMMEDIATE DECOMPRESSION:** a flagged event just ENDED → the set-down offered now, not only at bedtime.
 - **P11 TEMPORAL LANDMARKS (Arlin 2026-07-08, voice: 'Daylight Saving Time is coming, be prepared, stuff like that'):** the calendar's own weather — DST shifts ('clocks move Sunday; Saturday night, wind down an hour early and it costs you nothing'), long weekends and holidays visible on their calendar, the year's first cold week, season turns. Pure world-prediction, deterministic from date arithmetic. (Bonus: the standing DST manual-test item becomes this mechanic's own test case.)
 **THE VOICE LAW FOR ALL OF IT (Arlin, canon-level): thoughtful, considerate, organizing — structure and routine HELD FOR the user, never demanded OF them. NOT a productivity app: no streak guilt, no task management, no performance framing, no 'crush your day.' And the care NEVER lands in words — no 'we care,' no warmth vocabulary, nothing that says love. The user feels cared for through the QUALITY AND TIMING of the consideration itself: the umbrella note IS the sentiment. (Same law as the AI's show-don't-tell rule — now governing the concierge too.)**
