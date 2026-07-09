@@ -1,4 +1,21 @@
 
+**== THE CONCIERGE PREDICTION CATALOG (Arlin's abstraction directive 2026-07-08: 'consider everything it can predict... umbrellas when the weather is going to rain... prevention of ruining their mood. Whatever friction we can prevent, that's the goal.') — ALL S1, her picks; none auto-built ==**
+**THE LINE (canon-adjacent): predict LOGISTICS AND LOAD freely (the world, not the person: weather, gaps, heat, windows); predict EMOTIONS only through the existing confirmed-pattern gate (their record, their confirmation, always a question). 'Rain at 2' is thoughtfulness; 'we know how you get' is surveillance. Every entry must pass the returned-attention test.**
+**BUILDABLE NOW (data already consented in-app — weather producer + calendar + signal log):**
+- **P1 UMBRELLA NOTE:** rain forecast ∩ calendar event → 'Rain around 2, right when you head out — umbrella by the door.' Pure logistics.
+- **P2 NO-GAP DAY:** calendar arithmetic finds no open slot across the midday span → 'Nothing open 11-3 — eat before 11.' Hunger crashes ruin afternoons.
+- **P3 TOMORROW VISIBLE TONIGHT:** a loaded morning ahead reshapes TONIGHT's brief → 'tomorrow is heavy; tonight's job is sleep.' Prediction while still actionable.
+- **P4 HEAT/COLD AS HARDWARE:** extreme-temp day → bio-filter-framed note ('if the fuse feels short, some of that is weather'). Prevents misreading a state as a self.
+- **P5 LEAVE-EARLIER:** bad weather before the first located event → lateness friction prevented.
+- **P6 SEASONAL DARK:** early-sunset window → the evening dip anticipated.
+- **P7 CLEAREST WINDOW:** the day's best uninterrupted stretch, named for the real work.
+- **P8 TIME-OF-DAY DIP:** signal-log clustering by hour (double-gated like the forecast loop) → the 3pm known before 3pm.
+- **P9 DAY-OF-WEEK PATTERN:** rough-Monday history earns a Sunday-evening word (same gate).
+- **P10 IMMEDIATE DECOMPRESSION:** a flagged event just ENDED → the set-down offered now, not only at bedtime.
+**NATIVE TIME (recorded, blocked on hardware/APIs):** sleep-aware morning expectations · HRV-informed volume · location-aware leave-times.
+**OUT (fails the line):** anything inferring emotions outside the confirmed-pattern gate; anniversary-of-pain resurfacing without explicit opt-in; anything reading as 'we watched you.'**
+**CLAUDE'S RECOMMENDED FIRST WAVE: P1 + P2 + P3 — already-consented data, pure logistics, each a tell-someone moment. Awaiting Arlin's picks alongside the four app-internal candidates below.**
+
 **CONCIERGE IDENTITY DEEPENED (ARLIN 2026-07-08, voice — canonized in STILLFORM_CANON.md): friction removal in service of metacognitive capacity; the voices are instances, not the definition; PREDICT the user's needs from their own record/beat/calendar/state; test = does it SPEND attention or RETURN it. PREDICTED-NEEDS CANDIDATES (Claude's derivation, S1 pending her picks — none auto-built): (1) THE ONE THING — home leads with a single predicted next action instead of a stack (kills choice load; the concierge picks, one tap overrides); (2) RESUME THREAD — a session/lesson/re-read left mid-way gets a quiet resume offer (no re-navigation hunt); (3) PRE-CARRIED CONTEXT — entering the practice from a forecast/meeting prompt pre-carries the trigger + prior frame so the user never re-explains what the app already knows; (4) STATE-AWARE DEFAULT PATH — on a depleted read, the app pre-selects the lighter path instead of asking. Each individually approvable.**
 
 **THE CONCIERGE SCREEN (ARLIN'S DESIGN 2026-07-08, voice: 'a screen just for the concierge — some place I can go to see... if they dismiss the prompts they have an area they can hit and go to'). SCOPE LOCKED BEFORE BUILD:**
