@@ -224,7 +224,13 @@ export default function AppV2() {
     if (screen === "paywall") return <Paywall onClose={() => setScreen("home")} />;
 
     if (screen === "onboarding") {
-      return <Onboarding onComplete={() => { setOnboarded(); setScreen("home"); }} />;
+      return <Onboarding onComplete={() => {
+        setOnboarded();
+        // W3 (2026-07-09): the first-landing catch — the most-motivated moment
+        // a user ever has. One-shot flag; SmartScreen consumes it once.
+        try { localStorage.setItem("stillform_v2_first_landing", "1"); } catch { /* fine */ }
+        setScreen("home");
+      }} />;
     }
 
     if (screen === "settings") return <Settings onExit={() => setScreen("home")} />;

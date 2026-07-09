@@ -71,6 +71,8 @@ export function saveSession(session) {
   if (!session || typeof session !== "object") return false;
 
   try {
+    // W3: a real rep happened — the first-landing note's purpose is complete.
+    try { localStorage.removeItem("stillform_v2_first_landing"); } catch { /* fine */ }
     const now = new Date();
     const record = {
       id: generateSessionId(),

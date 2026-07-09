@@ -261,6 +261,11 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             sleep) with honest states only, no fabricated data. Receding so
             the naming surface leads. (S5: merge with the concierge "Today"
             header for established users so there's a single Today anchor.) */}
+        {/* W3: the first landing — consumed once. The Read just gave them
+            their own words back; the natural next thing is one real rep,
+            offered quietly, dismissible forever with one tap. */}
+        <FirstLandingCatch />
+
         {/* The Concierge room (Arlin's design): the quiet standing door. */}
         {typeof onOpenConcierge === "function" && (
           <button type="button" className="sf-link-quiet" onClick={onOpenConcierge} aria-label="Open the concierge" style={{ margin: "var(--sf-space-8) 0" }}>
@@ -500,6 +505,29 @@ function ThreadLine({ time, text }) {
     <div className="sf-thread-line">
       <span className="sf-thread-time">{time}</span>
       <span className="sf-thread-text">{text}</span>
+    </div>
+  );
+}
+
+/* W3 — the first-landing catch (one-shot). */
+function FirstLandingCatch() {
+  const [show, setShow] = React.useState(() => {
+    try { return localStorage.getItem("stillform_v2_first_landing") === "1"; } catch { return false; }
+  });
+  const clear = () => {
+    try { localStorage.removeItem("stillform_v2_first_landing"); } catch { /* fine */ }
+    setShow(false);
+  };
+  if (!show) return null;
+  return (
+    <div className="sf-fade-enter" style={{ padding: "var(--sf-space-12) 0", borderBottom: "0.5px solid var(--sf-border-hairline)" }}>
+      <p style={{ margin: 0, fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.6, color: "var(--sf-text-primary)" }}>
+        The Read gave you your words back. The practice is doing that with a real
+        moment — name one below whenever you're ready, and this note won't return.
+      </p>
+      <button type="button" className="sf-link-quiet" onClick={clear} style={{ marginTop: "var(--sf-space-8)" }}>
+        Got it
+      </button>
     </div>
   );
 }
