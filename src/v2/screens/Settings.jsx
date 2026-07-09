@@ -42,7 +42,7 @@ import { getPref, setPref } from "../lib/userPrefs.js";
  *
  * @param {function(): void} onExit — called when the user taps back to home.
  */
-export default function Settings({ onExit }) {
+export default function Settings({ onExit, onNavigate }) {
   const [confirmClear, setConfirmClear] = useState(false);
   const [cleared, setCleared] = useState(false);
   const [summary, setSummary] = useState(() => readDeviceSummary());
@@ -301,6 +301,18 @@ export default function Settings({ onExit }) {
       </CollapsibleSection>
 
       {/* YOUR DATA — read-only summary + destructive clear (confirm-gated) */}
+      {/* W7 (2026-07-09): the crisis door — quiet, standing, one tap from
+          Settings which is one tap from home. The screen itself is in the
+          bundle, so it works offline once the app has loaded once. */}
+      <button
+        type="button"
+        className="sf-link-quiet"
+        onClick={() => onNavigate && onNavigate("crisis-resources")}
+        style={{ display: "block", margin: "0 0 var(--sf-space-24)" }}
+      >
+        In a hard moment — real support, one tap \u2192
+      </button>
+
       <CollapsibleSection label="Your data">
         <div style={SECTION}>
           <p style={ROW}>

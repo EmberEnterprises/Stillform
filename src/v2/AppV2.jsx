@@ -233,7 +233,7 @@ export default function AppV2() {
       }} />;
     }
 
-    if (screen === "settings") return <Settings onExit={() => setScreen("home")} />;
+    if (screen === "settings") return <Settings onExit={() => setScreen("home")} onNavigate={(t) => { if (t === "crisis-resources") setScreen("crisis-resources"); }} />;
     if (screen === "roadmap") return <Roadmap onExit={() => setScreen("home")} />;
     if (screen === "crisis-resources") return <CrisisResources onExit={() => setScreen("home")} />;
     if (screen === "faq") return <FAQ onExit={() => setScreen("home")} />;
