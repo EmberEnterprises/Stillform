@@ -65,7 +65,7 @@ export default function Home({ onEnterPractice, onNavigate }) {
           <div onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420, background: "var(--sf-ground-elev)", border: "0.5px solid var(--sf-border-hairline)", padding: "var(--sf-space-24)" }}>
             <p style={{ fontFamily: "var(--sf-font-mono)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--sf-accent)", margin: "0 0 var(--sf-space-12)" }}>Quick Breathe</p>
             <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.65, color: "var(--sf-text-primary)", margin: "0 0 var(--sf-space-12)" }}>
-              About a minute \u00b7 no typing \u00b7 stop whenever you want. A physiological sigh, paced: breathe in, a small top-off inhale, then a long slow exhale. The extended out-breath is the lever — it settles the system faster than any other single move.
+              About a minute · no typing · stop whenever you want. A physiological sigh, paced: breathe in, a small top-off inhale, then a long slow exhale. The extended out-breath is the lever — it settles the system faster than any other single move.
             </p>
             <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.65, color: "var(--sf-text-primary)", margin: "0 0 var(--sf-space-16)" }}>
               The length is completely up to you. There's no target count — run it as long as feels right and stop with the \u00d7 whenever you're done.

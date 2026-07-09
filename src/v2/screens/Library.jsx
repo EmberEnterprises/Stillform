@@ -146,7 +146,7 @@ export default function Library({ onExit, initialTab }) {
             <span className="sf-sec-row-main">
               <span className="sf-sec-row-top">
                 <span className="sf-sec-name">Body Scan</span>
-                <span className="sf-sec-meta">~5 min \u00b7 no typing</span>
+                <span className="sf-sec-meta">~5 min · no typing</span>
               </span>
               <span className="sf-sec-sub">Six areas, one at a time — precise attention with a firm-pressure anchor. Read the hardware directly.</span>
             </span>
@@ -238,12 +238,12 @@ export default function Library({ onExit, initialTab }) {
                       aria-label={`Open move: ${lesson.title}`}
                       onClick={() => setActiveLessonId(m.id)}
                     >
-                      <span className="sf-sec-mark" aria-hidden="true">{m.working ? "\u25c9" : "\u00b7"}</span>
+                      <span className="sf-sec-mark" aria-hidden="true">{m.working ? "\u25c9" : "·"}</span>
                       <span className="sf-sec-row-main">
                         <span className="sf-sec-row-top">
                           <span className="sf-sec-name">{lesson.title}</span>
                         </span>
-                        {bits.length ? <span className="sf-sec-sub">{bits.join(" \u00b7 ")}</span> : null}
+                        {bits.length ? <span className="sf-sec-sub">{bits.join(" · ")}</span> : null}
                       </span>
                       <span className="sf-sec-arrow" aria-hidden="true">→</span>
                     </button>
