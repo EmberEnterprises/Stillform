@@ -51,6 +51,7 @@ export default function Settings({ onExit }) {
   // behavior; every default flagged for Arlin's picks in userPrefs.js.
   const [prefs, setPrefs] = useState(() => ({
     breathing: getPref("practice.defaultBreathing"),
+    hapticPacing: getPref("practice.hapticPacing"),
     volume: getPref("concierge.volume"),
     directness: getPref("ai.directness"),
     addressAs: getPref("ai.addressAs"),
@@ -197,6 +198,16 @@ export default function Settings({ onExit }) {
               </button>
             </div>
           ))}
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>Eyes-free pacing
+              <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>a pulse marks each breath phase — screen optional</span>
+            </span>
+            <button type="button" onClick={() => pickPref("practice.hapticPacing", "hapticPacing", !prefs.hapticPacing)}
+              style={prefs.hapticPacing ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={!!prefs.hapticPacing} aria-label="Toggle eyes-free pacing">
+              {prefs.hapticPacing ? "On" : "Off"}
+            </button>
+          </div>
         </div>
       </CollapsibleSection>
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { recordBreathe, getTodayBreatheCount } from "../lib/breatheLog.js";
+import { getPref } from "../lib/userPrefs.js";
 
 /**
  * BreatheOverlay — the Quick Breathe surface.
@@ -77,6 +78,15 @@ export default function BreatheOverlay({ open, onClose }) {
       timeoutId = setTimeout(() => {
         i = (i + 1) % PHASES.length;
         setPhaseIndex(i);
+        // W5: eyes-free pacing — a distinct pulse marks each phase so the
+        // screen is optional. Longest pulse = the long exhale. No-ops
+        // silently where unsupported (iOS web) or when the pref is off.
+        try {
+          if (getPref("practice.hapticPacing") === true && navigator.vibrate) {
+            const PULSE = [30, 15, 70]; // inhale, top-up, exhale
+            navigator.vibrate(PULSE[i] || 30);
+          }
+        } catch { /* fail-silent */ }
         if (i === 0) {
           cycles += 1;
           setCycleCount(cycles);

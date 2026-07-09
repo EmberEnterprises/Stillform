@@ -29,7 +29,7 @@
 const KEY = "stillform_v2_prefs";
 
 export const PREF_DEFAULTS = {
-  practice: { defaultBreathing: "quick-reset" },
+  practice: { defaultBreathing: "quick-reset", hapticPacing: false },
   ai: { directness: "standard" },
   concierge: {
     volume: "adaptive",
@@ -42,6 +42,13 @@ export const PREF_DEFAULTS = {
 
 const VALID = {
   "practice.defaultBreathing": ["quick-reset", "deep-regulate", "cyclic-sighing"],
+  // W5 (2026-07-09): eyes-free pacing — vibration marks each phase so the
+  // screen becomes optional (low vision, closed eyes, walking). Android web
+  // supports navigator.vibrate; unsupported devices no-op silently. Default
+  // OFF (nothing-forced). NOTE: this is the honest consumer the earlier
+  // audio-toggle refusal was waiting for — vibration shipped first; audio
+  // joins when real sound design exists.
+  "practice.hapticPacing": [true, false],
   // AI directness: how straight the Reframe voice lands. "gentle" = more
   // space, softer edges; "direct" = fewer cushions, straighter naming.
   // Doctrine unchanged at every setting: suggestive never deterministic.
