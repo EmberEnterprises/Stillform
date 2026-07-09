@@ -78,6 +78,16 @@ export default function BreatheOverlay({ open, onClose }) {
       timeoutId = setTimeout(() => {
         i = (i + 1) % PHASES.length;
         setPhaseIndex(i);
+        // W5 (2026-07-09): eyes-free pacing — a distinct tap per phase so the
+        // session works with eyes closed, in the dark, or without sight.
+        // Owned by Settings ("practice.hapticPacing"), default OFF; Android
+        // web honors navigator.vibrate, elsewhere it no-ops silently.
+        try {
+          if (getPref("practice.hapticPacing") && navigator.vibrate) {
+            const sig = PHASES[i].id === "in" ? [30] : PHASES[i].id === "top-off" ? [15] : [70];
+            navigator.vibrate(sig);
+          }
+        } catch { /* never breaks the breath */ }
         // W5: eyes-free pacing — a distinct pulse marks each phase so the
         // screen is optional. Longest pulse = the long exhale. No-ops
         // silently where unsupported (iOS web) or when the pref is off.

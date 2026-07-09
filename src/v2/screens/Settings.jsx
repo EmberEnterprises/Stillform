@@ -44,6 +44,7 @@ import { getPref, setPref } from "../lib/userPrefs.js";
  */
 export default function Settings({ onExit, onNavigate }) {
   const [confirmClear, setConfirmClear] = useState(false);
+  const [hapticPacing, setHapticPacing] = useState(() => { try { return !!getPref("practice.hapticPacing"); } catch { return false; } });
   const [cleared, setCleared] = useState(false);
   const [summary, setSummary] = useState(() => readDeviceSummary());
   const [a11y, setA11yState] = useState(() => getA11y());
@@ -153,6 +154,23 @@ export default function Settings({ onExit, onNavigate }) {
               {a11y.motion === "reduced" ? "On" : "Off"}
             </button>
           </div>
+          {/* W5 (2026-07-09): eyes-free pacing — the breath, felt not watched.
+              A distinct tap per phase (in/top-off/out). Default OFF. */}
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>Eyes-free pacing</span>
+            <button
+              type="button"
+              onClick={() => { const v = !hapticPacing; setHapticPacing(v); try { setPref("practice.hapticPacing", v); } catch { /* fine */ } }}
+              style={hapticPacing ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={hapticPacing}
+              aria-label="Toggle eyes-free vibration pacing for breathing"
+            >
+              {hapticPacing ? "On" : "Off"}
+            </button>
+          </div>
+          <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--sf-text-faint)", fontFamily: "var(--sf-font-serif)", fontStyle: "italic", fontWeight: 300 }}>
+            A gentle tap marks each phase of the breath — the session works with your eyes closed. Android phones only.
+          </p>
         </div>
       </CollapsibleSection>
 
