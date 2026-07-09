@@ -146,7 +146,7 @@ export default function Library({ onExit, initialTab }) {
             <span className="sf-sec-row-main">
               <span className="sf-sec-row-top">
                 <span className="sf-sec-name">Body Scan</span>
-                <span className="sf-sec-meta">~5 min</span>
+                <span className="sf-sec-meta">~5 min \u00b7 no typing</span>
               </span>
               <span className="sf-sec-sub">Six areas, one at a time — precise attention with a firm-pressure anchor. Read the hardware directly.</span>
             </span>
