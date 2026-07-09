@@ -293,7 +293,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
             {/* W9 trust line: their message already lives in the thread above —
                 say so, because the fear of loss is the trust-killer. */}
             <p style={{ margin: "0 0 var(--sf-space-16)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", color: "var(--sf-text-faint)" }}>
-              Your words are safe in the thread above \u2014 nothing was lost.
+              Your words are safe in the thread above — nothing was lost.
             </p>
             {/*
               When the AI errors, the user shouldn't be stranded. Self-led
