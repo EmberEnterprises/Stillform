@@ -16,9 +16,12 @@
 # STILLFORM MASTER TODO
 **ARA Embers LLC · last verified 2026-07-08.** The Full Build (13 items) is at S5 — complete and pushed; gates green (build clean, 38/38 suites, zero unreachable, zero ghost tokens). Awaiting Arlin's deploy + walk — the S6 acceptance test. Live launch blockers: her Supabase clicks, LS URLs, Termly paste, billing-path decision, pricing (last). Full phase history preserved in HISTORY at the document tail.
 
-**== GOOGLE PLAY LAUNCH GATE (audited + specced 2026-07-02) ==**
+**== GOOGLE PLAY LAUNCH GATE (audited + specced 2026-07-02; date corrected note: audit is early-July fresh, but ⚠ RE-VERIFY POLICY AT EXECUTION TIME — store policy is the one domain where a week-old audit can't be trusted) ==**
+**THE CRITICAL PATH LEADS (Arlin agreed 2026-07-08 — everything else below is paperwork that waits on these two):**
+1. **THE ONE HARD BUILD: in-app ACCOUNT DELETION + web deletion path** — Play-policy mandatory; fully specced; blocked ONLY on Arlin's Supabase 2 clicks; Claude builds the moment they land.
+2. **THE ONE HARD DECISION: billing path.** Arlin's lean 2026-07-08 (agreeing with the case as argued): LOGIN-ONLY (Netflix pattern — subscribe on web; Android app carries no checkout/pricing/purchase links; preserves Lemon Squeezy margins vs a 15-30% cut; one billing system; provably compliant; Play Billing can be ADDED later, margin can't be clawed back). Status: PROVISIONAL LEAN, not locked — CONFIRM with her once at store-setup execution before anything irreversible.
 **READY (verified): targetSdk 36 (current — Play technical bar met); Capacitor android project + wear module exist; icons built.**
-**ARLIN'S TWO DECISIONS:**
+**DETAIL (superseded ordering — the critical path above leads):**
 1. **Billing path:** Play forbids external checkout for digital subs IN-app. Option A = Google Play Billing (15-30% cut). Option B = LOGIN-ONLY Android app (subscribe on web; app shows no checkout, no pricing, no purchase links — Netflix pattern; keeps Lemon Squeezy + margins). Decide together with the Apple path.
 2. **Play developer account as ORGANIZATION (LLC + DUNS qualify):** org accounts are exempt from the 12-testers/14-day closed-testing requirement — removes the '14-day clock' from the critical path. Personal account = clock applies.
 **REQUIRED BUILD (Claude, blocked on Arlin's Supabase 2 clicks): in-app ACCOUNT DELETION + web deletion link — Play policy requirement for apps with accounts; no deletion flow exists yet (verified). Supabase clicks now gate: data safety + native storage + Play.**
