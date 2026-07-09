@@ -51,8 +51,8 @@ function triggerLabels() {
  * or null. { title, matchedTrigger, durationMin, line }. The line is an
  * offer phrased as a question (the concierge never instructs).
  */
-export function getDecompressionCandidate(nowMs = Date.now()) {
-  if (safeGet(DISMISS_KEY) === dayKey(nowMs)) return null; // set down / passed today
+export function getDecompressionCandidate(nowMs = Date.now(), { includeDismissed = false } = {}) {
+  if (!includeDismissed && safeGet(DISMISS_KEY) === dayKey(nowMs)) return null; // off-my-home today
 
   let events = [];
   try { events = getCalendarEvents() || []; } catch { return null; }

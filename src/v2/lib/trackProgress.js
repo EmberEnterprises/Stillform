@@ -183,7 +183,7 @@ export function getMovesBuilding(allIds) {
  * @param {Array<{id:string}>} allLessons — the LESSONS registry (ordered)
  * @returns {{ id:string }|null} the next lesson to offer, or null (honest-empty)
  */
-export function getNextLessonNudge(allLessons) {
+export function getNextLessonNudge(allLessons, { includeDismissed = false } = {}) {
   if (!Array.isArray(allLessons) || allLessons.length === 0) return null;
 
   const practice = readJSON(PRACTICE_KEY, {});
@@ -198,7 +198,7 @@ export function getNextLessonNudge(allLessons) {
   // Dismissal memory — quiet for the window. Any new practice CLEARS this key
   // (see recordPractice), so re-engagement deterministically reopens the nudge.
   const nudgeState = readJSON(NUDGE_KEY, null);
-  if (nudgeState && nudgeState.dismissedAt) {
+  if (!includeDismissed && nudgeState && nudgeState.dismissedAt) {
     const quietUntil = new Date(
       new Date(nudgeState.dismissedAt).getTime() + NUDGE_QUIET_DAYS * 24 * 60 * 60 * 1000
     ).toISOString();

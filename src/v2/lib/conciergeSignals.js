@@ -77,7 +77,7 @@ function activeTriggerLabels() {
  * WORTH = the event title contains a trigger label the user named, OR the
  * event carries a userMarked flag. Never every event.
  */
-export function getUpcomingEventOffer(nowMs = Date.now()) {
+export function getUpcomingEventOffer(nowMs = Date.now(), { includeDismissed = false } = {}) {
   let events = [];
   try { events = getCalendarEvents() || []; } catch { return null; }
   if (!events.length) return null;
@@ -93,7 +93,9 @@ export function getUpcomingEventOffer(nowMs = Date.now()) {
     if (minutesUntil > SPEAK_AHEAD_MIN || minutesUntil < SPEAK_FLOOR_MIN) continue;
 
     const key = eventKey(ev);
-    if (dismissed[key]) continue; // "not this one" is remembered per event
+    // "not this one" = off-my-home, never gone (Arlin's dismissal semantics):
+    // home skips dismissed; The Concierge room shows them until expiry.
+    if (!includeDismissed && dismissed[key]) continue;
 
     const title = String(ev.title).toLowerCase();
     const matchedTrigger = labels.find((l) => title.includes(l)) || null;

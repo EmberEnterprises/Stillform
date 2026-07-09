@@ -42,6 +42,7 @@ import Library from "./screens/Library.jsx";
 import PreEventBrief from "./screens/PreEventBrief.jsx";
 import ReRead from "./screens/ReRead.jsx";
 import Becoming from "./screens/Becoming.jsx";
+import Concierge from "./screens/Concierge.jsx";
 import Paywall from "./screens/Paywall.jsx";
 import Onboarding from "./screens/Onboarding.jsx";
 import Settings from "./screens/Settings.jsx";
@@ -212,6 +213,7 @@ export default function AppV2() {
 
     if (screen === "library") return <Library onExit={() => setScreen("home")} />;
     if (screen === "library-learn") return <Library initialTab="learn" onExit={() => setScreen("home")} />;
+    if (screen === "concierge") return <Concierge onExit={() => setScreen("home")} onOpenSettings={() => setScreen("settings")} />;
     if (screen === "becoming") return <Becoming onExit={() => setScreen("my-progress")} />;
     if (screen === "re-read") return <ReRead onExit={() => setScreen("my-progress")} onNavigate={(t) => { if (t === "crisis-resources") setScreen("crisis-resources"); }} />;
 
@@ -250,6 +252,7 @@ export default function AppV2() {
           else if (target === "library") setScreen("library");
           else if (target === "library-learn") setScreen("library-learn");
           else if (target === "pre-event-brief") setScreen("pre-event-brief");
+          else if (target === "concierge") setScreen("concierge");
           else if (target === "settings") setScreen("settings");
           else if (target === "faq") setScreen("faq");
           else if (target === "crisis-resources") setScreen("crisis-resources");

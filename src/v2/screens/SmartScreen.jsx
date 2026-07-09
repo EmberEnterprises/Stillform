@@ -84,7 +84,7 @@ import {
  *
  * @param {function(): void} onBeginSession — opens the spine.
  */
-export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onOpenProgress = null, onOpenLearn = null, onOpenPreEventBrief = null }) {
+export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onOpenProgress = null, onOpenLearn = null, onOpenPreEventBrief = null, onOpenConcierge = null }) {
   const [beat, setBeat] = useState(() => getBeatOverride() || getCurrentBeat());
   const [thread, setThread] = useState(() => getTodayThread(beat));
   const [sessionCount, setSessionCount] = useState(() => getSessionCount());
@@ -261,6 +261,13 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             sleep) with honest states only, no fabricated data. Receding so
             the naming surface leads. (S5: merge with the concierge "Today"
             header for established users so there's a single Today anchor.) */}
+        {/* The Concierge room (Arlin's design): the quiet standing door. */}
+        {typeof onOpenConcierge === "function" && (
+          <button type="button" className="sf-link-quiet" onClick={onOpenConcierge} aria-label="Open the concierge" style={{ margin: "var(--sf-space-8) 0" }}>
+            The concierge {"\u203a"}
+          </button>
+        )}
+
         <TodayEngine />
 
         {/* TODAY label — heads the concierge layer (thread / trajectory /
