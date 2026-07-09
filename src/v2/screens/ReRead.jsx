@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import MicButton from "../components/MicButton.jsx";
 import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
@@ -134,6 +135,9 @@ export default function ReRead({ onExit, onNavigate }) {
             placeholder="What happened, as you hold it…"
             aria-label="The memory in your own words"
           />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "var(--sf-space-8)" }}>
+            <MicButton onTranscript={(t) => setMemory((v) => (v ? v + " " : "") + t.trim())} />
+          </div>
           {logMoments.length > 0 && (
             <div style={{ marginTop: "var(--sf-space-16)" }}>
               <MonoLabel size="xs" tone="faint">Or start from a logged moment</MonoLabel>
@@ -219,6 +223,9 @@ export default function ReRead({ onExit, onNavigate }) {
             placeholder="The same moment, with more of the room in it…"
             aria-label="The wider telling"
           />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "var(--sf-space-8)" }}>
+            <MicButton onTranscript={(t) => setRetelling((v) => (v ? v + " " : "") + t.trim())} />
+          </div>
           <div style={{ marginTop: "var(--sf-space-16)" }}>
             <Button variant="primary" onClick={() => setBeat("close")} disabled={retelling.trim().length < 12}>
               Set it down

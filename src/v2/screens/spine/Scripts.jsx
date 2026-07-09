@@ -82,7 +82,7 @@ export default function Scripts({ seed = "", onDone, onExit }) {
         return;
       }
       if (res.error || !res.script) {
-        setErrorMsg(res.error || "Couldn't draft that. Try again.");
+        setErrorMsg(res.error || "Couldn't draft that \u2014 your words are safe below. Try again when ready.");
         setPhase("error");
         return;
       }
@@ -92,7 +92,7 @@ export default function Scripts({ seed = "", onDone, onExit }) {
       setPhase("result");
       try { window.plausible?.("Script Generated", { props: { channel } }); } catch { /* analytics non-fatal */ }
     } catch {
-      setErrorMsg("Couldn't reach the network. Try again.");
+      setErrorMsg("Couldn't reach the network \u2014 nothing you wrote was lost. Send again when ready.");
       setPhase("error");
     }
   };

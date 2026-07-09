@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import MicButton from "../../components/MicButton.jsx";
 import EditorialBlock from "../../components/EditorialBlock.jsx";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
@@ -249,6 +250,9 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
           rows={2}
           aria-label="Name what is present"
         />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "var(--sf-space-8)" }}>
+            <MicButton onTranscript={(t) => setText((v) => (v ? v + " " : "") + t.trim())} />
+          </div>
       </div>
 
       <InfoModal

@@ -91,7 +91,7 @@ export default function PreEventBrief({ seed = "", onDone, onExit }) {
       setPhase("brief");
       try { window.plausible?.("Pre-event Brief Generated"); } catch { /* analytics non-fatal */ }
     } catch {
-      setErrorMsg("Couldn't reach the network. Try again.");
+      setErrorMsg("Couldn't reach the network \u2014 nothing you wrote was lost. Send again when ready.");
       setPhase("error");
     }
   };
@@ -111,7 +111,7 @@ export default function PreEventBrief({ seed = "", onDone, onExit }) {
         return;
       }
       if (res.error || res.exchanges.length === 0) {
-        setRehearsalError(res.error || "Couldn't draft that. Try again.");
+        setRehearsalError(res.error || "Couldn't draft that \u2014 your words are safe below. Try again when ready.");
         setPhase("rehearsal");
         return;
       }
@@ -119,7 +119,7 @@ export default function PreEventBrief({ seed = "", onDone, onExit }) {
       setPhase("rehearsal");
       try { window.plausible?.("Rehearsal Generated", { props: { count: res.exchanges.length } }); } catch { /* non-fatal */ }
     } catch {
-      setRehearsalError("Couldn't reach the network. Try again.");
+      setRehearsalError("Couldn't reach the network \u2014 nothing you wrote was lost. Send again when ready.");
       setPhase("rehearsal");
     }
   };

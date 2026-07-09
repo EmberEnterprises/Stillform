@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import MicButton from "../../components/MicButton.jsx";
 import EditorialBlock from "../../components/EditorialBlock.jsx";
 import Button from "../../components/Button.jsx";
 import BreathingSession from "../../components/BreathingSession.jsx";
@@ -145,6 +146,9 @@ export default function WindDown({ onReturnHome }) {
             rows={3}
             aria-label="Tomorrow's anchor"
           />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "var(--sf-space-8)" }}>
+            <MicButton onTranscript={(t) => setAnchorText((v) => (v ? v + " " : "") + t.trim())} />
+          </div>
         </div>
 
         <div

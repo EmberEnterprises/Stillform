@@ -287,9 +287,14 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
 
         {error ? (
           <div style={{ padding: "var(--sf-space-24) 0" }}>
-            <MonoLabel size="sm" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
+            <MonoLabel size="sm" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
               {error}
             </MonoLabel>
+            {/* W9 trust line: their message already lives in the thread above —
+                say so, because the fear of loss is the trust-killer. */}
+            <p style={{ margin: "0 0 var(--sf-space-16)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", color: "var(--sf-text-faint)" }}>
+              Your words are safe in the thread above \u2014 nothing was lost.
+            </p>
             {/*
               When the AI errors, the user shouldn't be stranded. Self-led
               practice is the same Notice → Reframe → Close practice, the
