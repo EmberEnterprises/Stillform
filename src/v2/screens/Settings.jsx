@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { hasPin, setPin as savePin, verifyPin, clearPin } from "../lib/pinLock.js";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import CollapsibleSection from "../components/CollapsibleSection.jsx";
 import CalendarImport from "../components/CalendarImport.jsx";
@@ -45,6 +46,10 @@ import { getPref, setPref } from "../lib/userPrefs.js";
 export default function Settings({ onExit, onNavigate }) {
   const [confirmClear, setConfirmClear] = useState(false);
   const [hapticPacing, setHapticPacing] = useState(() => { try { return !!getPref("practice.hapticPacing"); } catch { return false; } });
+  const [pinSet, setPinSet] = useState(() => hasPin());
+  const [pinPanel, setPinPanel] = useState(false);
+  const [pinNew, setPinNew] = useState("");
+  const [pinCurrent, setPinCurrent] = useState("");
   const [cleared, setCleared] = useState(false);
   const [summary, setSummary] = useState(() => readDeviceSummary());
   const [a11y, setA11yState] = useState(() => getA11y());
@@ -171,6 +176,42 @@ export default function Settings({ onExit, onNavigate }) {
           <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--sf-text-faint)", fontFamily: "var(--sf-font-serif)", fontStyle: "italic", fontWeight: 300 }}>
             A gentle tap marks each phase of the breath — the session works with your eyes closed. Android phones only.
           </p>
+          {/* W8 web tier (2026-07-12): the app lock. Her design: one clasp on
+              the whole diary; forgot = erase-and-start-over only. */}
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>App lock (PIN)</span>
+            <button
+              type="button"
+              onClick={() => setPinPanel((v) => !v)}
+              style={pinSet ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={pinSet}
+              aria-label="Configure the app lock PIN"
+            >
+              {pinSet ? "On" : "Off"}
+            </button>
+          </div>
+          {pinPanel ? (
+            <div style={{ padding: "8px 0 4px" }}>
+              {pinSet ? (
+                <>
+                  <input type="password" inputMode="numeric" value={pinCurrent} onChange={(e) => setPinCurrent(e.target.value)} placeholder="Current PIN" aria-label="Current PIN" style={PIN_INPUT} />
+                  <button type="button" className="sf-link-quiet" style={{ marginLeft: 12 }} onClick={async () => { if (await verifyPin(pinCurrent)) { clearPin(); setPinSet(false); setPinPanel(false); setPinCurrent(""); } }}>
+                    Remove lock
+                  </button>
+                </>
+              ) : (
+                <>
+                  <input type="password" inputMode="numeric" value={pinNew} onChange={(e) => setPinNew(e.target.value)} placeholder="New PIN (4+ digits)" aria-label="New PIN" style={PIN_INPUT} />
+                  <button type="button" className="sf-link-quiet" style={{ marginLeft: 12 }} onClick={async () => { if (pinNew.length >= 4 && (await savePin(pinNew))) { setPinSet(true); setPinPanel(false); setPinNew(""); } }}>
+                    Set lock
+                  </button>
+                </>
+              )}
+              <p style={{ margin: "8px 0 0", fontSize: "12px", color: "var(--sf-text-faint)", fontFamily: "var(--sf-font-serif)", fontStyle: "italic", fontWeight: 300 }}>
+                The whole practice locks behind it. If it's ever forgotten, the only way through is erasing this device's data — your words are deleted, never exposed. On your phone, your fingerprint will open it instead.
+              </p>
+            </div>
+          ) : null}
         </div>
       </CollapsibleSection>
 
@@ -468,6 +509,11 @@ const SECTION = {
   marginBottom: "var(--sf-space-32)",
 };
 
+const PIN_INPUT = {
+  background: "transparent", border: "0.5px solid var(--sf-border-hairline)",
+  borderRadius: 6, color: "var(--sf-text-primary)", fontSize: 15,
+  padding: "8px 10px", width: 160, outline: "none",
+};
 const ROW = {
   fontSize: "15px",
   lineHeight: 1.5,

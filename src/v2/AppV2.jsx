@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import PinGate from "./components/PinGate.jsx";
+import { shouldLock, markBackgrounded, hasPin } from "./lib/pinLock.js";
 import "./tokens.css";
 import "./components.css";
 import { applyA11y } from "./lib/a11y.js";
@@ -103,6 +105,17 @@ const HEADERLESS = new Set(["home", "onboarding", "verify", "spine", "statecheck
 
 export default function AppV2() {
   const [screen, setScreen] = useState(pickInitialScreen);
+  // W8 web tier (2026-07-12): the app-level lock. Arms at cold start when a
+  // PIN exists; re-arms when the app leaves the screen for >60s.
+  const [locked, setLocked] = useState(() => shouldLock());
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === "hidden") markBackgrounded();
+      else if (hasPin() && shouldLock()) setLocked(true);
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
   const [entryPayload, setEntryPayload] = useState(null);
   const [homeNonce, setHomeNonce] = useState(0);
   // Phase 6.4c: one-shot forced beat for a manual launch (post-event from My
@@ -268,6 +281,16 @@ export default function AppV2() {
       />
     );
   };
+
+  // W8: the gate replaces everything while locked — nothing renders behind it
+  // (no content in the DOM for a snooper's dev tools to read).
+  if (locked) {
+    return (
+      <div className="sf-v2">
+        <PinGate onUnlock={() => setLocked(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="sf-v2">
