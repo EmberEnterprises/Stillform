@@ -94,6 +94,7 @@ export default function BodyScan({ onExit }) {
   const [phase, setPhase] = useState("intro"); // intro | area | hold | done
   const [idx, setIdx] = useState(0);
   const [remaining, setRemaining] = useState(0);
+  const [leftEarly, setLeftEarly] = useState(false); // J4: partial-credit path
   const timerRef = useRef(null);
 
   const mult = useRef(paceMultiplier());
@@ -126,6 +127,13 @@ export default function BodyScan({ onExit }) {
     }, 1000);
   };
 
+  // J4: leave the scan early but keep the credit — the areas read still count.
+  const leaveWithCredit = () => {
+    clearInterval(timerRef.current);
+    setLeftEarly(true);
+    setPhase("done");
+  };
+
   const skipArea = () => {
     clearInterval(timerRef.current);
     if (idx + 1 < AREAS.length) {
@@ -141,7 +149,7 @@ export default function BodyScan({ onExit }) {
     return (
       <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
         <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
-          <button type="button" onClick={onExit} aria-label="Back" style={BACK}>\u2190 back</button>
+          <button type="button" onClick={leaveWithCredit} aria-label="Finish here with credit" style={BACK}>\u2190 finish here</button>
           <EditorialBlock
             label="Body Scan"
             headline="Read the hardware, area by area"
@@ -165,7 +173,13 @@ export default function BodyScan({ onExit }) {
       <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
         <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
           <MonoLabel size="xs" tone="faint">Scan complete</MonoLabel>
-          <p style={Q}>Six areas, read. Whatever you found is the day's actual state \u2014 now you're working from the real reading, not a guess.</p>
+          {/* J4 (2026-07-14): partial credit — the count is honest, and any
+              amount is a real scan. No all-or-nothing in a self-mastery app. */}
+          <p style={Q}>{
+            leftEarly
+              ? `${idx + 1} ${idx === 0 ? "area" : "areas"}, read. That's a real scan \u2014 you checked in with your body and that counts. Whatever you found is the day's actual state \u2014 now you're working from`
+              : "Six areas, read. Whatever you found is the day's actual state \u2014 now you're working from"
+          } the real reading, not a guess.</p>
           <Button variant="primary" onClick={onExit}>Done</Button>
         </article>
       </main>
