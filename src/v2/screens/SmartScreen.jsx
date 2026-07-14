@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { getRecentSessions } from "../lib/sessions.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
 import { getTodayThread } from "../lib/thread.js";
@@ -261,7 +262,9 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             sleep) with honest states only, no fabricated data. Receding so
             the naming surface leads. (S5: merge with the concierge "Today"
             header for established users so there's a single Today anchor.) */}
-        {/* W3: the first landing — consumed once. The Read just gave them
+<SameDayLine />
+
+                {/* W3: the first landing — consumed once. The Read just gave them
             their own words back; the natural next thing is one real rep,
             offered quietly, dismissible forever with one tap. */}
         <FirstLandingCatch />
@@ -529,5 +532,43 @@ function FirstLandingCatch() {
         Got it
       </button>
     </div>
+  );
+}
+
+/* A6 — same-day continuity: it knows it saw you this morning. */
+function SameDayLine() {
+  const line = React.useMemo(() => {
+    try {
+      const today = new Date().toDateString();
+      const earlier = getRecentSessions(8).filter(
+        (x) => x?.ts && new Date(x.ts).toDateString() === today
+      );
+      if (!earlier.length) return null;
+      const h = new Date().getHours();
+      if (earlier.length === 1) {
+        return h >= 17
+          ? "Back again — you were here earlier today."
+          : "Second time today. The day's still open.";
+      }
+      return `${earlier.length} already today — the record's carrying it.`;
+    } catch {
+      return null;
+    }
+  }, []);
+  if (!line) return null;
+  return (
+    <p
+      className="sf-fade-enter"
+      style={{
+        margin: "0 0 var(--sf-space-12)",
+        fontFamily: "var(--sf-font-serif)",
+        fontWeight: 300,
+        fontStyle: "italic",
+        fontSize: "13px",
+        color: "var(--sf-text-faint)",
+      }}
+    >
+      {line}
+    </p>
   );
 }
