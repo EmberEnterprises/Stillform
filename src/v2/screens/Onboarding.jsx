@@ -313,6 +313,14 @@ export default function Onboarding({ onComplete }) {
     else { setPhase("read"); fire("Calibration Completed"); }
   }
 
+  // O3: step back and re-answer — the "yours to correct" promise starts here,
+  // not after the Read. The question arrives fresh, as it did the first time.
+  function backBeat() {
+    if (beatIndex === 0) return;
+    setPicked(null); setOtherOpen(false); setOtherText("");
+    setBeatIndex(beatIndex - 1);
+  }
+
   function skipBeat() {
     setPicked(null); setOtherOpen(false);
     fire("Calibration Beat Skipped", { beat: beat.id });
@@ -357,6 +365,11 @@ export default function Onboarding({ onComplete }) {
             It starts with five questions. Not an intake — a first rep. Watch what happens
             to your first answer.
           </p>
+          <p style={BODY}>
+            What it builds, over reps: a sharper read on your own thinking — so decisions
+            get cleaner and pressure moves you less. Composure isn't the drill. It's what's
+            left once the thinking has room.
+          </p>
           <Button variant="primary" onClick={() => setPhase("cal")}>Run the first rep</Button>
         </article>
       </main>
@@ -368,7 +381,11 @@ export default function Onboarding({ onComplete }) {
     return (
       <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
         <article className="sf-fade-enter" style={{ maxWidth: 560 }}>
-          <MonoLabel size="xs" tone="faint">{beat.kicker}</MonoLabel>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+            <MonoLabel size="xs" tone="faint">{beat.kicker}</MonoLabel>
+            {/* O2: the cost was stated ("five questions") — this is honest progress against it. */}
+            <MonoLabel size="xs" tone="faint">{beatIndex + 1} / {BEATS.length}</MonoLabel>
+          </div>
 
           {!picked ? (
             <>
@@ -398,7 +415,10 @@ export default function Onboarding({ onComplete }) {
                   </div>
                 </div>
               )}
-              <div style={{ marginTop: "var(--sf-space-16)" }}>
+              <div style={{ marginTop: "var(--sf-space-16)", display: "flex", gap: "var(--sf-space-16)" }}>
+                {beatIndex > 0 && (
+                  <button type="button" className="sf-link-quiet" onClick={backBeat}>Back a step</button>
+                )}
                 <button type="button" className="sf-link-quiet" onClick={skipBeat}>Skip this one</button>
               </div>
             </>
@@ -461,6 +481,11 @@ export default function Onboarding({ onComplete }) {
               <p className="sf-fade-enter" style={{ ...NORM, animationDelay: next() }}>
                 A starting read, not a verdict — it sharpens with use, and every line stays yours
                 to correct.
+              </p>
+              <p className="sf-fade-enter" style={{ ...NORM, animationDelay: next() }}>
+                {/* O4: the bridge — the proof they just watched, claimed as the method. */}
+                That's the practice: your own words, handed back with more of the picture in
+                them. What you just did in five questions, a rep does with a real moment.
               </p>
             </>
           ) : (
