@@ -89,6 +89,7 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
   const chips = config?.notice?.chips ?? DEFAULT_SCAFFOLDING_CHIPS;
 
   const [text, setText] = useState(() => (typeof initialText === "string" ? initialText : ""));
+  const [bodyFirst, setBodyFirst] = useState(false); // J5: the body as the way in
   const [selectedChip, setSelectedChip] = useState(null);
   const [infoChip, setInfoChip] = useState(null);
   const [showChipGuide, setShowChipGuide] = useState(false);
@@ -250,13 +251,42 @@ export default function Notice({ config, onContinue, onExit, initialText = null,
           rows={2}
           aria-label="Name what is present"
         />
-          <div style={{ marginTop: "var(--sf-space-8)", display: "flex", justifyContent: "flex-end" }}>
-            {/* W4: the mic, everywhere there's a field. */}
-            <MicButton onTranscript={(t) => setText((d) => (d ? d + " " : "") + t.trim())} />
-          </div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "var(--sf-space-8)" }}>
             <MicButton onTranscript={(t) => setText((v) => (v ? v + " " : "") + t.trim())} />
           </div>
+
+        {/* J5 (2026-07-14): the can't-name-it door. The blank field assumes the
+            word is findable — sometimes the block IS the state. The body is the
+            way in: tapping opens the chips as a starting point, no typing. */}
+        {!text.trim() && (
+          <button
+            type="button"
+            className="sf-link-quiet"
+            onClick={() => setBodyFirst((v) => !v)}
+            style={{ marginTop: "var(--sf-space-8)" }}
+          >
+            {bodyFirst ? "Never mind — I'll write it" : "Can't find the word? Start with the body"}
+          </button>
+        )}
+        {bodyFirst && !text.trim() && (
+          <div style={{ marginTop: "var(--sf-space-8)" }}>
+            <p style={{ margin: "0 0 var(--sf-space-8)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", color: "var(--sf-text-faint)" }}>
+              Where does it sit right now? Naming the place is naming something.
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
+              {["jaw", "chest", "shoulders", "stomach", "throat", "hands"].map((part) => (
+                <button
+                  key={part}
+                  type="button"
+                  className="sf-chip"
+                  onClick={() => { setText(`It's sitting in my ${part}.`); setBodyFirst(false); }}
+                >
+                  {part}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <InfoModal
