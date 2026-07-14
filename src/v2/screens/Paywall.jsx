@@ -199,6 +199,16 @@ export default function Paywall({ onClose }) {
         <button type="button" onClick={onClose} className="sf-link-quiet">Not now ›</button>
       </div>
 
+      {/* J11 (2026-07-14): the money moment's silent fear — "what happens to my
+          words if I don't pay?" — answered plainly, once. */}
+      <p
+        className="sf-fade-enter sf-fade-enter--delay-3"
+        style={{ marginTop: "var(--sf-space-16)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)" }}
+      >
+        Your record stays yours either way — everything you've written lives on your
+        device, subscription or not.
+      </p>
+
       {error ? <p style={ERR}>{error}</p> : null}
 
       {/* Log in / sign up — relocated here from Settings (Arlin, June 23): the

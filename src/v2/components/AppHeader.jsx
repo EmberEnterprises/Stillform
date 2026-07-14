@@ -18,7 +18,7 @@ import React from "react";
  *              to where auth lives (currently Settings → Account; a dedicated
  *              login surface is a flagged refinement).
  */
-export default function AppHeader({ onHome, onSignIn }) {
+export default function AppHeader({ onHome, onSignIn, onCrisis }) {
   const wordmark = (
     <>
       <span style={{ fontWeight: 300 }}>Still</span>
@@ -67,6 +67,20 @@ export default function AppHeader({ onHome, onSignIn }) {
         </div>
       )}
 
+      {/* J9 (2026-07-14): the crisis door, standing on every surface the header
+          touches — quiet, never loud, always ≤2 taps from wherever they are. */}
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}>
+        {typeof onCrisis === "function" ? (
+          <button
+            type="button"
+            onClick={onCrisis}
+            className="sf-foot-link"
+            aria-label="Support and crisis resources"
+            style={{ background: "none", border: "none", padding: 0, cursor: "pointer", opacity: 0.75 }}
+          >
+            Support
+          </button>
+        ) : null}
       {typeof onSignIn === "function" ? (
         <button
           type="button"
@@ -89,6 +103,7 @@ export default function AppHeader({ onHome, onSignIn }) {
           Log in
         </button>
       ) : null}
+      </div>
     </header>
   );
 }

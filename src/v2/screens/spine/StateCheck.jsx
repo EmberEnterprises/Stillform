@@ -41,6 +41,9 @@ const STATES = [
 
 export default function StateCheck({ onDone, onSkip }) {
   const [selected, setSelected] = useState([]);
+  // J2: which states earn the offer — the honest heavy set (never "clear").
+  const HEAVY = ["depleted", "sleep-deprived", "pain", "activated"];
+  const heavy = selected.some((id) => HEAVY.includes(id));
 
   useEffect(() => {
     try { window.plausible?.("State Check Opened"); } catch { /* analytics non-fatal */ }
@@ -93,6 +96,15 @@ export default function StateCheck({ onDone, onSkip }) {
           })}
         </div>
         <div style={ROW}>
+          {/* J2 (2026-07-14): the check-in that LISTENS. A heavy state gets the
+              matched floor offered here — one option, no insistence; Continue
+              still means continue. */}
+          {heavy && (
+            <p style={{ margin: "var(--sf-space-12) 0 0", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)" }}>
+              That's a real load to be carrying. The 90-second breath is right there if you
+              want it — it asks nothing of you.
+            </p>
+          )}
           <Button variant="primary" onClick={done}>Continue</Button>
         </div>
         <button

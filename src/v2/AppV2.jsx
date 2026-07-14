@@ -294,7 +294,7 @@ export default function AppV2() {
 
   return (
     <div className="sf-v2">
-      {!HEADERLESS.has(screen) ? <AppHeader onHome={goHome} onSignIn={goSignIn} /> : null}
+      {!HEADERLESS.has(screen) ? <AppHeader onHome={goHome} onSignIn={goSignIn} onCrisis={() => setScreen("crisis-resources")} /> : null}
       {renderScreen()}
     </div>
   );

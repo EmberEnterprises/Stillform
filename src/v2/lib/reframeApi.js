@@ -300,7 +300,12 @@ export async function sendReframeMessage({ input, history = [], feelState = null
       crisisDetected: !!(data && data.crisisDetected),
     };
   } catch (err) {
-    return { reframe: "", error: "Connection issue. Check your network." };
+    return {
+      reframe: "",
+      error: navigator.onLine === false
+        ? "You're offline — everything else in Stillform still works; the AI waits for signal."
+        : "Connection issue. Check your network.",
+    };
   }
 }
 
