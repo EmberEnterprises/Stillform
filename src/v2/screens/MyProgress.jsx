@@ -1,4 +1,5 @@
 import React from "react";
+import { getSessionCount, getDistinctPracticeDays, getRecentSessions } from "../lib/sessions.js";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import GrowthArbor from "../components/GrowthArbor.jsx";
@@ -54,6 +55,30 @@ export default function MyProgress({ onExit, onNavigate }) {
   const pendingValue = getPendingValue();
   const observerSeatCount = getObserverSeatCount();
 
+  // J8 (2026-07-14): greet before asking — one true line from their own record,
+  // so the room hosts instead of presenting 28 doors cold. No praise, no streak.
+  const greeting = (() => {
+    try {
+      const total = getSessionCount();
+      if (!total) return "Nothing here yet — this fills as you practice. No rush.";
+      const today = new Date().toDateString();
+      const thisWeek = getRecentSessions(50).filter((x) => {
+        if (!x?.ts) return false;
+        const d = (Date.now() - x.ts) / 86400000;
+        return d <= 7;
+      }).length;
+      const mornings = getRecentSessions(50).filter((x) => x?.ts && new Date(x.ts).getHours() < 12 && (Date.now() - x.ts) / 86400000 <= 7).length;
+      if (thisWeek >= 2 && mornings >= 2 && mornings >= thisWeek - 1) {
+        return `This week: ${thisWeek} reps, mostly mornings. The record's holding the shape.`;
+      }
+      if (thisWeek >= 1) return `This week: ${thisWeek} ${thisWeek === 1 ? "rep" : "reps"} on the record.`;
+      const days = getDistinctPracticeDays();
+      return `${total} on the record across ${days} ${days === 1 ? "day" : "days"}. Pick up wherever.`;
+    } catch {
+      return null;
+    }
+  })();
+
   return (
     <main className="sf-page" style={{ paddingTop: "var(--sf-space-32)" }}>
       <div className="sf-home-aura" aria-hidden="true" />
@@ -93,6 +118,13 @@ export default function MyProgress({ onExit, onNavigate }) {
         }
         rule
       />
+
+      {/* J8: the host line — their own week, before any door. */}
+      {greeting ? (
+        <p style={{ margin: "0 0 var(--sf-space-24)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "14px", lineHeight: 1.6, color: "var(--sf-text-faint)" }}>
+          {greeting}
+        </p>
+      ) : null}
 
       {/* Keystone Step 2: the discovery confirm surface. Self-gating (renders
           nothing until the engine is ready + a candidate is undecided), so it
