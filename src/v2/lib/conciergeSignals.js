@@ -225,6 +225,59 @@ export function getNoGapDayNote(nowMs = Date.now(), { includeDismissed = false, 
   };
 }
 
+/**
+ * P3 TOMORROW VISIBLE TONIGHT (2026-07-15): a loaded morning tomorrow, seen
+ * TONIGHT while it's still actionable. Counts tomorrow's early events (before
+ * ~11:00) and their total load; if the morning is heavy, returns a note whose
+ * job is to reshape the evening toward sleep. Prediction while it can still
+ * change tonight's choices — logistics (a full tomorrow), not a claim about the
+ * person.
+ *
+ * Only speaks in the evening (after ~17:00) so it lands at set-down, not midday.
+ */
+export function getTomorrowHeavyNote(nowMs = Date.now(), { includeDismissed = false, eveningFromHour = 17, heavyCount = 3, heavyLoadMin = 180 } = {}) {
+  const now = new Date(nowMs);
+  if (now.getHours() < eveningFromHour) return null; // only at set-down
+
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { return null; }
+  if (!events.length) return null;
+
+  const tmr = new Date(nowMs + 24 * 60 * 60 * 1000);
+  const tmrKey = tmr.toDateString();
+  const morningCutoff = new Date(tmr); morningCutoff.setHours(11, 0, 0, 0);
+  const cutoffMs = morningCutoff.getTime();
+
+  let count = 0;
+  let loadMin = 0;
+  let earliest = null;
+  for (const ev of events) {
+    if (!ev || !ev.start) continue;
+    const st = Date.parse(ev.start);
+    if (Number.isNaN(st)) continue;
+    if (new Date(st).toDateString() !== tmrKey) continue;
+    if (st > cutoffMs) continue; // only the morning load
+    count += 1;
+    const dur = typeof ev.durationMin === "number" ? ev.durationMin : 60;
+    loadMin += dur;
+    if (earliest === null || st < earliest) earliest = st;
+  }
+
+  const heavy = count >= heavyCount || loadMin >= heavyLoadMin;
+  if (!heavy) return null;
+
+  const key = "tmrheavy:" + tmrKey;
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!includeDismissed && dismissed[key]) return null;
+
+  return {
+    key,
+    note: "Tomorrow morning is loaded \u2014 tonight's job is sleep.",
+    count,
+    loadMin,
+  };
+}
+
 /** Remember "not this one" for a specific event offer. */
 export function dismissEventOffer(key) {
   if (!key || typeof key !== "string") return false;

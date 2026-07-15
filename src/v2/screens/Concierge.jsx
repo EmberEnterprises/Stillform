@@ -1,7 +1,7 @@
 import React from "react";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote } from "../lib/conciergeSignals.js";
+import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate } from "../lib/eodDecompression.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
@@ -62,6 +62,16 @@ export default function Concierge({ onExit, onOpenSettings }) {
       item: safe(() => {
         const g = getNoGapDayNote(Date.now(), { includeDismissed: true });
         return g ? g.note : null;
+      }, null),
+    },
+    {
+      key: "tomorrowHeavy",
+      name: "Tomorrow, tonight",
+      earns: "Speaks only when tomorrow morning is genuinely loaded — so tonight can bend toward sleep while it still matters.",
+      when: "In the evening, when tomorrow's morning is already full.",
+      item: safe(() => {
+        const t = getTomorrowHeavyNote(Date.now(), { includeDismissed: true });
+        return t ? t.note : null;
       }, null),
     },
     {
