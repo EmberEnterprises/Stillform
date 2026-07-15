@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { downloadEventIcs } from "../../lib/icsExport.js";
 import { draftStatement } from "../../lib/reframeApi.js";
 import { getPref, hasExplicitPref } from "../../lib/userPrefs.js";
 import EditorialBlock from "../../components/EditorialBlock.jsx";
@@ -561,6 +562,24 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
             Not yet ›
           </button>
         </div>
+        {/* J7 (2026-07-14): hand it to the calendar — the move PLACED, not just
+            stated. Opt-in, one tap, their device, no account. */}
+        <button
+          type="button"
+          className="sf-link-quiet"
+          onClick={() => {
+            try {
+              downloadEventIcs({
+                title: `Stillform — ${nextMove.trim()}`,
+                durationMin: 15,
+                description: "A move you chose to run. From your Stillform close.",
+              });
+            } catch { /* fail-silent */ }
+          }}
+          style={{ display: "block", marginTop: "var(--sf-space-16)", opacity: 0.7, fontSize: "13px" }}
+        >
+          Put it on my calendar →
+        </button>
       </main>
     );
   }
