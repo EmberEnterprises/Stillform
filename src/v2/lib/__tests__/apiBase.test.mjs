@@ -4,7 +4,8 @@ let n = 0; const ok = (name, f) => { f(); n++; console.log("PASS", name); };
 
 // web runtime: no Capacitor global
 globalThis.window = {};
-const { fnUrl, isNativeRuntime } = await import("../apiBase.js");
+const { fnUrl, isNativeRuntime, goUrl } = await import("../apiBase.js");
+const gu = goUrl;
 
 ok("web: relative, unchanged behavior", () => {
   assert.strictEqual(isNativeRuntime(), false);
@@ -29,3 +30,10 @@ ok("native: absolute against deployed origin", () => {
   assert.strictEqual(isNativeRuntime(), true);
 });
 console.log(`apiBase: ${n}/3 pass`);
+
+// goUrl — crisis redirect layer
+ok("goUrl: relative on web, normalizes forms", () => {
+  globalThis.window = {};
+  assert.strictEqual(gu("/go/helpline"), "/go/helpline");
+  assert.strictEqual(gu("helpline"), "/go/helpline");
+});

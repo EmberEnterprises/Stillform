@@ -46,3 +46,17 @@ export function fnUrl(name) {
   }
   return isNativeRuntime() ? DEPLOYED_ORIGIN + path : path;
 }
+
+/**
+ * Build a URL for the first-party /go/* redirect layer (crisis links, outbound
+ * destinations). Same rule as fnUrl: relative on web, absolute against the
+ * deployed origin on native — so a crisis redirect never dead-ends in the
+ * webview.
+ * @param {string} path  e.g. "/go/helpline" or "go/helpline"
+ * @returns {string}
+ */
+export function goUrl(path) {
+  let p = String(path || "").trim();
+  if (!p.startsWith("/go/")) p = "/go/" + p.replace(/^\/+/, "").replace(/^go\//, "");
+  return isNativeRuntime() ? DEPLOYED_ORIGIN + p : p;
+}

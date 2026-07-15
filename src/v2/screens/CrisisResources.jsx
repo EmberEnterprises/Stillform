@@ -1,4 +1,5 @@
 import { buildSessionSummary } from "../lib/sessionSummary.js";
+import { goUrl } from "../lib/apiBase.js";
 import React from "react";
 import BrassCross from "../components/BrassCross.jsx";
 import CollapsibleSection from "../components/CollapsibleSection.jsx";
@@ -36,7 +37,7 @@ const REGIONS = [
     region: "Brazil",
     lines: [
       { name: "CVV — Centro de Valorização da Vida", note: "Free and confidential, 24/7. Emergency: 192.", number: "Ligar 188", href: "tel:188" },
-      { name: "CVV — chat support", note: "Online chat support.", number: "cvv.org.br", href: "/go/cvv", external: true },
+      { name: "CVV — chat support", note: "Online chat support.", number: "cvv.org.br", href: goUrl("/go/cvv"), external: true },
     ],
   },
   {
@@ -55,7 +56,7 @@ const REGIONS = [
     region: "Armenia",
     lines: [
       { name: "Emotional Support Hotline", note: "Toll-free (MHAI · Yerevan). Mon–Fri 09:00–18:00. Outside hours, call 112.", number: "Call 0800 00 900", href: "tel:080000900" },
-      { name: "Armenia helpline directory", note: "All Armenia crisis lines.", number: "findahelpline.com", href: "/go/helpline-am", external: true },
+      { name: "Armenia helpline directory", note: "All Armenia crisis lines.", number: "findahelpline.com", href: goUrl("/go/helpline-am"), external: true },
     ],
   },
 ];
@@ -149,7 +150,7 @@ export default function CrisisResources({ onExit }) {
 
         <p style={NOTE_BLOCK}>
           Anywhere else,{" "}
-          <a href="/go/helpline" target="_blank" rel="noopener noreferrer" style={INLINE_LINK}>
+          <a href={goUrl("/go/helpline")} target="_blank" rel="noopener noreferrer" style={INLINE_LINK}>
             findahelpline.com
           </a>{" "}
           lists crisis lines by country.
