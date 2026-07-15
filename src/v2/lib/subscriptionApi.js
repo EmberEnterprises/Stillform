@@ -31,6 +31,22 @@ const CHECKOUT_URLS = {
 };
 
 /**
+ * Lemon Squeezy hosted customer-portal URL (store-required: Manage/Cancel).
+ * Arlin fills this from the LS dashboard (Settings → Customer Portal, or the
+ * "My Orders" portal link). Until set, the Manage row shows an honest
+ * unavailable state rather than a dead link. No other code change needed.
+ */
+const CUSTOMER_PORTAL_URL = "";
+
+/**
+ * The customer-portal URL for managing or cancelling a subscription.
+ * @returns {string|null} null until configured
+ */
+export function getCustomerPortalUrl() {
+  return CUSTOMER_PORTAL_URL || null;
+}
+
+/**
  * Build the full checkout URL for a variant, with custom data attached so the
  * webhook can match the purchase back to this device (SUBSCRIPTION_SETUP §4).
  * Returns null if the variant's URL isn't configured yet.

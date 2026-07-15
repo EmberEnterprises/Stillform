@@ -451,6 +451,29 @@ export default function Settings({ onExit, onNavigate }) {
               Privacy policy
             </a>
           </p>
+          {/* TIER-1 store requirement: Manage / cancel subscription. Links to
+              the Lemon Squeezy customer portal; honest unavailable state until
+              the URL is configured (getCustomerPortalUrl returns null). */}
+          <p style={ROW}>
+            {getCustomerPortalUrl() ? (
+              <a href={getCustomerPortalUrl()} target="_blank" rel="noopener noreferrer" style={LINK}>
+                Manage or cancel subscription
+              </a>
+            ) : (
+              <span style={{ color: "var(--sf-text-faint)" }}>
+                Manage or cancel subscription — available once billing is live
+              </span>
+            )}
+          </p>
+          {/* TIER-1 store requirement: Terms of Service. CONTENT IS ARLIN'S TO
+              PROVIDE (legal — not Claude's to fabricate). Until public/terms.html
+              exists, show an honest not-yet state rather than a 404 link. When
+              the file lands, flip this span to: <a href="/terms.html" style={LINK}>Terms of Service</a> */}
+          <p style={ROW}>
+            <span style={{ color: "var(--sf-text-faint)" }}>
+              Terms of Service — added before launch
+            </span>
+          </p>
           <p style={ROW}>
             <a href="mailto:ARAembersllc@proton.me" style={LINK}>
               ARAembersllc@proton.me

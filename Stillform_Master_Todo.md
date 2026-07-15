@@ -143,7 +143,10 @@
 **(Also noted: Play Catalog Access third-party listing-sharing program — an opt-out setting to decide when the Play listing is created.)**
 
 **== TABLE-STAKES GAPS (audited 2026-07-02, Arlin: 'what do we not have that are common for other apps') ==**
-**TIER 1 — STORE/LEGAL REQUIRED, MISSING (add to launch blockers, Claude builds):**
+**TIER 1 — STORE/LEGAL REQUIRED — STATUS 2026-07-15:**
+- #3 MANAGE/CANCEL SUBSCRIPTION: SHIPPED (Settings → Privacy & contact → 'Manage or cancel subscription', gated on getCustomerPortalUrl() from subscriptionApi.js; honest 'available once billing is live' until Arlin pastes the LS customer-portal URL — same config pattern as checkout URLs, no code change needed when it lands).
+- #2 TERMS OF SERVICE: ROW SHIPPED with honest not-yet state ('Terms of Service — added before launch') — NO dead link. CONTENT IS ARLIN'S (legal, Claude will not fabricate ToS). When public/terms.html exists, flip the span to the <a> (one line, noted in Settings.jsx). ToS + auto-renew disclosure still required before subscription sale.
+- #1 ACCOUNT DELETION: STILL THE ONE HARD BUILD — needs Supabase wired (Arlin's 2 clicks) before Claude can build the in-app delete + web deletion path. BLOCKED, not forgotten.
 1. **ACCOUNT DELETION — in-app.** Both stores require it for apps with sign-in; nowhere in the app today. Build: Settings entry -> confirm -> server-side delete (Supabase user + record) + local wipe; plus a web deletion path for Play's Data Safety form.
 2. **TERMS OF SERVICE.** No ToS anywhere; subscription purchase requires ToS + auto-renew disclosure near the buy button. Arlin: Termly can generate ToS alongside the privacy policy — same session as the privacy paste. Claude: link it at Paywall + Settings.
 3. **MANAGE/CANCEL SUBSCRIPTION.** No LS customer-portal link in-app. Build: Settings 'Manage subscription' -> LS portal URL (needs the LS portal link from Arlin with the checkout URLs).
