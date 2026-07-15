@@ -65,3 +65,22 @@ export function getTodayBreatheCount(nowMs = Date.now()) {
 export function getBreatheCount() {
   return read().length;
 }
+
+/**
+ * J3 (2026-07-14): attach a "did that land?" outcome to the most recent entry.
+ * Optional, one tap — the honest signal for which pattern actually settles this
+ * person over time (P12 groundwork). Never required; silence is a valid answer.
+ * @param {"settled"|"same"|"not-yet"} outcome
+ */
+export function rateLastBreathe(outcome) {
+  if (!["settled", "same", "not-yet"].includes(outcome)) return false;
+  try {
+    const log = read();
+    if (!log.length) return false;
+    log[log.length - 1].outcome = outcome;
+    localStorage.setItem(KEY, JSON.stringify(log));
+    return true;
+  } catch {
+    return false;
+  }
+}

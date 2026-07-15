@@ -33,3 +33,10 @@ ok("fail-silent without storage", () => {
 });
 
 console.log(`breatheLog: ${passed}/3 pass`);
+
+ok("rateLastBreathe attaches outcome to last entry", () => {
+  store.clear();
+  bl.recordBreathe({ patternId: "cyclic-sighing", cycles: 4 });
+  assert.strictEqual(bl.rateLastBreathe("settled"), true);
+  assert.strictEqual(bl.rateLastBreathe("bogus"), false);
+});

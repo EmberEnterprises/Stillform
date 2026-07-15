@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { recordBreathe, getTodayBreatheCount } from "../lib/breatheLog.js";
-import { getPref } from "../lib/userPrefs.js";
+import { recordBreathe, getTodayBreatheCount, rateLastBreathe } from "../lib/breatheLog.js";
+import { getPref, setPref } from "../lib/userPrefs.js";
 
 /**
  * BreatheOverlay — the Quick Breathe surface.
@@ -57,6 +57,8 @@ export default function BreatheOverlay({ open, onClose }) {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [cycleCount, setCycleCount] = useState(0);
   const [done, setDone] = useState(false);
+  const [discreet, setDiscreet] = useState(() => { try { return !!getPref("practice.discreetBreath"); } catch { return false; } });
+  const toggleDiscreet = () => setDiscreet((v) => { const n = !v; try { setPref("practice.discreetBreath", n); } catch { /* fine */ } return n; });
 
   useEffect(() => {
     if (!open) return;
@@ -184,7 +186,7 @@ export default function BreatheOverlay({ open, onClose }) {
       {done ? (
         <DoneState onClose={onClose} />
       ) : (
-        <ActiveState phase={phase} cycleCount={cycleCount} onStop={onClose} />
+        <ActiveState phase={phase} cycleCount={cycleCount} onStop={onClose} discreet={discreet} onToggleDiscreet={toggleDiscreet} />
       )}
     </div>
   );
@@ -197,7 +199,7 @@ export default function BreatheOverlay({ open, onClose }) {
  * transition uses the current phase's duration so the user's breath can
  * follow the geometry. Phase label below, cycle count quietly below that.
  * -------------------------------------------------------------------- */
-function ActiveState({ phase, cycleCount, onStop }) {
+function ActiveState({ phase, cycleCount, onStop, discreet, onToggleDiscreet }) {
   return (
     <>
       {/* The breath circle. Scale is set inline based on current phase,
@@ -216,6 +218,7 @@ function ActiveState({ phase, cycleCount, onStop }) {
           border: "0.5px solid var(--sf-accent-line, rgba(184, 134, 43, 0.32))",
           transform: `scale(${phase.scale})`,
           transition: `transform ${phase.durationMs}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+          opacity: discreet ? 0.28 : 1,
         }}
       />
 
@@ -232,8 +235,19 @@ function ActiveState({ phase, cycleCount, onStop }) {
           color: "var(--sf-text-cream, #EDE8DC)",
         }}
       >
-        {phase.label}
+        {discreet ? "" : phase.label}
       </div>
+      {/* J3a (2026-07-14): discreet mode — one tap dims the practice for
+          composure in public. A glance reveals nothing. */}
+      <button
+        type="button"
+        onClick={onToggleDiscreet}
+        className="sf-link-quiet"
+        aria-label={discreet ? "Show the full breathing guide" : "Dim for privacy"}
+        style={{ position: "absolute", bottom: "24px", left: "50%", transform: "translateX(-50%)", opacity: 0.5, fontSize: "12px" }}
+      >
+        {discreet ? "show" : "dim for privacy"}
+      </button>
 
       <div
         style={{
@@ -305,6 +319,7 @@ function ActiveState({ phase, cycleCount, onStop }) {
  * affordances ("how did that feel," "track your practice," etc.).
  * -------------------------------------------------------------------- */
 function DoneState({ onClose }) {
+  const [rated, setRated] = React.useState(false);
   // W2: the record acknowledges — a fact, quietly. No praise, no streaks.
   let ackLine = "It's in your record.";
   try {
@@ -328,6 +343,18 @@ function DoneState({ onClose }) {
       >
         Done.
       </h2>
+      {/* J3 (2026-07-14): did that land? — one optional tap; the honest signal
+          for which pattern settles this person over time. Silence is valid. */}
+      {!rated ? (
+        <div style={{ marginTop: "var(--sf-space-16, 16px)", display: "flex", gap: "var(--sf-space-12, 12px)", justifyContent: "center" }}>
+          {[["settled", "settled"], ["same", "about the same"], ["not-yet", "not yet"]].map(([k, label]) => (
+            <button key={k} type="button" className="sf-link-quiet" style={{ fontSize: "13px" }}
+              onClick={() => { try { rateLastBreathe(k); } catch { /* fine */ } setRated(true); }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <p
         style={{
           margin: "var(--sf-space-12, 12px) 0 0",
