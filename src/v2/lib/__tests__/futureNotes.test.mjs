@@ -8,7 +8,7 @@ const now = Date.now();
 ok("attach + surface at the right moment (with lead time)", () => {
   store.clear();
   const at = now + 60*60*1000; // 1h away
-  fn.attachNote({ text:"charger", surfaceAt: at, leadMinutes: 90 }); // lead opens it now
+  fn.attachNote({ text:"charger", surfaceAt: at, leadMinutes: 90, voice:"speak" }); // lead opens it now
   const due = fn.getDueNotes(now);
   assert.strictEqual(due.length, 1);
   assert.strictEqual(due[0].text, "charger");
@@ -36,4 +36,15 @@ ok("rejects empty text and bad dates", () => {
   assert.strictEqual(fn.attachNote({ text:"", surfaceAt: now }), null);
   assert.strictEqual(fn.attachNote({ text:"x", surfaceAt: "not-a-date" }), null);
 });
-console.log(`futureNotes: ${n}/5 pass`);
+ok("P30: orphan (no valid moment) is REFUSED", () => {
+  store.clear();
+  assert.strictEqual(fn.attachNote({ text:"reorganize the garage someday", surfaceAt:"whenever" }), null);
+});
+ok("P30: held is the default — silent until granted voice", () => {
+  store.clear();
+  const id = fn.attachNote({ text:"held one", surfaceAt: now + 30*60000, leadMinutes: 60 }); // due now via lead; no voice -> hold
+  assert.strictEqual(fn.getDueNotes(now).length, 0); // silent
+  fn.letNoteSpeak(id);
+  assert.strictEqual(fn.getDueNotes(now).length, 1); // now speaks
+});
+console.log(`futureNotes: ${n}/7 pass`);

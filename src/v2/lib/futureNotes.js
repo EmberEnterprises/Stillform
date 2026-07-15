@@ -37,14 +37,23 @@ function write(list) {
 
 /**
  * Attach a note to a future moment.
- * @param {{ text: string, surfaceAt: number|string, leadMinutes?: number, label?: string }} input
- *   surfaceAt — when the underlying thing happens (ms or ISO).
- *   leadMinutes — how far ahead to surface the note (default 0 = at the moment).
- * @returns {string|null} the note id, or null on invalid input
+ * P30 THE IDENTITY TEST (2026-07-09, canon): a note must be ANCHORED to
+ * something real — an event, a trip, a confirmed pattern, or a user-declared
+ * date. `surfaceAt` (a real moment) IS the anchor: a note with no real time to
+ * arrive at is an orphan ("someday reorganize the garage") and is REFUSED —
+ * that's a task app's job, which the morning row can launch; we annotate the
+ * life that exists, we never store a life of our own. This keeps Stillform from
+ * becoming a productivity app at the data layer, not just in copy.
+ *
+ * @param {{ text: string, surfaceAt: number|string, leadMinutes?: number, label?: string, anchor?: object }} input
+ *   surfaceAt — when the real underlying thing happens (ms or ISO). REQUIRED and
+ *     must be a valid future-capable moment; this is the anchor.
+ * @returns {string|null} the note id, or null on invalid/orphan input
  */
-export function attachNote({ text, surfaceAt, leadMinutes = 0, label = "" } = {}) {
+export function attachNote({ text, surfaceAt, leadMinutes = 0, label = "", anchor = null, voice = "hold" } = {}) {
   const t = typeof text === "string" ? text.trim() : "";
   if (t.length < 1) return null;
+  // P30: the anchor is mandatory. No real moment = orphan = refused.
   const atMs = typeof surfaceAt === "number" ? surfaceAt : Date.parse(surfaceAt);
   if (!Number.isFinite(atMs)) return null;
   const id = "note_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
@@ -56,6 +65,13 @@ export function attachNote({ text, surfaceAt, leadMinutes = 0, label = "" } = {}
     label: typeof label === "string" ? label.slice(0, 80) : "",
     atMs,
     leadMs: Math.max(0, (Number.isFinite(leadMinutes) ? leadMinutes : 0) * 60000),
+    // P30: what real thing this is anchored to (event/trip/pattern/date). The
+    // note annotates that; it is not a free-floating to-do.
+    anchor: (anchor && typeof anchor === "object") ? anchor : { kind: "date", at: atMs },
+    // P30 KEPT: per-item voice consent. Default HOLD — the note is kept quietly
+    // and only surfaces if the user asked for a word ("speak"). No overdue, no
+    // red state; a held note simply waits, unshamed.
+    voice: voice === "speak" ? "speak" : "hold",
   });
   return write(list) ? id : null;
 }
@@ -71,6 +87,7 @@ export function getDueNotes(nowMs = Date.now()) {
   const GRACE_MS = 60 * 60 * 1000; // stays visible up to an hour past its moment
   return read().filter((n) => {
     if (!n || typeof n.atMs !== "number") return false;
+    if (n.voice !== "speak") return false; // held notes wait silently (P30)
     const opensAt = n.atMs - (n.leadMs || 0);
     return nowMs >= opensAt && nowMs <= n.atMs + GRACE_MS;
   });
@@ -120,5 +137,19 @@ export function acceptPackingNote(offer, editedText) {
     surfaceAt: offer.startMs,
     leadMinutes: Math.max(0, Math.round((offer.startMs - dayBefore.getTime()) / 60000)),
     label: "Packing",
+    anchor: { kind: "trip", title: offer.tripTitle, at: offer.startMs },
+    voice: "speak", // the user accepted the offer — it should arrive
   });
+}
+
+/**
+ * P30: grant a held note voice (the user says "yes, remind me"). Held is the
+ * default; this is the opt-in to surfacing. Returns true if updated.
+ */
+export function letNoteSpeak(id) {
+  const list = read();
+  const note = list.find((n) => n && n.id === id);
+  if (!note) return false;
+  note.voice = "speak";
+  return write(list);
 }
