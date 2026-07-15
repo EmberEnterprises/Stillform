@@ -403,7 +403,7 @@ FINDING 2 — THE FRACTAL TREES (Arlin: 'I really loved those trees but it doesn
 **BUILT BUT NOT WIRED (finish = connect):**
 4. **LEARNING TRACK subsystem** (see UNWIRED AUDIT above) — decision: Learn tab in the Library; + fix trackProgress wiring. Finishing-debt (freeze-safe).
 **SPECCED BUT NEVER BUILT (real mechanics, wanted):**
-5. **PATTERN-DISRUPTION CONVERSION HALF (insight -> ENACTED change)** — structured Reframe close ('next move' + 'lock in') + implementation-intentions; PATTERN_DISRUPTION_SPEC calls it 'the load-bearing unbuilt piece.' CLAUDE'S FLAG: for a SELF-MASTERY app this may be the most important gap on the list — seeing a pattern is not mastering it.
+5. ~~PATTERN-DISRUPTION CONVERSION HALF~~ **SHIPPED — STALE DUPLICATE CLEARED 2026-07-15: this was already DONE 2026-07-08 (see the [x] entry above: priorFrame.js resurfaces the user's own stored lockIn/nextMove token-matched to the live forecast, wired into ForecastCard's 'Last time this came up (N days ago), you landed on: ...', deterministic + honest-empty, tested). This second listing was a stale duplicate — verified built on sight (priorFrame.js exists + ForecastCard imports it) and cleared.**
 6. **EOD meeting decompression** (spec'd not shipped); **THRESHOLD AWARENESS** (heavy-day protection signals, spec'd not implemented); **FOCUS MODES** (spec'd not shipped); **PRE-EVENT BRIEF AUTO-TRIGGER** (the meeting prompt firing on its own; deferred 7e — see the concierge block above).
 **HANDLING (Arlin 'oh my God all of them' 2026-07-08 — captured, not auto-built): items 1-3 = Arlin's premise/aesthetic decisions, do NOT auto-restore; item 4 = finishing-debt (freeze-safe, on Arlin's go) Nothing here is built without Arlin's word on (a) the freeze and (b) the premise questions.**
 
