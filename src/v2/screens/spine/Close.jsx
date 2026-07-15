@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { getResurfaceLine } from "../../lib/keepShelf.js";
 import { downloadEventIcs } from "../../lib/icsExport.js";
 import { draftStatement } from "../../lib/reframeApi.js";
 import { getPref, hasExplicitPref } from "../../lib/userPrefs.js";
@@ -75,6 +76,9 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
   const [text, setText] = useState("");
   // PCE.1: structured close — forward implementation intention + lock-in.
   const [nextMove, setNextMove] = useState("");
+  // J6 resurfacing (2026-07-15): a line kept in a past reframe returns here at
+  // the close — the shelf is read, not just written. Null when nothing's kept.
+  const keptLine = (() => { try { return getResurfaceLine(); } catch { return null; } })();
   const [lockedIn, setLockedIn] = useState(false);
   const textareaRef = useRef(null);
   const microCreditFiredRef = useRef(false);
@@ -461,6 +465,14 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
             autoFocus
           />
         </div>
+        {keptLine ? (
+          <div className="sf-fade-enter sf-fade-enter--delay-2" style={{ marginTop: "var(--sf-space-24)" }}>
+            <p style={{ margin: 0, fontFamily: "var(--sf-font-mono)", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--sf-text-faint)" }}>A line you kept</p>
+            <p style={{ margin: "var(--sf-space-8) 0 0", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "15px", lineHeight: 1.6, color: "var(--sf-text-secondary)" }}>
+              {keptLine.text}
+            </p>
+          </div>
+        ) : null}
         <div
           className="sf-fade-enter sf-fade-enter--delay-3"
           style={{
