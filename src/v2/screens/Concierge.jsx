@@ -1,7 +1,7 @@
 import React from "react";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote } from "../lib/conciergeSignals.js";
+import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate } from "../lib/eodDecompression.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
@@ -72,6 +72,16 @@ export default function Concierge({ onExit, onOpenSettings }) {
       item: safe(() => {
         const t = getTomorrowHeavyNote(Date.now(), { includeDismissed: true });
         return t ? t.note : null;
+      }, null),
+    },
+    {
+      key: "temporalLandmark",
+      name: "Time landmarks",
+      earns: "Speaks only for a real shift on the clock or calendar — daylight saving, a season turn. The world, never you.",
+      when: "A few days before the shift lands.",
+      item: safe(() => {
+        const l = getTemporalLandmark(Date.now(), { includeDismissed: true });
+        return l ? l.note : null;
       }, null),
     },
     {

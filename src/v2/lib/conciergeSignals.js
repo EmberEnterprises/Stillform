@@ -278,6 +278,38 @@ export function getTomorrowHeavyNote(nowMs = Date.now(), { includeDismissed = fa
   };
 }
 
+/**
+ * P11 TEMPORAL LANDMARKS (2026-07-15): the calendar's own weather — pure
+ * date arithmetic, no external data. Currently: the DST transition (detected by
+ * comparing timezone offsets across the coming week — works in any locale that
+ * observes it, silent where none). Deterministic; the standing DST manual-test
+ * becomes this mechanic's own test case.
+ *
+ * Returns the nearest upcoming landmark within a lookahead window, or null.
+ */
+export function getTemporalLandmark(nowMs = Date.now(), { includeDismissed = false, lookaheadDays = 4 } = {}) {
+  const now = new Date(nowMs);
+  const baseOffset = now.getTimezoneOffset();
+
+  // DST: scan the next N days for an offset change (the clock shift).
+  for (let d = 1; d <= lookaheadDays; d++) {
+    const future = new Date(nowMs + d * 24 * 60 * 60 * 1000);
+    if (future.getTimezoneOffset() !== baseOffset) {
+      // A shift happens on day d. springs forward = offset decreases.
+      const springsForward = future.getTimezoneOffset() < baseOffset;
+      const key = "dst:" + future.toDateString();
+      const dismissed = readJSON(DISMISS_KEY, {});
+      if (!includeDismissed && dismissed[key]) return null;
+      const when = d === 1 ? "tonight" : `in ${d} days`;
+      const note = springsForward
+        ? `Clocks jump forward ${when} — you lose an hour; an earlier night costs you nothing.`
+        : `Clocks fall back ${when} — an extra hour, but the light shifts; ease into it.`;
+      return { key, kind: "dst", note };
+    }
+  }
+  return null;
+}
+
 /** Remember "not this one" for a specific event offer. */
 export function dismissEventOffer(key) {
   if (!key || typeof key !== "string") return false;
