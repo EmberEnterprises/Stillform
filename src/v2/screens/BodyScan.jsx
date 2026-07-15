@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { recordScan } from "../lib/scanLog.js";
 import Button from "../components/Button.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
@@ -117,6 +118,7 @@ export default function BodyScan({ onExit }) {
               setIdx((i) => i + 1);
               setPhase("area");
             } else {
+              try { recordScan({ areasRead: AREAS.length, totalAreas: AREAS.length }); } catch { /* fail-silent */ }
               setPhase("done");
             }
           }, 400);
@@ -130,6 +132,7 @@ export default function BodyScan({ onExit }) {
   // J4: leave the scan early but keep the credit — the areas read still count.
   const leaveWithCredit = () => {
     clearInterval(timerRef.current);
+    try { recordScan({ areasRead: idx + 1, totalAreas: AREAS.length }); } catch { /* fail-silent */ }
     setLeftEarly(true);
     setPhase("done");
   };
