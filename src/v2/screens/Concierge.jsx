@@ -1,7 +1,7 @@
 import React from "react";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import { getUpcomingEventOffer, getConciergeVolume } from "../lib/conciergeSignals.js";
+import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate } from "../lib/eodDecompression.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
@@ -42,6 +42,16 @@ export default function Concierge({ onExit, onOpenSettings }) {
       item: safe(() => {
         const o = getUpcomingEventOffer(Date.now(), { includeDismissed: true });
         return o ? `${o.title} — ${o.minutesUntil <= 0 ? "started" : `in ${o.minutesUntil} min`}${o.matchedTrigger ? ` (your flag: ${o.matchedTrigger})` : ""}` : null;
+      }, null),
+    },
+    {
+      key: "umbrella",
+      name: "Umbrella note",
+      earns: "Speaks only when rain is forecast right around a calendar event — pure logistics, never about you.",
+      when: "Up to about six hours before the rain lines up with something you're heading out for.",
+      item: safe(() => {
+        const u = getUmbrellaNote(Date.now(), { includeDismissed: true });
+        return u ? u.note : null;
       }, null),
     },
     {

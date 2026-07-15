@@ -30,6 +30,7 @@
  */
 
 import { getCalendarEvents, getCalendarSummary } from "./calendarData.js";
+import { getWeather } from "./ambientSignals.js";
 import { getTriggerProfile } from "./triggerProfile.js";
 import { getLatestBodyBioFilter } from "./signalLog.js";
 import { getPref } from "./userPrefs.js";
@@ -108,6 +109,53 @@ export function getUpcomingEventOffer(nowMs = Date.now(), { includeDismissed = f
       start: ev.start,
       minutesUntil,
       matchedTrigger,
+    };
+  }
+  return null;
+}
+
+/**
+ * P1 UMBRELLA NOTE (2026-07-15): rain window (from weather) intersecting a
+ * calendar event near that time -> a pure-logistics note. No personal inference,
+ * no trigger matching — the world, not the person. Returns null when it's dry,
+ * no event straddles the rain, or the note was dismissed from home.
+ *
+ * Dismissal: same off-my-home-never-gone semantics as the event offer.
+ */
+export function getUmbrellaNote(nowMs = Date.now(), { includeDismissed = false } = {}) {
+  let w = null;
+  try { w = getWeather(); } catch { return null; }
+  if (!w || !w.nextRain || typeof w.nextRain.at !== "number") return null;
+
+  const rainAt = w.nextRain.at;
+  // Only speak about rain that's ahead and within the anticipation window.
+  const minsToRain = Math.round((rainAt - nowMs) / 60000);
+  if (minsToRain < 0 || minsToRain > 6 * 60) return null;
+
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { return null; }
+
+  // Find an event whose start sits within ~90 min of the rain window — the
+  // "right when you head out" intersection.
+  const WINDOW_MS = 90 * 60 * 1000;
+  const dismissed = readJSON(DISMISS_KEY, {});
+  for (const ev of events) {
+    if (!ev || !ev.start || !ev.title) continue;
+    const startMs = Date.parse(ev.start);
+    if (Number.isNaN(startMs)) continue;
+    if (Math.abs(startMs - rainAt) > WINDOW_MS) continue;
+    if (startMs < nowMs) continue;
+
+    const key = "umbrella:" + eventKey(ev);
+    if (!includeDismissed && dismissed[key]) continue;
+
+    const hh = new Date(rainAt).getHours();
+    const clock = hh === 0 ? "midnight" : hh < 12 ? `${hh} AM` : hh === 12 ? "noon" : `${hh - 12} PM`;
+    return {
+      key,
+      note: `Rain around ${clock}, right when you head out for ${String(ev.title)} — umbrella by the door.`,
+      rainAt,
+      eventTitle: String(ev.title),
     };
   }
   return null;

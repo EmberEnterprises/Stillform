@@ -61,7 +61,25 @@ export function mapOpenMeteo(json) {
   const dd = json.daily && Array.isArray(json.daily.daylight_duration) ? json.daily.daylight_duration[0] : null;
   if (typeof dd === "number" && Number.isFinite(dd)) daylightHours = Math.round((dd / 3600) * 10) / 10;
   if (tempC === null && pressureHpa === null && condition === null && daylightHours === null) return null;
-  return { tempC, pressureHpa, condition, daylightHours };
+  // P1 (2026-07-15): next rain window — the first upcoming hour with a
+  // meaningful chance of rain. Pure logistics data for the umbrella note.
+  let nextRain = null;
+  try {
+    const h = json.hourly;
+    if (h && Array.isArray(h.time) && Array.isArray(h.precipitation_probability)) {
+      const now = Date.now();
+      for (let i = 0; i < h.time.length; i++) {
+        const t = new Date(h.time[i]).getTime();
+        const prob = h.precipitation_probability[i];
+        const amt = Array.isArray(h.precipitation) ? h.precipitation[i] : null;
+        if (t >= now && typeof prob === "number" && prob >= 60 && (amt === null || amt > 0.1)) {
+          nextRain = { at: t, probability: prob };
+          break;
+        }
+      }
+    }
+  } catch { /* nextRain stays null */ }
+  return { tempC, pressureHpa, condition, daylightHours, nextRain };
 }
 
 // Default browser geolocation, promise-wrapped with a timeout. Coarse accuracy.
@@ -111,6 +129,7 @@ export async function refreshWeather({ getPosition = defaultGetPosition, fetchIm
   const url =
     `${OPEN_METEO}?latitude=${lat}&longitude=${lon}` +
     `&current=temperature_2m,surface_pressure,weather_code&daily=daylight_duration` +
+    `&hourly=precipitation_probability,precipitation` +
     `&timezone=auto&forecast_days=1`;
   let json;
   try {
