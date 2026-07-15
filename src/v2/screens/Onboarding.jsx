@@ -271,7 +271,7 @@ const BEATS = [
   },
 ];
 
-export default function Onboarding({ onComplete }) {
+export default function Onboarding({ onComplete, onEscapeToBreath }) {
   const [phase, setPhase] = useState("frame"); // frame | how | cal | concierge | personal
   const [beatIndex, setBeatIndex] = useState(0);
   const [picked, setPicked] = useState(null); // option object after a pick (sharpen view)
@@ -347,6 +347,23 @@ export default function Onboarding({ onComplete }) {
             This form is yours. It grows as your record does — no two are alike.
           </p>
           <Button variant="primary" onClick={() => { setPhase("how"); fire("Onboarding Started"); }}>Begin</Button>
+          {/* Honest cost up front — no one ambushed by a setup they didn't expect. */}
+          <p style={{ ...NORM, textAlign: "center", fontSize: "13px", opacity: 0.6, marginTop: "var(--sf-space-16)" }}>
+            About 3 minutes. Everything's changeable later.
+          </p>
+          {/* J1 (2026-07-15): the escape hatch. Someone often opens Stillform
+              BECAUSE right now is bad — meet their moment. Straight to breath,
+              setup deferred (NOT marked onboarded — it resumes next time). */}
+          {typeof onEscapeToBreath === "function" ? (
+            <button
+              type="button"
+              className="sf-link-quiet"
+              onClick={() => { fire("Onboarding Escape To Breath"); onEscapeToBreath(); }}
+              style={{ display: "block", margin: "var(--sf-space-24) auto 0", fontSize: "14px" }}
+            >
+              Need it right now? →
+            </button>
+          ) : null}
         </article>
       </main>
     );

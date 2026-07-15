@@ -238,7 +238,14 @@ export default function AppV2() {
     if (screen === "paywall") return <Paywall onClose={() => setScreen("home")} />;
 
     if (screen === "onboarding") {
-      return <Onboarding onComplete={() => {
+      return <Onboarding
+        onEscapeToBreath={() => {
+          // J1: deferred setup — do NOT setOnboarded; land on Home where
+          // BreathAnywhere floats, and signal it to open breath immediately.
+          try { localStorage.setItem("stillform_v2_open_breath_on_land", "1"); } catch { /* fine */ }
+          setScreen("home");
+        }}
+        onComplete={() => {
         setOnboarded();
         // W3 (2026-07-09): the first-landing catch — the most-motivated moment
         // a user ever has. One-shot flag; SmartScreen consumes it once.

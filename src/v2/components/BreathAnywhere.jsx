@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import QuickBreathe from "./QuickBreathe.jsx";
 import BreatheOverlay from "../screens/BreatheOverlay.jsx";
 import BodyScan from "../screens/BodyScan.jsx";
@@ -25,6 +25,17 @@ export default function BreathAnywhere() {
   const [breatheOpen, setBreatheOpen] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+
+  // J1 (2026-07-15): the escape hatch lands here. If onboarding was skipped
+  // "right now," open breath immediately — one-shot, then clear the flag.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("stillform_v2_open_breath_on_land") === "1") {
+        localStorage.removeItem("stillform_v2_open_breath_on_land");
+        setBreatheOpen(true);
+      }
+    } catch { /* fine */ }
+  }, []);
 
   // The scan takes the whole surface when escalated to.
   if (scanOpen) return <BodyScan onExit={() => setScanOpen(false)} />;
