@@ -30,7 +30,7 @@ import { getPref } from "../lib/userPrefs.js";
  * @param {function(): void} onExit — back
  * @param {function(): void} onOpenSettings — the dials
  */
-export default function Concierge({ onExit, onOpenSettings }) {
+export default function Concierge({ onExit, onOpenSettings, onCompose }) {
   const volume = safe(() => getConciergeVolume(), "standard");
 
   const voices = [
@@ -172,6 +172,11 @@ export default function Concierge({ onExit, onOpenSettings }) {
               {!v.on && <p style={EMPTY}>Switched off in Settings — silent everywhere until you turn it back on.</p>}
             </div>
           ))}
+          {typeof onCompose === "function" && (
+            <button type="button" className="sf-link-quiet" onClick={onCompose} style={{ display: "block", marginTop: "var(--sf-space-24)" }}>
+              Leave a note for later \u2192
+            </button>
+          )}
           {typeof onOpenSettings === "function" && (
             <button type="button" className="sf-link-quiet" onClick={onOpenSettings} style={{ marginTop: "var(--sf-space-12)" }}>
               The dials live in Settings \u2192

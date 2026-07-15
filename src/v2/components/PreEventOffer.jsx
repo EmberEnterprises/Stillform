@@ -26,7 +26,7 @@ import {
  *
  * @param {function(): void} onOpenBrief — routes to the Pre-event Brief
  */
-export default function PreEventOffer({ onOpenBrief }) {
+export default function PreEventOffer({ onOpenBrief, onNoteForEvent }) {
   // Item 9 depth: this voice is individually silenceable (concierge.meetingPrompts).
   try { if (getPref("concierge.meetingPrompts") === false) return null; } catch { /* default: on */ }
   const [offer, setOffer] = useState(() => {
@@ -75,15 +75,26 @@ export default function PreEventOffer({ onOpenBrief }) {
         </span>
         <span className="sf-sec-arrow" aria-hidden="true">→</span>
       </button>
-      <button
-        type="button"
-        className="sf-link-quiet"
-        onClick={dismiss}
-        aria-label="Not this one"
-        style={{ marginTop: "4px" }}
-      >
-        not this one
-      </button>
+      <div style={{ display: "flex", gap: "var(--sf-space-16)", marginTop: "4px" }}>
+        <button
+          type="button"
+          className="sf-link-quiet"
+          onClick={dismiss}
+          aria-label="Not this one"
+        >
+          not this one
+        </button>
+        {typeof onNoteForEvent === "function" && (
+          <button
+            type="button"
+            className="sf-link-quiet"
+            onClick={() => onNoteForEvent({ title: offer.title, start: offer.start })}
+            aria-label={`Leave a note for ${offer.title}`}
+          >
+            leave a note
+          </button>
+        )}
+      </div>
     </section>
   );
 }

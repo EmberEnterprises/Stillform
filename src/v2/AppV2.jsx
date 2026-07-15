@@ -46,6 +46,7 @@ const PreEventBrief = React.lazy(() => import("./screens/PreEventBrief.jsx"));
 const ReRead = React.lazy(() => import("./screens/ReRead.jsx"));
 const Becoming = React.lazy(() => import("./screens/Becoming.jsx"));
 const Concierge = React.lazy(() => import("./screens/Concierge.jsx"));
+const NoteCompose = React.lazy(() => import("./screens/NoteCompose.jsx"));
 const Paywall = React.lazy(() => import("./screens/Paywall.jsx"));
 import Onboarding from "./screens/Onboarding.jsx";
 const Settings = React.lazy(() => import("./screens/Settings.jsx"));
@@ -196,6 +197,7 @@ export default function AppV2() {
             else if (target === "pre-event-brief") setScreen("pre-event-brief");
             else if (target === "season-review") setScreen("season-review");
             else if (target === "naming-ledger") setScreen("naming-ledger");
+            else if (target === "note-compose") setScreen("note-compose");
           }}
         />
       );
@@ -227,7 +229,8 @@ export default function AppV2() {
 
     if (screen === "library") return <Library onExit={() => setScreen("home")} />;
     if (screen === "library-learn") return <Library initialTab="learn" onExit={() => setScreen("home")} />;
-    if (screen === "concierge") return <Concierge onExit={() => setScreen("home")} onOpenSettings={() => setScreen("settings")} />;
+    if (screen === "note-compose") return <NoteCompose onExit={() => setScreen("home")} />;
+    if (screen === "concierge") return <Concierge onCompose={() => setScreen("note-compose")} onExit={() => setScreen("home")} onOpenSettings={() => setScreen("settings")} />;
     if (screen === "becoming") return <Becoming onExit={() => setScreen("my-progress")} />;
     if (screen === "re-read") return <ReRead onExit={() => setScreen("my-progress")} onNavigate={(t) => { if (t === "crisis-resources") setScreen("crisis-resources"); }} />;
 
@@ -280,6 +283,7 @@ export default function AppV2() {
           else if (target === "library-learn") setScreen("library-learn");
           else if (target === "pre-event-brief") setScreen("pre-event-brief");
           else if (target === "concierge") setScreen("concierge");
+          else if (target === "note-compose") setScreen("note-compose");
           else if (target === "settings") setScreen("settings");
           else if (target === "faq") setScreen("faq");
           else if (target === "crisis-resources") setScreen("crisis-resources");

@@ -86,7 +86,7 @@ import {
  *
  * @param {function(): void} onBeginSession — opens the spine.
  */
-export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onOpenProgress = null, onOpenLearn = null, onOpenPreEventBrief = null, onOpenConcierge = null }) {
+export default function SmartScreen({ onEnterPractice, onNoteForEvent = null, onOpenRoadmap = null, onOpenProgress = null, onOpenLearn = null, onOpenPreEventBrief = null, onOpenConcierge = null }) {
   const [beat, setBeat] = useState(() => getBeatOverride() || getCurrentBeat());
   const [thread, setThread] = useState(() => getTodayThread(beat));
   const [sessionCount, setSessionCount] = useState(() => getSessionCount());
@@ -371,7 +371,7 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
         {/* The anticipatory concierge (Arlin 2026-07-08): the meeting prompt,
             firing on its own — deterministic, earned (trigger-match or
             user-marked only), state-adaptive volume, per-event dismissal. */}
-        <PreEventOffer onOpenBrief={onOpenPreEventBrief} />
+        <PreEventOffer onOpenBrief={onOpenPreEventBrief} onNoteForEvent={onNoteForEvent} />
 
         {/* Forecast-and-verify (ARLIN'S canonical spec): the threshold
             question from her own confirmed pattern, the follow-up, and the
