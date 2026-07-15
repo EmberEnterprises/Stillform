@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import BreathAnywhere from "./components/BreathAnywhere.jsx";
 import PinGate from "./components/PinGate.jsx";
 import { shouldLock, markBackgrounded, hasPin } from "./lib/pinLock.js";
 import "./tokens.css";
@@ -296,6 +297,10 @@ export default function AppV2() {
     <div className="sf-v2">
       {!HEADERLESS.has(screen) ? <AppHeader onHome={goHome} onSignIn={goSignIn} onCrisis={() => setScreen("crisis-resources")} /> : null}
       {renderScreen()}
+      {/* Quick Breathe, everywhere (Arlin's v1 decision restored): floats over
+          every screen; hides itself only while its own overlay is open. Not
+          gated by HEADERLESS — breath must reach home, spine, and onboarding. */}
+      {!locked && <BreathAnywhere />}
     </div>
   );
 }
