@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { keepLine, isKept, unkeepLine } from "../../lib/keepShelf.js";
 import Button from "../../components/Button.jsx";
 import MonoLabel from "../../components/MonoLabel.jsx";
 import SpineBack from "../../components/SpineBack.jsx";
@@ -615,6 +616,7 @@ function ShapeMeta({ label }) {
 
 function Turn({ role, text, question, log_prediction, mode, taken_apart, shape, rebuilt }) {
   const [logged, setLogged] = useState(false);
+  const [kept, setKept] = useState(() => { try { return isKept(text); } catch { return false; } });
 
   if (role === "user") {
     return (
@@ -636,6 +638,22 @@ function Turn({ role, text, question, log_prediction, mode, taken_apart, shape, 
         >
           {text}
         </div>
+        {/* J6a (2026-07-14): keep this line — the moment worth saving gets a
+            home here instead of a screenshot. Toggle; resurfaces in Close. */}
+        <button
+          type="button"
+          className="sf-link-quiet"
+          onClick={() => {
+            try {
+              if (kept) { unkeepLine(text); setKept(false); }
+              else { keepLine({ text, source: "guide" }); setKept(true); }
+            } catch { /* fail-silent */ }
+          }}
+          aria-label={kept ? "Remove from kept lines" : "Keep this line"}
+          style={{ marginTop: "var(--sf-space-8)", fontSize: "12px", opacity: 0.6 }}
+        >
+          {kept ? "kept ✓" : "keep this"}
+        </button>
       </div>
     );
   }
