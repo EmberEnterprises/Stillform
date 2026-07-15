@@ -14,8 +14,9 @@
  *
  * Backend gates by origin + an 8/min IP rate-limit; no identity required.
  */
+import { fnUrl } from "./apiBase.js";
 
-const OTHER_READ_API_URL = "/.netlify/functions/devils-advocate";
+const OTHER_READ_API_URL = fnUrl("devils-advocate");
 
 /**
  * Ask for the strongest case for the other read of a belief.

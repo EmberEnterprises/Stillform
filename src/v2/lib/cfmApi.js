@@ -7,8 +7,9 @@
  * invents a number. Fail-soft: any failure returns nulls, never a fabricated
  * score and never a throw to the caller.
  */
+import { fnUrl } from "./apiBase.js";
 
-const DEFUSION_URL = "/.netlify/functions/cognitive-defusion-score";
+const DEFUSION_URL = fnUrl("cognitive-defusion-score");
 
 /**
  * @param {{ thought: string, frames: string[] }} input

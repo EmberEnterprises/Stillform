@@ -14,8 +14,9 @@
  * The backend gates by origin + an 8/min IP rate-limit; no install_id /
  * session identity is required (unlike reframe.js), so this stays simple.
  */
+import { fnUrl } from "./apiBase.js";
 
-const SCRIPTS_API_URL = "/.netlify/functions/scripts";
+const SCRIPTS_API_URL = fnUrl("scripts");
 
 const VALID_CHANNELS = ["text", "email", "in-person", "voice"];
 

@@ -9,8 +9,9 @@
  * install_id. This client shapes the request, normalizes the exchange list,
  * and surfaces the crisis/error cases cleanly.
  */
+import { fnUrl } from "./apiBase.js";
 
-const REHEARSAL_API_URL = "/.netlify/functions/rehearsal";
+const REHEARSAL_API_URL = fnUrl("rehearsal");
 
 /**
  * @param {object} args

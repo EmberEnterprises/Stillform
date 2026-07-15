@@ -14,8 +14,9 @@
  * clean object the surface renders. Voice is enforced server-side; the
  * client never re-prompts or post-processes the brief text.
  */
+import { fnUrl } from "./apiBase.js";
 
-const PRE_EVENT_BRIEF_API_URL = "/.netlify/functions/pre-event-brief";
+const PRE_EVENT_BRIEF_API_URL = fnUrl("pre-event-brief");
 
 /**
  * Generate a Pre-event Brief for one upcoming event.

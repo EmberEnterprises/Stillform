@@ -26,6 +26,7 @@
  * fallback — any failure leaves the queue and Mirror unchanged and the
  * practice unaffected (fire-and-forget, swallow errors).
  */
+import { fnUrl } from "./apiBase.js";
 
 import { getTriggerProfile, addTrigger, updateTrigger, deleteTrigger } from "./triggerProfile.js";
 import { formatAnchorsForAI, addAnchor, retireAnchor } from "./anchors.js";
@@ -122,7 +123,7 @@ export async function runMediation(reason = "manual") {
 
   let res;
   try {
-    res = await fetch("/.netlify/functions/reframe", {
+    res = await fetch(fnUrl("reframe"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

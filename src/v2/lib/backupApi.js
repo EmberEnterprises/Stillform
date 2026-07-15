@@ -14,13 +14,14 @@
  * Self-Mode law: every export fails soft; backup being unavailable never
  * touches the practice.
  */
+import { fnUrl } from "./apiBase.js";
 
 import { getAccessToken } from "./authApi.js";
 import { AUTH_KEY } from "./authApi.js";
 
-const SAVE_URL = "/.netlify/functions/backup-save";
-const LIST_URL = "/.netlify/functions/backup-list";
-const RESTORE_URL = "/.netlify/functions/backup-restore";
+const SAVE_URL = fnUrl("backup-save");
+const LIST_URL = fnUrl("backup-list");
+const RESTORE_URL = fnUrl("backup-restore");
 
 const NEVER_SNAPSHOT = new Set([AUTH_KEY]);
 const NEVER_RESTORE_WRITE = new Set([AUTH_KEY, "stillform_install_id"]);
@@ -78,7 +79,7 @@ export async function linkInstallToAccount() {
   let installId = null;
   try { installId = localStorage.getItem("stillform_install_id") || null; } catch { /* ok */ }
   if (!installId) return { ok: false, error: "no_install_id" };
-  const r = await authedPost("/.netlify/functions/subscription-link-account", { install_id: installId });
+  const r = await authedPost(fnUrl("subscription-link-account"), { install_id: installId });
   return r.ok ? { ok: true, linked: !!r.data?.linked } : { ok: false, error: r.signedOut ? "signed_out" : "link_failed" };
 }
 

@@ -13,8 +13,9 @@
  * softens — the surface routes workable:false to CrisisResources + handoff
  * when isCrisis, and renders the note honestly otherwise.
  */
+import { fnUrl } from "./apiBase.js";
 
-const RE_READ_API_URL = "/.netlify/functions/re-read";
+const RE_READ_API_URL = fnUrl("re-read");
 
 /**
  * Ask for the guided widening of one self-selected memory.

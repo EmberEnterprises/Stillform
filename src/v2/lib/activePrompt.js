@@ -32,10 +32,11 @@
  *   Good: "Heavy day held. Begin when ready."
  *   Bad:  "Let's begin your morning check-in now."
  */
+import { fnUrl } from "./apiBase.js";
 
 import { getSmartFloorPrompt } from "./smartPromptFloor.js";
 
-const AI_ACTIVE_PROMPT_URL = "/.netlify/functions/active-prompt";
+const AI_ACTIVE_PROMPT_URL = fnUrl("active-prompt");
 const CACHE_KEY = "stillform_v2_active_prompt_cache";
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min
 

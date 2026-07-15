@@ -24,6 +24,7 @@
  * history, Context Profile (needs backend), check-in/EOD, AI session notes.
  * Signal Profile + bio-filter have no source module in this build.
  */
+import { fnUrl } from "./apiBase.js";
 
 import { getOrCreateInstallId } from "./identity.js";
 import { formatBiasProfileForAI } from "./biasProfile.js";
@@ -43,7 +44,7 @@ import { getAmbientContext } from "./ambientSignals.js";
 import { formatCapacitiesForAI } from "./capacitiesProfile.js";
 import { getWindowRead } from "./windowRead.js";
 
-const REFRAME_API_URL = "/.netlify/functions/reframe";
+const REFRAME_API_URL = fnUrl("reframe");
 
 /**
  * Client-side mode routing per canon §7:
@@ -320,7 +321,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
  */
 export async function draftStatement({ surfacedFrame = null, takeaway = null } = {}) {
   try {
-    const response = await fetch("/.netlify/functions/reframe", {
+    const response = await fetch(fnUrl("reframe"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mode: "statement", surfacedFrame, takeaway, input: "statement" }),

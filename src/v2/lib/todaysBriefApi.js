@@ -20,12 +20,13 @@
  * empty-safe; the brief is leaner than V1's until/unless the morning beat is
  * enriched (separate, flagged decision).
  */
+import { fnUrl } from "./apiBase.js";
 
 import { formatTriggerProfileForAI } from "./triggerProfile.js";
 import { formatBiasProfileForAI } from "./biasProfile.js";
 import { getSessionCount } from "./sessions.js";
 
-const TODAYS_BRIEF_API_URL = "/.netlify/functions/todays-brief";
+const TODAYS_BRIEF_API_URL = fnUrl("todays-brief");
 const STORAGE_KEY = "stillform_todays_brief";
 
 /** Local date key (YYYY-MM-DD) in the user's own timezone. */

@@ -1,4 +1,5 @@
 import { getOrCreateInstallId } from "./identity.js";
+import { fnUrl } from "./apiBase.js";
 
 /**
  * subscriptionApi — v2 client for subscription status (Phase 8a).
@@ -16,7 +17,7 @@ import { getOrCreateInstallId } from "./identity.js";
  * user (per SUBSCRIPTION_SETUP.md's grace-window behavior).
  */
 
-const SUBSCRIPTION_STATUS_URL = "/.netlify/functions/subscription-status";
+const SUBSCRIPTION_STATUS_URL = fnUrl("subscription-status");
 
 /**
  * Lemon Squeezy hosted-checkout URLs (LIVE). Arlin fills these from the LS

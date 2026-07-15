@@ -13,8 +13,9 @@
  * attendees or notes on screen even though we only keep titles/times. The UI
  * must say so plainly before the user uploads.
  */
+import { fnUrl } from "./apiBase.js";
 
-const CALENDAR_EXTRACT_URL = "/.netlify/functions/calendar-screenshot-extract";
+const CALENDAR_EXTRACT_URL = fnUrl("calendar-screenshot-extract");
 
 export async function extractCalendarFromScreenshot({ imageBase64, imageMime = "image/png", referenceDate = null, tzOffsetMinutes = null } = {}) {
   const data = String(imageBase64 || "").trim();

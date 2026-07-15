@@ -16,10 +16,11 @@
  * session count, today's feel-states/patterns where available); the backend is
  * empty-safe for the rest.
  */
+import { fnUrl } from "./apiBase.js";
 
 import { getSessions } from "./sessions.js";
 
-const EOD_ARTIFACT_API_URL = "/.netlify/functions/eod-artifact";
+const EOD_ARTIFACT_API_URL = fnUrl("eod-artifact");
 const STORAGE_KEY = "stillform_eod_artifact";
 const PENDING_KEY = "stillform_eod_artifact_pending";
 
