@@ -30,6 +30,7 @@
  */
 
 import { getCalendarEvents, getCalendarSummary } from "./calendarData.js";
+import { getRecentSessions } from "./sessions.js";
 import { getWeather } from "./ambientSignals.js";
 import { getTriggerProfile } from "./triggerProfile.js";
 import { getLatestBodyBioFilter } from "./signalLog.js";
@@ -329,6 +330,37 @@ export function sizeOfferToWindow(minutesAvailable) {
   if (m >= 5) return { fits: true, size: "scan", label: `${Math.floor(m)} minutes — the body scan fits.` };
   if (m >= 2) return { fits: true, size: "breath", label: `${Math.floor(m)} minutes — the short version.` };
   return { fits: false, size: null, label: null };
+}
+
+/**
+ * P14 RECOVERY GRACE (2026-07-15): re-entry as the warmest moment. Someone
+ * returning after days or weeks away gets zero ledger, zero guilt, no streak
+ * debt — "pick up where the day is, not where you left off." The anti-shame
+ * moment every other app fails. Care carried in the response, never spoken.
+ *
+ * Fires only on a genuine gap (>= gapDays since the last session). Silent for
+ * daily/near-daily use (nothing to forgive) and for brand-new users (no prior
+ * session to have been away from).
+ */
+export function getRecoveryGrace(nowMs = Date.now(), { gapDays = 4 } = {}) {
+  let recent = [];
+  try { recent = getRecentSessions(1) || []; } catch { return null; }
+  if (!recent.length) return null; // new user — no absence to grace
+
+  const last = recent[0];
+  const lastMs = last && typeof last.ts === "number" ? last.ts : null;
+  if (lastMs === null) return null;
+
+  const days = Math.floor((nowMs - lastMs) / (24 * 60 * 60 * 1000));
+  if (days < gapDays) return null; // not really away
+
+  // Warm, factual, no streak language. Scale the phrasing gently by length.
+  let note;
+  if (days >= 21) note = "However long it's been, you're not behind — pick up where today is, not where you left off.";
+  else if (days >= 7) note = "Been a little while. Nothing's lost — start from where the day is.";
+  else note = "Welcome back. Pick up where today is, not where you left off.";
+
+  return { key: "recovery:" + new Date(nowMs).toDateString(), note, daysAway: days };
 }
 
 /** Remember "not this one" for a specific event offer. */

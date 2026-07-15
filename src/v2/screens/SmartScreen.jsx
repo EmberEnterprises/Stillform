@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getRecentSessions } from "../lib/sessions.js";
+import { getRecoveryGrace } from "../lib/conciergeSignals.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
 import { getTodayThread } from "../lib/thread.js";
@@ -263,6 +264,7 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             the naming surface leads. (S5: merge with the concierge "Today"
             header for established users so there's a single Today anchor.) */}
 <SameDayLine />
+        <RecoveryGraceLine />
 
                 {/* W3: the first landing — consumed once. The Read just gave them
             their own words back; the natural next thing is one real rep,
@@ -551,6 +553,38 @@ function SameDayLine() {
           : "Second time today. The day's still open.";
       }
       return `${earlier.length} already today — the record's carrying it.`;
+    } catch {
+      return null;
+    }
+  }, []);
+  if (!line) return null;
+  return (
+    <p
+      className="sf-fade-enter"
+      style={{
+        margin: "0 0 var(--sf-space-12)",
+        fontFamily: "var(--sf-font-serif)",
+        fontWeight: 300,
+        fontStyle: "italic",
+        fontSize: "13px",
+        color: "var(--sf-text-faint)",
+      }}
+    >
+      {line}
+    </p>
+  );
+}
+
+/* P14 — recovery grace: the warm re-entry after days away. Mutually exclusive
+   with SameDayLine by construction (a days-away returner has no session today). */
+function RecoveryGraceLine() {
+  const line = React.useMemo(() => {
+    try {
+      const today = new Date().toDateString();
+      const here = getRecentSessions(8).filter((x) => x?.ts && new Date(x.ts).toDateString() === today);
+      if (here.length) return null; // here today -> SameDayLine owns it, not this
+      const g = getRecoveryGrace(Date.now());
+      return g ? g.note : null;
     } catch {
       return null;
     }
