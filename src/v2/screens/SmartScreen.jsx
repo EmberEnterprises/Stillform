@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getRecentSessions } from "../lib/sessions.js";
-import { getRecoveryGrace } from "../lib/conciergeSignals.js";
+import { getRecentSessions, getRecoveryGrace } from "../lib/sessions.js";
 import { getDueNotes, sweepExpired } from "../lib/futureNotes.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
@@ -583,7 +582,7 @@ function RecoveryGraceLine() {
   const line = React.useMemo(() => {
     try {
       const today = new Date().toDateString();
-      const here = getRecentSessions(8).filter((x) => x?.ts && new Date(x.ts).toDateString() === today);
+      const here = getRecentSessions(8).filter((x) => x?.timestamp && new Date(x.timestamp).toDateString() === today);
       if (here.length) return null; // here today -> SameDayLine owns it, not this
       const g = getRecoveryGrace(Date.now());
       return g ? g.note : null;

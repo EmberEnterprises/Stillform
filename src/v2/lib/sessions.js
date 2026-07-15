@@ -223,3 +223,29 @@ export function getDistinctPracticeDays() {
   }
   return keys.size;
 }
+
+/**
+ * P14 RECOVERY GRACE (2026-07-15): re-entry as the warmest moment. If the last
+ * session was days ago, returns a warm, ledger-free line for the return — no
+ * streak debt, no guilt, no "you missed N days." Care shown by what it does
+ * NOT say. Returns null on first-ever use or a same-week return (that's A6's job).
+ *
+ * @returns {{ daysAway:number, note:string }|null}
+ */
+export function getRecoveryGrace(nowMs = Date.now(), { minDaysAway = 5 } = {}) {
+  try {
+    const all = getSessions();
+    if (!all.length) return null; // first-ever use — not a return
+    const last = all[all.length - 1];
+    const lastMs = last && last.timestamp ? Date.parse(last.timestamp) : NaN;
+    if (Number.isNaN(lastMs)) return null;
+    const daysAway = Math.floor((nowMs - lastMs) / 86400000);
+    if (daysAway < minDaysAway) return null; // A6 covers same-week
+
+    // Deliberately no number in the line — naming the gap is the ledger we refuse.
+    const note = "Good to have you back. Pick up where the day is, not where you left off.";
+    return { daysAway, note };
+  } catch {
+    return null;
+  }
+}
