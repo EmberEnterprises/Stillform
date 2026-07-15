@@ -18,40 +18,40 @@ import AppHeader from "./components/AppHeader.jsx";
 import Spine from "./screens/Spine.jsx";
 import FoundationVerify from "./screens/FoundationVerify.jsx";
 import StateCheck from "./screens/spine/StateCheck.jsx"; // debug route ?statecheck=1 (orphan draft, M3 increment 2a)
-import MyProgress from "./screens/MyProgress.jsx";
-import ContextProfile from "./screens/ContextProfile.jsx";
-import TriggerProfile from "./screens/TriggerProfile.jsx";
-import BiasProfile from "./screens/BiasProfile.jsx";
-import CapacitiesMirror from "./screens/CapacitiesMirror.jsx";
-import SeasonReview from "./screens/SeasonReview.jsx";
-import NamingLedger from "./screens/NamingLedger.jsx";
-import RiskProfileMirror from "./screens/RiskProfileMirror.jsx";
-import PredictionErrorMirror from "./screens/PredictionErrorMirror.jsx";
-import WhatYouBetOnMirror from "./screens/WhatYouBetOnMirror.jsx";
-import Vulnerabilities from "./screens/Vulnerabilities.jsx";
-import ProtectiveMoves from "./screens/ProtectiveMoves.jsx";
-import BodyVsStory from "./screens/BodyVsStory.jsx";
-import ReframeVsHold from "./screens/ReframeVsHold.jsx";
-import ObserverSeat from "./screens/ObserverSeat.jsx";
-import TriggerMetaPatterns from "./screens/TriggerMetaPatterns.jsx";
-import FrameworkModel from "./screens/FrameworkModel.jsx";
-import Strengths from "./screens/Strengths.jsx";
-import Values from "./screens/Values.jsx";
-import WindowRead from "./screens/WindowRead.jsx";
-import ThoughtRecord from "./screens/ThoughtRecord.jsx";
-import NarrativeArc from "./screens/NarrativeArc.jsx";
-import PracticeEvidence from "./screens/PracticeEvidence.jsx";
-import Library from "./screens/Library.jsx";
-import PreEventBrief from "./screens/PreEventBrief.jsx";
-import ReRead from "./screens/ReRead.jsx";
-import Becoming from "./screens/Becoming.jsx";
-import Concierge from "./screens/Concierge.jsx";
-import Paywall from "./screens/Paywall.jsx";
+const MyProgress = React.lazy(() => import("./screens/MyProgress.jsx"));
+const ContextProfile = React.lazy(() => import("./screens/ContextProfile.jsx"));
+const TriggerProfile = React.lazy(() => import("./screens/TriggerProfile.jsx"));
+const BiasProfile = React.lazy(() => import("./screens/BiasProfile.jsx"));
+const CapacitiesMirror = React.lazy(() => import("./screens/CapacitiesMirror.jsx"));
+const SeasonReview = React.lazy(() => import("./screens/SeasonReview.jsx"));
+const NamingLedger = React.lazy(() => import("./screens/NamingLedger.jsx"));
+const RiskProfileMirror = React.lazy(() => import("./screens/RiskProfileMirror.jsx"));
+const PredictionErrorMirror = React.lazy(() => import("./screens/PredictionErrorMirror.jsx"));
+const WhatYouBetOnMirror = React.lazy(() => import("./screens/WhatYouBetOnMirror.jsx"));
+const Vulnerabilities = React.lazy(() => import("./screens/Vulnerabilities.jsx"));
+const ProtectiveMoves = React.lazy(() => import("./screens/ProtectiveMoves.jsx"));
+const BodyVsStory = React.lazy(() => import("./screens/BodyVsStory.jsx"));
+const ReframeVsHold = React.lazy(() => import("./screens/ReframeVsHold.jsx"));
+const ObserverSeat = React.lazy(() => import("./screens/ObserverSeat.jsx"));
+const TriggerMetaPatterns = React.lazy(() => import("./screens/TriggerMetaPatterns.jsx"));
+const FrameworkModel = React.lazy(() => import("./screens/FrameworkModel.jsx"));
+const Strengths = React.lazy(() => import("./screens/Strengths.jsx"));
+const Values = React.lazy(() => import("./screens/Values.jsx"));
+const WindowRead = React.lazy(() => import("./screens/WindowRead.jsx"));
+const ThoughtRecord = React.lazy(() => import("./screens/ThoughtRecord.jsx"));
+const NarrativeArc = React.lazy(() => import("./screens/NarrativeArc.jsx"));
+const PracticeEvidence = React.lazy(() => import("./screens/PracticeEvidence.jsx"));
+const Library = React.lazy(() => import("./screens/Library.jsx"));
+const PreEventBrief = React.lazy(() => import("./screens/PreEventBrief.jsx"));
+const ReRead = React.lazy(() => import("./screens/ReRead.jsx"));
+const Becoming = React.lazy(() => import("./screens/Becoming.jsx"));
+const Concierge = React.lazy(() => import("./screens/Concierge.jsx"));
+const Paywall = React.lazy(() => import("./screens/Paywall.jsx"));
 import Onboarding from "./screens/Onboarding.jsx";
-import Settings from "./screens/Settings.jsx";
-import FAQ from "./screens/FAQ.jsx";
+const Settings = React.lazy(() => import("./screens/Settings.jsx"));
+const FAQ = React.lazy(() => import("./screens/FAQ.jsx"));
 import CrisisResources from "./screens/CrisisResources.jsx";
-import Roadmap from "./screens/Roadmap.jsx";
+const Roadmap = React.lazy(() => import("./screens/Roadmap.jsx"));
 import { isOnboarded, setOnboarded } from "./lib/onboarding.js";
 import { shouldGate } from "./lib/gating.js";
 import { refreshSubscriptionStatus } from "./lib/subscriptionApi.js";
@@ -296,7 +296,9 @@ export default function AppV2() {
   return (
     <div className="sf-v2">
       {!HEADERLESS.has(screen) ? <AppHeader onHome={goHome} onSignIn={goSignIn} onCrisis={() => setScreen("crisis-resources")} /> : null}
-      {renderScreen()}
+      <React.Suspense fallback={<div className="sf-page" style={{ minHeight: "40vh" }} aria-busy="true" />}>
+        {renderScreen()}
+      </React.Suspense>
       {/* Quick Breathe, everywhere (Arlin's v1 decision restored): floats over
           every screen; hides itself only while its own overlay is open. Not
           gated by HEADERLESS — breath must reach home, spine, and onboarding. */}
