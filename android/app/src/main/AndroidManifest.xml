@@ -93,6 +93,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <!-- Coarse location: ONLY for the opt-in ambient weather signal
+         (weatherProducer.js, enableHighAccuracy:false). Fine location is
+         deliberately NOT requested. Weather degrades cleanly if denied. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!-- Health Connect permissions -->
     <uses-permission android:name="android.permission.health.READ_SLEEP" />

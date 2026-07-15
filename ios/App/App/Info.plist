@@ -53,5 +53,7 @@
 	<string>Stillform reads your upcoming calendar events to personalize daily composure guidance.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Stillform reads sleep and heart metrics from Health to personalize your regulation prompts.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Stillform uses your rough location only to add local weather as optional context for the practice. You can decline and everything still works.</string>
 </dict>
 </plist>
