@@ -50,7 +50,7 @@ export default function Home({ onEnterPractice, onNavigate }) {
 
       <QuickBreathe onTap={() => setBreatheOpen(true)} onOpenInfo={() => setBreatheInfoOpen(true)} />
 
-      <BreatheOverlay open={breatheOpen} onClose={() => setBreatheOpen(false)} />
+      <BreatheOverlay open={breatheOpen} onClose={() => setBreatheOpen(false)} onEscalateToScan={() => setScanOpen(true)} />
       {/* Quick Breathe info (Arlin's design 2026-07-08): how it works + the
           duration being entirely the user's — and in the space beneath the
           information, the deeper option. */}

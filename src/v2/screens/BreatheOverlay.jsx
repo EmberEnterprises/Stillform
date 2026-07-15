@@ -53,7 +53,7 @@ const PHASES = [
 
 const TARGET_CYCLES = 23; // Full Balban 2023 protocol (~5 min at 13s/cycle)
 
-export default function BreatheOverlay({ open, onClose }) {
+export default function BreatheOverlay({ open, onClose, onEscalateToScan }) {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [cycleCount, setCycleCount] = useState(0);
   const [done, setDone] = useState(false);
@@ -184,7 +184,7 @@ export default function BreatheOverlay({ open, onClose }) {
       </button>
 
       {done ? (
-        <DoneState onClose={onClose} />
+        <DoneState onClose={onClose} onEscalateToScan={onEscalateToScan} />
       ) : (
         <ActiveState phase={phase} cycleCount={cycleCount} onStop={onClose} discreet={discreet} onToggleDiscreet={toggleDiscreet} />
       )}
@@ -318,8 +318,9 @@ function ActiveState({ phase, cycleCount, onStop, discreet, onToggleDiscreet }) 
  * restrained — single line, single Return button, no engagement
  * affordances ("how did that feel," "track your practice," etc.).
  * -------------------------------------------------------------------- */
-function DoneState({ onClose }) {
+function DoneState({ onClose, onEscalateToScan }) {
   const [rated, setRated] = React.useState(false);
+  const [notYet, setNotYet] = React.useState(false); // breath didn't land -> offer the scan
   // W2: the record acknowledges — a fact, quietly. No praise, no streaks.
   let ackLine = "It's in your record.";
   try {
@@ -349,11 +350,23 @@ function DoneState({ onClose }) {
         <div style={{ marginTop: "var(--sf-space-16, 16px)", display: "flex", gap: "var(--sf-space-12, 12px)", justifyContent: "center" }}>
           {[["settled", "settled"], ["same", "about the same"], ["not-yet", "not yet"]].map(([k, label]) => (
             <button key={k} type="button" className="sf-link-quiet" style={{ fontSize: "13px" }}
-              onClick={() => { try { rateLastBreathe(k); } catch { /* fine */ } setRated(true); }}>
+              onClick={() => { try { rateLastBreathe(k); } catch { /* fine */ } if (k === "not-yet") setNotYet(true); setRated(true); }}>
               {label}
             </button>
           ))}
         </div>
+      ) : null}
+      {/* Body Scan is the ESCALATION, not a parallel choice (Arlin's decision):
+          offered only when breath didn't land. */}
+      {notYet && typeof onEscalateToScan === "function" ? (
+        <button
+          type="button"
+          className="sf-link-quiet"
+          onClick={() => { onClose(); onEscalateToScan(); }}
+          style={{ display: "block", margin: "var(--sf-space-16, 16px) auto 0", fontSize: "13px", opacity: 0.8 }}
+        >
+          Still holding on? Try the body scan →
+        </button>
       ) : null}
       <p
         style={{
