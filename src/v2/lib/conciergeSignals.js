@@ -161,6 +161,70 @@ export function getUmbrellaNote(nowMs = Date.now(), { includeDismissed = false }
   return null;
 }
 
+/**
+ * P2 NO-GAP DAY (2026-07-15): calendar arithmetic across the midday span. If
+ * events leave no open gap of a meaningful length between 11:00 and 15:00 on a
+ * given day, surface a pure-logistics eat-ahead note. Hunger crashes ruin
+ * afternoons — this is the world (a packed schedule), not the person.
+ *
+ * Only speaks for TODAY (or the target day passed), only when the span is
+ * genuinely blocked. Honest with unknown-end events: treats them as a default
+ * 60-min block so it never invents free time that may not exist.
+ */
+export function getNoGapDayNote(nowMs = Date.now(), { includeDismissed = false, spanStartHour = 11, spanEndHour = 15, minGapMin = 45 } = {}) {
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { return null; }
+  if (!events.length) return null;
+
+  const day = new Date(nowMs);
+  const spanStart = new Date(day); spanStart.setHours(spanStartHour, 0, 0, 0);
+  const spanEnd = new Date(day); spanEnd.setHours(spanEndHour, 0, 0, 0);
+  const spanStartMs = spanStart.getTime();
+  const spanEndMs = spanEnd.getTime();
+  // If the whole span is already in the past, nothing to warn about.
+  if (spanEndMs <= nowMs) return null;
+
+  // Build busy intervals clipped to the span.
+  const busy = [];
+  for (const ev of events) {
+    if (!ev || !ev.start) continue;
+    const st = Date.parse(ev.start);
+    if (Number.isNaN(st)) continue;
+    let en = ev.end ? Date.parse(ev.end) : NaN;
+    if (Number.isNaN(en)) {
+      const dur = typeof ev.durationMin === "number" ? ev.durationMin : 60; // honest default
+      en = st + dur * 60000;
+    }
+    // clip to span
+    const cs = Math.max(st, spanStartMs);
+    const ce = Math.min(en, spanEndMs);
+    if (ce > cs) busy.push([cs, ce]);
+  }
+  if (!busy.length) return null; // span is wide open — no warning
+
+  // Merge and find the largest open gap within the span.
+  busy.sort((a, b) => a[0] - b[0]);
+  let cursor = spanStartMs;
+  let largestGap = 0;
+  for (const [cs, ce] of busy) {
+    if (cs > cursor) largestGap = Math.max(largestGap, cs - cursor);
+    cursor = Math.max(cursor, ce);
+  }
+  if (spanEndMs > cursor) largestGap = Math.max(largestGap, spanEndMs - cursor);
+
+  if (largestGap >= minGapMin * 60000) return null; // there's a real gap — no note
+
+  const key = "nogap:" + new Date(day).toDateString();
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!includeDismissed && dismissed[key]) return null;
+
+  const fmt = (h) => (h === 12 ? "noon" : h > 12 ? `${h - 12}` : `${h}`);
+  return {
+    key,
+    note: `Nothing open ${fmt(spanStartHour)}\u2013${fmt(spanEndHour)} \u2014 eat before ${fmt(spanStartHour)}.`,
+  };
+}
+
 /** Remember "not this one" for a specific event offer. */
 export function dismissEventOffer(key) {
   if (!key || typeof key !== "string") return false;

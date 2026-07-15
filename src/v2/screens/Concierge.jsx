@@ -1,7 +1,7 @@
 import React from "react";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote } from "../lib/conciergeSignals.js";
+import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate } from "../lib/eodDecompression.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
@@ -52,6 +52,16 @@ export default function Concierge({ onExit, onOpenSettings }) {
       item: safe(() => {
         const u = getUmbrellaNote(Date.now(), { includeDismissed: true });
         return u ? u.note : null;
+      }, null),
+    },
+    {
+      key: "noGapDay",
+      name: "No-gap day",
+      earns: "Speaks only when your own calendar leaves no real break across the middle of the day — pure logistics.",
+      when: "On a day whose 11-to-3 span is fully booked, while it's still ahead.",
+      item: safe(() => {
+        const g = getNoGapDayNote(Date.now(), { includeDismissed: true });
+        return g ? g.note : null;
       }, null),
     },
     {
