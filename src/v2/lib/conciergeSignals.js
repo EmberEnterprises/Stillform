@@ -363,6 +363,57 @@ export function getRecoveryGrace(nowMs = Date.now(), { gapDays = 4 } = {}) {
   return { key: "recovery:" + new Date(nowMs).toDateString(), note, daysAway: days };
 }
 
+/**
+ * P29 THE PACKING NOTE (2026-07-15): a trip on the calendar earns an OFFERED
+ * packing-note template — season- and length-aware, always optional, edited or
+ * declined. Accepting it writes a P28 future-note that arrives the evening
+ * before. Never a checklist-with-state (it becomes a futureNote, which by
+ * construction cannot be a task).
+ *
+ * Trip detection: a multi-day event (>= ~20h span) or a travel-titled event.
+ * Returns { key, tripTitle, startMs, template } to offer, or null.
+ */
+export function getPackingNoteOffer(nowMs = Date.now(), { includeDismissed = false } = {}) {
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { return null; }
+  if (!events.length) return null;
+
+  const TRAVEL_RE = /\b(trip|flight|vacation|holiday|travel|getaway|retreat|conference)\b/i;
+  const dismissed = readJSON(DISMISS_KEY, {});
+
+  for (const ev of events) {
+    if (!ev || !ev.start || !ev.title) continue;
+    const st = Date.parse(ev.start);
+    if (Number.isNaN(st) || st < nowMs) continue;
+    // only offer within ~10 days ahead (actionable, not far-future noise)
+    if (st - nowMs > 10 * 24 * 60 * 60 * 1000) continue;
+
+    let en = ev.end ? Date.parse(ev.end) : NaN;
+    const spanHours = Number.isFinite(en) ? (en - st) / 3600000 : 0;
+    const isMultiDay = spanHours >= 20;
+    const looksTravel = TRAVEL_RE.test(ev.title);
+    if (!isMultiDay && !looksTravel) continue;
+
+    const key = "packing:" + (ev.start + "|" + ev.title).slice(0, 60);
+    if (!includeDismissed && dismissed[key]) continue;
+
+    // Season-aware base list (northern-hemisphere month heuristic; honest and simple).
+    const month = new Date(st).getMonth();
+    const cold = month <= 1 || month === 11; // Dec-Feb
+    const warm = month >= 5 && month <= 8;    // Jun-Sep
+    const nights = isMultiDay ? Math.max(1, Math.round(spanHours / 24)) : 1;
+
+    const items = ["charger", "any meds you take", "the good headphones"];
+    if (cold) items.push("a warm layer");
+    if (warm) items.push("sunscreen");
+    if (nights >= 3) items.push(`enough for ${nights} nights`);
+
+    const template = `For ${String(ev.title)}: ${items.join(", ")}.`;
+    return { key, tripTitle: String(ev.title), startMs: st, template };
+  }
+  return null;
+}
+
 /** Remember "not this one" for a specific event offer. */
 export function dismissEventOffer(key) {
   if (!key || typeof key !== "string") return false;

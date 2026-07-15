@@ -101,3 +101,24 @@ export function sweepExpired(nowMs = Date.now()) {
   write(kept);
   return kept;
 }
+
+/**
+ * P29 helper: accept a packing-note offer -> a future note that arrives the
+ * evening before the trip. `editedText` lets the user amend the template first.
+ * Returns the note id or null.
+ * @param {{ tripTitle: string, startMs: number, template: string }} offer
+ * @param {string} [editedText]
+ */
+export function acceptPackingNote(offer, editedText) {
+  if (!offer || typeof offer.startMs !== "number") return null;
+  const text = (typeof editedText === "string" && editedText.trim()) ? editedText.trim() : offer.template;
+  // "Evening before": surface at ~18:00 the day before the trip starts.
+  const dayBefore = new Date(offer.startMs - 24 * 60 * 60 * 1000);
+  dayBefore.setHours(18, 0, 0, 0);
+  return attachNote({
+    text,
+    surfaceAt: offer.startMs,
+    leadMinutes: Math.max(0, Math.round((offer.startMs - dayBefore.getTime()) / 60000)),
+    label: "Packing",
+  });
+}
