@@ -273,7 +273,15 @@ body:has(.sf-v2) {
  * ------------------------------------------------------------------ */
 
 .sf-page {
-  padding: var(--sf-space-48) var(--sf-space-24) var(--sf-space-80);
+  /* Safe-area insets (2026-07-15): with viewport-fit=cover, notches/punch-holes
+     and the gesture bar are respected on every screen at once — content never
+     hides under system chrome. env() resolves to 0 on non-notched devices, so
+     this is inert on desktop/older phones. */
+  padding:
+    calc(var(--sf-space-48) + env(safe-area-inset-top, 0px))
+    calc(var(--sf-space-24) + env(safe-area-inset-right, 0px))
+    calc(var(--sf-space-80) + env(safe-area-inset-bottom, 0px))
+    calc(var(--sf-space-24) + env(safe-area-inset-left, 0px));
   max-width: 640px;
   margin: 0 auto;
   position: relative; /* anchor for the spine back affordance */
@@ -284,7 +292,7 @@ body:has(.sf-v2) {
   padding-top: var(--sf-space-64);
   /* Clear the fixed Quick Breathe valve (bottom-right, ~44px + 16px inset)
      so practice content never sits underneath it. June 15 craft fix. */
-  padding-bottom: calc(var(--sf-space-80) + var(--sf-space-48));
+  padding-bottom: calc(var(--sf-space-80) + var(--sf-space-48) + env(safe-area-inset-bottom, 0px));
 }
 
 .sf-stack-paragraph > * + * {

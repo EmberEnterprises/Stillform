@@ -40,7 +40,8 @@ export default function AppHeader({ onHome, onSignIn, onCrisis }) {
         alignItems: "center",
         justifyContent: "space-between",
         gap: "var(--sf-space-16)",
-        padding: "var(--sf-space-24) var(--sf-space-24) 0",
+        padding:
+          "calc(var(--sf-space-24) + env(safe-area-inset-top, 0px)) calc(var(--sf-space-24) + env(safe-area-inset-right, 0px)) 0 calc(var(--sf-space-24) + env(safe-area-inset-left, 0px))",
         maxWidth: "640px",
         margin: "0 auto",
       }}
