@@ -670,3 +670,15 @@ html[data-sf-motion="reduced"] .sf-v2 .sf-listening-bars i { animation: none !im
   .sf-v2 .sf-still-ember,
   .sf-v2 .sf-still-drift { animation: none; }
 }
+
+/* A7 (2026-07-14): reading-friendly spacing — dyslexia + brain-fog support.
+   Loosens line-height and letter/word spacing on body prose without touching
+   the mono labels or the deliberate editorial display type. Opt-in via
+   Settings; applied app-wide as a data attribute before first paint. */
+html[data-sf-reading="spacious"] .sf-v2 p,
+html[data-sf-reading="spacious"] .sf-v2 li,
+html[data-sf-reading="spacious"] .sf-v2 .sf-body {
+  line-height: 1.9 !important;
+  letter-spacing: 0.02em !important;
+  word-spacing: 0.08em !important;
+}

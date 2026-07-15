@@ -28,7 +28,7 @@
 
 const KEY = "stillform_v2_a11y";
 
-const DEFAULTS = { contrast: "default", textSize: "default", motion: "full" };
+const DEFAULTS = { contrast: "default", textSize: "default", motion: "full", reading: "default" };
 
 /** @returns {{contrast:string, textSize:string, motion:string}} */
 export function getA11y() {
@@ -40,13 +40,14 @@ export function getA11y() {
       contrast: parsed.contrast === "high" ? "high" : "default",
       textSize: parsed.textSize === "large" ? "large" : "default",
       motion: parsed.motion === "reduced" ? "reduced" : "full",
+      reading: parsed.reading === "spacious" ? "spacious" : "default",
     };
   } catch {
     return { ...DEFAULTS };
   }
 }
 
-/** Persist one setting and re-apply. @param {"contrast"|"textSize"|"motion"} k */
+/** Persist one setting and re-apply. @param {"contrast"|"textSize"|"motion"|"reading"} k */
 export function setA11y(k, value) {
   const cur = getA11y();
   const next = { ...cur, [k]: value };
@@ -69,4 +70,8 @@ export function applyA11y(settings) {
   else el.removeAttribute("data-sf-textsize");
   if (s.motion === "reduced") el.setAttribute("data-sf-motion", "reduced");
   else el.removeAttribute("data-sf-motion");
+  // A7 (2026-07-14): reading-friendly spacing — looser line-height + letter/word
+  // spacing, easing dyslexic and brain-fog reading. Tokens applied in CSS.
+  if (s.reading === "spacious") el.setAttribute("data-sf-reading", "spacious");
+  else el.removeAttribute("data-sf-reading");
 }

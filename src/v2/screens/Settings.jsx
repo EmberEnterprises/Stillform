@@ -159,6 +159,19 @@ export default function Settings({ onExit, onNavigate }) {
               {a11y.motion === "reduced" ? "On" : "Off"}
             </button>
           </div>
+          {/* A7 (2026-07-14): reading-friendly spacing for dyslexia / brain fog. */}
+          <div style={ROW}>
+            <span style={{ color: "var(--sf-text-primary)" }}>Reading spacing</span>
+            <button
+              type="button"
+              onClick={() => toggleA11y("reading", "spacious")}
+              style={a11y.reading === "spacious" ? TOGGLE_ON : TOGGLE_OFF}
+              aria-pressed={a11y.reading === "spacious"}
+              aria-label="Toggle reading-friendly spacing"
+            >
+              {a11y.reading === "spacious" ? "On" : "Off"}
+            </button>
+          </div>
           {/* W5 (2026-07-09): eyes-free pacing — the breath, felt not watched.
               A distinct tap per phase (in/top-off/out). Default OFF. */}
           <div style={ROW}>
