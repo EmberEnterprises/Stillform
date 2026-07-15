@@ -46,6 +46,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
   // history is the wire-shape sent to the backend: [{role, text}]
   const [history, setHistory] = useState([]);
   const [draft, setDraft] = useState("");
+  const [readBack, setReadBack] = useState(false); // J6b: mirror their own words
   const [thinking, setThinking] = useState(false);
   const [error, setError] = useState(null);
   const [initialized, setInitialized] = useState(false);
@@ -405,6 +406,34 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
           <div style={{ marginTop: "var(--sf-space-12)", display: "flex", justifyContent: "flex-end" }}>
             <MicButton onTranscript={(t) => setDraft((d) => (d ? d + " " : "") + t.trim())} />
           </div>
+
+          {/* J6b (2026-07-15): read-it-back — the spiral grounded in THEIR OWN
+              words, verbatim, never the AI's take. Shown once they've written. */}
+          {history.some((m) => m.role === "user") ? (
+            <div style={{ marginTop: "var(--sf-space-12)" }}>
+              <button
+                type="button"
+                className="sf-link-quiet"
+                onClick={() => setReadBack((v) => !v)}
+                aria-expanded={readBack}
+                style={{ fontSize: "13px" }}
+              >
+                {readBack ? "Hide my own words" : "Read my own words back"}
+              </button>
+              {readBack ? (
+                <div style={{ marginTop: "var(--sf-space-12)", paddingLeft: "var(--sf-space-16)", borderLeft: "1px solid var(--sf-border-hairline)" }}>
+                  <p style={{ margin: "0 0 var(--sf-space-8)", fontFamily: "var(--sf-font-mono)", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--sf-text-faint)" }}>
+                    What you've said, in your words
+                  </p>
+                  {history.filter((m) => m.role === "user").map((m, i) => (
+                    <p key={i} style={{ margin: "0 0 var(--sf-space-8)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "15px", lineHeight: 1.6, color: "var(--sf-text-secondary)" }}>
+                      {m.text}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           <div
             style={{
