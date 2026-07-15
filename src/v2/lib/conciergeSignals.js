@@ -109,6 +109,9 @@ export function getUpcomingEventOffer(nowMs = Date.now(), { includeDismissed = f
       start: ev.start,
       minutesUntil,
       matchedTrigger,
+      // P13: the offer knows how much room it has, so a surface never suggests
+      // a practice that won't fit before this event.
+      sized: sizeOfferToWindow(minutesUntil),
     };
   }
   return null;
@@ -308,6 +311,24 @@ export function getTemporalLandmark(nowMs = Date.now(), { includeDismissed = fal
     }
   }
   return null;
+}
+
+/**
+ * P13 TIME-SIZED OFFERS (2026-07-15): the guard that kills the daily micro-
+ * failure of unusable suggestions. Given the minutes actually available (from a
+ * calendar gap), return the largest practice that FITS — never a 5-minute
+ * practice into a 3-minute window. Pure arithmetic; the offer surfaces phrase it.
+ *
+ * Practice floors (minutes): quick breath ~2, body scan ~5, full spine ~12.
+ * Returns { fits:boolean, size:"breath"|"scan"|"full"|null, label } — label is
+ * the honest offer phrase, or null when nothing fits (then the offer stays silent).
+ */
+export function sizeOfferToWindow(minutesAvailable) {
+  const m = typeof minutesAvailable === "number" && Number.isFinite(minutesAvailable) ? minutesAvailable : 0;
+  if (m >= 12) return { fits: true, size: "full", label: `${Math.floor(m)} minutes — room for the full practice.` };
+  if (m >= 5) return { fits: true, size: "scan", label: `${Math.floor(m)} minutes — the body scan fits.` };
+  if (m >= 2) return { fits: true, size: "breath", label: `${Math.floor(m)} minutes — the short version.` };
+  return { fits: false, size: null, label: null };
 }
 
 /** Remember "not this one" for a specific event offer. */
