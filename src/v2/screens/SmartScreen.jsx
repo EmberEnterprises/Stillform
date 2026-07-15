@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getRecentSessions } from "../lib/sessions.js";
 import { getRecoveryGrace } from "../lib/conciergeSignals.js";
+import { getDueNotes, sweepExpired } from "../lib/futureNotes.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
 import { getTodayThread } from "../lib/thread.js";
@@ -265,6 +266,7 @@ export default function SmartScreen({ onEnterPractice, onOpenRoadmap = null, onO
             header for established users so there's a single Today anchor.) */}
 <SameDayLine />
         <RecoveryGraceLine />
+        <DueNotesLine />
 
                 {/* W3: the first landing — consumed once. The Read just gave them
             their own words back; the natural next thing is one real rep,
@@ -604,5 +606,33 @@ function RecoveryGraceLine() {
     >
       {line}
     </p>
+  );
+}
+
+/* P28 — notes that arrive on time. Read-only surface: shows notes whose moment
+   is now. Never a task — no checkbox, nothing owed. Expired notes retire silently. */
+function DueNotesLine() {
+  const due = React.useMemo(() => {
+    try {
+      sweepExpired();
+      return getDueNotes();
+    } catch {
+      return [];
+    }
+  }, []);
+  if (!due.length) return null;
+  return (
+    <div className="sf-fade-enter" style={{ margin: "0 0 var(--sf-space-16)" }}>
+      {due.map((note) => (
+        <div key={note.id} style={{ marginBottom: "var(--sf-space-8)" }}>
+          {note.label ? (
+            <p style={{ margin: 0, fontFamily: "var(--sf-font-mono)", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--sf-text-faint)" }}>{note.label}</p>
+          ) : null}
+          <p style={{ margin: "var(--sf-space-4) 0 0", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "14px", lineHeight: 1.6, color: "var(--sf-text-secondary)" }}>
+            {note.text}
+          </p>
+        </div>
+      ))}
+    </div>
   );
 }
