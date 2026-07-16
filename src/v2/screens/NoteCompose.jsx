@@ -34,6 +34,7 @@ export default function NoteCompose({ onExit, event = null }) {
   const [resolvedEvent] = useState(() => event || (() => { try { return takePendingNoteEvent(); } catch { return null; } })());
   const [text, setText] = useState(() => (resolvedEvent && resolvedEvent.template) ? resolvedEvent.template : "");
   const [saved, setSaved] = useState(false);
+  const [wantWord, setWantWord] = useState(false); // P30: default HOLD; opt-in to a spoken arrival
   const eventStartMs = resolvedEvent && resolvedEvent.start ? Date.parse(resolvedEvent.start) : null;
   const anchored = Number.isFinite(eventStartMs);
   const [when, setWhen] = useState(anchored ? "event" : null);
@@ -52,7 +53,7 @@ export default function NoteCompose({ onExit, event = null }) {
         leadMinutes: Math.max(0, Math.round((eventStartMs - eve.getTime()) / 60000)),
         label: resolvedEvent.title ? String(resolvedEvent.title).slice(0, 80) : "",
         anchor: { kind: "event", title: resolvedEvent.title || "", at: eventStartMs },
-        voice: "speak",
+        voice: wantWord ? "speak" : "hold",
       });
     } else {
       const chosen = options.find((o) => o.id === when);
@@ -63,7 +64,7 @@ export default function NoteCompose({ onExit, event = null }) {
         leadMinutes: 0,
         label: "",
         anchor: { kind: "date", at: chosen.atMs },
-        voice: "speak",
+        voice: wantWord ? "speak" : "hold",
       });
     }
     if (id) setSaved(true);
@@ -140,7 +141,18 @@ export default function NoteCompose({ onExit, event = null }) {
         </div>
       )}
 
-      <div className="sf-fade-enter sf-fade-enter--delay-3" style={{ marginTop: "var(--sf-space-32)", display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}>
+      <div className="sf-fade-enter sf-fade-enter--delay-3" style={{ marginTop: "var(--sf-space-24)" }}>
+        <button
+          type="button"
+          className="sf-link-quiet"
+          onClick={() => setWantWord((v) => !v)}
+          aria-pressed={wantWord}
+          style={{ fontSize: "13px" }}
+        >
+          {wantWord ? "It'll speak up when it arrives \u2713" : "Want a word when it arrives, or just keep it quietly?"}
+        </button>
+      </div>
+      <div className="sf-fade-enter sf-fade-enter--delay-3" style={{ marginTop: "var(--sf-space-24)", display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}>
         <Button variant="primary" onClick={save} disabled={!text.trim() || !when}>Leave the note</Button>
         <button type="button" onClick={onExit} className="sf-link-quiet">Not now ›</button>
       </div>
