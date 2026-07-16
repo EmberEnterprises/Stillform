@@ -29,7 +29,10 @@ function whenOptions(now = new Date()) {
 }
 
 export default function NoteCompose({ onExit, event = null }) {
-  const [text, setText] = useState("");
+  // P28/P29: a per-event or packing note hands its event/template off via
+  // pendingNoteEvent (avoids threading through the tree). Explicit prop wins.
+  const [resolvedEvent] = useState(() => event || (() => { try { return takePendingNoteEvent(); } catch { return null; } })());
+  const [text, setText] = useState(() => (resolvedEvent && resolvedEvent.template) ? resolvedEvent.template : "");
   const [saved, setSaved] = useState(false);
   const eventStartMs = resolvedEvent && resolvedEvent.start ? Date.parse(resolvedEvent.start) : null;
   const anchored = Number.isFinite(eventStartMs);

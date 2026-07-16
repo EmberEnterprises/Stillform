@@ -1,7 +1,9 @@
 import React from "react";
+import { setPendingNoteEvent } from "../lib/pendingNoteEvent.js";
+import { getPackingNoteOffer as _pkOffer } from "../lib/conciergeSignals.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark } from "../lib/conciergeSignals.js";
+import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate } from "../lib/eodDecompression.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
@@ -85,6 +87,16 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
       }, null),
     },
     {
+      key: "packingNote",
+      name: "Packing note",
+      earns: "Offered only when a trip shows on your calendar — a starting list you edit or wave off, never a checklist.",
+      when: "Up to about ten days before a multi-day trip or travel event.",
+      item: safe(() => {
+        const o = getPackingNoteOffer(Date.now(), { includeDismissed: true });
+        return o ? o.template : null;
+      }, null),
+    },
+    {
       key: "forecasts",
       name: "Pattern forecasts",
       earns: "Speaks only when a pattern YOU confirmed has its trigger live again in your own log — arithmetic, never a guess, always a question.",
@@ -151,6 +163,21 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
               <div key={v.key} style={ITEM_BLOCK}>
                 <MonoLabel size="xs" tone="faint">{v.name}</MonoLabel>
                 <p style={ITEM_LINE}>{v.item}</p>
+                {v.key === "packingNote" && typeof onCompose === "function" ? (
+                  <button
+                    type="button"
+                    className="sf-link-quiet"
+                    style={{ marginTop: "var(--sf-space-8)" }}
+                    onClick={() => {
+                      try {
+                        const o = getPackingNoteOffer(Date.now(), { includeDismissed: true });
+                        if (o) { setPendingNoteEvent({ title: o.tripTitle, start: new Date(o.startMs).toISOString(), template: o.template }); onCompose(); }
+                      } catch { /* fail-silent */ }
+                    }}
+                  >
+                    Make it mine to edit \u2192
+                  </button>
+                ) : null}
               </div>
             ))
           )}

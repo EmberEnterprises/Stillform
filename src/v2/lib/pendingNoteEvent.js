@@ -9,9 +9,12 @@
  */
 let pending = null;
 
-/** Stash the event the user wants to note (title + start). */
+/** Stash the event the user wants to note (title + start), optionally with a
+ *  pre-fill template and a surface time (used by the packing-note accept). */
 export function setPendingNoteEvent(ev) {
-  pending = ev && typeof ev === "object" ? { title: ev.title || "", start: ev.start || null } : null;
+  pending = ev && typeof ev === "object"
+    ? { title: ev.title || "", start: ev.start || null, template: ev.template || "", surfaceAtMs: ev.surfaceAtMs || null }
+    : null;
 }
 
 /** Read and CLEAR the pending event (one-shot — the composer consumes it once). */
