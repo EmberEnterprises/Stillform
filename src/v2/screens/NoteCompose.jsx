@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import Button from "../components/Button.jsx";
 import MicButton from "../components/MicButton.jsx";
@@ -35,6 +35,11 @@ export default function NoteCompose({ onExit, event = null }) {
   const [text, setText] = useState(() => (resolvedEvent && resolvedEvent.template) ? resolvedEvent.template : "");
   const [saved, setSaved] = useState(false);
   const [wantWord, setWantWord] = useState(false); // P30: default HOLD; opt-in to a spoken arrival
+  // P29: a packing offer hands its template in - seed the field once.
+  useEffect(() => {
+    if (resolvedEvent && resolvedEvent.template && !text) setText(resolvedEvent.template);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const eventStartMs = resolvedEvent && resolvedEvent.start ? Date.parse(resolvedEvent.start) : null;
   const anchored = Number.isFinite(eventStartMs);
   const [when, setWhen] = useState(anchored ? "event" : null);
