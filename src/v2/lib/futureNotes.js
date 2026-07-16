@@ -126,7 +126,7 @@ export function sweepExpired(nowMs = Date.now()) {
  * @param {{ tripTitle: string, startMs: number, template: string }} offer
  * @param {string} [editedText]
  */
-export function acceptPackingNote(offer, editedText) {
+export function acceptPackingNote(offer, editedText, wantWord = false) {
   if (!offer || typeof offer.startMs !== "number") return null;
   const text = (typeof editedText === "string" && editedText.trim()) ? editedText.trim() : offer.template;
   // "Evening before": surface at ~18:00 the day before the trip starts.
@@ -138,7 +138,8 @@ export function acceptPackingNote(offer, editedText) {
     leadMinutes: Math.max(0, Math.round((offer.startMs - dayBefore.getTime()) / 60000)),
     label: "Packing",
     anchor: { kind: "trip", title: offer.tripTitle, at: offer.startMs },
-    voice: "speak", // the user accepted the offer — it should arrive
+    // P30: default HOLD like every note; speaking is an explicit opt-in.
+    voice: wantWord ? "speak" : "hold",
   });
 }
 
