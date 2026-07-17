@@ -606,4 +606,97 @@ const ITEMS = [
       </>
     ),
   },
+  {
+    id: "concierge-what",
+    q: "What is the concierge, and how does it decide when to speak?",
+    a: (
+      <>
+        It reads the data you&rsquo;ve already given the app &mdash; your calendar, the local
+        weather, patterns you&rsquo;ve named yourself &mdash; and stays quiet unless those line up
+        into something worth a word. It doesn&rsquo;t watch your mood or guess at how you feel.
+        Most of the time it says nothing, and that silence is intended, not a failure. There&rsquo;s a
+        full walkthrough under &ldquo;How the concierge works&rdquo; in the concierge room and in Settings.
+      </>
+    ),
+  },
+  {
+    id: "concierge-earns",
+    q: "How does each concierge note earn its place?",
+    a: (
+      <>
+        Each voice has one job and one trigger. The umbrella note speaks only when rain is forecast
+        right around a calendar event. The no-gap note speaks only when your day leaves no real
+        midday break. Tomorrow-tonight speaks only in the evening, when tomorrow morning is loaded.
+        None speak on a schedule &mdash; only when the world lines up.
+      </>
+    ),
+  },
+  {
+    id: "concierge-logistics",
+    q: "Will the concierge ever comment on how I feel?",
+    a: (
+      <>
+        No. It predicts the world &mdash; rain, gaps, heat, a full morning &mdash; and never makes a
+        claim about who you are or how you feel. &ldquo;Rain around 3, umbrella by the door&rdquo; is
+        logistics. Something like &ldquo;you seem anxious&rdquo; is not something it will say.
+      </>
+    ),
+  },
+  {
+    id: "concierge-dismiss",
+    q: "What happens when I wave off a concierge note?",
+    a: (
+      <>
+        It leaves your home surface for that occasion &mdash; not deleted, not punished, and never
+        &ldquo;overdue.&rdquo; Nothing here keeps score. You can also switch any single voice off in
+        Settings, and it goes silent everywhere until you bring it back.
+      </>
+    ),
+  },
+  {
+    id: "concierge-install",
+    q: "How do I install the app to my home screen (Android)?",
+    a: (
+      <>
+        In Chrome: open the three-dot menu, choose &ldquo;Add to Home screen&rdquo; (sometimes
+        &ldquo;Install app&rdquo;), confirm the name, and tap Add. On Samsung Internet it&rsquo;s the
+        menu &rarr; &ldquo;Add page to&rdquo; &rarr; &ldquo;Home screen.&rdquo; Installed, it opens
+        full-screen and the concierge can reach you the way an app would.
+      </>
+    ),
+  },
+  {
+    id: "concierge-calendar",
+    q: "How do I connect my calendar?",
+    a: (
+      <>
+        In Settings, grant calendar consent, then import your events &mdash; paste a calendar link
+        (.ics) or a screenshot of your day, and the app reads the events from it. Your calendar stays
+        on your device; it isn&rsquo;t sent anywhere or copied to a server.
+      </>
+    ),
+  },
+  {
+    id: "concierge-weather",
+    q: "How do I turn on weather for the concierge?",
+    a: (
+      <>
+        In Settings, grant location for weather. The app then pulls the local forecast (including the
+        rain window the umbrella note uses) on its own. Location is coarse and used only for the
+        forecast; revoke it any time and the weather voices go quiet.
+      </>
+    ),
+  },
+  {
+    id: "concierge-morning-row",
+    q: "What is the morning row, and how do I set it up?",
+    a: (
+      <>
+        It&rsquo;s a set of one-tap shortcuts to the apps you open first &mdash; it works alongside
+        your other apps, never replacing them. In Settings, open the morning-row editor, add a
+        shortcut with a name and the app&rsquo;s link (most apps have a web link; some have a deep
+        link in their share menu), and reorder them into the sequence you actually use.
+      </>
+    ),
+  },
 ];

@@ -32,7 +32,7 @@ import { getPref } from "../lib/userPrefs.js";
  * @param {function(): void} onExit — back
  * @param {function(): void} onOpenSettings — the dials
  */
-export default function Concierge({ onExit, onOpenSettings, onCompose }) {
+export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }) {
   const volume = safe(() => getConciergeVolume(), "standard");
   // Nonce: restoring a shelved item re-derives the voices so it moves from
   // "shelved (bring back)" to a live voice without a full navigation.
@@ -217,6 +217,11 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
           {typeof onCompose === "function" && (
             <button type="button" className="sf-link-quiet" onClick={onCompose} style={{ display: "block", marginTop: "var(--sf-space-24)" }}>
               Leave a note for later \u2192
+            </button>
+          )}
+          {typeof onSetup === "function" && (
+            <button type="button" className="sf-link-quiet" onClick={onSetup} style={{ display: "block", marginTop: "var(--sf-space-12)" }}>
+              How this works, and setting it up \u2192
             </button>
           )}
           {typeof onOpenSettings === "function" && (

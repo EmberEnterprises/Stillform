@@ -326,6 +326,11 @@ export default function Settings({ onExit, onNavigate }) {
           adaptation only ever backs off (Arlin's doctrine). */}
       <CollapsibleSection label="The concierge">
         <div style={SECTION}>
+          {typeof onNavigate === "function" && (
+            <button type="button" className="sf-link-quiet" onClick={() => onNavigate("concierge-setup")} style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
+              How the concierge works, and setting it up \u2192
+            </button>
+          )}
           <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-12)" }}>
             How the app speaks up — the meeting prompts, the pattern forecasts, the evening offers. It always backs off on a heavy day; here you can make soft the rule.
           </p>
