@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { isSpeechAvailable, speakSegments } from "../lib/speak.js";
 import MonoLabel from "./MonoLabel.jsx";
 import { readTodaysBrief } from "../lib/todaysBriefApi.js";
 
@@ -36,6 +37,10 @@ function readPending() {
 export default function TodaysBriefCard() {
   const [brief, setBrief] = useState(() => readTodaysBrief());
   const [pending, setPending] = useState(() => !readTodaysBrief() && readPending());
+  const [speaking, setSpeaking] = useState(false);
+  const stopRef = React.useRef(null);
+  // P22: stop any in-progress speech when the card unmounts.
+  useEffect(() => () => { if (stopRef.current) stopRef.current(); }, []);
 
   // Poll for arrival while a generation is pending. Stops the moment the brief
   // lands, the pending flag clears, or ~25s elapses (10 × 2.5s).
@@ -64,6 +69,16 @@ export default function TodaysBriefCard() {
     weekday: "long", month: "long", day: "numeric",
   });
 
+  const speakBrief = () => {
+    if (speaking) { if (stopRef.current) stopRef.current(); setSpeaking(false); return; }
+    const segments = [dateline + ". Today's brief."];
+    for (const { key, label } of SECTIONS) {
+      if (brief && brief[key]) segments.push(label + ". " + String(brief[key]));
+    }
+    setSpeaking(true);
+    stopRef.current = speakSegments(segments, { onEnd: () => setSpeaking(false) });
+  };
+
   return (
     <section
       className="sf-fade-enter sf-fade-enter--delay-1"
@@ -85,7 +100,20 @@ export default function TodaysBriefCard() {
         }}
       >
         <MonoLabel size="xs" tone="faint">The Brief</MonoLabel>
-        <span style={DATELINE}>{dateline}</span>
+        <span style={{ display: "flex", alignItems: "baseline", gap: "var(--sf-space-12)" }}>
+          {hasContent && isSpeechAvailable() && (
+            <button
+              type="button"
+              onClick={speakBrief}
+              className="sf-link-quiet"
+              aria-label={speaking ? "Stop reading the brief aloud" : "Read the brief aloud"}
+              style={{ fontFamily: "var(--sf-font-mono)", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase" }}
+            >
+              {speaking ? "Stop" : "Listen"}
+            </button>
+          )}
+          <span style={DATELINE}>{dateline}</span>
+        </span>
       </header>
 
       {!hasContent ? (
