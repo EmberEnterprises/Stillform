@@ -3,7 +3,7 @@ import { setPendingNoteEvent } from "../lib/pendingNoteEvent.js";
 import { getPackingNoteOffer as _pkOffer } from "../lib/conciergeSignals.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer } from "../lib/conciergeSignals.js";
+import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, restoreOffer, isShelved } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate } from "../lib/eodDecompression.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
@@ -34,6 +34,9 @@ import { getPref } from "../lib/userPrefs.js";
  */
 export default function Concierge({ onExit, onOpenSettings, onCompose }) {
   const volume = safe(() => getConciergeVolume(), "standard");
+  // Nonce: restoring a shelved item re-derives the voices so it moves from
+  // "shelved (bring back)" to a live voice without a full navigation.
+  const [nonce, setNonce] = React.useState(0);
 
   const voices = [
     {
@@ -43,7 +46,7 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
       when: "Up to 90 minutes ahead, through 10 minutes in.",
       item: safe(() => {
         const o = getUpcomingEventOffer(Date.now(), { includeDismissed: true });
-        return o ? `${o.title} — ${o.minutesUntil <= 0 ? "started" : `in ${o.minutesUntil} min`}${o.matchedTrigger ? ` (your flag: ${o.matchedTrigger})` : ""}` : null;
+        return o ? { text: `${o.title} — ${o.minutesUntil <= 0 ? "started" : `in ${o.minutesUntil} min`}${o.matchedTrigger ? ` (your flag: ${o.matchedTrigger})` : ""}`, key: o.key } : null;
       }, null),
     },
     {
@@ -53,7 +56,7 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
       when: "Up to about six hours before the rain lines up with something you're heading out for.",
       item: safe(() => {
         const u = getUmbrellaNote(Date.now(), { includeDismissed: true });
-        return u ? u.note : null;
+        return u ? { text: u.note, key: u.key } : null;
       }, null),
     },
     {
@@ -63,7 +66,7 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
       when: "On a day whose 11-to-3 span is fully booked, while it's still ahead.",
       item: safe(() => {
         const g = getNoGapDayNote(Date.now(), { includeDismissed: true });
-        return g ? g.note : null;
+        return g ? { text: g.note, key: g.key } : null;
       }, null),
     },
     {
@@ -73,7 +76,7 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
       when: "In the evening, when tomorrow's morning is already full.",
       item: safe(() => {
         const t = getTomorrowHeavyNote(Date.now(), { includeDismissed: true });
-        return t ? t.note : null;
+        return t ? { text: t.note, key: t.key } : null;
       }, null),
     },
     {
@@ -83,7 +86,7 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
       when: "A few days before the shift lands.",
       item: safe(() => {
         const l = getTemporalLandmark(Date.now(), { includeDismissed: true });
-        return l ? l.note : null;
+        return l ? { text: l.note, key: l.key } : null;
       }, null),
     },
     {
@@ -93,7 +96,7 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
       when: "Up to about ten days before a multi-day trip or travel event.",
       item: safe(() => {
         const o = getPackingNoteOffer(Date.now(), { includeDismissed: true });
-        return o ? o.template : null;
+        return o ? { text: o.template, key: o.key } : null;
       }, null),
     },
     {
@@ -132,6 +135,8 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
     },
   ].map((v) => ({ ...v, on: getPrefSafe(`concierge.${v.key}`) !== false }));
 
+  // Reference nonce so a restore (which bumps it) re-derives this list.
+  void nonce;
   const speaking = voices.filter((v) => v.on && v.item);
 
   return (
@@ -162,7 +167,17 @@ export default function Concierge({ onExit, onOpenSettings, onCompose }) {
             speaking.map((v) => (
               <div key={v.key} style={ITEM_BLOCK}>
                 <MonoLabel size="xs" tone="faint">{v.name}</MonoLabel>
-                <p style={ITEM_LINE}>{v.item}</p>
+                <p style={ITEM_LINE}>{typeof v.item === "string" ? v.item : v.item.text}</p>
+                {v.item && typeof v.item === "object" && v.item.key && isShelved(v.item.key) ? (
+                  <button
+                    type="button"
+                    className="sf-link-quiet"
+                    style={{ marginTop: "var(--sf-space-8)" }}
+                    onClick={() => { try { restoreOffer(v.item.key); setNonce((n) => n + 1); } catch { /* fail-silent */ } }}
+                  >
+                    Bring this back to home \u2192
+                  </button>
+                ) : null}
                 {v.key === "packingNote" && typeof onCompose === "function" ? (
                   <button
                     type="button"

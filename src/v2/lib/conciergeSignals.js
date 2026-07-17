@@ -429,6 +429,29 @@ export function dismissEventOffer(key) {
 }
 
 /**
+ * THE SHELF (2026-07-16): the restore half of the guilt-free sovereignty law.
+ * Dismissing a concierge item never destroys it — it goes to a quiet history
+ * (the room already shows dismissed items via includeDismissed). restoreOffer
+ * is the inverse of dismissEventOffer: it lifts the "not this one" so the item
+ * can speak on home again. Nothing is ever truly gone; dismissing carries no
+ * cost, which is the whole point — no guilt, fully reversible.
+ */
+export function restoreOffer(key) {
+  if (!key || typeof key !== "string") return false;
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!(key in dismissed)) return true; // already not-dismissed = restored
+  delete dismissed[key];
+  return writeJSON(DISMISS_KEY, dismissed);
+}
+
+/** True if a given item key is currently shelved (dismissed from home). */
+export function isShelved(key) {
+  if (!key || typeof key !== "string") return false;
+  const dismissed = readJSON(DISMISS_KEY, {});
+  return key in dismissed;
+}
+
+/**
  * The state-adaptive volume dial. "soft" when the same-day body read shows a
  * depleted state (physically depleted / sleep-deprived / pain) OR the day is
  * heavy (4+ events or back-to-back); "standard" otherwise. Never louder than
