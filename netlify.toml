@@ -9,6 +9,13 @@
 [functions."reframe"]
   timeout = 26
 
+# THE LINK SENTINEL (P-policy): scheduled check of every /go/ target.
+# Daily sweep of all targets. (Crisis targets can be checked more often by a
+# second scheduled invocation with ?scope=crisis once a fast cron is wired;
+# the function already honors scope=crisis.)
+[functions."link-sentinel"]
+  schedule = "@daily"
+
 [[redirects]]
   from = "/favicon.ico"
   to = "/icon-192.png"
