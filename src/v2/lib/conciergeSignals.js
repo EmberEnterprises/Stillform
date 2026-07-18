@@ -30,6 +30,7 @@
  */
 
 import { getCalendarEvents, getCalendarSummary } from "./calendarData.js";
+import { getAllNotes } from "./futureNotes.js";
 import { getRecentSessions } from "./sessions.js";
 import { getWeather } from "./ambientSignals.js";
 import { getTriggerProfile } from "./triggerProfile.js";
@@ -324,6 +325,83 @@ export function getTemporalLandmark(nowMs = Date.now(), { includeDismissed = fal
  * Returns { fits:boolean, size:"breath"|"scan"|"full"|null, label } — label is
  * the honest offer phrase, or null when nothing fits (then the offer stays silent).
  */
+/**
+ * P31 GAP-MATCHING — THE FLOOR (2026-07-15, web-now tier).
+ *
+ * The mechanic: the note says WHAT, the calendar says WHEN IT'S POSSIBLE, and
+ * only the concierge sees both. "You've got pick-up-medication and a free half-
+ * hour at 2 — want to take care of it?" A reminder echoed is noise; a reminder
+ * PLACED is service.
+ *
+ * FLOOR SCOPE (no OAuth, no new permissions, nothing stored that isn't already
+ * theirs): matches the user's OWN anchored notes (P28) against real open gaps in
+ * today's calendar. The OAuth/native tiers (Google Tasks, EventKit) are separate
+ * doors and are NOT smuggled in here.
+ *
+ * NON-REDUNDANCY LAW: we never re-remind what already reminds. These are the
+ * app's own notes — nothing else is reminding about them — so placing them is
+ * service, not an echo. Returns null when there's no gap, no note, or no fit.
+ */
+export function getGapMatch(nowMs = Date.now(), { includeDismissed = false, minGapMin = 20, horizonHours = 8 } = {}) {
+  let notes = [];
+  try { notes = getAllNotes() || []; } catch { return null; }
+  if (!notes.length) return null;
+
+  // Notes worth placing: anchored, not yet surfaced, still ahead.
+  // Stored notes carry atMs (the resolved moment), not the surfaceAt input name.
+  const candidates = notes.filter((n) => n && n.text && typeof n.atMs === "number" && n.atMs > nowMs);
+  if (!candidates.length) return null;
+
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { return null; }
+
+  // Build today's busy intervals within the horizon.
+  const horizonEnd = nowMs + horizonHours * 60 * 60 * 1000;
+  const busy = [];
+  for (const ev of events) {
+    if (!ev || !ev.start) continue;
+    const st = Date.parse(ev.start);
+    if (Number.isNaN(st)) continue;
+    let en = ev.end ? Date.parse(ev.end) : NaN;
+    if (Number.isNaN(en)) en = st + (typeof ev.durationMin === "number" ? ev.durationMin : 60) * 60000;
+    if (en <= nowMs || st >= horizonEnd) continue;
+    busy.push([Math.max(st, nowMs), Math.min(en, horizonEnd)]);
+  }
+  busy.sort((a, b) => a[0] - b[0]);
+
+  // First open gap of at least minGapMin, starting from now.
+  let cursor = nowMs;
+  let gapStart = null;
+  let gapMin = 0;
+  for (const [st, en] of busy) {
+    if (st - cursor >= minGapMin * 60000) { gapStart = cursor; gapMin = Math.round((st - cursor) / 60000); break; }
+    cursor = Math.max(cursor, en);
+  }
+  if (gapStart === null && horizonEnd - cursor >= minGapMin * 60000) {
+    gapStart = cursor;
+    gapMin = Math.round((horizonEnd - cursor) / 60000);
+  }
+  if (gapStart === null) return null;
+
+  const note = candidates[0];
+  const key = "gapmatch:" + (note.id || String(note.atMs));
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!includeDismissed && dismissed[key]) return null;
+
+  const h = new Date(gapStart).getHours();
+  const clock = h === 0 ? "midnight" : h < 12 ? `${h} AM` : h === 12 ? "noon" : `${h - 12} PM`;
+  const span = gapMin >= 60 ? `${Math.floor(gapMin / 60)} hour${gapMin >= 120 ? "s" : ""}` : `${gapMin} minutes`;
+
+  return {
+    key,
+    noteText: String(note.text),
+    gapStart,
+    gapMin,
+    // The offer PLACES it — deciding-when is the tax being removed.
+    note: `You've got "${String(note.text).slice(0, 60)}" and ${span} open around ${clock}.`,
+  };
+}
+
 export function sizeOfferToWindow(minutesAvailable) {
   const m = typeof minutesAvailable === "number" && Number.isFinite(minutesAvailable) ? minutesAvailable : 0;
   if (m >= 12) return { fits: true, size: "full", label: `${Math.floor(m)} minutes — room for the full practice.` };

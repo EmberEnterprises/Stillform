@@ -3,7 +3,7 @@ import { setPendingNoteEvent } from "../lib/pendingNoteEvent.js";
 import { getPackingNoteOffer as _pkOffer } from "../lib/conciergeSignals.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, restoreOffer, isShelved } from "../lib/conciergeSignals.js";
+import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, getGapMatch, restoreOffer, isShelved } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate } from "../lib/eodDecompression.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
@@ -97,6 +97,16 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }
       item: safe(() => {
         const o = getPackingNoteOffer(Date.now(), { includeDismissed: true });
         return o ? { text: o.template, key: o.key } : null;
+      }, null),
+    },
+    {
+      key: "gapMatch",
+      name: "Placed, not repeated",
+      earns: "Speaks only when a note you left yourself fits a real open gap in your own day \u2014 your reminder app still owns the reminding.",
+      when: "When something you wrote down and a free stretch line up today.",
+      item: safe(() => {
+        const g = getGapMatch(Date.now(), { includeDismissed: true });
+        return g ? { text: g.note, key: g.key } : null;
       }, null),
     },
     {
