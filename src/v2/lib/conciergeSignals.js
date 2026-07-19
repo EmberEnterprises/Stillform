@@ -402,6 +402,161 @@ export function getGapMatch(nowMs = Date.now(), { includeDismissed = false, minG
   };
 }
 
+/**
+ * P4 HEAT/COLD AS HARDWARE (2026-07-15): on an extreme-temperature day, name the
+ * weather as hardware load BEFORE the person reads a short fuse as a character
+ * flaw. The bio-filter move, surfaced as weather: the world explains part of the
+ * state, so the state doesn't get mistaken for a self.
+ *
+ * Speaks about the WORLD (it is hot / it is cold), never about the person's
+ * feelings — the offer is a frame they can take or leave, not a diagnosis.
+ */
+export function getTempHardwareNote(nowMs = Date.now(), { includeDismissed = false, hotC = 30, coldC = -4 } = {}) {
+  let w = null;
+  try { w = getWeather(); } catch { return null; }
+  if (!w || typeof w.tempC !== "number") return null;
+
+  const hot = w.tempC >= hotC;
+  const cold = w.tempC <= coldC;
+  if (!hot && !cold) return null;
+
+  const key = (hot ? "temphot:" : "tempcold:") + new Date(nowMs).toDateString();
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!includeDismissed && dismissed[key]) return null;
+
+  const note = hot
+    ? "It's genuinely hot out. If the fuse feels short today, some of that is the weather, not you."
+    : "It's genuinely cold out. If everything feels like more effort today, some of that is the weather, not you.";
+
+  return { key, kind: hot ? "heat" : "cold", tempC: w.tempC, note };
+}
+
+/**
+ * P5 LEAVE-EARLIER (2026-07-15): bad weather ahead of the first event you have
+ * to travel to -> a plain lateness-prevention note. Pure logistics; no claim
+ * about the person. Silent when the weather is fine or nothing is coming up.
+ */
+export function getLeaveEarlierNote(nowMs = Date.now(), { includeDismissed = false, aheadMin = 180 } = {}) {
+  let w = null;
+  try { w = getWeather(); } catch { return null; }
+  if (!w) return null;
+  const cond = typeof w.condition === "string" ? w.condition.toLowerCase() : "";
+  const rainSoon = w.nextRain && typeof w.nextRain.at === "number";
+  const roughNow = /rain|snow|sleet|storm|fog|freezing/.test(cond);
+  if (!roughNow && !rainSoon) return null;
+
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { return null; }
+
+  for (const ev of events) {
+    if (!ev || !ev.start || !ev.title) continue;
+    const st = Date.parse(ev.start);
+    if (Number.isNaN(st) || st < nowMs) continue;
+    const minsUntil = Math.round((st - nowMs) / 60000);
+    if (minsUntil > aheadMin) break;
+
+    // Only speak if the rough weather actually overlaps the travel window.
+    if (!roughNow && rainSoon && Math.abs(w.nextRain.at - st) > 90 * 60 * 1000) continue;
+
+    const key = "leaveearly:" + (ev.start + "|" + ev.title).slice(0, 60);
+    const dismissed = readJSON(DISMISS_KEY, {});
+    if (!includeDismissed && dismissed[key]) continue;
+
+    const what = roughNow ? (cond || "rough weather") : "rain";
+    return {
+      key,
+      note: `${what.charAt(0).toUpperCase()}${what.slice(1)} on the roads before ${String(ev.title)} \u2014 leaving ten minutes early costs less than arriving late.`,
+      eventTitle: String(ev.title),
+    };
+  }
+  return null;
+}
+
+/**
+ * P6 SEASONAL DARK (2026-07-15): in the early-sunset stretch of the year, name
+ * the short daylight as a fact of the season so the evening dip is anticipated
+ * rather than personalized. Uses the stored daylightHours the weather producer
+ * already fetches — no new data.
+ */
+export function getSeasonalDarkNote(nowMs = Date.now(), { includeDismissed = false, shortDayHours = 9.5 } = {}) {
+  let w = null;
+  try { w = getWeather(); } catch { return null; }
+  if (!w || typeof w.daylightHours !== "number") return null;
+  if (w.daylightHours > shortDayHours) return null;
+
+  // Only in the back half of the day, when the dark is the live fact.
+  const hour = new Date(nowMs).getHours();
+  if (hour < 15) return null;
+
+  const key = "seasonaldark:" + new Date(nowMs).toDateString();
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!includeDismissed && dismissed[key]) return null;
+
+  return {
+    key,
+    daylightHours: w.daylightHours,
+    note: `Short daylight today \u2014 under ${Math.floor(w.daylightHours)} hours. An early evening dip is the season, not a verdict on the day.`,
+  };
+}
+
+/**
+ * P7 CLEAREST WINDOW (2026-07-15): finds the day's longest uninterrupted stretch
+ * from the calendar and names it, so the real work gets the best block instead of
+ * whatever is left over. Calendar arithmetic only.
+ */
+export function getClearestWindow(nowMs = Date.now(), { includeDismissed = false, dayEndHour = 18, minWindowMin = 60 } = {}) {
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { return null; }
+
+  const now = new Date(nowMs);
+  const end = new Date(now); end.setHours(dayEndHour, 0, 0, 0);
+  const endMs = end.getTime();
+  if (endMs <= nowMs) return null;
+
+  const busy = [];
+  for (const ev of events) {
+    if (!ev || !ev.start) continue;
+    const st = Date.parse(ev.start);
+    if (Number.isNaN(st)) continue;
+    let en = ev.end ? Date.parse(ev.end) : NaN;
+    if (Number.isNaN(en)) {
+      const dur = typeof ev.durationMin === "number" ? ev.durationMin : 60;
+      en = st + dur * 60000;
+    }
+    const cs = Math.max(st, nowMs);
+    const ce = Math.min(en, endMs);
+    if (ce > cs) busy.push([cs, ce]);
+  }
+  busy.sort((a, b) => a[0] - b[0]);
+
+  let cursor = nowMs;
+  let best = { start: null, minutes: 0 };
+  const consider = (from, to) => {
+    const mins = Math.round((to - from) / 60000);
+    if (mins > best.minutes) best = { start: from, minutes: mins };
+  };
+  for (const [cs, ce] of busy) {
+    if (cs > cursor) consider(cursor, cs);
+    cursor = Math.max(cursor, ce);
+  }
+  if (endMs > cursor) consider(cursor, endMs);
+
+  if (!best.start || best.minutes < minWindowMin) return null;
+
+  const key = "clearest:" + new Date(nowMs).toDateString();
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!includeDismissed && dismissed[key]) return null;
+
+  const h = new Date(best.start).getHours();
+  const clock = h === 0 ? "midnight" : h < 12 ? `${h} AM` : h === 12 ? "noon" : `${h - 12} PM`;
+  return {
+    key,
+    startMs: best.start,
+    minutes: best.minutes,
+    note: `Your clearest stretch today starts around ${clock} \u2014 about ${best.minutes} minutes uninterrupted. Worth spending on the thing that actually matters.`,
+  };
+}
+
 export function sizeOfferToWindow(minutesAvailable) {
   const m = typeof minutesAvailable === "number" && Number.isFinite(minutesAvailable) ? minutesAvailable : 0;
   if (m >= 12) return { fits: true, size: "full", label: `${Math.floor(m)} minutes — room for the full practice.` };

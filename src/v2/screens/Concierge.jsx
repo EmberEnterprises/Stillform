@@ -3,7 +3,7 @@ import { setPendingNoteEvent } from "../lib/pendingNoteEvent.js";
 import { getPackingNoteOffer as _pkOffer } from "../lib/conciergeSignals.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
-import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, getGapMatch, restoreOffer, isShelved } from "../lib/conciergeSignals.js";
+import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, getGapMatch, restoreOffer, isShelved, getTempHardwareNote, getLeaveEarlierNote, getSeasonalDarkNote, getClearestWindow } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate } from "../lib/eodDecompression.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
@@ -87,6 +87,46 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }
       item: safe(() => {
         const l = getTemporalLandmark(Date.now(), { includeDismissed: true });
         return l ? { text: l.note, key: l.key } : null;
+      }, null),
+    },
+    {
+      key: "tempHardware",
+      name: "Weather as hardware",
+      earns: "Speaks only on a genuinely extreme-temperature day \u2014 naming the weather's load so a hard day isn't misread as a self.",
+      when: "While the temperature is at the extreme.",
+      item: safe(() => {
+        const t = getTempHardwareNote(Date.now(), { includeDismissed: true });
+        return t ? { text: t.note, key: t.key } : null;
+      }, null),
+    },
+    {
+      key: "leaveEarlier",
+      name: "Leave earlier",
+      earns: "Speaks only when rough weather lands before something you have to travel to \u2014 plain lateness prevention.",
+      when: "Up to about three hours before that event.",
+      item: safe(() => {
+        const l = getLeaveEarlierNote(Date.now(), { includeDismissed: true });
+        return l ? { text: l.note, key: l.key } : null;
+      }, null),
+    },
+    {
+      key: "seasonalDark",
+      name: "Short daylight",
+      earns: "Speaks only in the short-daylight stretch of the year, so an evening dip reads as the season rather than a verdict.",
+      when: "Afternoon onward, on genuinely short days.",
+      item: safe(() => {
+        const d = getSeasonalDarkNote(Date.now(), { includeDismissed: true });
+        return d ? { text: d.note, key: d.key } : null;
+      }, null),
+    },
+    {
+      key: "clearestWindow",
+      name: "Clearest stretch",
+      earns: "Speaks only when your own calendar leaves a real uninterrupted block \u2014 naming it so the good hours go to the real work.",
+      when: "During the day, while the stretch is still ahead.",
+      item: safe(() => {
+        const c = getClearestWindow(Date.now(), { includeDismissed: true });
+        return c ? { text: c.note, key: c.key } : null;
       }, null),
     },
     {
