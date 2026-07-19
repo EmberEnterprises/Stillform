@@ -31,6 +31,9 @@ function keyOf(node) {
 export function candidateId(c) {
   if (!c) return "";
   if (c.kind === "sequence") return `seq:${keyOf(c.from)}>${keyOf(c.to)}`;
+  // P8/P9: rhythm candidates are keyed by their band/day, not by token pairs.
+  if (c.kind === "time-of-day") return `tod:${(c.band && c.band.id) || "unknown"}`;
+  if (c.kind === "day-of-week") return `dow:${(c.day && typeof c.day.index === "number") ? c.day.index : "unknown"}`;
   const ka = keyOf(c.a);
   const kb = keyOf(c.b);
   const [lo, hi] = ka <= kb ? [ka, kb] : [kb, ka];
@@ -40,6 +43,14 @@ export function candidateId(c) {
 /** Plain-language phrasing — co-occurrence NEVER causation; the user's own tokens. */
 export function candidateLabel(c) {
   if (!c) return "";
+  // P8: a time band their own record leans on. Observation, never a verdict.
+  if (c.kind === "time-of-day") {
+    return `More of what you log lands in the ${(c.band && c.band.label) || "same stretch"} than anywhere else in the day.`;
+  }
+  // P9: their record decides which day — no assumed working week.
+  if (c.kind === "day-of-week") {
+    return `More of what you log lands on ${(c.day && c.day.label) || "one day"} than on other days.`;
+  }
   if (c.kind === "sequence") {
     const n = Math.max(1, Math.round(Number(c.medianLagDays) || 1));
     return `\u201c${c.to.value}\u201d tends to follow \u201c${c.from.value}\u201d by about ${n} ${n === 1 ? "day" : "days"}.`;

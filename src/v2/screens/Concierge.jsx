@@ -5,7 +5,8 @@ import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, getGapMatch, restoreOffer, isShelved, getTempHardwareNote, getLeaveEarlierNote, getSeasonalDarkNote, getClearestWindow } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
-import { getDecompressionCandidate } from "../lib/eodDecompression.js";
+import { getDecompressionCandidate, getImmediateDecompression } from "../lib/eodDecompression.js";
+import { getLearnedPreferences } from "../lib/learnedPreferences.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
 import { LESSONS } from "../lib/learningTrack.js";
 import { getPref } from "../lib/userPrefs.js";
@@ -34,6 +35,7 @@ import { getPref } from "../lib/userPrefs.js";
  */
 export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }) {
   const volume = safe(() => getConciergeVolume(), "standard");
+  const learned = safe(() => getLearnedPreferences([]), []);
   // Nonce: restoring a shelved item re-derives the voices so it moves from
   // "shelved (bring back)" to a live voice without a full navigation.
   const [nonce, setNonce] = React.useState(0);
@@ -127,6 +129,16 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }
       item: safe(() => {
         const c = getClearestWindow(Date.now(), { includeDismissed: true });
         return c ? { text: c.note, key: c.key } : null;
+      }, null),
+    },
+    {
+      key: "immediateDecompression",
+      name: "Set it down now",
+      earns: "Speaks only when an event YOU flagged has just ended \u2014 while the residue is still live, not saved for bedtime.",
+      when: "Within about twenty minutes of that event ending.",
+      item: safe(() => {
+        const d = getImmediateDecompression(Date.now(), { includeDismissed: true });
+        return d ? { text: d.note, key: d.key } : null;
       }, null),
     },
     {
@@ -247,6 +259,24 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }
             ))
           )}
         </section>
+
+        {/* P12 — what the app has learned, shown plainly. Never applied invisibly. */}
+        {learned.length > 0 && (
+          <section className="sf-sec">
+            <div className="sf-sec-head">
+              <span className="sf-sec-head-lbl">What I've noticed</span>
+              <div className="sf-sec-rule" />
+            </div>
+            {learned.map((l) => (
+              <p key={l.id} style={{ margin: "0 0 var(--sf-space-12)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "14px", lineHeight: 1.7, color: "var(--sf-text-soft)" }}>
+                {l.line}
+              </p>
+            ))}
+            <p style={{ margin: 0, fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", color: "var(--sf-text-faint)" }}>
+              These are defaults read from your own record, never locks. Choose differently any time and they change.
+            </p>
+          </section>
+        )}
 
         {/* The voices, explained */}
         <section className="sf-sec">

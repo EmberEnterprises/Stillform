@@ -170,6 +170,81 @@ export function findPatterns(entries, opts = {}) {
     }
   }
 
+  // --- P8 TIME-OF-DAY CONCENTRATION (2026-07-19) ---
+  // A rough hour-band that shows up disproportionately in their OWN record.
+  // Double-gated like everything else here: it needs real support AND a real
+  // concentration above an even spread, and it still only becomes a claim once
+  // the user confirms it downstream. Arithmetic never speaks on its own.
+  {
+    const BANDS = [
+      { id: "early-morning", label: "early morning", from: 5, to: 9 },
+      { id: "late-morning", label: "late morning", from: 9, to: 12 },
+      { id: "early-afternoon", label: "early afternoon", from: 12, to: 15 },
+      { id: "late-afternoon", label: "late afternoon", from: 15, to: 18 },
+      { id: "evening", label: "evening", from: 18, to: 22 },
+      { id: "night", label: "night", from: 22, to: 5 },
+    ];
+    const inBand = (h, b) => (b.from < b.to ? h >= b.from && h < b.to : h >= b.from || h < b.to);
+    const counts = new Map();
+    let total = 0;
+    for (const { t } of tokenList) {
+      if (t === null) continue;
+      const h = new Date(t).getHours();
+      const band = BANDS.find((b) => inBand(h, b));
+      if (!band) continue;
+      counts.set(band.id, (counts.get(band.id) || 0) + 1);
+      total += 1;
+    }
+    if (total >= cfg.minEntries) {
+      // Concentration test: a band must hold clearly more than an even spread.
+      const evenShare = 1 / BANDS.length;
+      for (const band of BANDS) {
+        const c = counts.get(band.id) || 0;
+        if (c < cfg.minSupport) continue;
+        const share = c / total;
+        if (share >= evenShare * 2) {
+          candidates.push({
+            kind: "time-of-day",
+            band: { id: band.id, label: band.label },
+            support: c,
+            share: Math.round(share * 100) / 100,
+          });
+        }
+      }
+    }
+  }
+
+  // --- P9 DAY-OF-WEEK CONCENTRATION (2026-07-19) ---
+  // THEIR record decides which day is rough — nothing here assumes Mon-Fri
+  // (the no-default-week law: a nurse on 3-on-4-off has a different week).
+  {
+    const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const counts = new Map();
+    let total = 0;
+    for (const { t } of tokenList) {
+      if (t === null) continue;
+      const d = new Date(t).getDay();
+      counts.set(d, (counts.get(d) || 0) + 1);
+      total += 1;
+    }
+    if (total >= cfg.minEntries) {
+      const evenShare = 1 / 7;
+      for (let d = 0; d < 7; d++) {
+        const c = counts.get(d) || 0;
+        if (c < cfg.minSupport) continue;
+        const share = c / total;
+        if (share >= evenShare * 2) {
+          candidates.push({
+            kind: "day-of-week",
+            day: { index: d, label: DAY_LABELS[d] },
+            support: c,
+            share: Math.round(share * 100) / 100,
+          });
+        }
+      }
+    }
+  }
+
   candidates.sort((a, b) => {
     if (b.support !== a.support) return b.support - a.support;
     const aLag = a.medianLagDays == null ? Infinity : a.medianLagDays;

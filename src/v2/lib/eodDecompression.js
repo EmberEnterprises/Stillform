@@ -98,3 +98,57 @@ export function getDecompressionCandidate(nowMs = Date.now(), { includeDismissed
 export function dismissDecompression(nowMs = Date.now()) {
   return safeSet(DISMISS_KEY, dayKey(nowMs));
 }
+
+/**
+ * P10 IMMEDIATE DECOMPRESSION (2026-07-19): the set-down offered NOW, not only
+ * at bedtime. A calendar event the user themselves flagged (its title matches a
+ * trigger they named) that ended within the last few minutes earns one quiet
+ * offer while the residue is still live.
+ *
+ * Deliberately narrower than the EOD candidate: trigger-matched ONLY. An
+ * ordinary meeting ending is not an event — the app doesn't chase every hour.
+ * One offer per event, off-my-home-never-gone dismissal.
+ */
+export function getImmediateDecompression(nowMs = Date.now(), { includeDismissed = false, windowMin = 20 } = {}) {
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { return null; }
+  if (!events.length) return null;
+
+  const labels = triggerLabels();
+  if (!labels.length) return null; // nothing flagged = nothing to speak about
+
+  for (const ev of events) {
+    if (!ev || !ev.title || !ev.start) continue;
+    const startMs = Date.parse(ev.start);
+    if (Number.isNaN(startMs)) continue;
+    const endMs = ev.end ? Date.parse(ev.end)
+      : typeof ev.durationMin === "number" ? startMs + ev.durationMin * 60000
+      : startMs + 30 * 60000;
+    if (!Number.isFinite(endMs)) continue;
+
+    const sinceMin = Math.round((nowMs - endMs) / 60000);
+    if (sinceMin < 0 || sinceMin > windowMin) continue; // only just-ended
+
+    const title = String(ev.title);
+    const matchedTrigger = labels.find((l) => title.toLowerCase().includes(l));
+    if (!matchedTrigger) continue; // flagged events only
+
+    const key = "immediate:" + (ev.start + "|" + title).slice(0, 60);
+    if (!includeDismissed && safeGet(key)) continue;
+
+    return {
+      key,
+      title,
+      matchedTrigger,
+      sinceMin,
+      note: `${title} just ended. Setting it down now costs less than carrying it to tonight.`,
+    };
+  }
+  return null;
+}
+
+/** P10: wave off one just-ended offer. Off my home, not deleted, never chased. */
+export function dismissImmediateDecompression(key) {
+  if (!key || typeof key !== "string") return false;
+  try { safeSet(key, "1"); return true; } catch { return false; }
+}
