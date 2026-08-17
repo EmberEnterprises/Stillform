@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getProtectedBlocks, protectBlock, unprotectBlock } from "../lib/protectedBlocks.js";
 import { hasPin, setPin as savePin, verifyPin, clearPin } from "../lib/pinLock.js";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import CollapsibleSection from "../components/CollapsibleSection.jsx";
@@ -334,6 +335,7 @@ export default function Settings({ onExit, onNavigate }) {
           <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", lineHeight: 1.6, color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-12)" }}>
             How the app speaks up — the meeting prompts, the pattern forecasts, the evening offers. It always backs off on a heavy day; here you can make soft the rule.
           </p>
+          <ProtectedBlocksManager />
           <div style={ROW}>
             <span style={{ color: "var(--sf-text-primary)" }}>Reads the day
               <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>softer when you're low</span>
@@ -544,6 +546,57 @@ const INPUT = {
   width: "100%",
   maxWidth: "320px",
 };
+
+/* P24 — mark blocks as yours. Three common presets, each a daily window. When a
+   calendar event collides with an on block, the concierge hands it back moved to
+   the next free slot (getProtectedBlockRescue). Opt-in, removable. We never write
+   the calendar; we hand. */
+const PROTECT_PRESETS = [
+  { label: "Lunch", startMin: 12 * 60, endMin: 12 * 60 + 45 },
+  { label: "A walk", startMin: 15 * 60, endMin: 15 * 60 + 30 },
+  { label: "A quiet hour", startMin: 17 * 60, endMin: 18 * 60 },
+];
+
+function ProtectedBlocksManager() {
+  const [blocks, setBlocks] = useState(() => { try { return getProtectedBlocks(); } catch { return []; } });
+  const refresh = () => { try { setBlocks(getProtectedBlocks()); } catch { /* noop */ } };
+  const isOn = (label) => blocks.some((b) => b.label === label);
+  const toggle = (preset) => {
+    try {
+      const existing = blocks.find((b) => b.label === preset.label);
+      if (existing) { unprotectBlock(existing.id); }
+      else { protectBlock({ label: preset.label, startMin: preset.startMin, endMin: preset.endMin }); }
+      refresh();
+    } catch { /* fail-silent */ }
+  };
+  const fmt = (min) => {
+    const h = Math.floor(min / 60); const m = min % 60;
+    const clock = h === 0 ? "12" : h <= 12 ? String(h) : String(h - 12);
+    const ap = h < 12 ? "AM" : "PM";
+    return m === 0 ? `${clock} ${ap}` : `${clock}:${String(m).padStart(2, "0")} ${ap}`;
+  };
+  return (
+    <div style={{ marginTop: "var(--sf-space-16)" }}>
+      <p style={{ fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", color: "var(--sf-text-faint)", margin: "0 0 var(--sf-space-8)" }}>
+        Mark a block as yours. When something on your calendar lands on it, the concierge hands it back moved to the next free slot &mdash; it never writes your calendar.
+      </p>
+      {PROTECT_PRESETS.map((preset) => (
+        <div key={preset.label} style={ROW}>
+          <span style={{ color: "var(--sf-text-primary)" }}>{preset.label}
+            <span style={{ color: "var(--sf-text-faint)", fontSize: "12px", marginLeft: "8px" }}>
+              {fmt(preset.startMin)}&ndash;{fmt(preset.endMin)}
+            </span>
+          </span>
+          <button type="button" onClick={() => toggle(preset)}
+            style={isOn(preset.label) ? TOGGLE_ON : TOGGLE_OFF}
+            aria-pressed={isOn(preset.label)} aria-label={`Protect ${preset.label}`}>
+            {isOn(preset.label) ? "Protected" : "Protect"}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const SECTION = {
   marginTop: "var(--sf-space-32)",

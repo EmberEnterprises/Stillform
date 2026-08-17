@@ -2,6 +2,7 @@ import React from "react";
 import { setPendingNoteEvent } from "../lib/pendingNoteEvent.js";
 import { getPackingNoteOffer as _pkOffer, getDeliberateSilence, getThresholdGreeting, getMiddayBeat } from "../lib/conciergeSignals.js";
 import { getDayShape } from "../lib/dayShaper.js";
+import { getProtectedBlockRescue } from "../lib/protectedBlocks.js";
 import { downloadEventIcs } from "../lib/icsExport.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
@@ -159,6 +160,16 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onPromise
       }, null),
     },
     {
+      key: "protectedRescue",
+      name: "A block you protected",
+      earns: "Speaks only when something on your calendar collides with a block you marked as yours \u2014 hands you that block moved to the next free slot, ready to drop in.",
+      when: "When a conflict lands on a protected block, while there's still room today.",
+      item: safe(() => {
+        const r = getProtectedBlockRescue(Date.now());
+        return r ? { text: r.note, key: r.id } : null;
+      }, null),
+    },
+    {
       key: "middayBeat",
       name: "Midday",
       earns: "Speaks once around midday \u2014 the middle brief between morning's orientation and evening's set-down. What's still ahead, lightly.",
@@ -297,6 +308,28 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onPromise
                     }}
                   >
                     Add it to my calendar \u2192
+                  </button>
+                ) : null}
+                {v.key === "protectedRescue" ? (
+                  <button
+                    type="button"
+                    className="sf-link-quiet"
+                    style={{ marginTop: "var(--sf-space-8)" }}
+                    onClick={() => {
+                      try {
+                        const r = getProtectedBlockRescue(Date.now());
+                        if (r && r.fix) {
+                          downloadEventIcs({
+                            title: r.fix.title,
+                            start: r.fix.start,
+                            durationMin: r.fix.durationMin,
+                            description: r.fix.description,
+                          });
+                        }
+                      } catch { /* fail-silent */ }
+                    }}
+                  >
+                    Add it to my calendar &rarr;
                   </button>
                 ) : null}
                 {v.key === "packingNote" && typeof onCompose === "function" ? (
