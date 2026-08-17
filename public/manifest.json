@@ -1,22 +1,60 @@
 {
-  "name": "Stillform",
-  "short_name": "Stillform",
-  "description": "Metacognition practice. Build the in-the-moment skill of catching your state before it drives the action.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#0A0A0C",
-  "theme_color": "#0A0A0C",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    "name": "Stillform",
+    "short_name": "Stillform",
+    "description": "Metacognition practice. Build the in-the-moment skill of catching your state before it drives the action.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0A0A0C",
+    "theme_color": "#0A0A0C",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Quick Breathe",
+            "short_name": "Breathe",
+            "description": "Open a breath right now.",
+            "url": "/?go=breathe",
+            "icons": [
+                {
+                    "src": "/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "State Check",
+            "short_name": "State",
+            "description": "Name where you are.",
+            "url": "/?go=state",
+            "icons": [
+                {
+                    "src": "/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Reframe",
+            "short_name": "Reframe",
+            "description": "Work a thought.",
+            "url": "/?go=reframe",
+            "icons": [
+                {
+                    "src": "/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
 }

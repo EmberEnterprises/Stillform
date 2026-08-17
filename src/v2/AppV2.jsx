@@ -82,6 +82,11 @@ function readShareText() {
   }
 }
 const INITIAL_SHARE_TEXT = readShareText();
+// P19: strip ?go= after it's been read so a refresh doesn't relaunch the shortcut.
+try {
+  const _p = new URLSearchParams(window.location.search);
+  if (_p.get("go")) { window.history.replaceState({}, "", window.location.pathname); }
+} catch { /* non-fatal */ }
 if (INITIAL_SHARE_TEXT) {
   try { window.history.replaceState({}, "", window.location.pathname); } catch { /* non-fatal */ }
 }
@@ -90,6 +95,15 @@ function pickInitialScreen() {
   try {
     const params = new URLSearchParams(window.location.search);
     if (params.get("verify") === "1") return "verify";
+    // P19 PWA shortcuts (long-press the app icon). One ?go= param, three destinations.
+    const go = params.get("go");
+    if (go === "breathe") {
+      // Land home and signal BreathAnywhere to open breath immediately (J1 mechanism).
+      try { localStorage.setItem("stillform_v2_open_breath_on_land", "1"); } catch { /* noop */ }
+      if (isOnboarded()) return "home";
+    }
+    if (go === "state" && isOnboarded()) return "statecheck";
+    if (go === "reframe" && isOnboarded()) return shouldGate() ? "paywall" : "spine";
     if (params.get("statecheck") === "1") return "statecheck";
     if (params.get("paywall") === "1") return "paywall";
     if (params.get("onboard") === "1") return "onboarding";
