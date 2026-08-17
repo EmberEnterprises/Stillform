@@ -1,6 +1,6 @@
 import React from "react";
 import { setPendingNoteEvent } from "../lib/pendingNoteEvent.js";
-import { getPackingNoteOffer as _pkOffer, getDeliberateSilence, getThresholdGreeting } from "../lib/conciergeSignals.js";
+import { getPackingNoteOffer as _pkOffer, getDeliberateSilence, getThresholdGreeting, getMiddayBeat } from "../lib/conciergeSignals.js";
 import { getDayShape } from "../lib/dayShaper.js";
 import { downloadEventIcs } from "../lib/icsExport.js";
 import MonoLabel from "../components/MonoLabel.jsx";
@@ -8,7 +8,7 @@ import EditorialBlock from "../components/EditorialBlock.jsx";
 import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, getGapMatch, restoreOffer, isShelved, getTempHardwareNote, getLeaveEarlierNote, getSeasonalDarkNote, getClearestWindow } from "../lib/conciergeSignals.js";
 import { getActiveForecast, getPendingFollowUp } from "../lib/forecastLoop.js";
 import { getDecompressionCandidate, getImmediateDecompression } from "../lib/eodDecompression.js";
-import { getLearnedPreferences } from "../lib/learnedPreferences.js";
+import { getLearnedPreferences, forgetLearnedPreference } from "../lib/learnedPreferences.js";
 import { getNextLessonNudge } from "../lib/trackProgress.js";
 import { LESSONS } from "../lib/learningTrack.js";
 import { getPref } from "../lib/userPrefs.js";
@@ -37,7 +37,10 @@ import { getPref } from "../lib/userPrefs.js";
  */
 export default function Concierge({ onExit, onOpenSettings, onCompose, onPromise, onSetup }) {
   const volume = safe(() => getConciergeVolume(), "standard");
-  const learned = safe(() => getLearnedPreferences([]), []);
+  const [learned, setLearned] = React.useState(() => { try { return getLearnedPreferences([]); } catch { return []; } });
+  const forgetLearned = (id) => {
+    try { forgetLearnedPreference(id); setLearned(getLearnedPreferences([])); } catch { /* fail-silent */ }
+  };
   // Nonce: restoring a shelved item re-derives the voices so it moves from
   // "shelved (bring back)" to a live voice without a full navigation.
   const [nonce, setNonce] = React.useState(0);
@@ -153,6 +156,16 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onPromise
       item: safe(() => {
         const ds = getDayShape(Date.now());
         return ds ? { text: ds.note, key: ds.id } : null;
+      }, null),
+    },
+    {
+      key: "middayBeat",
+      name: "Midday",
+      earns: "Speaks once around midday \u2014 the middle brief between morning's orientation and evening's set-down. What's still ahead, lightly.",
+      when: "Between 11 and 3, when there's something ahead to name.",
+      item: safe(() => {
+        const m = getMiddayBeat(Date.now(), { includeDismissed: true });
+        return m ? { text: m.note, key: m.key } : null;
       }, null),
     },
     {
@@ -314,12 +327,22 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onPromise
               <div className="sf-sec-rule" />
             </div>
             {learned.map((l) => (
-              <p key={l.id} style={{ margin: "0 0 var(--sf-space-12)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "14px", lineHeight: 1.7, color: "var(--sf-text-soft)" }}>
-                {l.line}
-              </p>
+              <div key={l.id} style={{ margin: "0 0 var(--sf-space-16)" }}>
+                <p style={{ margin: 0, fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "14px", lineHeight: 1.7, color: "var(--sf-text-soft)" }}>
+                  {l.line}
+                </p>
+                <button
+                  type="button"
+                  className="sf-link-quiet"
+                  onClick={() => forgetLearned(l.id)}
+                  style={{ marginTop: "var(--sf-space-4)", fontSize: "12px" }}
+                >
+                  Forget this &rarr;
+                </button>
+              </div>
             ))}
             <p style={{ margin: 0, fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "13px", color: "var(--sf-text-faint)" }}>
-              These are defaults read from your own record, never locks. Choose differently any time and they change.
+              Everything here is read from your own record, never locked. Forget any of it, or just choose differently and it changes.
             </p>
           </section>
         )}

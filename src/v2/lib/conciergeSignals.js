@@ -626,6 +626,57 @@ export function getThresholdGreeting(nowMs = Date.now()) {
   return { line: parts.join(" ") };
 }
 
+/**
+ * P23 MIDDAY BEAT (2026-08-17): the middle brief the app was missing. Morning
+ * orients the whole day (P16); evening sets it down (EOD); this speaks once
+ * around midday to the AFTERNOON AHEAD — what's left, not what's done. Light by
+ * design: a glance, not a re-brief. Character distinct from the bookends.
+ *
+ * Fires only inside the midday window (11–3) and only when there is genuinely
+ * something ahead to name — otherwise the middle of the day stays quiet.
+ */
+export function getMiddayBeat(nowMs = Date.now(), { includeDismissed = false } = {}) {
+  const now = new Date(nowMs);
+  const hour = now.getHours();
+  if (hour < 11 || hour >= 15) return null; // midday window only
+
+  const key = "midday:" + now.toDateString();
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!includeDismissed && dismissed[key]) return null;
+
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { events = []; }
+  const dayEnd = new Date(now); dayEnd.setHours(23, 59, 59, 999);
+  const ahead = events.filter((ev) => {
+    if (!ev || !ev.start) return false;
+    const st = Date.parse(ev.start);
+    return Number.isFinite(st) && st >= nowMs && st <= dayEnd.getTime();
+  });
+
+  // Nothing left on the calendar → the afternoon is open. Say so, lightly, once.
+  if (ahead.length === 0) {
+    // Only speak the open-afternoon line if the morning actually had events —
+    // otherwise this is just an empty day and P15 deliberate-silence owns it.
+    const earlier = events.filter((ev) => {
+      if (!ev || !ev.start) return false;
+      const st = Date.parse(ev.start);
+      return Number.isFinite(st) && st < nowMs && new Date(st).toDateString() === now.toDateString();
+    });
+    if (earlier.length === 0) return null;
+    return { key, note: "The calendar's clear from here. The afternoon is yours to shape." };
+  }
+
+  const next = ahead[0];
+  const st = Date.parse(next.start);
+  const h = new Date(st).getHours();
+  const clock = h === 0 ? "midnight" : h < 12 ? `${h} AM` : h === 12 ? "noon" : `${h - 12} PM`;
+  const more = ahead.length > 1 ? ` and ${ahead.length - 1} more after` : "";
+  return {
+    key,
+    note: `Next up: ${String(next.title || "something")} around ${clock}${more}. Half the day's still ahead of you.`,
+  };
+}
+
 export function sizeOfferToWindow(minutesAvailable) {
   const m = typeof minutesAvailable === "number" && Number.isFinite(minutesAvailable) ? minutesAvailable : 0;
   if (m >= 12) return { fits: true, size: "full", label: `${Math.floor(m)} minutes — room for the full practice.` };

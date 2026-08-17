@@ -18,6 +18,46 @@
 import { getSessions } from "./sessions.js";
 
 const MIN_OBSERVATIONS = 3; // below this it's a coincidence, not a habit
+
+// P27 — the "what it knows" ledger. The user can forget any learned preference;
+// a forgotten id stays forgotten until the habit re-forms AND they haven't
+// forgotten it again. Deletion is honored, not quietly re-learned over.
+const FORGET_KEY = "stillform_v2_learned_forgotten";
+
+function readForgotten() {
+  try {
+    const raw = localStorage.getItem(FORGET_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Forget a learned preference by id. The user's correction, honored. */
+export function forgetLearnedPreference(id) {
+  if (!id) return false;
+  try {
+    const cur = new Set(readForgotten());
+    cur.add(id);
+    localStorage.setItem(FORGET_KEY, JSON.stringify([...cur].slice(-100)));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Un-forget (let the app learn it again if the habit holds). */
+export function allowLearnedPreference(id) {
+  if (!id) return false;
+  try {
+    const next = readForgotten().filter((x) => x !== id);
+    localStorage.setItem(FORGET_KEY, JSON.stringify(next));
+    return true;
+  } catch {
+    return false;
+  }
+}
 const CONSISTENCY = 0.8;    // "always" means at least this share of the time
 
 function safeSessions() {
@@ -106,10 +146,11 @@ export function getQuietDay(dismissals) {
 
 /** Everything learned, for the room's transparency panel. Empty when nothing is. */
 export function getLearnedPreferences(dismissals) {
+  const forgotten = new Set(readForgotten());
   const out = [];
   const entry = getHabitualEntry();
-  if (entry) out.push({ id: "habitual-entry", line: entry.line });
+  if (entry && !forgotten.has("habitual-entry")) out.push({ id: "habitual-entry", line: entry.line });
   const quiet = getQuietDay(dismissals);
-  if (quiet) out.push({ id: "quiet-day", line: quiet.line });
+  if (quiet && !forgotten.has("quiet-day")) out.push({ id: "quiet-day", line: quiet.line });
   return out;
 }
