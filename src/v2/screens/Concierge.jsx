@@ -1,6 +1,8 @@
 import React from "react";
 import { setPendingNoteEvent } from "../lib/pendingNoteEvent.js";
 import { getPackingNoteOffer as _pkOffer, getDeliberateSilence, getThresholdGreeting } from "../lib/conciergeSignals.js";
+import { getDayShape } from "../lib/dayShaper.js";
+import { downloadEventIcs } from "../lib/icsExport.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, getGapMatch, restoreOffer, isShelved, getTempHardwareNote, getLeaveEarlierNote, getSeasonalDarkNote, getClearestWindow } from "../lib/conciergeSignals.js";
@@ -144,6 +146,16 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }
       }, null),
     },
     {
+      key: "dayShape",
+      name: "The day's shape",
+      earns: "Speaks only when your actual calendar has a real structural gap \u2014 no room to eat, or two heavy things with no breath between. Hands you the fix, never a lecture.",
+      when: "During the day, while the fix still helps.",
+      item: safe(() => {
+        const ds = getDayShape(Date.now());
+        return ds ? { text: ds.note, key: ds.id } : null;
+      }, null),
+    },
+    {
       key: "immediateDecompression",
       name: "Set it down now",
       earns: "Speaks only when an event YOU flagged has just ended \u2014 while the residue is still live, not saved for bedtime.",
@@ -250,6 +262,28 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }
                     onClick={() => { try { restoreOffer(v.item.key); setNonce((n) => n + 1); } catch { /* fail-silent */ } }}
                   >
                     Bring this back to home \u2192
+                  </button>
+                ) : null}
+                {v.key === "dayShape" ? (
+                  <button
+                    type="button"
+                    className="sf-link-quiet"
+                    style={{ marginTop: "var(--sf-space-8)" }}
+                    onClick={() => {
+                      try {
+                        const ds = getDayShape(Date.now());
+                        if (ds && ds.fix) {
+                          downloadEventIcs({
+                            title: ds.fix.title,
+                            start: ds.fix.start,
+                            durationMin: ds.fix.durationMin,
+                            description: ds.fix.description,
+                          });
+                        }
+                      } catch { /* fail-silent */ }
+                    }}
+                  >
+                    Add it to my calendar \u2192
                   </button>
                 ) : null}
                 {v.key === "packingNote" && typeof onCompose === "function" ? (
