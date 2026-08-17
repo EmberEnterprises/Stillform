@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Your Account — Stillform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Sans:wght@300;400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0A0A0C;
+      --surface: #141418;
+      --amber: #C8922A;
+      --amber-dim: rgba(200,146,42,0.2);
+      --text: #E8EAF0;
+      --text-dim: #9496A1;
+      --text-muted: #55575F;
+      --border: rgba(255,255,255,0.07);
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 0.5px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--amber); }
+    .nav-back {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .nav-back:hover { color: var(--amber); }
+    main { max-width: 640px; margin: 0 auto; padding: 56px 24px 96px; }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 34px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .lede { color: var(--text-dim); margin-bottom: 40px; }
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 22px;
+      margin: 40px 0 12px;
+    }
+    p { margin-bottom: 14px; color: var(--text); }
+    ul { margin: 0 0 14px 20px; color: var(--text-dim); }
+    li { margin-bottom: 8px; }
+    .label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 24px;
+    }
+    a.email { color: var(--amber); text-decoration: none; }
+    a.email:hover { text-decoration: underline; }
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .foot {
+      margin-top: 48px;
+      font-style: italic;
+      color: var(--text-muted);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="nav-logo">Still<span>form</span></a>
+    <a href="/" class="nav-back">← Back</a>
+  </nav>
+  <main>
+    <div class="label">Account Deletion</div>
+    <h1>Delete your account</h1>
+    <p class="lede">Two ways to do it. Both are permanent, and both are complete — there's no hidden copy kept somewhere.</p>
+
+    <div class="card">
+      <h2>In the app</h2>
+      <p>The fastest way, if you can still open Stillform:</p>
+      <ul>
+        <li>Open <strong>Settings</strong>.</li>
+        <li>Open <strong>Privacy &amp; contact</strong>.</li>
+        <li>Tap <strong>Delete my account</strong>, read what it removes, and confirm.</li>
+      </ul>
+      <p>You'll see a receipt when it's done.</p>
+    </div>
+
+    <div class="card">
+      <h2>By email</h2>
+      <p>If you can't reach the app, write to us from the email address on your account:</p>
+      <p><a class="email" href="mailto:ARAembersllc@proton.me?subject=Delete%20my%20account">ARAembersllc@proton.me</a></p>
+      <p>Put “Delete my account” in the subject. We'll delete the account and its records, and reply to confirm.</p>
+    </div>
+
+    <h2>What gets deleted</h2>
+    <ul>
+      <li><strong>Your account</strong> — the sign-in itself, removed from our server.</li>
+      <li><strong>Your records with us</strong> — subscription status and anything tied to your account.</li>
+      <li><strong>Your practice history</strong> — every session, note, and setting. In Stillform this lives on your own device, so deleting in the app clears it directly; an email deletion removes your account and server records, and you can clear the app's local data by uninstalling.</li>
+    </ul>
+
+    <h2>One thing to check</h2>
+    <p>If you subscribed through the App Store or Google Play, cancel that subscription in the store as well — app stores bill separately from your account here, and deleting your account doesn't stop a store subscription.</p>
+
+    <p class="foot">Deletion in daylight. You were never trapped here.</p>
+  </main>
+</body>
+</html>

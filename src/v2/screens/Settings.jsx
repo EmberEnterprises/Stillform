@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getProtectedBlocks, protectBlock, unprotectBlock } from "../lib/protectedBlocks.js";
+import { getAuthState } from "../lib/authApi.js";
 import { hasPin, setPin as savePin, verifyPin, clearPin } from "../lib/pinLock.js";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import CollapsibleSection from "../components/CollapsibleSection.jsx";
@@ -485,6 +486,25 @@ export default function Settings({ onExit, onNavigate }) {
             <a href="mailto:ARAembersllc@proton.me" style={LINK}>
               ARAembersllc@proton.me
             </a>
+          </p>
+          {/* S6 / #1: in-app account deletion. Only shown when signed in — a
+              deletion needs an authed user. Web deletion path (deletion.html)
+              covers the store Data Safety requirement for everyone else. */}
+          <p style={ROW}>
+            {(() => { try { return getAuthState()?.email; } catch { return null; } })() ? (
+              <button
+                type="button"
+                onClick={() => onNavigate && onNavigate("delete-account")}
+                className="sf-link-quiet"
+                style={{ color: "var(--sf-text-quiet)" }}
+              >
+                Delete my account
+              </button>
+            ) : (
+              <a href="/deletion.html" style={LINK}>
+                How to delete your account
+              </a>
+            )}
           </p>
         </div>
       </CollapsibleSection>
