@@ -16,6 +16,7 @@
  */
 
 import { getSessions } from "./sessions.js";
+import { getBestHours } from "./chronotype.js";
 
 const MIN_OBSERVATIONS = 3; // below this it's a coincidence, not a habit
 
@@ -152,5 +153,9 @@ export function getLearnedPreferences(dismissals) {
   if (entry && !forgotten.has("habitual-entry")) out.push({ id: "habitual-entry", line: entry.line });
   const quiet = getQuietDay(dismissals);
   if (quiet && !forgotten.has("quiet-day")) out.push({ id: "quiet-day", line: quiet.line });
+  // P25 — best hours, learned from their own engaged-session record.
+  let best = null;
+  try { best = getBestHours(); } catch { best = null; }
+  if (best && !forgotten.has("best-hours")) out.push({ id: "best-hours", line: best.line });
   return out;
 }
