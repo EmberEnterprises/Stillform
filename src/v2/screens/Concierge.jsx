@@ -1,6 +1,6 @@
 import React from "react";
 import { setPendingNoteEvent } from "../lib/pendingNoteEvent.js";
-import { getPackingNoteOffer as _pkOffer } from "../lib/conciergeSignals.js";
+import { getPackingNoteOffer as _pkOffer, getDeliberateSilence, getThresholdGreeting } from "../lib/conciergeSignals.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import EditorialBlock from "../components/EditorialBlock.jsx";
 import { getUpcomingEventOffer, getConciergeVolume, getUmbrellaNote, getNoGapDayNote, getTomorrowHeavyNote, getTemporalLandmark, getPackingNoteOffer, getGapMatch, restoreOffer, isShelved, getTempHardwareNote, getLeaveEarlierNote, getSeasonalDarkNote, getClearestWindow } from "../lib/conciergeSignals.js";
@@ -129,6 +129,18 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }
       item: safe(() => {
         const c = getClearestWindow(Date.now(), { includeDismissed: true });
         return c ? { text: c.note, key: c.key } : null;
+      }, null),
+    },
+    {
+      key: "deliberateSilence",
+      name: "A clear day",
+      earns: "Speaks only when the day is genuinely light \u2014 one line so the quiet reads as 'checked, you're clear,' not absence.",
+      when: "On a clear day, when nothing else has anything to say.",
+      item: safe(() => {
+        // Silence speaks only into real emptiness: suppress if any offer/note is live.
+        const anyLive = voices.some((v) => v.key !== "deliberateSilence" && v.item);
+        const d = getDeliberateSilence(Date.now(), { includeDismissed: true, otherVoicesActive: anyLive });
+        return d ? { text: d.note, key: d.key } : null;
       }, null),
     },
     {

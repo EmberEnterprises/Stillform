@@ -557,6 +557,75 @@ export function getClearestWindow(nowMs = Date.now(), { includeDismissed = false
   };
 }
 
+/**
+ * P15 DELIBERATE SILENCE (2026-08-17, rebuilt after a container reset): silence
+ * as a SERVICE, distinct from absence. On a genuinely clear, light day the
+ * concierge says one deliberate line instead of nothing at all, so the quiet
+ * reads as "checked, and you're clear" rather than "broken."
+ *
+ * Speaks ONLY into real emptiness: the caller passes whether anything else is
+ * live, so this can never talk over a real note.
+ */
+export function getDeliberateSilence(nowMs = Date.now(), { includeDismissed = false, otherVoicesActive = false } = {}) {
+  if (otherVoicesActive) return null;
+
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { events = []; }
+  const key = "silence:" + new Date(nowMs).toDateString();
+  const dismissed = readJSON(DISMISS_KEY, {});
+  if (!includeDismissed && dismissed[key]) return null;
+
+  const dayEnd = new Date(nowMs); dayEnd.setHours(23, 59, 59, 999);
+  const remaining = events.filter((ev) => {
+    if (!ev || !ev.start) return false;
+    const st = Date.parse(ev.start);
+    return Number.isFinite(st) && st >= nowMs && st <= dayEnd.getTime();
+  });
+  if (remaining.length > 1) return null; // a real day, not a clear one
+
+  let w = null;
+  try { w = getWeather(); } catch { /* fine */ }
+  if (w && w.nextRain && typeof w.nextRain.at === "number") return null;
+
+  return { key, note: "Nothing needed today \u2014 the day is yours." };
+}
+
+/**
+ * P16 THRESHOLD GREETINGS (2026-08-17, rebuilt): the orienting line at a
+ * threshold — the first open of the day. One glance: the day, what's on it, and
+ * the one weather fact that matters. Pure recitation of their own data; no read
+ * of the person. Return-after-absence is P14's job and takes priority there.
+ */
+export function getThresholdGreeting(nowMs = Date.now()) {
+  const now = new Date(nowMs);
+  const weekday = now.toLocaleDateString(undefined, { weekday: "long" });
+
+  let events = [];
+  try { events = getCalendarEvents() || []; } catch { events = []; }
+  const dayEnd = new Date(now); dayEnd.setHours(23, 59, 59, 999);
+  const ahead = events.filter((ev) => {
+    if (!ev || !ev.start) return false;
+    const st = Date.parse(ev.start);
+    return Number.isFinite(st) && st >= nowMs && st <= dayEnd.getTime();
+  });
+
+  const parts = [weekday + "."];
+  if (ahead.length === 1) parts.push("One thing on the calendar.");
+  else if (ahead.length > 1) parts.push(`${ahead.length} things on the calendar.`);
+
+  try {
+    const w = getWeather();
+    if (w && w.nextRain && typeof w.nextRain.at === "number") {
+      const h = new Date(w.nextRain.at).getHours();
+      const clock = h === 0 ? "midnight" : h < 12 ? `${h} AM` : h === 12 ? "noon" : `${h - 12} PM`;
+      parts.push(`Rain around ${clock}.`);
+    }
+  } catch { /* weather optional */ }
+
+  if (parts.length === 1) return null; // just a weekday is not orientation
+  return { line: parts.join(" ") };
+}
+
 export function sizeOfferToWindow(minutesAvailable) {
   const m = typeof minutesAvailable === "number" && Number.isFinite(minutesAvailable) ? minutesAvailable : 0;
   if (m >= 12) return { fits: true, size: "full", label: `${Math.floor(m)} minutes — room for the full practice.` };

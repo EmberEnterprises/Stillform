@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getRecentSessions, getRecoveryGrace } from "../lib/sessions.js";
+import { getThresholdGreeting } from "../lib/conciergeSignals.js";
 import { getDueNotes, sweepExpired } from "../lib/futureNotes.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
@@ -265,6 +266,7 @@ export default function SmartScreen({ onEnterPractice, onNoteForEvent = null, on
             header for established users so there's a single Today anchor.) */}
 <SameDayLine />
         <RecoveryGraceLine />
+        <ThresholdGreetingLine />
         <DueNotesLine />
 
                 {/* W3: the first landing — consumed once. The Read just gave them
@@ -586,6 +588,41 @@ function RecoveryGraceLine() {
       if (here.length) return null; // here today -> SameDayLine owns it, not this
       const g = getRecoveryGrace(Date.now());
       return g ? g.note : null;
+    } catch {
+      return null;
+    }
+  }, []);
+  if (!line) return null;
+  return (
+    <p
+      className="sf-fade-enter"
+      style={{
+        margin: "0 0 var(--sf-space-12)",
+        fontFamily: "var(--sf-font-serif)",
+        fontWeight: 300,
+        fontStyle: "italic",
+        fontSize: "13px",
+        color: "var(--sf-text-faint)",
+      }}
+    >
+      {line}
+    </p>
+  );
+}
+
+/* P16 — threshold greeting: the first-open orienting line for an ORDINARY day.
+   Yields to P14 (a days-away return owns the moment) and to same-day (already
+   here today needs no orientation). Pure recitation of their own data. */
+function ThresholdGreetingLine() {
+  const line = React.useMemo(() => {
+    try {
+      const today = new Date().toDateString();
+      const here = getRecentSessions(8).filter((x) => x?.timestamp && new Date(x.timestamp).toDateString() === today);
+      if (here.length) return null; // already oriented today
+      const g = getRecoveryGrace(Date.now());
+      if (g) return null; // P14 owns a real return
+      const t = getThresholdGreeting(Date.now());
+      return t ? t.line : null;
     } catch {
       return null;
     }
