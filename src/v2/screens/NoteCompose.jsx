@@ -3,6 +3,7 @@ import EditorialBlock from "../components/EditorialBlock.jsx";
 import Button from "../components/Button.jsx";
 import MicButton from "../components/MicButton.jsx";
 import { attachNote } from "../lib/futureNotes.js";
+import { makePromise } from "../lib/selfPromises.js";
 
 /**
  * NoteCompose — "a note to future you" (P28 attach entry point, 2026-07-15).
@@ -28,7 +29,7 @@ function whenOptions(now = new Date()) {
   return opts;
 }
 
-export default function NoteCompose({ onExit, event = null }) {
+export default function NoteCompose({ onExit, event = null, promiseMode = false }) {
   // P28/P29: a per-event or packing note hands its event/template off via
   // pendingNoteEvent (avoids threading through the tree). Explicit prop wins.
   const [resolvedEvent] = useState(() => event || (() => { try { return takePendingNoteEvent(); } catch { return null; } })());
@@ -60,6 +61,11 @@ export default function NoteCompose({ onExit, event = null }) {
         anchor: { kind: "event", title: resolvedEvent.title || "", at: eventStartMs },
         voice: wantWord ? "speak" : "hold",
       });
+    } else if (promiseMode) {
+      // P17: the user is hiring the concierge to hold this for a chosen day.
+      const chosen = options.find((o) => o.id === when);
+      if (!chosen) return;
+      id = makePromise({ text: text.trim(), forDateMs: chosen.atMs });
     } else {
       const chosen = options.find((o) => o.id === when);
       if (!chosen) return;
@@ -80,10 +86,10 @@ export default function NoteCompose({ onExit, event = null }) {
       <main className="sf-page sf-page--hero">
         <div className="sf-fade-enter">
           <EditorialBlock
-            label="Noted"
-            headline="It'll reach you then."
+            label={promiseMode ? "Held" : "Noted"}
+            headline={promiseMode ? "I'll hold it for that day." : "It'll reach you then."}
             headlineSize="lg"
-            body="Nothing to track, nothing owed. It arrives, you read it, that's the whole of it."
+            body={promiseMode ? "You asked; I'm holding it. It surfaces once on the day, then lets go. Nothing owed back." : "Nothing to track, nothing owed. It arrives, you read it, that's the whole thing."}
           />
           <div style={{ marginTop: "var(--sf-space-48)" }}>
             <Button variant="primary" onClick={onExit}>Done</Button>
@@ -97,10 +103,10 @@ export default function NoteCompose({ onExit, event = null }) {
     <main className="sf-page sf-page--hero">
       <div className="sf-fade-enter">
         <EditorialBlock
-          label="A note to future you"
-          headline="Leave something for later."
+          label={promiseMode ? "Hold this for a day" : "A note to future you"}
+          headline={promiseMode ? "Ask me to hold something." : "Leave something for later."}
           headlineSize="lg"
-          body="Write it now; it reaches you when you'll want it. A note, never a task — read it and it's done."
+          body={promiseMode ? "Name a commitment and a day. I'll hold it and surface it once when the day comes \u2014 never a nag, nothing owed back." : "Write it now; it reaches you when you'll want it. A note, never a task \u2014 read it and it's done."}
         />
       </div>
 
@@ -146,6 +152,7 @@ export default function NoteCompose({ onExit, event = null }) {
         </div>
       )}
 
+      {!promiseMode && (
       <div className="sf-fade-enter sf-fade-enter--delay-3" style={{ marginTop: "var(--sf-space-24)" }}>
         <button
           type="button"
@@ -157,8 +164,9 @@ export default function NoteCompose({ onExit, event = null }) {
           {wantWord ? "It'll speak up when it arrives \u2713" : "Want a word when it arrives, or just keep it quietly?"}
         </button>
       </div>
+      )}
       <div className="sf-fade-enter sf-fade-enter--delay-3" style={{ marginTop: "var(--sf-space-24)", display: "flex", alignItems: "center", gap: "var(--sf-space-16)" }}>
-        <Button variant="primary" onClick={save} disabled={!text.trim() || !when}>Leave the note</Button>
+        <Button variant="primary" onClick={save} disabled={!text.trim() || !when}>{promiseMode ? "Ask me to hold it" : "Leave the note"}</Button>
         <button type="button" onClick={onExit} className="sf-link-quiet">Not now ›</button>
       </div>
     </main>

@@ -247,8 +247,9 @@ export default function AppV2() {
     if (screen === "library") return <Library onExit={() => setScreen("home")} />;
     if (screen === "library-learn") return <Library initialTab="learn" onExit={() => setScreen("home")} />;
     if (screen === "note-compose") return <NoteCompose onExit={() => setScreen("home")} />;
+    if (screen === "promise-compose") return <NoteCompose promiseMode onExit={() => setScreen("concierge")} />;
     if (screen === "concierge-setup") return <ConciergeSetup onExit={() => setScreen("concierge")} onOpenFAQ={() => setScreen("faq")} />;
-    if (screen === "concierge") return <Concierge onCompose={() => setScreen("note-compose")} onSetup={() => setScreen("concierge-setup")} onExit={() => setScreen("home")} onOpenSettings={() => setScreen("settings")} />;
+    if (screen === "concierge") return <Concierge onPromise={() => setScreen("promise-compose")} onCompose={() => setScreen("note-compose")} onSetup={() => setScreen("concierge-setup")} onExit={() => setScreen("home")} onOpenSettings={() => setScreen("settings")} />;
     if (screen === "becoming") return <Becoming onExit={() => setScreen("my-progress")} />;
     if (screen === "re-read") return <ReRead onExit={() => setScreen("my-progress")} onNavigate={(t) => { if (t === "crisis-resources") setScreen("crisis-resources"); }} />;
 

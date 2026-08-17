@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getRecentSessions, getRecoveryGrace } from "../lib/sessions.js";
 import { getThresholdGreeting } from "../lib/conciergeSignals.js";
 import { getDueNotes, sweepExpired } from "../lib/futureNotes.js";
+import { getDuePromise } from "../lib/selfPromises.js";
 import MonoLabel from "../components/MonoLabel.jsx";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
 import { getTodayThread } from "../lib/thread.js";
@@ -267,6 +268,7 @@ export default function SmartScreen({ onEnterPractice, onNoteForEvent = null, on
 <SameDayLine />
         <RecoveryGraceLine />
         <ThresholdGreetingLine />
+        <DuePromiseLine />
         <DueNotesLine />
 
                 {/* W3: the first landing — consumed once. The Read just gave them
@@ -647,6 +649,30 @@ function ThresholdGreetingLine() {
 
 /* P28 — notes that arrive on time. Read-only surface: shows notes whose moment
    is now. Never a task — no checkbox, nothing owed. Expired notes retire silently. */
+/* P17 — a self-promise the user asked the concierge to hold, surfacing on its
+   day. Speaks ONCE (getDuePromise marks it), never repeats, nothing owed back.
+   Voice: "you told [day]-you" — the app held it FOR them, not over them. */
+function DuePromiseLine() {
+  const promise = React.useMemo(() => {
+    try { return getDuePromise(); } catch { return null; }
+  }, []);
+  if (!promise) return null;
+  const dayName = (() => {
+    try { return new Date(promise.forDateKey).toLocaleDateString(undefined, { weekday: "long" }); }
+    catch { return "today"; }
+  })();
+  return (
+    <div className="sf-fade-enter" style={{ margin: "0 0 var(--sf-space-16)" }}>
+      <p style={{ margin: 0, fontFamily: "var(--sf-font-mono)", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--sf-text-faint)" }}>
+        You asked {dayName}-you to hold this
+      </p>
+      <p style={{ margin: "var(--sf-space-4) 0 0", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.6, color: "var(--sf-text-soft)" }}>
+        {promise.text}
+      </p>
+    </div>
+  );
+}
+
 function DueNotesLine() {
   const due = React.useMemo(() => {
     try {

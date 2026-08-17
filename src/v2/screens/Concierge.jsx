@@ -35,7 +35,7 @@ import { getPref } from "../lib/userPrefs.js";
  * @param {function(): void} onExit — back
  * @param {function(): void} onOpenSettings — the dials
  */
-export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }) {
+export default function Concierge({ onExit, onOpenSettings, onCompose, onPromise, onSetup }) {
   const volume = safe(() => getConciergeVolume(), "standard");
   const learned = safe(() => getLearnedPreferences([]), []);
   // Nonce: restoring a shelved item re-derives the voices so it moves from
@@ -343,6 +343,11 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onSetup }
           {typeof onCompose === "function" && (
             <button type="button" className="sf-link-quiet" onClick={onCompose} style={{ display: "block", marginTop: "var(--sf-space-24)" }}>
               Leave a note for later \u2192
+            </button>
+          )}
+          {typeof onPromise === "function" && (
+            <button type="button" className="sf-link-quiet" onClick={onPromise} style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
+              Ask me to hold a commitment \u2192
             </button>
           )}
           {typeof onSetup === "function" && (
