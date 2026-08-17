@@ -919,3 +919,20 @@ The Wind-Down asks for tomorrow's anchor at day's close — writing what's ahead
 
 - Scullin, M. K., Krueger, M. L., Ballard, H. K., Pruett, N., & Bliwise, D. L. (2018). The effects of bedtime writing on difficulty falling asleep: A polysomnographic study comparing to-do lists and completed activity lists. Journal of Experimental Psychology: General, 147(1), 139–146. doi:10.1037/xge0000374 (web-verified 2026-07-08: 57 adults, randomized, polysomnography; to-do-list writers fell asleep faster than completed-list writers)
 - Claim discipline: single well-controlled study — stated at its true size in-app ("settles the mind toward sleep faster," no universal promise, no precise-minutes claim in user copy); the effect size lives here, not in the interface.
+
+## Structural Coaching — The Day-Shaper (P18)
+
+The concierge notices structural problems in the user's actual calendar (wall-to-wall days, zero buffers, vanished lunches) and hands over a pre-built .ics fix. Every structural claim is held to the same discipline as the rest of the app: most productivity advice is folklore, and only what survives the fact-check is voiced. What survives, and what does not:
+
+**Micro-breaks — support WELL-BEING, not a performance boost.** Albulescu, Macsinga, Rusu, Sulea, Bodnaru, Tulbure & Steinborn (2022), "Give me a break!", *PLOS ONE* 17(8):e0272460. Meta-analysis, k=22 independent samples, N=2335. Small but significant effects on vigor (d=.36) and reduced fatigue (d=.35); NON-significant effect on overall performance (d=.16, p=.116). Recovery from highly depleting tasks may need more than 10-minute breaks.
+- **Claim discipline:** the app says breaks restore vigor and cut fatigue — it does NOT claim breaks "boost performance," which this meta-analysis did not find. The honest voice is recovery/steadiness, not output.
+
+**Task-switching cost / attention residue — buffers between demanding blocks are justified.** Leroy, S. (2009), "Why is it so hard to do my work?", *Organizational Behavior and Human Decision Processes* 109(2):168-181. Established "attention residue": cognitive activity about Task A persists after switching to Task B, impairing performance on B; the effect is strongest when Task A was time-pressured or left unfinished.
+- **Stillform application:** a buffer between two demanding calendar events is where residue clears before the next thing — the ground for offering a buffer block, framed as consideration ("a gap at one is what keeps two o'clock sharp"), never as productivity optimization.
+- **Claim discipline:** the primary finding (residue impairs the next task) is solid; popular inflations of it (e.g. "you lose 40% of your day") are listicle figures, not in Leroy's paper, and are NOT used.
+
+**Implementation intentions — already vetted.** Gollwitzer (1999), *American Psychologist* 54(7):493-503 (see the Implementation Intentions section above). "If X, then Y" plans are what convert a named structural fix into an action taken.
+
+**Planning fallacy — padding is honest, not pessimism.** Kahneman (2011), *Thinking, Fast and Slow* (see Kahneman entry above); the planning-fallacy line traces to Buehler, Griffin & Ross. People systematically underestimate how long things take; padding an estimate corrects a known bias.
+
+**REFUSED (thin evidence, banned per claims discipline):** eat-the-frog (hardest-task-first) as a universal rule, ultradian 90-minute work blocks, the 5am-club. These are folklore; the app does not voice them even though they are popular.
