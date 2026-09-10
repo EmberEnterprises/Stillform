@@ -111,3 +111,19 @@ Verified facts only. No adjectives, no comparisons.
 ### DECIDED/DOCUMENTED — NOT gaps (do not re-open):
 - B2B/organization backend (11 fns) staged ahead of frontend ON PURPOSE (B2B_SSO_INTEGRATION.md, CANON:333 "All five B2B revenue paths ship at launch").
 - account-delete.js is the superseded May-6 original (42ed650); delete-account.js replaced it. Optional cleanup only.
+
+
+## ===== CORRECTION 2026-08-17 — MY "4 ITEMS LEFT" BOARD WAS WRONG =====
+Arlin was right: I audited only the launch-gate SPINE and falsely called it the whole app. I never checked the back half of the concierge catalog. Verified against CODE now:
+
+### CONCIERGE CATALOG — GENUINELY UNBUILT (verified: NO producer code exists):
+- **P20 THE MORNING ROW / CROSS-APP LAUNCHER** — NO CODE. Not built.
+- **P26 TRIP AWARENESS + TRIP MODES** — NO CODE. Not built. (Arlin upgraded this by voice; the "trip modes" concept needs her definition before build.)
+- **P32 THE GRANULAR LAYER** — NO CODE. (A "granular" match in functionChecks.js is affect-labeling granularity, UNRELATED — false match.) Not built.
+- **P33 THE ACTIVE GRANULAR LAYER** — NO CODE. Not built. (Arlin's own correction on record: "that was a lazy reach for granular... LESS FRICTION not silence" — needs her intent.)
+- **P34 THE ENRICHMENT QUESTION** — NO CODE. Not built. (Ties to Arlin's pharmacy-design thinking.)
+- **P35 THE ROUTINE INTERVIEW + SEASONS OF LIFE + REST PLACEMENT** — NO CODE. Not built.
+
+### STILL TO VERIFY (not yet checked this pass): P5-EXTENSION (go-now moment), P16-EXTENSION (month's shape), P35's three sub-parts individually, and whether P26/P32-35 are DECISION-GATED (need Arlin's spec) vs Claude-buildable-now.
+
+### WHAT THIS MEANS: the earlier "only 4 items left" board covered the LAUNCH-GATE spine only. The concierge catalog has AT LEAST 6 unbuilt items (P20, P26, P32, P33, P34, P35). The app is NOT down to 4 things. Arlin was correct that there is substantially more concierge work. FULL line-by-line audit of the rest of the doc still owed.
