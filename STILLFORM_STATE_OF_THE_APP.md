@@ -73,11 +73,11 @@ Verified facts only. No adjectives, no comparisons.
 ### LIB + BACKEND AUDIT (verified)
 - 99 lib files: ZERO orphaned. Every lib is imported somewhere. No dead feature code.
 
-### REAL FINDING #2 — DUPLICATE DELETION FUNCTION (dead code)
-- TWO exist: netlify/functions/account-delete.js (4281 bytes, NOT called by anything) and delete-account.js (4578 bytes, the LIVE one wired to AppV2). account-delete is orphaned older/duplicate — dead code. Both are auth-gated (not a security hole), but account-delete should be REMOVED so there is one deletion function. Cleanup, mine.
+### FINDING #2 — [ALREADY EXPLAINED, NOT A MYSTERY] duplicate deletion function
+- TWO exist: netlify/functions/account-delete.js (4281 bytes, NOT called by anything) and delete-account.js (4578 bytes, the LIVE one wired to AppV2). account-delete is orphaned older/duplicate — dead code. Both are auth-gated (not a security hole), but account-delete.js is the ORIGINAL May 6 deletion build (commit 42ed650), superseded when delete-account.js was built. Known-superseded, not random cruft. Trivial optional cleanup; NOT a finding that needs Arlin's attention. (I over-flagged this.)
 
-### REAL FINDING #3 — ENTIRE B2B/ORG BACKEND HAS NO FRONTEND (11 functions)
+### FINDING #3 — [ALREADY DECIDED, NOT A GAP] B2B/org backend staged ahead of frontend
 - 11 organization-* functions exist (create, invite, accept-invite, list-members, remove-member, update, status, audit-log, billing-checkout, billing-portal) — a complete B2B team-management backend. ZERO frontend references it (no screen/component mentions organizations). It is entirely unreachable from the app.
 - All auth-gated (parseBearer + getUserFromToken) — NOT an open security hole, just unused.
-- INTERPRETATION (honest): the code can't tell me if this is parked-on-purpose (B2B backend built ahead of a deferred frontend — Arlin's notes did mention B2B/SSO as future) or abandoned. FACT: 11 backend functions ship with no way to reach them. Arlin's call: is B2B a real future path (keep, build the frontend later) or dead weight (remove)?
+- ALREADY DECIDED — NOT A GAP. Dedicated docs exist: B2B_SSO_INTEGRATION.md, STILLFORM_B2B_PRIVACY_ARCHITECTURE.md (names organization-invite.js etc. as 'Future write endpoints, PR B+'), and STILLFORM_CANON.md:333 'All five B2B revenue paths ship at launch.' The backend-ahead-of-frontend is DELIBERATE and PLANNED. I wrongly presented a settled, documented strategy as a mystery gap — corrected. NOTHING for Arlin to decide here; it's decided.
 - Functions correctly NOT-frontend-called for legitimate reasons (NOT findings): subscription-webhook (Lemon Squeezy webhook), link-sentinel (@daily cron), metrics-ingest (server-side). These are supposed to be non-frontend.
