@@ -2551,3 +2551,16 @@ NOTE: both watch gaps are CODE (mine), fixable now; only compile+device-test nee
 ### SECTION 5 — DATA EXPORT, CRISIS, STORE-COMPLIANCE
 CRISIS RESOURCES: no gap. CrisisResources.jsx exists, routed (6 refs in AppV2), carries 988 + Crisis Text Line. Solid.
 **>>> GAP #4 (Tier-2, EXPECTED not launch-blocking, Claude's to build): NO user-facing DATA EXPORT. <<<** The doc lists "download my record" as Tier-2 expected. Verified absent: Settings has no export button (only the JS `export default` keyword), and no lib fn gathers the whole record for download. SEVERITY: real but NOT store-mandatory for a US solo launch (account deletion IS Play-required and is DONE; data portability/export matters more for GDPR/EU/B2B). Build = a lib fn that gathers signalLog + breatheLog + sessions + journal + profiles into one JSON/file + a Settings "Download my record" action. Mine to build; not gating launch.
+
+### ===== REVIEW SUMMARY (2026-08-17) — THE GAPS, RANKED =====
+Health at review: build clean, suite 68/68, boot-static PASS. The app is structurally sound; the spine (catalog, onboarding, gating, AI, crisis) is wired end-to-end. Gaps found, by severity:
+
+1. **GAP #1 — CHECKOUT URLS EMPTY (LAUNCH + REVENUE BLOCKING).** CHECKOUT_URLS={monthly:"",annual:""} in subscriptionApi.js. No one can subscribe. Fix: Arlin grabs 2 hosted-checkout links from the LS dashboard (each plan's Share); Claude wires. THE thing blocking launch.
+2. **GAP #2 — watch has no JS trigger (code, mine).** Nothing calls WatchBridgePlugin.startBreathingOnWatch(); the watch never starts. Fixable now.
+3. **GAP #3 — watch pattern-id mismatch (code, mine).** Bridge expects quick/deep/cyclic_sigh (dead App.jsx); v2 uses deep-regulate/cyclic-sighing. Reconcile when fixing #2.
+4. **GAP #4 — no user-facing data export (Tier-2, mine, NOT launch-blocking).** "Download my record" absent. Expected nicety; matters for GDPR/EU/B2B, not US solo launch.
+5. **VERIFY (Arlin, env) — OPENAI_API_KEY in Netlify.** Reframe code is correct; confirm the key is set (like the Supabase vars were).
+
+NO GAPS FOUND IN: concierge catalog (19/19 wired), onboarding/setup routing, gating logic, Reframe AI flow, crisis resources, account deletion (done+live), terms (done), portal URL (done).
+OPEN BY DESIGN (scoped, not broken): Becoming, The Re-Read, library expansion, engagement architecture, P20/P26/P32-34 — aspirational/awaiting-Arlin, not flow gaps.
+NEXT ACTIONS: (a) Arlin: LS checkout links + confirm OPENAI_API_KEY. (b) Claude: wire watch JS trigger + fix pattern ids (GAP #2+#3), build data export (GAP #4).
