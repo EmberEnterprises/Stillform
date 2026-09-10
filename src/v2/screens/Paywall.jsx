@@ -176,15 +176,15 @@ export default function Paywall({ onClose }) {
         <PlanOption
           id="annual"
           name="Annual"
-          price="$9.99"
-          sub="Billed $119.88 a year · save 33%"
+          price="$17.49"
+          sub="Per month, billed annually — save 30%"
           selected={variant === "annual"}
           onSelect={setVariant}
         />
         <PlanOption
           id="monthly"
           name="Monthly"
-          price="$14.99"
+          price="$24.99"
           sub="Billed monthly"
           selected={variant === "monthly"}
           onSelect={setVariant}
