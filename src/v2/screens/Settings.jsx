@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getProtectedBlocks, protectBlock, unprotectBlock } from "../lib/protectedBlocks.js";
+import { downloadRecord } from "../lib/dataExport.js";
 import { getAuthState } from "../lib/authApi.js";
 import { hasPin, setPin as savePin, verifyPin, clearPin } from "../lib/pinLock.js";
 import EditorialBlock from "../components/EditorialBlock.jsx";
@@ -458,6 +459,13 @@ export default function Settings({ onExit, onNavigate }) {
             <a href="/privacy.html" style={LINK}>
               Privacy policy
             </a>
+          </p>
+          {/* Tier-2 data portability: download the whole on-device record as JSON.
+              Your data is yours — this makes that literal. Excludes auth tokens. */}
+          <p style={ROW}>
+            <button type="button" onClick={() => downloadRecord()} className="sf-link-quiet" style={LINK}>
+              Download my record
+            </button>
           </p>
           {/* TIER-1 store requirement: Manage / cancel subscription. Links to
               the Lemon Squeezy customer portal; honest unavailable state until
