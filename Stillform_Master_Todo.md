@@ -696,7 +696,7 @@ STANDING CONSTRAINTS (every phase): zero fabrication; citations web-verified bef
 - Voice → confidant-grade third-person observation (AI as user's own awareness externalized)
 - Home rule → multiple substantive sections composed editorially OK; never surface-level widgets
 - Achievement credits → quiet observation, never gamified pep
-- Pricing → IS positioning. Current $14.99/mo likely under-priced. Specific change deferred to Phase 8.
+- Pricing → IS positioning. [CORRECTED 2026-08-17: pricing is now $24.99/mo + $17.49/mo-annual, save 30% — superseding $14.99; the under-pricing concern is resolved by this increase.] (old note: Current $14.99/mo likely under-priced.) Specific change deferred to Phase 8.
 - Felt outcome → **stabilized composure** (external/customer-facing). Internal note: this is sovereignty by another name — owning yourself, free from inherited noise. "Sovereign" never appears in user-facing surfaces.
 
 **Architectural integrity principle (locked):** Stillform PRESENTS the science (via Library — external curated knowledge users encounter) AND faithfully executes the metacognitive steps from it (via spine + surfaces). Practice doesn't lecture; Library does. Both layers respect the same scientific integrity.
