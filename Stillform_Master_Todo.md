@@ -2536,3 +2536,14 @@ GATING LOGIC: sound. shouldGate() = past FREE_SESSION_LIMIT (3) AND confirmed-no
 - CONSEQUENCE: a user who hits the paywall CANNOT SUBSCRIBE. Gating rises, paywall shows, but the CTA has no checkout to open — falls to the "almost ready / checkout goes live the moment..." placeholder. NO ONE CAN PAY.
 - This is DISTINCT from the customer PORTAL url (billing/manage), which IS wired. Portal = manage existing sub; Checkout = CREATE a sub. The create path is dead.
 - FIX (Arlin's, ~2 min, same as the portal was): Lemon Squeezy dashboard -> each plan (monthly + annual) -> Share -> copy the hosted checkout link -> paste both; Claude wires them (one-line each, no other code change per the doc comment). Until then the app cannot take money.
+
+### SECTION 3 (cont) — REFRAME / AI FLOW: VERIFIED WIRED
+- reframe.js function exists (~1900 lines, real prompt scaffolding), calls api.openai.com/v1/chat/completions with Bearer auth. Invoked from real screens (Spine.jsx = the reframe flow, ReframeVsHold.jsx). Flow reaches the AI. No gap.
+- ENV DEPENDENCY TO VERIFY (Arlin, like the Supabase check): OPENAI_API_KEY must be set in Netlify for reframe to actually respond. Same pattern as the confirmed Supabase vars. [UNVERIFIED — Arlin to confirm in Netlify env vars alongside the others.]
+
+### SECTION 4 — NATIVE ANDROID + WATCH FLOW
+NATIVE ANDROID (Capacitor): real project, plugins wired (haptics/notifications/push), appId com.araembers.stillform. Builds to installable app ON THE MAC (device-gated, not code-gated). No code gap.
+WATCH COMPANION: the native halves are BUILT and wired (WearBreatheActivity haptic breathing + WearListenerService receiver on the watch; WatchBridge.java sender + WatchBridgePlugin registered in MainActivity on the phone; :wear in settings.gradle). BUT two real flow gaps:
+**>>> GAP #2 (watch, code — Claude's to fix): NO JS caller. <<<** Nothing in src/v2 calls WatchBridgePlugin.startBreathingOnWatch(). The native pipe is laid and plugin exposed to JS, but no button/breath-flow invokes it — the watch never actually starts. Fixable from here (wire a JS call in the breath flow); Mac only needed to compile/test.
+**>>> GAP #3 (watch, code — Claude's to fix): pattern-id MISMATCH. <<<** WatchBridge.java expects ids "quick"/"deep"/"cyclic_sigh" and its comment points at the DELETED src/App.jsx BREATHING_PATTERNS. Real v2 ids are "deep-regulate"/"cyclic-sighing" (BreathingSession.jsx). If the JS caller were wired today it would send an id the watch can't match -> wrong/no pattern. Must reconcile the id vocabulary (v2 names) when wiring GAP #2.
+NOTE: both watch gaps are CODE (mine), fixable now; only compile+device-test needs the Mac.
