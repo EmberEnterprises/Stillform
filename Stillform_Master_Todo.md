@@ -2522,3 +2522,9 @@ Checked producer-exists AND consumed-in-flow for all shipped P-items. Result: 19
 - P1–P7, P10–P18, P23, P24, P29: producer defined + consumed directly in Concierge.jsx / SmartScreen.jsx.
 - P25 (getBestHours): consumed INDIRECTLY by design — flows chronotype.js -> learnedPreferences.js (getLearnedPreferences) -> the Concierge "what it knows" ledger. Not an orphan; the shallow grep missed the indirect path, verified by hand.
 - No concierge producer is built-but-unwired. The catalog is real, not vaporware.
+
+### SECTION 2 — SETUP / ONBOARDING FLOW: VERIFIED, NO GAPS
+- Entry routing (pickInitialScreen): first-load-not-onboarded -> onboarding; onboarded -> home; ?go= shortcuts + share-text all gate on isOnboarded() so a new user never lands mid-flow. Correct.
+- Onboarding completion: fires "Onboarding Completed" event, calls setOnboarded() AND navigates — a refresh will NOT re-trap the user (the classic onboarding-flow bug is absent).
+- Deliberate J1 escape-hatch: breath-first entry intentionally does NOT set onboarded (deferred setup lands on Home, real onboarding still happens later). Thoughtful, not a gap.
+- Profile-setup screens (ContextProfile/TriggerProfile/BiasProfile): all exist and are routed in AppV2. Reachable.
