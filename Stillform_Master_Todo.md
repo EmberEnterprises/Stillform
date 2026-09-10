@@ -2528,3 +2528,11 @@ Checked producer-exists AND consumed-in-flow for all shipped P-items. Result: 19
 - Onboarding completion: fires "Onboarding Completed" event, calls setOnboarded() AND navigates — a refresh will NOT re-trap the user (the classic onboarding-flow bug is absent).
 - Deliberate J1 escape-hatch: breath-first entry intentionally does NOT set onboarded (deferred setup lands on Home, real onboarding still happens later). Thoughtful, not a gap.
 - Profile-setup screens (ContextProfile/TriggerProfile/BiasProfile): all exist and are routed in AppV2. Reachable.
+
+### SECTION 3 — PAYWALL / GATING / REFRAME FLOW
+GATING LOGIC: sound. shouldGate() = past FREE_SESSION_LIMIT (3) AND confirmed-not-subscribed; never gates confirmed subscribers; any uncertainty errs toward NOT gating. Correct.
+**>>> GAP #1 (LAUNCH-BLOCKING, REVENUE-BLOCKING): the Lemon Squeezy CHECKOUT URLs are EMPTY. <<<**
+- src/v2/lib/subscriptionApi.js: CHECKOUT_URLS = { monthly: "", annual: "" } — both empty strings.
+- CONSEQUENCE: a user who hits the paywall CANNOT SUBSCRIBE. Gating rises, paywall shows, but the CTA has no checkout to open — falls to the "almost ready / checkout goes live the moment..." placeholder. NO ONE CAN PAY.
+- This is DISTINCT from the customer PORTAL url (billing/manage), which IS wired. Portal = manage existing sub; Checkout = CREATE a sub. The create path is dead.
+- FIX (Arlin's, ~2 min, same as the portal was): Lemon Squeezy dashboard -> each plan (monthly + annual) -> Share -> copy the hosted checkout link -> paste both; Claude wires them (one-line each, no other code change per the doc comment). Until then the app cannot take money.
