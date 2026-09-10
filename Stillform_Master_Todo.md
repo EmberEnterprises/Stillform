@@ -2564,3 +2564,19 @@ Health at review: build clean, suite 68/68, boot-static PASS. The app is structu
 NO GAPS FOUND IN: concierge catalog (19/19 wired), onboarding/setup routing, gating logic, Reframe AI flow, crisis resources, account deletion (done+live), terms (done), portal URL (done).
 OPEN BY DESIGN (scoped, not broken): Becoming, The Re-Read, library expansion, engagement architecture, P20/P26/P32-34 — aspirational/awaiting-Arlin, not flow gaps.
 NEXT ACTIONS: (a) Arlin: LS checkout links + confirm OPENAI_API_KEY. (b) Claude: wire watch JS trigger + fix pattern ids (GAP #2+#3), build data export (GAP #4).
+
+## ===== FULL-DOC AUDIT SWEEP (2026-08-17, Arlin: audit EVERYTHING — all 86 docs, all 2604 commits, all 574 files) =====
+Method: every doc's feature checked against live code (built/unbuilt). Checkpointed here (source of truth, no new files). This is a MULTI-PASS audit; this is pass 1 (feature-spec existence).
+
+### SCALE (verified): 2604 commits, 574 files, 86 docs, 279 src/v2 files, 54 netlify function files.
+
+### PASS 1 — FEATURE SPECS vs CODE (keyword-existence; "BUILT" = related code exists, still needs depth-check):
+BUILT (code exists): Engagement Architecture, Cognitive Function Measurement, My Progress Redesign, Settled Chip, Pattern Disruption, Settings Rewrite, Reframe UI, Plain-Language Science Card, Workshop (Catalog/MCQ30/CDQuest), Low-Demand Phase 2+3, Chip Definitions, Self Mode Redesign, Narrative Arc, Trigger Profile P2, Today's Brief, Pre-Event Brief, Move Card.
+UNBUILT (NO related code found — REAL GAPS to confirm): 
+- **BODY SCAN "WHAT SHIFTED" (BODY_SCAN_WHAT_SHIFTED_SPEC, 329-line spec)** — no whatShifted/scanShift code. Likely unbuilt.
+- **THREE CATEGORY DATA FEED (THREE_CATEGORY_DATA_FEED_SPEC, 509-line spec)** — no threeCategory/dataFeed code. Likely unbuilt.
+NOT-A-FEATURE (false flags, ignore): Framing Law = doctrine doc (enforced by doctrine-sync guard, passes), not a buildable feature.
+
+### CONCIERGE UNBUILT (from prior pass, confirmed): P20, P26, P32, P33, P34, P35 — no producer code.
+
+### STILL OWED (next passes): depth-verify the "BUILT" specs actually match their spec (not just keyword-present); the remaining ~60 docs; B2B suite; SOC2; the guides (WATCH/SHARE_EXTENSION/BUILD/B2B_IT); every commit-era's work. This is pass 1 of several.
