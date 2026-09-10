@@ -40,7 +40,7 @@ Entry -> Onboarding (first time) -> Home (SmartScreen). From Home the user reach
 5. **Internal .md docs still carry old $14.99/$9.99 pricing** — record hygiene, not user-facing.
 
 ## 5. NOT-BLOCKING / OPEN BY DESIGN (scoped, not broken)
-Becoming, The Re-Read, library expansion, engagement architecture, catalog items P20/P26/P32-34 — these are scoped-but-not-fully-built by design (future work, awaiting Arlin's direction), NOT broken flow.
+Library expansion chapters, the 5-stage engagement roadmap (Engine 1), catalog items P20/P26/P32-P35 — these are scoped-but-not-built (awaiting Arlin's direction), NOT broken flow. CORRECTION 2026-09-10: Becoming (fa531ad) and The Re-Read (7bdd630) ARE built, routed, and AI-wired — an earlier version of this line wrongly listed them as scoped. The full verified map now lives in Stillform_Master_Todo.md under AUDIT LEDGER (2026-09-10); this file is a pointer.
 
 ## 6. DEVICE / ACCOUNT GATED (not code, not tonight)
 - Android + Watch native BUILD (needs Arlin's Mac + Android Studio — later, her call).
