@@ -478,9 +478,9 @@ export default function Settings({ onExit, onNavigate }) {
               exists, show an honest not-yet state rather than a 404 link. When
               the file lands, flip this span to: <a href="/terms.html" style={LINK}>Terms of Service</a> */}
           <p style={ROW}>
-            <span style={{ color: "var(--sf-text-faint)" }}>
-              Terms of Service — added before launch
-            </span>
+            <a href="/terms.html" style={LINK}>
+              Terms of Service
+            </a>
           </p>
           <p style={ROW}>
             <a href="mailto:ARAembersllc@proton.me" style={LINK}>
