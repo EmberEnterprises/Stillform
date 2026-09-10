@@ -2513,3 +2513,12 @@ VERIFIED GROUNDED (not fabricated):
 - STILLFORM_PRESTIGE_SPEC_RECOVERED.md: the real 422-line locked spec, exists intact. Real.
 THE ONE REAL FABRICATION (corrected above at the COLOR + FONT AUDIT item): Claude's CONVERSATIONAL claim that the font/color treatment was finished "considered high-end / restraint IS prestige" work, when the disciplined spec-pass is still open. Not a docs problem — a Claude-overstatement problem, now on the record.
 AUDIT COMPLETE 2026-08-17. Checked all ~190 claims. RESULT: no additional fabrications in the docs. Completed_Archive + AUDIT_PHILOSOPHY + the remaining low-count files use 'prestige/considered/premium' descriptively or as product names, not as false done-claims. The design tokens are verified on-spec. THE ONE DRIFT FOUND (corrected, not a fabrication): four historical audit/spec docs (STILLFORM_UI_FLOW_AUDIT, TRIGGER_PROFILE_PHASE_2_FLOW_AUDIT, REFRAME_UI_FOUNDATION_SPEC, V1_V2_GAP_AUDIT_COMPLETE) reference the DELETED src/App.jsx and pre-v2 token locations; each now carries a dated STALENESS FLAG banner marking it as history, not current-state. NET: the only genuine fabrication was Claude's conversational overstatement of the font/color treatment (corrected at the COLOR + FONT AUDIT item). The docs themselves were grounded or merely stale, now flagged. The disciplined color+font spec-pass remains genuinely OPEN (real work, honestly marked).
+
+## FULL MASTER-TODO PROTOCOL REVIEW (started 2026-08-17, Arlin's order: thorough review + find gaps in setup and flow)
+Auditing every doc claim against live code (src/v2/), section by section, checkpointed here so state survives resets.
+
+### SECTION 1 — CONCIERGE CATALOG (P1–P34): VERIFIED WIRED
+Checked producer-exists AND consumed-in-flow for all shipped P-items. Result: 19/19 genuinely wired, ZERO orphans.
+- P1–P7, P10–P18, P23, P24, P29: producer defined + consumed directly in Concierge.jsx / SmartScreen.jsx.
+- P25 (getBestHours): consumed INDIRECTLY by design — flows chronotype.js -> learnedPreferences.js (getLearnedPreferences) -> the Concierge "what it knows" ledger. Not an orphan; the shallow grep missed the indirect path, verified by hand.
+- No concierge producer is built-but-unwired. The catalog is real, not vaporware.
