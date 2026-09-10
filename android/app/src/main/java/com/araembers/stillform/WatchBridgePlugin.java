@@ -10,7 +10,7 @@ public class WatchBridgePlugin extends Plugin {
 
     @PluginMethod()
     public void startBreathing(PluginCall call) {
-        String pattern = call.getString("pattern", "calm");
+        String pattern = call.getString("pattern", "deep-regulate");
         WatchBridge.startBreathingOnWatch(getContext(), pattern);
         call.resolve();
     }

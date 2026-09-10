@@ -21,9 +21,11 @@ public class WatchBridge {
      * Call this when a breathing session starts on the phone.
      *
      * @param context App context
-     * @param pattern One of: "quick", "deep", "cyclic_sigh".
-     *                Must match a pattern id in BREATHING_PATTERNS (src/App.jsx)
-     *                and a switch case in WearBreatheActivity.onCreate.
+     * @param pattern A v2 breathing pattern id: "deep-regulate", "cyclic-sighing",
+     *                or "quick-reset" (the live ids in
+     *                src/v2/components/BreathingSession.jsx). Legacy ids
+     *                "deep"/"cyclic_sigh"/"quick" are still accepted as aliases
+     *                by WearBreatheActivity.
      */
     public static void startBreathingOnWatch(Context context, String pattern) {
         executor.execute(() -> {

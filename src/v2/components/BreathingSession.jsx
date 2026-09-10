@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import MonoLabel from "./MonoLabel.jsx";
 import Button from "./Button.jsx";
+import { startBreathingOnWatch } from "../lib/watchBridge.js";
 
 /**
  * BreathingSession — pattern-driven breath runner.
@@ -39,6 +40,13 @@ export default function BreathingSession({ pattern = "deep-regulate", onComplete
   const [phaseIndex, setPhaseIndex] = useState(0);   // 0-based within current round
   const [secondsLeft, setSecondsLeft] = useState(phases[0].duration);
   const startTimestampRef = useRef(Date.now());
+
+  // Wear OS companion: when the session starts, mirror the pattern onto a paired
+  // watch with haptic pacing. Fires once per session; degrades silently on web /
+  // iOS / no-watch. The phone session is unaffected either way.
+  useEffect(() => {
+    startBreathingOnWatch(pattern);
+  }, [pattern]);
 
   // Run a single 1-second tick. When seconds hit 0, advance to next phase
   // (or next round, or complete if all rounds done).

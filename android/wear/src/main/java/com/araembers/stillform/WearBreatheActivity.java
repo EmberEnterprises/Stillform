@@ -46,22 +46,28 @@ public class WearBreatheActivity extends Activity {
         cycleLabel = findViewById(R.id.cycle_label);
 
         // Check for pattern from phone via intent extras.
-        // Pattern IDs and durations must match BREATHING_PATTERNS in src/App.jsx.
-        // Phone-side default is "quick" (see watchBridge.startBreathing default arg in App.jsx).
+        // Pattern IDs and durations must match PATTERNS in
+        // src/v2/components/BreathingSession.jsx (the live v2 source of truth):
+        //   "deep-regulate" 4-4-8-2, "cyclic-sighing" 4-1-8, "quick-reset" 4-4-6.
+        // Legacy ids ("deep"/"cyclic_sigh"/"quick") are accepted as aliases so a
+        // stale caller degrades to the right pattern instead of the default.
         String pattern = getIntent().getStringExtra("pattern");
         if (pattern != null) {
             switch (pattern) {
+                case "quick-reset":
                 case "quick":
                     // Quick Reset: 4 inhale, 4 hold, 6 exhale (no rest).
                     phaseDurations = new int[]{4, 4, 6, 0};
                     phaseNames = new String[]{"Inhale", "Hold", "Exhale", ""};
                     break;
+                case "deep-regulate":
                 case "deep":
                     // Deep Regulate: 4 inhale, 4 hold, 8 exhale, 2 rest.
                     // Matches the default declared at top of class.
                     phaseDurations = new int[]{4, 4, 8, 2};
                     phaseNames = new String[]{"Inhale", "Hold", "Exhale", "Rest"};
                     break;
+                case "cyclic-sighing":
                 case "cyclic_sigh":
                     // Cyclic Sighing (Balban et al. 2023, Cell Reports Medicine 4:100895):
                     // primary nasal inhale (4), secondary top-off inhale (1), long oral exhale (8).

@@ -34,7 +34,7 @@ Entry -> Onboarding (first time) -> Home (SmartScreen). From Home the user reach
 
 ## 4. THE REAL GAPS (verified, ranked — this is the actual to-do)
 1. **CHECKOUT DOESN'T FUNCTION (launch/revenue blocker).** The Lemon Squeezy subscription PRODUCTS don't exist yet at $24.99/$17.49-annual. Until Arlin creates them in the LS dashboard, there are no checkout links to wire, so NO ONE CAN SUBSCRIBE. **This is the #1 thing blocking launch. It is Arlin's dashboard step.**
-2. **Watch companion — no JS trigger + pattern-id mismatch (code, Claude's).** The native watch halves are built and wired, but nothing in the app starts the watch, and the pattern ids reference the deleted src/App.jsx. Fixable from here; Mac only for compile/test.
+2. **Watch companion — DONE IN CODE 2026-08-17.** JS trigger wired (src/v2/lib/watchBridge.js -> WatchBridgePlugin, fired from BreathingSession.jsx on session start, degrades silently off-Android) AND pattern-id mismatch fixed (WearBreatheActivity now matches the real v2 ids deep-regulate/cyclic-sighing/quick-reset, with legacy aliases; WatchBridge comment corrected off the dead App.jsx; plugin default fixed from invalid 'calm' to 'deep-regulate'). Tested 4/4. REMAINING: compile + on-device test needs Arlin's Mac (device-gated only).
 3. **No user-facing data export (Tier-2, Claude's, NOT launch-blocking).** "Download my record" is absent.
 4. **Verify OPENAI_API_KEY set in Netlify (Arlin, env).** Reframe code is correct; confirm the key like the Supabase ones.
 5. **Internal .md docs still carry old $14.99/$9.99 pricing** — record hygiene, not user-facing.
