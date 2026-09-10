@@ -138,7 +138,7 @@ The current build state is too dynamic to mirror in this transfer doc. Pull `Sti
 - AI: GPT-4o via `netlify/functions/reframe.js`.
 - Cloud sync: Supabase, AES-256 encrypted, three-table schema (user_data, backups, user_profiles). ⚠️ **NOT wired in the live frontend (May 30 2026 audit) — no Supabase client, no sync, no encryption; data is plain `localStorage`, device-only. Describes intended design, not current reality. See Punch List "VERIFIED CODE AUDIT."**
 - Payments: Lemon Squeezy LIVE.
-- Pricing: $14.99/mo or $9.99/mo annual ($119.88/yr).
+- Pricing (CORRECTED 2026-08-17): $24.99/mo, or $17.49/mo billed annually (save 30%, $209.92/yr). Old $14.99/$9.99 was superseded.
 
 **Frontend:** `src/v2/` is Stillform's frontend. The prior frontend at `src/App.jsx` was deleted in commit `237167b` (May 17, 2026). Stillform is just Stillform — there is no "v1 vs v2" comparison framing in current work.
 
@@ -184,7 +184,7 @@ Live tracking of open issues, bugs, and pending decisions is in `Stillform_Maste
 - Launch standard: master todo complete, except translations and Apple Store. No other launch gates exist. Testimonials are not a prerequisite. Reddit is not a launch step.
 - Netlify deploys are MANUAL. Arlin triggers AND publishes (TWO STEP — trigger ≠ publish, confirmed Apr 27). Claude never triggers.
 - Bobby is name-only on LLC. NOT involved in code. Never attribute code changes to Bobby — causes Arlin real anxiety about security.
-- Pricing: $14.99/mo or $9.99/mo annual ($119.88/yr) — LIVE via Lemon Squeezy
+- Pricing (CORRECTED 2026-08-17): $24.99/mo, or $17.49/mo billed annually (save 30%). NOTE: NOT yet live — the Lemon Squeezy products don't exist yet at these prices (Arlin's setup step); checkout is non-functional until they do.
 - **Apr 28 operating rule:** Before claiming any architectural gap exists, proposing to close one, or suggesting changes to Stillform, Claude (1) reads the existing implementation, (2) checks the doc repo, and (3) checks git commit history. Apparent contradictions are usually intentional design.
 - **Apr 28 operating rule:** Arlin's direction is always for the whole app, not one type. She can only see one screen at a time, so Claude must proactively audit every change for whether the equivalent should apply to the other processing type and flag asymmetries before shipping.
 - **Apr 28 operating rule:** Research-grounded changes are placement-first; gating decisions are separate. When current evidence contradicts implementation (e.g. Nook 2021 vs pre-regulation chips), fix placement first, defer optionality/gating decisions to a separate pass to avoid compounding changes.

@@ -96,7 +96,7 @@ Pattern-Change Engine (PCE.1–3) + Phase 6.2 Support Sheet · Move card (quick-
 - 8a/8b/8c, 10a/10b, error boundary — all run against STILLFORM_FRAMING_LAW (Layer 0) + Science + Flow + the 11-item gate (recorded inline in Completed Archive). Framing: all PASS — the paywall + intro copy were audited line-by-line vs the banned list (zero regulate/calm/wellness; composure framed as felt-outcome; §291 stated).
 - §291 VERIFIED IN CODE: Quick Breathe opens BreatheOverlay from Home via local state, independent of the gated onBeginSession — the free valve is not behind the wall.
 - Gap found + CLOSED: onboarding fired no Plausible → added Onboarding Started/Completed (`af9d5be`).
-- Open flags (not framing fails): paywall prices ($14.99/$9.99) are WORKING DEFAULTS, not locked — final price is set at the pre-launch review and gated on the finished app earning it (see Master Todo pricing entry, May 28 clarification); Privacy/Terms must cover billing + Health/Sleep/Calendar before those ship; FAQ billing entry pending the FAQ screen.
+- Open flags: paywall prices CORRECTED 2026-08-17 to $24.99/mo + $17.49/mo-annual (save 30%). Displayed on Paywall + Terms; checkout products NOT yet created in LS. — final price is set at the pre-launch review and gated on the finished app earning it (see Master Todo pricing entry, May 28 clarification); Privacy/Terms must cover billing + Health/Sleep/Calendar before those ship; FAQ billing entry pending the FAQ screen.
 - **Full layer sweep completed May 28 (after Arlin pushed on comprehensiveness — the first pass was Layer-0-prioritized, not the full protocol):** Layer 1.1 collisions — localStorage keys, screen-route strings, AND all Plausible event names verified distinct, no collisions. Layer 2.37 contracts — subscriptionApi reads `is_subscribed` (matches subscription-status.js) + checkout params match SUBSCRIPTION_SETUP §4. Layer 6.4 — every new file wired (no orphans), no leftover console.log/TODO/debugger. All clean. (Phase 6/7 inline F·S·F was NOT a residual — it was already completed earlier the same day in `a8790f0`; a later note here wrongly called it open and was corrected on inspection.)
 - Transfer doc: §2 delegates current build state to Master Todo/CANON by design (not duplicated), so updating those = keeping transfer current; no separate transfer edit needed this session.
 
@@ -419,8 +419,8 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 ### Paywall
 - [ ] "Start Free Trial" button in header → goes to pricing
 - [ ] Pricing screen shows Monthly/Annual toggle
-- [ ] Monthly: $14.99/month
-- [ ] Annual: $119.88/year ($9.99/month, Save 33%)
+- [ ] Monthly: $24.99/month (corrected 2026-08-17)
+- [ ] Annual: $209.92/year ($17.49/month, Save 30%) (corrected 2026-08-17)
 - [ ] "Start 14-day free trial →" button opens Lemon Squeezy checkout
 - [ ] After trial expires → forced to pricing screen, no back button
 - [ ] In Lemon Squeezy: both variants show on checkout page
