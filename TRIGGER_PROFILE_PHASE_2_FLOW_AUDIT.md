@@ -1,3 +1,5 @@
+> **STALENESS FLAG (2026-08-17, prestige-claim audit):** This document references the OLD single-file `src/App.jsx` frontend, which is DELETED. The app is now v2 (`src/v2/`); tokens live in `src/v2/tokens.css`. The prestige design tokens remain wired and on-spec (verified 2026-08-17), but file-path and line-number references below are stale. Read as HISTORY, not current-state.
+
 # TRIGGER PROFILE PHASE 2 — FLOW AUDIT
 **ARA Embers LLC · May 8, 2026 · Layer 0.6 audit output per audit philosophy v1.3**
 

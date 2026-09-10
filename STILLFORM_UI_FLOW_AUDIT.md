@@ -1,3 +1,5 @@
+> **STALENESS FLAG (2026-08-17, prestige-claim audit):** This audit was written against the OLD `src/App.jsx` single-file frontend (see 'Tokens at App.jsx:82', 'walked in code: src/App.jsx'). That file is DELETED; the app is now v2 (`src/v2/`) and the design tokens live in `src/v2/tokens.css`. The prestige tokens ARE still wired and on-spec (verified 2026-08-17: #08080A ground + #B8862B antiqued gold + 0.5px hairlines match STILLFORM_PRESTIGE_SPEC_RECOVERED.md), but every file-path and line-number reference below is stale. Read this doc as HISTORY, not current-state.
+
 # STILLFORM — UI FLOW AUDIT
 **ARA Embers LLC · May 7, 2026**
 **Walked from the canonical docs and the actual code, not from memory.**

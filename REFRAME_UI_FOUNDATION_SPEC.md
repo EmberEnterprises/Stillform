@@ -1,3 +1,5 @@
+> **STALENESS FLAG (2026-08-17, prestige-claim audit):** This document references the OLD single-file `src/App.jsx` frontend, which is DELETED. The app is now v2 (`src/v2/`); tokens live in `src/v2/tokens.css`. The prestige design tokens remain wired and on-spec (verified 2026-08-17), but file-path and line-number references below are stale. Read as HISTORY, not current-state.
+
 # REFRAME UI FOUNDATION — Commit 2 Spec
 **ARA Embers LLC · v1.0 · Drafted May 13, 2026**
 
