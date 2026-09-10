@@ -2582,3 +2582,18 @@ NOT-A-FEATURE (false flags, ignore): Framing Law = doctrine doc (enforced by doc
 ### CONCIERGE UNBUILT (from prior pass, confirmed): P20, P26, P32, P33, P34, P35 — no producer code.
 
 ### STILL OWED (next passes): depth-verify the "BUILT" specs actually match their spec (not just keyword-present); the remaining ~60 docs; B2B suite; SOC2; the guides (WATCH/SHARE_EXTENSION/BUILD/B2B_IT); every commit-era's work. This is pass 1 of several.
+
+
+## ===== AUDIT LEDGER (started 2026-09-10 — full line-by-line audit, new session on Claude Fable) =====
+Rules of this ledger: nothing here is from memory or from a keyword grep. Every verdict names the file read and the commit evidence. Status vocabulary: TRUE-BUILT / PARTIAL / UNBUILT / DELETED-LATER / DECISION-GATED (Arlin) / DEVICE-GATED / RECORD-STALE (doc wrong, code fine).
+Passes: 0 health -> 1 Master Todo line-by-line -> 2 feature specs depth -> 3 Completed_Archive + Punch List -> 4 all remaining docs. Checkpointed per section.
+
+### PASS 0 — HEALTH AT HEAD 03fcdba (run 2026-09-10, this session, not inherited)
+- npm run build: clean (vite, 5.2s).
+- Test loop src/v2/lib/__tests__/*.test.mjs: 70 pass / 0 fail.
+- node scripts/boot-static.mjs: PASS, 35 lazy routes, 0 failures.
+- node scripts/check-doctrine-sync.mjs: PASS (4 carriers x 4 sentinels).
+- node scripts/check-links.mjs: PASS.
+- node scripts/check-science-citations.mjs: PASS, 0 fabricated citations.
+- node scripts/security-smoke.mjs: static checks PASS (no wildcard CORS, origin allowlist enforced, RLS in SQL). The live Supabase anon-access probe FAILED with "fetch failed" — the audit container cannot reach supabase.co (HTTP 000). NOT a code failure; must be re-run from a networked machine or Netlify before launch. [OPEN — env, not code]
+- RECORD-STALE: "npm run ship:preflight (21+ guards)" referenced in memory/older docs does NOT exist. Removed 2026-05-17 in f84d263 because Phase A (237167b) deleted scripts/ship-preflight.mjs with the v1 frontend. The current gate set is: build + test loop + boot-static + doctrine-sync + links + science-citations + security-smoke(static). Any doc telling a future session to run ship:preflight is wrong.
