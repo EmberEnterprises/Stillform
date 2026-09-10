@@ -81,3 +81,33 @@ Verified facts only. No adjectives, no comparisons.
 - All auth-gated (parseBearer + getUserFromToken) — NOT an open security hole, just unused.
 - ALREADY DECIDED — NOT A GAP. Dedicated docs exist: B2B_SSO_INTEGRATION.md, STILLFORM_B2B_PRIVACY_ARCHITECTURE.md (names organization-invite.js etc. as 'Future write endpoints, PR B+'), and STILLFORM_CANON.md:333 'All five B2B revenue paths ship at launch.' The backend-ahead-of-frontend is DELIBERATE and PLANNED. I wrongly presented a settled, documented strategy as a mystery gap — corrected. NOTHING for Arlin to decide here; it's decided.
 - Functions correctly NOT-frontend-called for legitimate reasons (NOT findings): subscription-webhook (Lemon Squeezy webhook), link-sentinel (@daily cron), metrics-ingest (server-side). These are supposed to be non-frontend.
+
+
+## ===== VERIFIED LINE-BY-LINE BOARD (2026-08-17) =====
+## Every line cross-checked: CODE + git HISTORY. Nothing from memory. This is the truth to verify line by line.
+
+### DONE (verified in code, not claimed):
+- ACCOUNT DELETION: delete-account.js exists + wired in AppV2 (history: ad151d9). LIVE (env vars confirmed by Arlin). VERIFIED DONE.
+- TERMS OF SERVICE: public/terms.html exists + Settings links it. VERIFIED DONE.
+- PRICING DISPLAYED: Paywall shows $24.99 + $17.49 only (no stale numbers). VERIFIED DONE.
+- SUBSCRIPTION PORTAL (manage/cancel): CUSTOMER_PORTAL_URL set to real https URL. VERIFIED DONE.
+- DATA EXPORT: dataExport.js exists + Settings "Download my record" wired. VERIFIED DONE.
+- WATCH COMPANION (code): JS trigger in BreathingSession + pattern-ids fixed to v2 (deep-regulate etc). VERIFIED DONE IN CODE. (Compile/device-test = Arlin's Mac.)
+- REFRAME AI: reframe.js calls api.openai + invoked from Spine screen. VERIFIED WIRED.
+- CRISIS: crisis-resources routed + 988 present. VERIFIED DONE.
+- QUICK BREATHE / BreatheOverlay: cyclic sighing, duration entirely user's (history: a2e108f, corrected 774380f). VERIFIED DONE — this IS the "one method, user duration" decision, already built.
+
+### OPEN — GENUINELY NOT DONE (verified open in code):
+1. CHECKOUT URLS EMPTY (LAUNCH BLOCKER). subscriptionApi.js CHECKOUT_URLS = {monthly:"", annual:""}. History confirms never wired. NO ONE CAN SUBSCRIBE. => ARLIN: create the 2 products in Lemon Squeezy at $24.99/$17.49-annual, then the checkout links exist, then Claude wires them (1 line each). This is THE thing blocking taking money.
+2. OPENAI_API_KEY in Netlify: reframe code is correct; the KEY being set is unverifiable from code. => ARLIN: confirm it's set in Netlify env (like the Supabase ones).
+3. BREATHINGSESSION.JSX still has 3 patterns with fixed round-counts (14 totalRounds refs) — does NOT match the QuickBreathe decision (cyclic-only, user-duration). => ARLIN'S CALL: reduce BreathingSession to cyclic-only + user-duration to match, OR it serves a different purpose and stays. (Claude's to build once Arlin decides.)
+4. ACTIVE-PROMPT AI path: stubbed by design — static fallback prompts work; the AI-generated version's backend (active-prompt.js) was never built. => NOT launch-blocking (works static). ARLIN'S CALL if the AI version matters for launch.
+
+### DEVICE/DASHBOARD-GATED (not code, not tonight):
+- Android + Watch native BUILD: Arlin's Mac + Android Studio.
+- Lemon Squeezy product creation: Arlin's dashboard (unblocks #1 above).
+- iOS: gated behind Android revenue (Arlin's decided sequence).
+
+### DECIDED/DOCUMENTED — NOT gaps (do not re-open):
+- B2B/organization backend (11 fns) staged ahead of frontend ON PURPOSE (B2B_SSO_INTEGRATION.md, CANON:333 "All five B2B revenue paths ship at launch").
+- account-delete.js is the superseded May-6 original (42ed650); delete-account.js replaced it. Optional cleanup only.
