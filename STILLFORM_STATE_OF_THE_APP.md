@@ -46,3 +46,26 @@ Becoming, The Re-Read, library expansion, engagement architecture, catalog items
 - Android + Watch native BUILD (needs Arlin's Mac + Android Studio — later, her call).
 - iOS (gated behind Android revenue, her decision).
 - Lemon Squeezy product creation (her dashboard).
+
+## ===== DEEP CODE AUDIT (2026-08-17, Arlin: "thorough, from the code, not memory") =====
+Verified facts only. No adjectives, no comparisons.
+
+### FACTS (counted from the repo)
+- build: succeeds. test files: 70/70 pass. boot-static: PASS.
+- 49 screen files; 42 routed in AppV2; 99 lib files; 37 netlify functions; 70 test files.
+
+### SCREEN INTEGRITY (verified)
+- Every routed screen resolves to a real, loadable component (boot-static loads each one — authoritative).
+- ZERO orphan screens: every screen file is referenced somewhere. Nothing built-and-abandoned.
+- No zero-line stubs. Smallest screen = Home (46 lines, simple by design).
+- (Caught + discarded a FALSE "missing screens" alarm from a buggy path-check script — files all exist.)
+
+### REAL FINDING #1 — AI ACTIVE-PROMPT PATH IS STUBBED (by design, not broken)
+- src/v2/lib/activePrompt.js: the AI-generated prompt path is STUBBED. It attempts to fetch /netlify/functions/active-prompt, which DOES NOT EXIST, and always falls back to static confidant-voice prompts.
+- CONSEQUENCE: prompts WORK (static fallback ships and functions), but the AI-PERSONALIZED version of them was never built. This is a planned-enhancement-not-built, not a broken feature.
+- (Corrected my own earlier inventory: I implied "active-prompt" was among the 37 functions; it is NOT — verified by listing the directory.)
+- STATUS: known gap, not launch-blocking (feature degrades to working static prompts). Arlin's call whether the AI version matters for launch.
+
+### BREATHING METHODS (verified against decision record)
+- Code has THREE patterns: deep-regulate (4-4-8-2, 10 rounds), cyclic-sighing (4-1-8, 23 rounds), quick-reset (4-4-6, 4 rounds). Each has a HARDCODED totalRounds.
+- Searched full git history + all docs: NO record of a decision to reduce to one method or make duration user-controlled. If that decision was made, it was never committed anywhere — it lives only in memory. THIS IS A CAPTURE GAP: the decision (if real) needs to be recorded, then implemented. The code currently contradicts what Arlin remembers deciding.
