@@ -37,7 +37,7 @@ const CHECKOUT_URLS = {
  * "My Orders" portal link). Until set, the Manage row shows an honest
  * unavailable state rather than a dead link. No other code change needed.
  */
-const CUSTOMER_PORTAL_URL = "";
+const CUSTOMER_PORTAL_URL = "https://embers.lemonsqueezy.com/billing";
 
 /**
  * The customer-portal URL for managing or cancelling a subscription.
