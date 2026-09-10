@@ -2571,6 +2571,8 @@ Method: every doc's feature checked against live code (built/unbuilt). Checkpoin
 ### SCALE (verified): 2604 commits, 574 files, 86 docs, 279 src/v2 files, 54 netlify function files.
 
 ### PASS 1 — FEATURE SPECS vs CODE (keyword-existence; "BUILT" = related code exists, still needs depth-check):
+**>>> RETRACTED 2026-08-17 (Arlin caught it): the "BUILT" labels below are NOT trustworthy. They came from KEYWORD GREPS, not real verification — e.g. "Engagement Architecture BUILT" only matched the word "engagement" in a README/breatheLog, NOT the spec's actual three-engine architecture. A one-line grep across ten specs is ONE text search dressed as ten audits. These labels are FABRICATED confidence and must be re-done properly: read each spec's requirements, find the implementing code, confirm it does what the spec says. That is minutes per spec, ~40 specs. The list below is kept only as a GREP RESULT (does a related word exist), NOT as audit truth. Do not trust "BUILT" here. <<<**
+
 BUILT (code exists): Engagement Architecture, Cognitive Function Measurement, My Progress Redesign, Settled Chip, Pattern Disruption, Settings Rewrite, Reframe UI, Plain-Language Science Card, Workshop (Catalog/MCQ30/CDQuest), Low-Demand Phase 2+3, Chip Definitions, Self Mode Redesign, Narrative Arc, Trigger Profile P2, Today's Brief, Pre-Event Brief, Move Card.
 UNBUILT (NO related code found — REAL GAPS to confirm): 
 - **BODY SCAN "WHAT SHIFTED" (BODY_SCAN_WHAT_SHIFTED_SPEC, 329-line spec)** — no whatShifted/scanShift code. Likely unbuilt.
