@@ -1,3 +1,5 @@
+**2026-09-10: the full audit (Passes 0-4) is complete. The current board lives at the TOP of Stillform_Master_Todo.md ("TASK BOARD — 2026-09-10"); the evidence lives in its AUDIT LEDGER. This file is a historical pointer; where it conflicts with the ledger, the ledger wins.**
+
 # STILLFORM — STATE OF THE APP
 **Complete audit from the ground up. Started 2026-08-17 (Arlin: "start from the beginning, complete + thorough, no fabrications").**
 **Every line here is verified against live code in `src/v2/`, not memory. This file is the single honest map.**
