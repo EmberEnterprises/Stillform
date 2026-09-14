@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** PARTIAL in v2: the AI half (sentence/question caps) is live and fires from State Check tokens depleted / sleep-deprived / pain / hormonal; the UI half was deleted with 237167b and never rebuilt; the "medicated" flag cannot trigger (no v2 tag). Board C2 decides.
+
 # LOW-DEMAND MODE PHASE 3 — REFRAME SPEC
 
 > **⚠️ PARTIAL SHIP — verified May 14, 2026** per Master Todo line 1696: **AI SIDE SHIPPED, UI SIDE OPEN.** The AI behavior change in `netlify/functions/reframe.js` landed (commit `9783d94`). The user-facing UI strip in Reframe is still open as a launch-readiness item — tracked in Master Todo as 🔥 priority. The 3 `src/App.jsx` line refs in this doc point at v1 code deleted in Phase A; the UI work needs to land in `src/v2/screens/spine/Reframe.jsx` instead.

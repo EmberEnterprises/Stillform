@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** AS OF 2026-09-14: pattern ids are quick-reset / deep-regulate / cyclic-sighing / box (legacy aliases retained in WearBreatheActivity.java); the phone side is src/v2/lib/watchBridge.js (App.jsx references below are v1); the duplicate IntegrationBridgePlugin.java that would have failed the first gradle build was removed 2026-09-14 (board B1). Watch APK build + on-device test remain device-gated (board D2).
+
 # Stillform Watch Haptics Integration Guide
 
 **Status:** ✅ Implemented — verify on paired phone/watch hardware  

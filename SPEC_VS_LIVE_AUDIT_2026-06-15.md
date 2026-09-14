@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** HISTORICAL (June 15 2026, 18 routed screens; 42 today). Superseded by the AUDIT LEDGER in Stillform_Master_Todo.md (2026-09-10).
+
 # SPEC-VS-LIVE AUDIT — June 15 2026
 
 **Purpose:** honest map of what is specified vs. what is actually built, wired, and reachable in live code. Produced as a reading-and-verifying pass against `src/v2/` + `netlify/functions/`, not from memory. Triggered by Arlin's concern that "none of the documented scope has been implemented" — which the audit does NOT bear out: the app is overwhelmingly built and wired. The "nothing's there" feeling traced to the HOME SCREEN being broken + stripped of its concierge (fixed this session, commit ffee465), not missing features.

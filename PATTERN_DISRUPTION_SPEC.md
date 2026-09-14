@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** AS BUILT (v2, June 15 – July 1 2026): detection is the deterministic discoveryEngine (co-occurrence/sequence over the signal log, user-confirmed) — NOT the server-side AI read of the 8 loop dimensions below; the prompt-on-open is the dismissible StepOutOffer (never a non-dismissable modal); the disruptor is the user-paced StepOutOverlay grounding sequence; the dismissal state machine is stepOutTrigger.js (MAX_DISMISSALS=2, 24h refire). NOT BUILT by decision: push notifications, the Settings transparency surface, the post-disruptor reflection line. Read the rest as the original proposal.
+
 # Pattern Disruption — Spec v1
 
 **Status:** Drafted May 3, 2026. Conversational decisions captured. Engineering scope outlined. Open questions called out.

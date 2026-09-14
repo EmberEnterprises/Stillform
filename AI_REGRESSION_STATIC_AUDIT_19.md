@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** HISTORICAL (May 14 2026, against v1 prompts). The live 26-scenario runner is scripts/run-ai-regression.mjs; it has never been run against a deployed function on record (board D4).
+
 # 19-Scenario Static Structural Audit — REFRESH
 
 **Date:** May 14, 2026

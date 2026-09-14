@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** RETIRED. v1 spec (April 17); v2 Settings (May 30 / June 23 / July 8) has eight collapsible sections and Account/subscription live on the Paywall. Kept for history only.
+
 # Settings Rewrite Spec
 **Locked April 17, 2026 — confirm before coding**
 

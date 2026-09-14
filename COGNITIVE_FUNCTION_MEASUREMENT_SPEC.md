@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** BUILT in v2 for candidates 1 (affect labeling) and 3 (defusion) — functionChecks.js, cfmStimuli.js, AffectLabelingRound.jsx, DefusionRound.jsx, PracticeEvidence.jsx, cognitive-defusion-score.js. The stimulus draft embedded at the bottom of this spec is STALE: the locked live set is src/v2/lib/cfmStimuli.js (30 + 15). Candidate 2 held (weakest science); no feature flag or pilot was run; result-voice lines shipped 2026-09-14 (Arlin).
+
 # COGNITIVE FUNCTION MEASUREMENT SPEC
 
 **Working title:** Function Tests / Capacity Tests / Practice Evidence (final naming TBD with Arlin)

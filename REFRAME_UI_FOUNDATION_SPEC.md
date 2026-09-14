@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** RETIRED / SUPERSEDED. Written against the deleted v1 App.jsx. In v2 Reframe.jsx, Moves 1 and 4 are satisfied by design; Moves 2/3/5 (first-sentence lead, Reply pill + overflow, pill collapse) are UNBUILT and decision-gated (board C8).
+
 > **STALENESS FLAG (2026-08-17, prestige-claim audit):** This document references the OLD single-file `src/App.jsx` frontend, which is DELETED. The app is now v2 (`src/v2/`); tokens live in `src/v2/tokens.css`. The prestige design tokens remain wired and on-spec (verified 2026-08-17), but file-path and line-number references below are stale. Read as HISTORY, not current-state.
 
 # REFRAME UI FOUNDATION — Commit 2 Spec

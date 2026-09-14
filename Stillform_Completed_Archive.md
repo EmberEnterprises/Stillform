@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** everything below predates the v1 deletion (237167b, May 17 2026) and is history by design. For v2 status see Stillform_Master_Todo.md → AUDIT LEDGER (2026-09-10). The four v1 SECURE_KEYS guard scripts named below died with the v1 encryption layer; v2 has no device-side encryption.
+
 # STILLFORM COMPLETED ARCHIVE
 
 Items removed from `Stillform_Master_Todo.md` during the May 6, 2026 refactor and items completed in earlier sessions. Source of truth for *what shipped when*. Chronological, newest first.

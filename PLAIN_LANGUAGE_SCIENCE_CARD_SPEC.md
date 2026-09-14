@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** v1-SHIPPED, DELETED with 237167b as a post-session card (dead science_card branch remains in reframe.js). The corpus intent lives on as the citation-guarded Library "The Science" tab (scienceLibrary.js). Board C4 decides a post-session moment vs retire.
+
 # Plain-Language Neuroscience Surface — Spec (REVISED)
 
 *Drafted May 1, 2026. Decisions locked. Corpus verified against Science Sheet. Ready for Arlin's verification pass before code.*

@@ -31,7 +31,7 @@ Every Netlify function in `netlify/functions/` is the source of truth for its ca
 - `reframe` — AI metacognition (Notice → Reframe → Close)
 - `todays-brief` — morning artifact
 - `pre-event-brief` — 30-min-before-event artifact
-- `move-card-select` — somatic move selection
+- `move-card-select` — somatic move selection ⚠️ NOT CALLED by v2 (selection is deterministic in lib/moveCard/select.js); dead until board C9 decides
 - `scripts` — verbatim language for hard conversations
 - `eod-artifact` — 2-sentence AI-named takeaway
 - `infer-trigger` — trigger pattern inference

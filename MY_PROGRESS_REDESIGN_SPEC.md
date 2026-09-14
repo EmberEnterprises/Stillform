@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** RETIRED / SUPERSEDED by the v2 My Progress portrait (Felt Layer F2 + surfacing program, 26 rows). No heat map, saved-reframes list, shareable card, or 5-stage roadmap exists in v2.
+
 # MY PROGRESS — REDESIGN SPEC
 **ARA Embers LLC · April 30, 2026 · Pillar 4 (Neuroplasticity) anchor screen**
 

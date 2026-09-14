@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** CURRENT GATE SET (run before every commit): npm run build · node src/v2/lib/__tests__/*.test.mjs (loop) · node scripts/boot-static.mjs · node scripts/check-doctrine-sync.mjs · node scripts/check-links.mjs · node scripts/check-science-citations.mjs · node scripts/security-smoke.mjs (static; the live Supabase probe needs network). `npm run ship:preflight` no longer exists (removed May 17 2026). Deploy: Netlify → Trigger deploy → "Deploy project" / "Deploy project without cache"; afterwards confirm Deploys shows "Published main@<your hash>" and no "Auto Publishing Locked".
+
 # Stillform Build & Deploy Guide
 
 **Last Updated:** April 4, 2026  

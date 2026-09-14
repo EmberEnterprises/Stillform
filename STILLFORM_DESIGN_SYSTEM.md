@@ -66,3 +66,6 @@ growth/oxblood -> cooler clay #B5654A. State colors de-warmed (sage #88A882,
 clay #C88A6A, cool gray #9C9C9E). Verified by eyes on home, work-turn, and
 crisis screens — the structure now reads as the elite manuscript it was
 designed to be, on a ground that doesn't undercut it.
+
+## SUPERSESSION NOTE (2026-09-10 audit)
+The "PALETTE CHANGE — INK & BONE (June 15 2026)" section above describes commit fdc21da, which was REVERSED the same month by 2fc23d7 ("PALETTE RESTORED to the locked prestige spec"). The live tokens.css is the recovered prestige spec: grounds #08080A / #111114 / #16161A, antiqued gold #B8862B (+#8C6420), text #E8EAF0 cool / #EDE8DC cream, live #6FE3C4, growth #8C3B2A, Cormorant Garamond / DM Sans / IBM Plex Mono. The Ink & Bone values (#0F0F10 / #EDEAE3 / #C2A878 / #B5654A) and "Fraunces" appear nowhere in the live tokens. Kept as history.

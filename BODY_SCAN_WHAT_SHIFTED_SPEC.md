@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** v1-SHIPPED (890469aa), DELETED with 237167b, NOT REBUILT in v2. v2 BodyScan records {ts, totalAreas, full} only — no post-state chip. The ✅ SHIPPED banner below is v1-true / v2-false. Board C3 decides.
+
 # BODY_SCAN_WHAT_SHIFTED_SPEC.md
 **Stillform Body Scan What Shifted — implementation spec**
 **ARA Embers LLC · April 30, 2026**

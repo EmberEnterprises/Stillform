@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** DELETED-LATER (v1 only). metrics-ingest.js + _metricsSetup.sql exist server-side but NO v2 client sends metrics and Settings has no telemetry toggle. Board C10 decides rebuild vs retire.
+
 # Metrics-Only Performance Telemetry Setup
 
 This adds daily metrics ingestion so Stillform can measure if core loops are working without collecting user text content.

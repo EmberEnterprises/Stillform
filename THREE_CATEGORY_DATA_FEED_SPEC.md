@@ -1,3 +1,5 @@
+> **AUDIT 2026-09-10/14 — STATUS:** v1-SHIPPED (890469aa), DELETED with 237167b, NOT REBUILT in v2. No classifier, no stillform_shift_events, no "Shift Classified" event; v2 captures no post-state chip so the classifier has no input. Sequenced after board C3.
+
 # THREE_CATEGORY_DATA_FEED_SPEC.md
 **Stillform — What Shifted three-category data feed implementation spec**
 **ARA Embers LLC · April 30, 2026**
