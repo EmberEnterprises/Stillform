@@ -24,6 +24,7 @@ const ALLOWED_ORIGINS = (() => {
     "https://stillformapp.com",
     "https://www.stillformapp.com",
     "https://stillformapp.netlify.app",
+    "https://stillform-app.netlify.app",
     "http://localhost:4173",
     "http://localhost:5173",
     "http://127.0.0.1:4173",
