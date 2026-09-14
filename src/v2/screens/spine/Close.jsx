@@ -658,7 +658,9 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
             }}
             aria-label="Anchor on what surfaced during the reframe"
           >
-            ↩ Anchor on what surfaced
+            
+            {text.trim() ? "↩ Use what surfaced instead" : "↩ Use what surfaced — one tap fills it"}
+          
           </button>
         </div>
       ) : null}
