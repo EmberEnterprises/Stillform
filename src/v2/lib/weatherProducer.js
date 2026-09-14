@@ -60,6 +60,17 @@ export function mapOpenMeteo(json) {
   let daylightHours = null;
   const dd = json.daily && Array.isArray(json.daily.daylight_duration) ? json.daily.daylight_duration[0] : null;
   if (typeof dd === "number" && Number.isFinite(dd)) daylightHours = Math.round((dd / 3600) * 10) / 10;
+  // B14 (2026-09-14): sunrise/sunset (local ISO from timezone=auto) → ms, so the
+  // day's beats can key to the light instead of a fixed clock (canon §10,
+  // INTEGRATIONS §2.6/§3.3). Null when absent; beat.js falls back to the clock.
+  const isoToMs = (arr) => {
+    const v = Array.isArray(arr) ? arr[0] : null;
+    if (typeof v !== "string") return null;
+    const ms = Date.parse(v);
+    return Number.isFinite(ms) ? ms : null;
+  };
+  const sunriseMs = json.daily ? isoToMs(json.daily.sunrise) : null;
+  const sunsetMs = json.daily ? isoToMs(json.daily.sunset) : null;
   if (tempC === null && pressureHpa === null && condition === null && daylightHours === null) return null;
   // P1 (2026-07-15): next rain window — the first upcoming hour with a
   // meaningful chance of rain. Pure logistics data for the umbrella note.
@@ -79,7 +90,7 @@ export function mapOpenMeteo(json) {
       }
     }
   } catch { /* nextRain stays null */ }
-  return { tempC, pressureHpa, condition, daylightHours, nextRain };
+  return { tempC, pressureHpa, condition, daylightHours, nextRain, sunriseMs, sunsetMs };
 }
 
 // Default browser geolocation, promise-wrapped with a timeout. Coarse accuracy.
@@ -128,7 +139,7 @@ export async function refreshWeather({ getPosition = defaultGetPosition, fetchIm
   const lon = roundCoord(pos.lon);
   const url =
     `${OPEN_METEO}?latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m,surface_pressure,weather_code&daily=daylight_duration` +
+    `&current=temperature_2m,surface_pressure,weather_code&daily=daylight_duration,sunrise,sunset` +
     `&hourly=precipitation_probability,precipitation` +
     `&timezone=auto&forecast_days=1`;
   let json;

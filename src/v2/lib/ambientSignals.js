@@ -78,7 +78,7 @@ export function setWeatherConsent(granted) {
 }
 
 /** A producer (geolocation+API or native) writes the current conditions here. */
-export function setWeather({ tempC = null, pressureHpa = null, condition = null, nextRain = null, daylightHours = null, at = Date.now() } = {}) {
+export function setWeather({ tempC = null, pressureHpa = null, condition = null, nextRain = null, daylightHours = null, sunriseMs = null, sunsetMs = null, at = Date.now() } = {}) {
   if (!getWeatherConsent()) return false;
   const ls = safeLocal();
   if (!ls) return false;
@@ -89,6 +89,9 @@ export function setWeather({ tempC = null, pressureHpa = null, condition = null,
       pressureHpa: typeof pressureHpa === "number" ? pressureHpa : null,
       condition: typeof condition === "string" ? condition.slice(0, 40) : null,
       daylightHours: typeof daylightHours === "number" ? daylightHours : null,
+      // B14: the day's light edges (ms). beat.js keys EOD / wind-down to these.
+      sunriseMs: typeof sunriseMs === "number" && Number.isFinite(sunriseMs) ? sunriseMs : null,
+      sunsetMs: typeof sunsetMs === "number" && Number.isFinite(sunsetMs) ? sunsetMs : null,
       // P1: next rain window { at:ms, probability } — pure logistics, null when dry.
       nextRain: (nextRain && typeof nextRain.at === "number") ? { at: nextRain.at, probability: typeof nextRain.probability === "number" ? nextRain.probability : null } : null,
       at: Number.isFinite(ms) ? ms : Date.now(),

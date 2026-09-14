@@ -60,21 +60,55 @@ function readSavedTodayFlag(storageKey) {
  * @returns {"morning" | "main" | "eod" | "wind-down"}
  */
 export function getCurrentBeat(now = new Date()) {
-  const hour = now.getHours();
+  const hourNow = now.getHours() + now.getMinutes() / 60;
   const checkinDone = readSavedTodayFlag("stillform_checkin_today");
   const eodDone = readSavedTodayFlag("stillform_eod_today");
+  const { eodStart, windDownStart } = getBeatWindows(now);
 
   // Wind-down overrides everything once we're inside the pre-sleep window.
-  if (hour >= 21) return "wind-down";
+  if (hourNow >= windDownStart) return "wind-down";
 
-  // EOD window: 19:00 onward, until done.
-  if (hour >= 19 && !eodDone) return "eod";
+  // EOD window: opens at the day's light edge (clock fallback 19:00), until done.
+  if (hourNow >= eodStart && !eodDone) return "eod";
 
   // Morning beat persists until done or EOD window opens.
-  if (!checkinDone && hour < 19) return "morning";
+  if (!checkinDone && hourNow < eodStart) return "morning";
 
   // Default: main practice window.
   return "main";
+}
+
+/**
+ * B14 (2026-09-14) — circadian beat windows. When Ambient weather is on, the
+ * producer stores today's sunset; EOD opens at sunset (clamped 17:30–19:30 so
+ * a December 16:30 sunset doesn't end the working day early and a June 20:30
+ * sunset doesn't push the review too late), wind-down opens two hours later
+ * (clamped 20:30–21:30 — review content stays clear of sleep, canon §10).
+ * Without weather (or a stale record) the windows are exactly the old clock:
+ * 19:00 / 21:00. Pure, local, fail-silent.
+ *
+ * @returns {{ eodStart: number, windDownStart: number, source: "sunset"|"clock" }} decimal local hours
+ */
+export function getBeatWindows(now = new Date()) {
+  const fallback = { eodStart: 19, windDownStart: 21, source: "clock" };
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem("stillform_weather") : null;
+    if (!raw) return fallback;
+    const w = JSON.parse(raw);
+    const sunset = w && typeof w.sunsetMs === "number" ? w.sunsetMs : null;
+    if (!sunset) return fallback;
+    // Only today's sunset counts (the producer refreshes daily; a stale record
+    // from another day must not steer today's windows).
+    if (localDateKey(new Date(sunset)) !== localDateKey(now)) return fallback;
+    const d = new Date(sunset);
+    const sunsetHour = d.getHours() + d.getMinutes() / 60;
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+    const eodStart = clamp(sunsetHour, 17.5, 19.5);
+    const windDownStart = clamp(eodStart + 2, 20.5, 21.5);
+    return { eodStart, windDownStart, source: "sunset" };
+  } catch {
+    return fallback;
+  }
 }
 
 /**
