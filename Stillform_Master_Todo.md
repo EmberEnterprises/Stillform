@@ -14,8 +14,8 @@
 - [ ] A11 [ARLIN] Replace the project's uploaded April transfer file with the repo's STILLFORM_PROJECT_TRANSFER.md after B13 fixes its two stale lines (the April file carries every banned framing, the wrong model, the wrong price).
 
 **B. LAUNCH BLOCKERS + LAUNCH-RELEVANT — CLAUDE'S BUILD (no decision needed unless marked)**
-- [ ] B1 NATIVE BUILD BLOCKER: delete android/…/IntegrationBridgePlugin.java after a line-by-line diff confirms IntegrationBridgePlugin.kt is the superset (same package, kotlin-android — gradle fails on redeclaration). Unblocks every device item in D.
-- [ ] B2 Wire CHECKOUT_URLS in subscriptionApi.js (after A1). One line each. Then Paywall "Start" is live.
+- [x] B1 DONE 2026-09-14: IntegrationBridgePlugin.java removed. Diff confirmed .kt is the superset (syncCalendar + syncHealth + requestCalendarPermission + requestHealthPermission vs the .java's two; RMSSD HRV vs SDNN). MainActivity.kt registers by class name — unchanged. Note: no v2 JS calls IntegrationBridge yet (the web seam says 'producer is native, later'), so this only unblocks compilation; the native hook-up is D3.
+- [x] B2 DONE 2026-09-14: CHECKOUT_URLS wired (monthly variant 1510526, annual 1510525). Both hosted checkouts verified live via HTTP: 200, correct variant + $209.92 rendered, and the URL survives the appended checkout[custom][install_id]/[variant] params (200, variant still pinned). Paywall 'Start' goes live on the next deploy.
 - [ ] B3 crisisDetected handoff: v2 Reframe never reads the server's crisisDetected flag — route it to CrisisResources with the handoff summary (locked, not an editable thread message) + fire the Plausible crisis/liability events (GPT4O §2.2 C2/C5).
 - [ ] B4 Subscription recovery: send Authorization: Bearer <token> from getSubscriptionStatus() when signed in (server already prefers user lookup); include checkout[custom][user_id] when signed in; add the Paywall line "Already subscribed? Log in with the email you paid with." Without this, a subscriber on a new device is locked out.
 - [ ] B5 Reviewer access build (after A5).

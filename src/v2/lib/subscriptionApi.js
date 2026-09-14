@@ -27,8 +27,11 @@ const SUBSCRIPTION_STATUS_URL = fnUrl("subscription-status");
  * URLs land here (no other code change needed).
  */
 const CHECKOUT_URLS = {
-  monthly: "",
-  annual: "",
+  // Live Lemon Squeezy hosted checkouts (store "Embers", product 961807),
+  // set 2026-09-14 after Arlin's pricing lock: $24.99/mo · $209.92/yr.
+  // ?enabled=<variantId> pins the checkout to that single variant.
+  monthly: "https://embers.lemonsqueezy.com/checkout/buy/39d7df24-0644-46c1-9bb5-3f2cf89839e4?enabled=1510526",
+  annual: "https://embers.lemonsqueezy.com/checkout/buy/540c609b-2534-4362-9e9f-0b07b08dbedc?enabled=1510525",
 };
 
 /**
