@@ -306,9 +306,12 @@ relationship with the Member.)
 
 ### Encryption
 - TLS 1.2+ for all data in transit
-- AES-256 encryption at rest at the database layer
-- AES-GCM device-local encryption for conversation history
-  prior to cloud upload ⚠️ [PLANNED — NOT in the current build (June 2 2026): device-local encryption + cloud sync were features of the deleted old frontend; rebuild backlog. The TLS + database-layer claims above are current platform facts.]
+- AES-256 encryption at rest at the database layer (provider
+  disk-level encryption; backup snapshots are NOT end-to-end
+  encrypted and are readable JSON under row-level security)
+- Device-local encryption of practice content prior to cloud
+  upload: ROADMAP, not a current control (audit 2026-09-14). Do
+  not represent it as implemented.
 
 ### Access Control
 - Service-role keys for backend data access, held only by
@@ -362,9 +365,9 @@ access.
 | Lemon Squeezy   | Payments              | United States     |
 | Resend          | Transactional email   | United States     |
 | Plausible       | Analytics (no PII)    | European Union    |
-| Anthropic       | AI inference          | United States     |
-| OpenAI          | Image-only AI         | United States     |
-| Apple, Google   | App store distribution | Per platform     |
+| OpenAI          | AI inference (all AI features: reframe, briefs, re-read, scripts, rehearsal, defusion scoring, calendar-screenshot extraction) | United States |
+| Open-Meteo      | Weather (approximate location only; no account, no identifier; only if the user enables Ambient weather) | Germany |
+| Apple, Google   | App store distribution (once published) | Per platform |
 
 ---
 

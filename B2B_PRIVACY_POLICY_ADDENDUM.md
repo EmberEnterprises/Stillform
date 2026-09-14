@@ -196,16 +196,17 @@ service:
 | Lemon Squeezy   | Payments              | United States     |
 | Resend          | Transactional email   | United States     |
 | Plausible       | Analytics (no PII)    | European Union    |
-| Anthropic       | AI inference          | United States     |
-| OpenAI          | Image-only AI         | United States     |
-| Apple, Google   | App store distribution | Per platform     |
+| OpenAI          | AI inference (all AI features: reframe, briefs, re-read, scripts, rehearsal, defusion scoring, calendar-screenshot extraction) | United States |
+| Open-Meteo      | Weather (approximate location only; no account, no identifier; only if the user enables Ambient weather) | Germany |
+| Apple, Google   | App store distribution (once published) | Per platform |
 
 Plausible is configured to operate without personal identifiers
-and without cookies. Anthropic and OpenAI receive only the
-content the Member voluntarily includes in a reframe session,
-processed solely to return a response; we do not authorize
-either provider to retain or use that content for model
-training.
+and without cookies. OpenAI receives only the content the Member
+voluntarily sends in an AI feature plus the parts of the Member's
+own record that make the answer specific, processed solely to
+return a response; API data-usage terms apply and we do not
+authorize the provider to use that content for model training.
+(Corrected 2026-09-14 audit: sub-processor list verified against the live code.)
 
 A current list of sub-processors and any material changes is
 maintained in Stillform's documentation and made available to
@@ -214,10 +215,12 @@ the Customer at the email on file on request.
 ## 9. Data Security
 
 Practice content is encrypted in transit (TLS 1.2+ on all
-endpoints) and at rest (AES-256 at the database layer). A
-device-local AES-GCM key further encrypting conversation history
-before cloud upload is PLANNED — not in the current build (June 2
-2026; it was a deleted-old-frontend feature, rebuild backlog). The
+endpoints) and at rest by the database provider's disk-level
+encryption (AES-256). Cloud backups are NOT end-to-end encrypted:
+the backup snapshot is stored as readable JSON under the Member's
+account, protected by row-level security, and is not a
+device-encrypted blob. Device-local encryption before cloud upload
+is a ROADMAP item, not a current control (audit 2026-09-14). The
 TLS and database-layer protections above are current platform facts.
 
 Access to backend systems is restricted to authorized personnel

@@ -1,11 +1,11 @@
 # Stillform B2B SSO Integration Guide
 
 **Version 1.0 — May 2026**
-**Status: configuration UI shipped; auth handler pending implementation choice**
+**Status (corrected 2026-09-14 audit): backend configuration FIELDS exist (organization-update accepts sso_provider / sso_metadata / auto_join_domain); NO configuration UI exists in the app; auth handler not implemented. B2B is post-launch (decided 2026-09-14).**
 
 > **CRITICAL CLARITY ON STATUS.**
 >
-> Stillform's B2B schema and admin UI support SSO **configuration**.
+> Stillform's B2B schema supports SSO **configuration** fields (no admin UI exists yet).
 > The actual SAML assertion verification / OIDC token validation
 > code is **not yet shipped**. This is intentional: implementing
 > SAML from scratch without integration testing against the

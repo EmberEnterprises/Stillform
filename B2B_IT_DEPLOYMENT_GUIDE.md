@@ -14,8 +14,10 @@ as:
 
 - A progressive web application (PWA) at
   `https://stillformapp.com`
-- Native iOS application via the App Store
-- Native Android application via Google Play
+- Native Android application via Google Play (in submission —
+  not yet published as of 2026-09-14)
+- Native iOS application via the App Store (post-launch; not
+  yet submitted)
 
 This guide covers what IT needs to deploy Stillform across an
 organization, including network requirements, MDM compatibility,
@@ -84,9 +86,10 @@ the current deployment. Standard HTTPS only.
 
 ### iOS
 
-- **App Store distribution.** Stillform is published on the iOS
-  App Store. IT may deploy via standard MDM tools such as
-  Microsoft Intune, Jamf, or VMware Workspace ONE.
+- **App Store distribution.** Stillform is NOT yet on the iOS App
+  Store (post-launch item). Once published, IT may deploy via
+  standard MDM tools such as Microsoft Intune, Jamf, or VMware
+  Workspace ONE.
 - **App ID.** `com.araembers.stillform`
 - **TestFlight.** A TestFlight build is available for pre-launch
   testing. Contact `ARAembersllc@proton.me` to be added.
@@ -101,9 +104,10 @@ the current deployment. Standard HTTPS only.
 
 ### Android
 
-- **Google Play distribution.** Stillform is published on
-  Google Play. IT may deploy via Managed Google Play in
-  Workspace, Intune, or other Android MDM solutions.
+- **Google Play distribution.** Stillform's Google Play listing
+  is in submission (not yet published as of 2026-09-14). Once
+  live, IT may deploy via Managed Google Play in Workspace,
+  Intune, or other Android MDM solutions.
 - **Package name.** `com.araembers.stillform`
 - **Required Permissions.** `RECEIVE_BOOT_COMPLETED` (for daily
   reminder scheduling), `POST_NOTIFICATIONS` (Android 13+),
@@ -166,8 +170,10 @@ behalf:
 - Lemon Squeezy (US) — payments
 - Resend (US) — transactional email
 - Plausible (EU) — analytics (no PII)
-- Anthropic (US) — AI inference
-- OpenAI (US) — image-only AI
+- OpenAI (US) — AI inference for every AI feature (reframe,
+  briefs, re-read, scripts, rehearsal, defusion scoring,
+  calendar-screenshot extraction)
+- Open-Meteo (DE) — weather, approximate location only, opt-in
 
 For customers requiring EU data residency or specific
 sub-processor exclusions, please contact us to discuss whether a
@@ -183,9 +189,11 @@ request.
 TLS 1.2 or higher on all endpoints.
 
 ### At rest
-- AES-256 at the Supabase database layer.
-- Device-local AES-GCM encryption of conversation history
-  before cloud sync. ⚠️ [PLANNED — NOT in the current build (June 2 2026): device-local encryption + cloud sync were features of the deleted old frontend; rebuild backlog. The TLS + database-layer claims above are current platform facts.]
+- AES-256 at the Supabase database layer (provider disk-level;
+  backup snapshots are readable JSON under row-level security,
+  not end-to-end encrypted).
+- Device-local encryption before cloud sync: ROADMAP, not a
+  current control (audit 2026-09-14).
 
 ### Access
 - Supabase Row-Level Security (RLS) enforced on all user-facing
