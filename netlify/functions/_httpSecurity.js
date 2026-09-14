@@ -5,6 +5,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
   "https://stillformapp.com",
   "https://www.stillformapp.com",
   "https://stillformapp.netlify.app",
+  "https://stillform-app.netlify.app", // the actual Netlify project address (the line above never existed; audit 2026-09-14)
   "http://localhost:4173",
   "http://localhost:5173",
   "http://127.0.0.1:4173",
