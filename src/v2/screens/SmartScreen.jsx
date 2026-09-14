@@ -673,7 +673,7 @@ function DuePromiseLine() {
       <p style={{ margin: 0, fontFamily: "var(--sf-font-mono)", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--sf-text-faint)" }}>
         You asked {dayName}-you to hold this
       </p>
-      <p style={{ margin: "var(--sf-space-4) 0 0", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.6, color: "var(--sf-text-soft)" }}>
+      <p style={{ margin: "var(--sf-space-4) 0 0", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.6, color: "var(--sf-text-quiet)" }}>
         {promise.text}
       </p>
     </div>

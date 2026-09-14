@@ -232,7 +232,7 @@ function ActiveState({ phase, cycleCount, onStop, discreet, onToggleDiscreet }) 
           fontSize: "12px",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: "var(--sf-text-cream, #EDE8DC)",
+          color: "var(--sf-text-cream)",
         }}
       >
         {discreet ? "" : phase.label}
@@ -295,7 +295,7 @@ function ActiveState({ phase, cycleCount, onStop, discreet, onToggleDiscreet }) 
           fontSize: "11px",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "var(--sf-accent, #B8862B)",
+          color: "var(--sf-accent)",
           cursor: "pointer",
           WebkitTapHighlightColor: "transparent",
         }}
@@ -338,7 +338,7 @@ function DoneState({ onClose, onEscalateToScan }) {
           fontSize: "var(--sf-text-display-md, 28px)",
           lineHeight: 1.2,
           fontWeight: 300,
-          color: "var(--sf-text-cream, #EDE8DC)",
+          color: "var(--sf-text-cream)",
           letterSpacing: "-0.01em",
         }}
       >
@@ -386,9 +386,9 @@ function DoneState({ onClose, onEscalateToScan }) {
         style={{
           marginTop: "var(--sf-space-48, 48px)",
           padding: "14px 28px",
-          background: "var(--sf-ground-elev, #111114)",
+          background: "var(--sf-ground-elev)",
           border: "0.5px solid var(--sf-accent-line, rgba(184, 134, 43, 0.32))",
-          color: "var(--sf-accent, #B8862B)",
+          color: "var(--sf-accent)",
           fontFamily: "var(--sf-font-mono, monospace)",
           fontSize: "12px",
           letterSpacing: "0.18em",

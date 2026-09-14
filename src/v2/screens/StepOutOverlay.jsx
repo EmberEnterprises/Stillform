@@ -72,7 +72,7 @@ export default function StepOutOverlay({ open, onClose, patternLabel = null, onC
         position: "fixed",
         inset: 0,
         zIndex: 300,
-        background: "var(--sf-ground-deep, #08080A)",
+        background: "var(--sf-ground-deep)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -119,7 +119,7 @@ export default function StepOutOverlay({ open, onClose, patternLabel = null, onC
               fontWeight: 300,
               fontSize: "26px",
               lineHeight: 1.35,
-              color: "var(--sf-text-cream, #EDE8DC)",
+              color: "var(--sf-text-cream)",
               margin: 0,
             }}
           >
@@ -140,7 +140,7 @@ export default function StepOutOverlay({ open, onClose, patternLabel = null, onC
               fontSize: "11px",
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "var(--sf-accent, #B8862B)",
+              color: "var(--sf-accent)",
               cursor: "pointer",
               WebkitTapHighlightColor: "transparent",
             }}
@@ -159,7 +159,7 @@ export default function StepOutOverlay({ open, onClose, patternLabel = null, onC
               fontWeight: 300,
               fontSize: "22px",
               lineHeight: 1.45,
-              color: "var(--sf-text-cream, #EDE8DC)",
+              color: "var(--sf-text-cream)",
               margin: 0,
             }}
           >
@@ -179,7 +179,7 @@ export default function StepOutOverlay({ open, onClose, patternLabel = null, onC
               fontSize: "11px",
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "var(--sf-accent, #B8862B)",
+              color: "var(--sf-accent)",
               cursor: "pointer",
               WebkitTapHighlightColor: "transparent",
             }}

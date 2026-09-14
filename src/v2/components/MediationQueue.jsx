@@ -108,7 +108,7 @@ const SCRIM = {
 
 const SHEET = {
   width: "100%", maxWidth: "520px", maxHeight: "78vh", overflowY: "auto",
-  background: "var(--sf-ground-elev, #111114)",
+  background: "var(--sf-ground-elev)",
   border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.10))",
   borderRadius: "16px 16px 0 0",
   padding: "var(--sf-space-24)",
@@ -155,7 +155,7 @@ const ROW = { display: "flex", gap: "var(--sf-space-12)" };
 
 const APPROVE = {
   minHeight: "44px", padding: "0 20px",
-  background: "var(--sf-text-primary, #F4F2EC)", color: "var(--sf-ground-deep, #08080A)",
+  background: "var(--sf-text-primary)", color: "var(--sf-ground-deep)",
   border: "none", borderRadius: "10px",
   fontFamily: "var(--sf-font-sans)", fontSize: "15px", fontWeight: 300,
   cursor: "pointer", WebkitTapHighlightColor: "transparent",

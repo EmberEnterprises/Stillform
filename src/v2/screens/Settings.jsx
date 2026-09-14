@@ -564,7 +564,7 @@ const BACK_BTN = {
 
 
 const INPUT = {
-  background: "var(--sf-ground-elev, #111114)",
+  background: "var(--sf-ground-elev)",
   border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.14))",
   borderRadius: "12px",
   color: "var(--sf-text-primary)",
@@ -656,7 +656,7 @@ const TOGGLE_BASE = {
 const TOGGLE_ON = {
   ...TOGGLE_BASE,
   background: "var(--sf-text-primary)",
-  color: "var(--sf-ground-deep, #08080A)",
+  color: "var(--sf-ground-deep)",
   border: "0.5px solid var(--sf-text-primary)",
 };
 const TOGGLE_OFF = {

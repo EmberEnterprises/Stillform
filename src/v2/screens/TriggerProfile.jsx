@@ -267,7 +267,7 @@ function CategoryChipGroup({ value, onChange }) {
               fontFamily: "var(--sf-font-mono)",
               fontSize: "11px",
               letterSpacing: "0.12em",
-              color: selected ? "var(--sf-accent, #B8862B)" : "var(--sf-text-secondary)",
+              color: selected ? "var(--sf-accent)" : "var(--sf-text-secondary)",
               WebkitTapHighlightColor: "transparent",
               transition: "color var(--sf-motion-quick) var(--sf-ease-prestige), border-color var(--sf-motion-quick) var(--sf-ease-prestige)",
             }}

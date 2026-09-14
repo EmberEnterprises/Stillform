@@ -319,7 +319,7 @@ function WatchRow({
             textTransform: "uppercase",
             color:
               tier === "confirmed"
-                ? "var(--sf-accent, #B8862B)"
+                ? "var(--sf-accent)"
                 : "var(--sf-text-faint)",
           }}
         >
@@ -442,7 +442,7 @@ function CatalogRow({ chip, onInfo, onAdd, added }) {
           aria-label={`Add ${chip.label} to watch list`}
           style={{
             ...textLinkStyle,
-            color: "var(--sf-accent, #B8862B)",
+            color: "var(--sf-accent)",
             whiteSpace: "nowrap",
           }}
         >

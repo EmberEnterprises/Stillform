@@ -221,7 +221,7 @@ export default function AccountSection({ onSubscribed } = {}) {
 }
 
 const INPUT = {
-  background: "var(--sf-ground-elev, #111114)",
+  background: "var(--sf-ground-elev)",
   border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.14))",
   borderRadius: "12px",
   color: "var(--sf-text-primary)",

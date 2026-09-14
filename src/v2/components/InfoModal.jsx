@@ -82,7 +82,7 @@ export default function InfoModal({ open, title, body, onClose }) {
           // defined variables are --sf-ground-deep / --sf-ground-elev / --sf-ground-elev-2.
           // Using ground-elev (#111114) so the card sits visually ABOVE the
           // page ground (#08080A) — proper elevation, the way a card should read.
-          background: "var(--sf-ground-elev, #111114)",
+          background: "var(--sf-ground-elev)",
           border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.10))",
           // Subtle depth — the card lifts off the page.
           boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
@@ -154,7 +154,7 @@ export default function InfoModal({ open, title, body, onClose }) {
               // and easy to miss on a phone.
               background: "transparent",
               border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.10))",
-              color: "var(--sf-accent, #B8862B)",
+              color: "var(--sf-accent)",
               fontFamily: "var(--sf-font-mono, monospace)",
               fontSize: "12px",
               letterSpacing: "0.18em",

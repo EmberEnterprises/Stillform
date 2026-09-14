@@ -390,7 +390,7 @@ function OptionButton({ label, selected, onClick }) {
         marginBottom: "var(--sf-space-8)",
         background: selected ? "var(--sf-accent-glow)" : "transparent",
         border: selected
-          ? "1px solid var(--sf-accent, #B8862B)"
+          ? "1px solid var(--sf-accent)"
           : "1px solid var(--sf-border-quiet)",
         borderRadius: "8px",
         color: "var(--sf-text-primary)",
@@ -695,7 +695,7 @@ function ProposedRow({ chip, added, takeState, onAdd, onMarkLived }) {
         <span style={onListStyle}>on watch list</span>
       ) : (
         <div style={{ display: "flex", gap: "var(--sf-space-16)", alignItems: "center", flexWrap: "wrap", marginTop: "var(--sf-space-12)" }}>
-          <button type="button" onClick={onAdd} aria-label={`Add ${chip.label} to watch list`} style={{ ...textLinkStyle, color: "var(--sf-accent, #B8862B)" }}>
+          <button type="button" onClick={onAdd} aria-label={`Add ${chip.label} to watch list`} style={{ ...textLinkStyle, color: "var(--sf-accent)" }}>
             + add to watch list
           </button>
           <button type="button" onClick={onMarkLived} aria-label={`${chip.label} was a real situation, not a pattern`} style={textLinkStyle}>
@@ -792,7 +792,7 @@ const stateChipStyle = {
 };
 
 const stateChipSelectedStyle = {
-  borderColor: "var(--sf-accent, #B8862B)",
+  borderColor: "var(--sf-accent)",
   color: "var(--sf-text-primary)",
 };
 

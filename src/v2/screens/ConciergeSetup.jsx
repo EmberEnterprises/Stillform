@@ -12,14 +12,14 @@ import MonoLabel from "../components/MonoLabel.jsx";
  * from the Concierge room ("Set it up") and from Settings.
  */
 
-const SECTION = { marginTop: "var(--sf-space-40)" };
+const SECTION = { marginTop: "var(--sf-space-48)" };
 const H = {
   margin: "0 0 var(--sf-space-12)",
   fontFamily: "var(--sf-font-serif)",
   fontWeight: 300,
   fontSize: "22px",
   lineHeight: 1.25,
-  color: "var(--sf-text)",
+  color: "var(--sf-text-primary)",
 };
 const P = {
   margin: "0 0 var(--sf-space-16)",
@@ -27,17 +27,17 @@ const P = {
   fontWeight: 300,
   fontSize: "15px",
   lineHeight: 1.7,
-  color: "var(--sf-text-soft)",
+  color: "var(--sf-text-quiet)",
 };
 const STEP = {
   margin: "0 0 var(--sf-space-12)",
   paddingLeft: "var(--sf-space-16)",
-  borderLeft: "1px solid var(--sf-hairline)",
+  borderLeft: "1px solid var(--sf-border-hairline)",
   fontFamily: "var(--sf-font-serif)",
   fontWeight: 300,
   fontSize: "14px",
   lineHeight: 1.7,
-  color: "var(--sf-text-soft)",
+  color: "var(--sf-text-quiet)",
 };
 const NUM = {
   fontFamily: "var(--sf-font-mono)",

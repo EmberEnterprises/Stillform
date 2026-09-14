@@ -361,7 +361,7 @@ export default function Concierge({ onExit, onOpenSettings, onCompose, onPromise
             </div>
             {learned.map((l) => (
               <div key={l.id} style={{ margin: "0 0 var(--sf-space-16)" }}>
-                <p style={{ margin: 0, fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "14px", lineHeight: 1.7, color: "var(--sf-text-soft)" }}>
+                <p style={{ margin: 0, fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "14px", lineHeight: 1.7, color: "var(--sf-text-quiet)" }}>
                   {l.line}
                 </p>
                 <button
