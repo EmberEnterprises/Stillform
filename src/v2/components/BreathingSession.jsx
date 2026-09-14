@@ -236,4 +236,20 @@ const PATTERNS = {
     ],
     totalRounds: 4,
   },
+  // Box breathing — 4-4-4-4, ~64s. The Pre-event Brief's spec default and the
+  // morning close's offer (beatConfig "box"); previously silently mapped to
+  // quick-reset (audit fix 2026-09-14). One of the three studied arms in
+  // Balban et al. 2023 — steadies without dropping arousal, which is the point
+  // before a moment you need to be sharp for.
+  "box": {
+    label: "Box Breath",
+    why: "Even sides: in, hold, out, hold. It steadies the system without switching it off — regulated, still engaged.",
+    phases: [
+      { name: "Inhale", duration: 4, instruction: "In through your nose." },
+      { name: "Hold",   duration: 4, instruction: "Hold, easy." },
+      { name: "Exhale", duration: 4, instruction: "Out through your nose." },
+      { name: "Hold",   duration: 4, instruction: "Hold, empty." },
+    ],
+    totalRounds: 4,
+  },
 };

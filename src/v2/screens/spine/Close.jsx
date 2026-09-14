@@ -828,11 +828,8 @@ export function deriveMicroCredit(n) {
  * BREATHING OFFER RESOLUTION (Phase 4 #7)
  *
  * Maps the beatConfig.close.breathingOffer value to BreathingSession
- * pattern keys. beatConfig uses "box" for morning, which doesn't map
- * exactly to any pattern BreathingSession ships yet (box-breathing is
- * 4-4-4-4, distinct from quick-reset's 4-4-6). For Phase 4, "box" maps
- * to "quick-reset" — both ~1 min priming patterns; deliberate
- * shortcut documented here. Full box-breathing pattern adds in polish.
+ * pattern keys. "box" is a real BreathingSession pattern (4-4-4-4) as of
+ * 2026-09-14; until then it was a documented shortcut to quick-reset.
  *
  * @param {string|null} offer  config.close.breathingOffer value
  * @returns {string|null}  BreathingSession pattern key, or null if unresolvable
@@ -848,7 +845,7 @@ function resolveBreathingPattern(offer) {
   if (offer === "deep-regulate") return "deep-regulate";
   if (offer === "cyclic-sighing") return "cyclic-sighing";
   if (offer === "quick-reset") return "quick-reset";
-  if (offer === "box") return "quick-reset"; // Box → Quick Reset shortcut for Phase 4.
+  if (offer === "box") return "box"; // real 4-4-4-4 pattern since 2026-09-14 (was a quick-reset shortcut).
   return null;
 }
 
@@ -875,10 +872,10 @@ const BREATHING_OFFER_COPY = {
     infoBody: "4-4-6 pattern over ~1 minute. Fast enough to do between meetings or before transitions — long enough to interrupt the previous state's cognitive momentum.",
   },
   "box": {
-    headline: "Quick Reset?",
-    body: "One minute. Priming-oriented breath before the day starts.",
-    infoTitle: "Quick Reset",
-    infoBody: "Box-style cadence over ~1 minute. Settles the nervous system without dropping arousal too far — useful at morning open when you want to start regulated but engaged.",
+    headline: "Box breath?",
+    body: "One minute. Even in, hold, out, hold — steady before the day starts.",
+    infoTitle: "Box Breath",
+    infoBody: "4-4-4-4 over ~1 minute. Settles the nervous system without dropping arousal too far — useful at morning open when you want to start regulated but engaged.",
   },
   default: {
     headline: "Take a moment?",

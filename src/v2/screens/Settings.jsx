@@ -240,6 +240,7 @@ export default function Settings({ onExit, onNavigate }) {
           </p>
           {[
             ["quick-reset", "Quick Reset", "~1 minute — a fast settle"],
+            ["box", "Box Breath", "~1 minute — steady, still engaged"],
             ["deep-regulate", "Deep Regulate", "~3 minutes — a full downshift"],
             ["cyclic-sighing", "Cyclic Sighing", "~5 minutes — the deepest lever"],
           ].map(([id, name, desc]) => (

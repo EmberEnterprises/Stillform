@@ -18,8 +18,8 @@ import { generateRehearsal } from "../lib/rehearsalApi.js";
  *   - Recovery: the downregulation move after it ends (Sheppes & Gross 2011)
  * — then an optional priming breath before you go in.
  *
- * Box breathing is the spec default; BreathingSession ships no true box
- * (4-4-4-4) pattern, so per Close's documented convention box → quick-reset
+ * Box breathing is the spec default and, since 2026-09-14, a real
+ * BreathingSession pattern (4-4-4-4); the earlier box → quick-reset
  * (the ~1-min priming pattern — settle without dropping arousal too far,
  * "regulated but engaged"). The "AI override on acute state" refinement
  * (swap priming for downregulation when the read is acute) needs state
@@ -228,7 +228,7 @@ export default function PreEventBrief({ seed = "", onDone, onExit }) {
   // ---- BREATHING (priming; box → quick-reset) ----
   if (phase === "breathing") {
     return (
-      <BreathingSession pattern="quick-reset" onComplete={onDone} onSkip={onDone} />
+      <BreathingSession pattern="box" onComplete={onDone} onSkip={onDone} />
     );
   }
 

@@ -126,6 +126,8 @@ Example: the morning anchor is grounded in Pillar 4 (neuroplasticity through rep
 - Zaccaro et al. (2018) — slow breathing techniques improve autonomic function, emotional control, and psychological well-being — *Frontiers in Human Neuroscience*
 - Ma et al. (2017) — diaphragmatic breathing reduces negative affect and improves sustained attention; significant time effect on cortisol observed across the breathing intervention period (group×time interaction did not reach significance) — *Frontiers in Psychology*
 
+**Box breathing (4-4-4-4) — added 2026-09-14:** one of the three breathwork arms in Balban et al. (2023) alongside cyclic sighing and cyclic hyperventilation-with-retention. All breathwork arms improved mood and reduced respiratory rate versus mindfulness meditation; cyclic sighing showed the largest effect. Stillform uses box for priming moments (Pre-event Brief, the morning close) where the aim is steady-and-engaged rather than the deepest downshift. Source: Balban et al. 2023.
+
 **If they push back:** "This is respiratory pacing based on autonomic nervous system research. The cyclic sighing pattern specifically outperformed mindfulness meditation in a 2023 Stanford RCT."
 
 ---
@@ -936,3 +938,45 @@ The concierge notices structural problems in the user's actual calendar (wall-to
 **Planning fallacy — padding is honest, not pessimism.** Kahneman (2011), *Thinking, Fast and Slow* (see Kahneman entry above); the planning-fallacy line traces to Buehler, Griffin & Ross. People systematically underestimate how long things take; padding an estimate corrects a known bias.
 
 **REFUSED (thin evidence, banned per claims discipline):** eat-the-frog (hardest-task-first) as a universal rule, ultradian 90-minute work blocks, the 5am-club. These are folklore; the app does not voice them even though they are popular.
+
+## Workshop Instruments — source instruments behind the seven adapted checks (added 2026-09-14 audit)
+
+The Workshop's seven checks are ORIGINAL Stillform-voiced adaptations; no verbatim
+items from any source instrument are reproduced anywhere in the app. Each module
+(src/v2/lib/instruments/*.js) names its source in a header comment; this section
+is the Sheet's record of those sources so the citation guard can see them.
+
+- **MCQ-30** — Wells, A., & Cartwright-Hatton, S. (2004). A short form of the
+  metacognitions questionnaire: properties of the MCQ-30. *Behaviour Research and
+  Therapy*, 42(4), 385–396. Five subscales; Stillform maps endorsed subscales to
+  the five metacognitive chips (pattern-work frame). Source: Wells & Cartwright-Hatton 2004.
+- **CD-Quest** — de Oliveira, I. R. (2015). Cognitive Distortions Questionnaire
+  (CD-Quest): validation across languages; fifteen distortions rated on frequency
+  and intensity. Stillform maps each item 1:1 to a distortion chip. Source: de Oliveira 2015.
+- **SRIS** — Grant, A. M., Franklin, J., & Langford, P. (2002). The
+  Self-Reflection and Insight Scale: a new measure of private self-consciousness.
+  *Social Behavior and Personality*, 30(8), 821–836. Two factors (self-reflection,
+  insight); capacities frame, never a deficit. Source: Grant, Franklin & Langford 2002.
+- **ERQ** — Gross, J. J., & John, O. P. (2003). Individual differences in two
+  emotion regulation processes: implications for affect, relationships, and
+  well-being. *Journal of Personality and Social Psychology*, 85(2), 348–362. Two
+  independent leans (reappraisal, suppression); no total score. Source: Gross & John 2003.
+- **MAIA-2** — Mehling, W. E., Acree, M., Stewart, A., Silas, J., & Jones, A.
+  (2018). The Multidimensional Assessment of Interoceptive Awareness, Version 2
+  (MAIA-2). *PLOS ONE*, 13(12), e0208034. Eight subscales; the trauma-sensitivity
+  escape hatch in the intro is non-negotiable. Source: Mehling et al. 2018.
+- **IRI** — Davis, M. H. (1980). A multidimensional approach to individual
+  differences in empathy. *JSAS Catalog of Selected Documents in Psychology*, 10,
+  85; Davis (1983) *Journal of Personality and Social Psychology*, 44(1),
+  113–126. Four subscales rendered in their own frames, never collapsed to one
+  empathy score. Source: Davis 1980, 1983.
+- **DOSPERT** — Weber, E. U., Blais, A.-R., & Betz, N. E. (2002). A
+  domain-specific risk-attitude scale. *Journal of Behavioral Decision Making*,
+  15(4), 263–290; Blais, A.-R., & Weber, E. U. (2006). A Domain-Specific
+  Risk-Taking (DOSPERT) scale for adult populations. *Judgment and Decision
+  Making*, 1(1), 33–47. Five domains; profile frame ("here's your shape"), no
+  number, no comparison to others. Source: Weber, Blais & Betz 2002; Blais & Weber 2006.
+
+**Copyright discipline (unchanged):** the source instruments are cited for the
+constructs and validation; Stillform's items are its own writing.
+
