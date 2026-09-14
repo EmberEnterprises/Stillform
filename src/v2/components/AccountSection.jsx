@@ -3,6 +3,7 @@ import Button from "./Button.jsx";
 import MonoLabel from "./MonoLabel.jsx";
 import HairlineDivider from "./HairlineDivider.jsx";
 import { requestCode, verifyCode, getAuthState, signOut } from "../lib/authApi.js";
+import { refreshSubscriptionStatus } from "../lib/subscriptionApi.js";
 import { saveBackup, listBackups, fetchBackup, applyRestore, deviceHasPracticeData, linkInstallToAccount } from "../lib/backupApi.js";
 
 /**
@@ -13,7 +14,7 @@ import { saveBackup, listBackups, fetchBackup, applyRestore, deviceHasPracticeDa
  * in or signing up lands you where access + subscription are handled — one
  * place, no Settings redundancy. Auth + backup logic is unchanged.
  */
-export default function AccountSection() {
+export default function AccountSection({ onSubscribed } = {}) {
   const [auth, setAuth] = useState(() => getAuthState());
   const [step, setStep] = useState("idle"); // idle | email | code | working
   const [email, setEmail] = useState("");
@@ -46,6 +47,17 @@ export default function AccountSection() {
       linkInstallToAccount().catch(() => { /* soft — A5 */ });
       const b = await saveBackup();
       setNote(b.ok ? "Signed in. First backup saved." : "Signed in. Backup will retry on next open.");
+      // Recovery (audit 2026-09-14): re-check subscription by ACCOUNT now that
+      // a token exists, so a subscriber on a new device is let in immediately
+      // instead of on the next app boot.
+      try {
+        const sub = await refreshSubscriptionStatus();
+        if (sub?.isSubscribed) {
+          setNote("Signed in. Your subscription is active on this device.");
+          try { window.plausible?.("Subscription Recovered By Sign In"); } catch { /* non-fatal */ }
+          if (typeof onSubscribed === "function") onSubscribed();
+        }
+      } catch { /* status is re-checked on next boot regardless */ }
     } else {
       setNote("That code didn't verify. Re-enter it, or send a fresh one.");
     }

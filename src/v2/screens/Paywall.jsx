@@ -219,7 +219,15 @@ export default function Paywall({ onClose }) {
         <MonoLabel size="xs" tone="faint" style={{ display: "block", margin: "var(--sf-space-24) 0 var(--sf-space-16)" }}>
           Log in or sign up
         </MonoLabel>
-        <AccountSection />
+        {/* Recovery path (audit 2026-09-14): a paid subscriber on a new device
+            has no install row; signing in with the email they paid with is how
+            the account lookup finds the subscription. Say so, plainly. */}
+        <p
+          style={{ margin: "0 0 var(--sf-space-16)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "14px", lineHeight: 1.6, color: "var(--sf-text-quiet)" }}
+        >
+          Already subscribed? Log in with the email you paid with and your access follows you here.
+        </p>
+        <AccountSection onSubscribed={() => { try { onClose?.(); } catch { /* fine */ } }} />
       </div>
     </main>
   );

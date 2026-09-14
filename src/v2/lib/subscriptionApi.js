@@ -1,5 +1,6 @@
 import { getOrCreateInstallId } from "./identity.js";
 import { fnUrl } from "./apiBase.js";
+import { getAccessToken, getAuthState } from "./authApi.js";
 
 /**
  * subscriptionApi — v2 client for subscription status (Phase 8a).
@@ -65,6 +66,14 @@ export function getCheckoutUrl(variant) {
   const params = new URLSearchParams();
   if (installId) params.set("checkout[custom][install_id]", installId);
   params.set("checkout[custom][variant]", variant);
+  // Signed-in buyers: pass user_id so the webhook binds the subscription to
+  // the account directly (SUBSCRIPTION_SETUP §4) — recovery on a new device
+  // then works by sign-in alone. Anonymous buyers stay install-bound; the
+  // webhook still matches on the Lemon Squeezy email as a fallback.
+  try {
+    const { signedIn, userId } = getAuthState();
+    if (signedIn && userId) params.set("checkout[custom][user_id]", userId);
+  } catch { /* identity read is best-effort */ }
   const sep = base.includes("?") ? "&" : "?";
   return `${base}${sep}${params.toString()}`;
 }
@@ -99,9 +108,18 @@ export async function getSubscriptionStatus() {
   }
 
   try {
+    // Audit fix (2026-09-14): send the auth token when signed in. The server
+    // prefers the account lookup over the install lookup, so a subscriber who
+    // signs in on a NEW device (fresh install_id, no row) is recognised by
+    // account instead of being told they're not subscribed.
+    const headers = { "Content-Type": "application/json" };
+    try {
+      const token = await getAccessToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+    } catch { /* stay anonymous */ }
     const response = await fetch(
       `${SUBSCRIPTION_STATUS_URL}?install_id=${encodeURIComponent(installId)}`,
-      { method: "GET", headers: { "Content-Type": "application/json" } }
+      { method: "GET", headers }
     );
 
     if (!response.ok) {

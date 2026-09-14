@@ -147,10 +147,13 @@ export default function AffectLabelingRound({ onExit }) {
             </div>
           )}
 
-          {/* RESULT VOICE — blank for Arlin. The honest interpretive line tying
-              the number to the task lives here, and only here. */}
+          {/* RESULT VOICE — Arlin's line (2026-09-14). The honest interpretive
+              line tying the number to the task lives here, and only here. */}
           <div style={voiceSlot}>
-            <MonoLabel>[ result voice — Arlin: what this means, honestly, vs their own past ]</MonoLabel>
+            <MonoLabel>
+              Speed here is how fast you catch a state before it drives the next move. Faster
+              than your first round means the catch is coming earlier. The same means it held.
+            </MonoLabel>
           </div>
 
           <button type="button" onClick={onExit} style={ctaStyle(false)}>

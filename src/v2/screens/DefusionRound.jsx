@@ -122,9 +122,12 @@ export default function DefusionRound({ onExit }) {
             </div>
           )}
 
-          {/* RESULT VOICE — blank for Arlin. */}
+          {/* RESULT VOICE — Arlin's line (2026-09-14). */}
           <div style={voiceSlot}>
-            <MonoLabel>[ result voice — Arlin: what this means, honestly, vs their own past ]</MonoLabel>
+            <MonoLabel>
+              Each distinct angle is proof the thought was a read, not the fact. More angles than
+              your first round means the read is loosening. The same means it held.
+            </MonoLabel>
           </div>
 
           <button type="button" onClick={onExit} style={ctaStyle(false)}>
