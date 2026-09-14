@@ -23,6 +23,7 @@ import ForecastCard from "../components/ForecastCard.jsx";
 import EodDecompressCard from "../components/EodDecompressCard.jsx";
 import FocusModeLine from "../components/FocusModeLine.jsx";
 import { getBeatConfig } from "../lib/beatConfig.js";
+import { getTomorrowAnchorForToday } from "../lib/dayBridge.js";
 import StepOutOffer from "../components/StepOutOffer.jsx";
 import ProofMoment from "../components/ProofMoment.jsx";
 import StillFormMark from "../components/StillFormMark.jsx";
@@ -382,6 +383,12 @@ export default function SmartScreen({ onEnterPractice, onNoteForEvent = null, on
             double-gated possible-break reflection. Arithmetic only. */}
         <ForecastCard onEnterPractice={onEnterPractice} />
 
+        {/* Last night's anchor (audit fix 2026-09-14): the wind-down's one
+            deliverable, finally read back the next morning. Self-gates:
+            nothing unless an anchor was set for today; never shown at
+            wind-down (no review content near sleep). */}
+        <LastNightAnchor beat={beat} />
+
         <TodaysBriefCard />
 
         {/* Learn nudge — the Track's one EARNED concierge offer (self-gating:
@@ -695,6 +702,28 @@ function DueNotesLine() {
           </p>
         </div>
       ))}
+    </div>
+  );
+}
+
+/* Last night's anchor — read side of stillform_tomorrow_anchor (dayBridge). */
+function LastNightAnchor({ beat }) {
+  const rec = React.useMemo(() => {
+    try { return getTomorrowAnchorForToday(); } catch { return null; }
+  }, []);
+  if (!rec || beat === "wind-down") return null;
+  return (
+    <div
+      className="sf-fade-enter sf-fade-enter--delay-1"
+      style={{ margin: "0 0 var(--sf-space-24)" }}
+      aria-label="The anchor you set last night"
+    >
+      <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+        Set last night, for today
+      </MonoLabel>
+      <p style={{ margin: 0, fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontStyle: "italic", fontSize: "17px", lineHeight: 1.5, color: "var(--sf-text-primary)" }}>
+        {rec.anchor}
+      </p>
     </div>
   );
 }

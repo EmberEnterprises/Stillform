@@ -21,6 +21,7 @@
  * enriched (separate, flagged decision).
  */
 import { fnUrl } from "./apiBase.js";
+import { getTomorrowAnchorForToday, getYesterdayEodArtifact } from "./dayBridge.js";
 
 import { formatTriggerProfileForAI } from "./triggerProfile.js";
 import { formatBiasProfileForAI } from "./biasProfile.js";
@@ -98,10 +99,17 @@ export function gatherTodaysBriefInputs(checkinPayload = {}) {
     return parts.join(", ");
   }, "");
 
+  // Night→morning bridge (audit fix 2026-09-14): last night's anchor and
+  // yesterday's evening read finally reach the morning brief.
+  const tomorrowAnchor = safe(() => (getTomorrowAnchorForToday() || {}).anchor || "", "");
+  const yesterdayEodArtifact = safe(() => getYesterdayEodArtifact() || "", "");
+
   return {
     morningMood: mood,
     ambient,
     outcomeFocus: precision,
+    tomorrowAnchor,
+    yesterdayEodArtifact,
     triggerProfile,
     biasProfile,
     recentSessionsCount,

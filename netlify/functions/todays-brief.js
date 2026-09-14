@@ -214,6 +214,7 @@ exports.handler = async (event) => {
     ? Math.max(0, Math.min(30, payload.recentSessionDays))
     : 0;
   const yesterdayEodArtifact = String(payload.yesterdayEodArtifact || "").slice(0, 400);
+  const tomorrowAnchor = String(payload.tomorrowAnchor || "").slice(0, 200);
   const yesterdayComposure = String(payload.yesterdayComposure || "").slice(0, 32);
 
   // Construct the user-message context block. Same posture as eod-artifact:
@@ -246,6 +247,7 @@ exports.handler = async (event) => {
   if (recentSessionsCount > 0) contextLines.push(`Practice in last ${recentSessionDays || 7} days: ${recentSessionsCount} session(s)`);
   if (yesterdayComposure) contextLines.push(`Yesterday's EOD composure rating: ${yesterdayComposure}`);
   if (yesterdayEodArtifact) contextLines.push(`Yesterday's EOD takeaway: "${yesterdayEodArtifact}"`);
+  if (tomorrowAnchor) contextLines.push(`The anchor the user set for TODAY at last night's wind-down (their own words — honor it in Moves, never restate it as advice): "${tomorrowAnchor}"`);
 
   const userMessage = `Generate today's brief from this data:\n\n${contextLines.join("\n")}`;
 
