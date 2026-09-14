@@ -24,8 +24,18 @@ inline where a pending decision changes the answer.
    Account is not required to use the practice (no-identity-until-sync principle).
 4. **Analytics** (Plausible) → anonymous, cookieless; no personal identifiers, no
    cross-site tracking. Aggregate visit/event counts only.
-5. **Everything else stays on the device** (localStorage): all practice records,
-   Signal Log, Reframe history, Becoming, routines, PIN hash.
+5. **Cloud backup (optional, user-initiated or after sign-in)** → backup-save
+   endpoint → Supabase table stillform_v2_backups, RLS-scoped to the user. A
+   snapshot of EVERY stillform-prefixed key (all practice records, Signal Log,
+   Reframe threads, Becoming, profiles, instrument results, routines) — the
+   auth session and PIN hash are excluded. Stored as JSON, encrypted in
+   transit (HTTPS) and at rest only by the database provider's disk
+   encryption; NOT end-to-end encrypted, so it must be declared as COLLECTED
+   (optional) on the Play Data Safety form, with deletion available via the
+   in-app "Delete account" (server-side) — audit 2026-09-14.
+6. **Everything else stays on the device** (localStorage) unless the user
+   backs it up: all practice records, Signal Log, Reframe history, Becoming,
+   routines, PIN hash (the PIN hash is never backed up).
 
 ---
 

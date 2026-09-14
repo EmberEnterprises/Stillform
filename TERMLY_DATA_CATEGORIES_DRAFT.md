@@ -70,6 +70,15 @@ health signals. Public ship is gated on the policy naming them.
 - On-device practice data (sessions, logs, profiles, instrument results,
   belief records, the season review — all computed on-device, stillform_-
   prefixed, removable via Settings).
+- **Cloud backup (ADD — audit 2026-09-14):** if the user creates an account
+  and backs up (manually, or automatically after sign-in / on app updates /
+  once a day when signed in), a snapshot of their whole practice record is
+  stored against their account on our database provider (Supabase, US).
+  Purpose: restore on a new or wiped device. Encrypted in transit; stored as
+  readable JSON on the provider's encrypted disks (not end-to-end encrypted).
+  Retained until the user deletes the account (in-app "Delete account"
+  removes the backups server-side). The sign-in session and PIN are never
+  included.
 - AI conversation content sent to the AI provider to generate responses.
 - Anonymous install ID for subscription status.
 - Analytics (Plausible — cookieless, no personal profiles).

@@ -441,9 +441,16 @@ const ITEMS = [
     q: "Where does my data live? Is it private?",
     a: (
       <>
-        Everything you enter stays on your device. The only thing that leaves it is an anonymous
-        check that confirms your access — no journal content, nothing personal. You can wipe
-        everything from this device any time in Settings.
+        Your practice record lives on your device: sessions, the signal log, profiles, Workshop
+        results, everything you name. Three things leave it, each only when you use them. When you
+        work with the AI (Reframe, the briefs, Re-read, Scripts, rehearsal, the defusion check), the
+        words you send and the parts of your record that make the answer specific go to our AI
+        provider, are answered, and are not stored by us. If you turn on a cloud backup, a copy of
+        your record is saved to your account so it survives a lost phone; it is encrypted in transit,
+        readable to you, and deleted when you delete your account. Access checks use an anonymous
+        install id. Nothing you write is sold, shared, or used to train anything. You can wipe this
+        device any time in Settings, and delete your account and every backup from the account
+        screen.
       </>
     ),
   },
@@ -517,8 +524,9 @@ const ITEMS = [
     q: "I paid, but it says my access is inactive.",
     a: (
       <>
-        Open Settings and tap “Refresh from server” — that re-checks your subscription. If it still
-        looks wrong, email{" "}
+        Open the subscription screen and log in with the email you paid with — your access follows
+        your account, and it re-checks the moment you sign in and every time the app opens. If it
+        still looks wrong, email{" "}
         <a href="mailto:ARAembersllc@proton.me" style={LINK}>
           ARAembersllc@proton.me
         </a>{" "}
@@ -536,6 +544,29 @@ const ITEMS = [
         offer \u2014 quietly, when you open it \u2014 to step out of that pattern for a minute. Stepping
         out is a short sensory reset; it doesn\u2019t dig back into the loop. It\u2019s only ever an
         offer: take it or tap \u201cNot now,\u201d and it won\u2019t keep asking.
+      </>
+    ),
+  },
+  {
+    id: "proposed-updates",
+    q: "What are \u201cProposed updates\u201d?",
+    a: (
+      <>
+        Every so often, after enough sessions, the AI may propose a small change to your own
+        record: a trigger it thinks it saw, an anchor, or that a baseline has moved. Proposals sit
+        in a queue on My Progress. Nothing applies unless you tap Approve; Dismiss is remembered
+        and the same proposal is not raised again. Your record is yours to correct.
+      </>
+    ),
+  },
+  {
+    id: "pattern-shifted",
+    q: "The AI asked whether a pattern of mine has shifted \u2014 why?",
+    a: (
+      <>
+        Once a pattern is on your watch list, the AI reads new sessions against it. If a session
+        looks like the pattern did not run the way it used to, it may ask, as a question, whether
+        something shifted. You confirm or wave it off; only your answer changes the record.
       </>
     ),
   },
