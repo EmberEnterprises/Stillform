@@ -4,6 +4,7 @@ import MonoLabel from "../components/MonoLabel.jsx";
 import Button from "../components/Button.jsx";
 import HairlineDivider from "../components/HairlineDivider.jsx";
 import AccountSection from "../components/AccountSection.jsx";
+import { isNativeRuntime } from "../lib/apiBase.js";
 import { startCheckout } from "../lib/subscriptionApi.js";
 
 /**
@@ -128,6 +129,12 @@ function PlanOption({ id, name, price, sub, selected, onSelect }) {
 export default function Paywall({ onClose }) {
   const [variant, setVariant] = useState("annual");
   const [error, setError] = useState("");
+  // A6 (Arlin, 2026-09-14): launch = website-only billing. Inside the native
+  // shell the store rules forbid showing prices or a buy path for a
+  // subscription sold elsewhere, so native renders the account-based frame
+  // only (log in; access follows the account). In-app billing is the first
+  // post-launch build and replaces this branch.
+  const native = isNativeRuntime();
 
   useEffect(() => {
     try { window.plausible?.("Paywall Viewed"); } catch { /* non-fatal */ }
@@ -169,6 +176,19 @@ export default function Paywall({ onClose }) {
         <p style={FREE_NOTE}>Quick Breathe stays free, always. The stabilization valve is never behind a wall.</p>
       </div>
 
+      {native ? (
+        <div className="sf-fade-enter sf-fade-enter--delay-2" style={{ marginTop: "var(--sf-space-48)" }}>
+          <p style={{ margin: 0, fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "17px", lineHeight: 1.55, color: "var(--sf-text-primary)" }}>
+            Access is tied to your account. Log in below and, if your account has an active subscription, the practice opens here.
+          </p>
+          <div style={{ marginTop: "var(--sf-space-24)" }}>
+            <button type="button" onClick={onClose} className="sf-link-quiet">Not now ›</button>
+          </div>
+        </div>
+      ) : null}
+
+      {!native ? (
+      <>
       <div className="sf-fade-enter sf-fade-enter--delay-2" style={{ marginTop: "var(--sf-space-48)" }}>
         <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
           Choose a plan
@@ -198,6 +218,8 @@ export default function Paywall({ onClose }) {
         <Button variant="primary" onClick={handleStart}>Start</Button>
         <button type="button" onClick={onClose} className="sf-link-quiet">Not now ›</button>
       </div>
+      </>
+      ) : null}
 
       {/* J11 (2026-07-14): the money moment's silent fear — "what happens to my
           words if I don't pay?" — answered plainly, once. */}

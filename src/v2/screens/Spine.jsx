@@ -502,6 +502,7 @@ export default function Spine({ onExit, onNavigate = null, forcedBeat = null, in
         selectedChip={selectedChip}
         onContinue={handleReframeContinue}
         onSwitchToSelfMode={handleSwitchToSelfMode}
+        onCrisis={onNavigate ? () => onNavigate("crisis-resources") : null}
         onExit={onExit}
       />
     );

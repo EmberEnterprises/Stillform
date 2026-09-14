@@ -42,7 +42,7 @@ import { getOtherRead } from "../../lib/otherReadApi.js";
  * @param {function(): void} onSwitchToSelfMode  switch to SelfReframe (offered on API error)
  * @param {function(): void} onExit
  */
-export default function Reframe({ beat = null, todayThread = null, precisionName, selectedChip, onContinue, onSwitchToSelfMode, onExit }) {
+export default function Reframe({ beat = null, todayThread = null, precisionName, selectedChip, onContinue, onSwitchToSelfMode, onExit, onCrisis = null }) {
   // history is the wire-shape sent to the backend: [{role, text}]
   const [history, setHistory] = useState([]);
   const [draft, setDraft] = useState("");
@@ -55,6 +55,22 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
   // confirmedTrigger is set only when the user taps Confirm. Skippable.
   const [pendingTrigger, setPendingTrigger] = useState(null);
   const [confirmedTrigger, setConfirmedTrigger] = useState(null);
+  // Crisis handoff (audit fix 2026-09-14, GPT-4o §2.2 C2/C5): the server's
+  // crisisDetected flag was never read on the client, so its safety text
+  // arrived as an ordinary thread message with no door out. Now: a locked
+  // (non-editable) handoff block with the crisis door, plus the two
+  // aggregate safety events (flags only — never content).
+  const [crisis, setCrisis] = useState(false);
+  const noteSafetyFlags = (result) => {
+    if (!result) return;
+    if (result.crisisDetected) {
+      setCrisis(true);
+      try { window.plausible?.("Crisis Detected", { props: { surface: "reframe", beat: beat || "main" } }); } catch { /* non-fatal */ }
+    }
+    if (result.liabilityGuard) {
+      try { window.plausible?.("Liability Guard Fired", { props: { surface: "reframe" } }); } catch { /* non-fatal */ }
+    }
+  };
 
   // The other read — optional, user-aimed devil's advocate (offer register).
   const [orOpen, setOrOpen] = useState(false);
@@ -111,6 +127,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
       // list — counts only patterns the user already tracks, per-day deduped,
       // fail-silent. Governed by ZERO FABRICATION (genuine confident reads only).
       if (result.distortion) noteAiPatternDetection(result.distortion);
+      noteSafetyFlags(result);
 
       maybeProposeTrigger(result.trigger);
       maybeStashVulnerability(result.surfaceVulnerability);
@@ -167,6 +184,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
     }
 
     if (result.distortion) noteAiPatternDetection(result.distortion); // 5.11(d)
+    noteSafetyFlags(result);
 
     maybeProposeTrigger(result.trigger);
     maybeStashVulnerability(result.surfaceVulnerability);
@@ -379,6 +397,29 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
         >
           Tagged: {confirmedTrigger}
         </p>
+      ) : null}
+
+      {/* Crisis handoff — locked, not a thread message. Renders only when the
+          server flagged crisis language this session. The door is the point. */}
+      {crisis ? (
+        <div
+          className="sf-fade-enter"
+          role="region"
+          aria-label="Support and crisis resources"
+          style={{ marginTop: "var(--sf-space-32)", padding: "var(--sf-space-16) 0", borderTop: "1px solid var(--sf-accent)", borderBottom: "1px solid var(--sf-accent)" }}
+        >
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+            Right now
+          </MonoLabel>
+          <p style={{ margin: "0 0 var(--sf-space-16)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "17px", lineHeight: 1.55, color: "var(--sf-text-primary)" }}>
+            What you wrote sounds like more than this practice should hold alone. Real people are available now, free, any hour — the lines are one tap away, and they work without signal to the AI.
+          </p>
+          <Button
+            onClick={() => { try { window.plausible?.("Crisis Door Opened", { props: { surface: "reframe" } }); } catch { /* non-fatal */ } if (typeof onCrisis === "function") onCrisis(); }}
+          >
+            Open support and crisis resources
+          </Button>
+        </div>
       ) : null}
 
       {/* Reply input + actions */}
