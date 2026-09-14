@@ -5,11 +5,11 @@
 - [x] A2 DONE 2026-09-14 (Arlin confirmed the key is set in Netlify).
 - [x] A3 DONE 2026-09-14 (Arlin set Site URL https://stillformapp.com + redirect https://stillformapp.com/**).
 - [x] A4 DECIDED 2026-09-14 (Arlin): B2B IS POST-LAUNCH. Launch is individuals only; no B2B path, no SOC 2 gate. CANON line 333 gets the supersession note in the B13 batch. Arlin will retain an IP attorney before any B2B work (see E).
-- [ ] A5 [DECISION] Reviewer demo access for Play review: dedicated review account in Supabase vs review-code bypass. Then Claude builds (B5).
-- [ ] A6 [DECISION] Billing path: confirm LOGIN-ONLY (Netflix pattern) or not. If confirmed, Claude hides Paywall on native (B6).
+- [x] A5 DECIDED 2026-09-14 (Arlin): dedicated REVIEW ACCOUNT (fixed email + fixed code, no general bypass). Claude builds B5.
+- [x] A6 DECIDED 2026-09-14 (Arlin): BOTH — website (Lemon Squeezy) AND in-app Google Play billing, website ~5% cheaper. Forced sequence: LAUNCH = website-only (app shows Log in, no prices, no buy links — the account-based pattern Google allows); IN-APP BILLING = first post-launch build (billing plugin + Play Console products + server purchase verification + entitlement merge), priced ~5% above web. B6 stands (hide Paywall pricing on native at launch). In-app billing added to E.
 - [ ] A7 [DECISION] Free floor vs live 3-session gate (pricing session): the scoped "grounding + daily loop free, paid = depth" is NOT what ships; FREE_SESSION_LIMIT=3 then a wall on everything.
 - [ ] A8 [DECISION] Encryption posture: build client-side encryption of backups/threads before launch/B2B, OR strike every encryption claim (three B2B docs + CANON + TRANSFER). Zero-knowledge sync (S2) is unbuilt.
-- [ ] A9 [ARLIN] Write the three CFM RESULT-VOICE lines (AffectLabelingRound x1, DefusionRound x2) — users currently see "[ result voice — Arlin: … ]". Or approve Claude's neutral fallback (B7).
+- [x] A9 DECIDED 2026-09-14 (Arlin chose the 'sharper pair'; it is TWO slots, one per round, not three): NAMING = "Speed here is how fast you catch a state before it drives the next move. Faster than your first round means the catch is coming earlier. The same means it held." · REFRAMING = "Each distinct angle is proof the thought was a read, not the fact. More angles than your first round means the read is loosening. The same means it held." Claude ships these in B7.
 - [ ] A10 [ARLIN] Run `node scripts/security-smoke.mjs` from a networked machine (the audit container cannot reach Supabase) — the live anon-access probe must pass before launch.
 - [ ] A11 [ARLIN] Replace the project's uploaded April transfer file with the repo's STILLFORM_PROJECT_TRANSFER.md after B13 fixes its two stale lines (the April file carries every banned framing, the wrong model, the wrong price).
 
@@ -62,6 +62,7 @@
 - [ ] D6 Pricing decision — the final step, after D5, per the locked rule.
 
 **E. POST-LAUNCH (per the locked Apr-29 standard)**
+- IN-APP GOOGLE PLAY BILLING (post-launch, decided 2026-09-14): billing plugin + Play Console subscription products at ~5% above web + server-side purchase-token verification + merge Google entitlements with Lemon Squeezy status. Cannot start until the app exists in the Play Console.
 - B2B (post-launch, decided 2026-09-14): FIRST retain an IP attorney — trademark strategy (file after 100 paying customers per the locked rule), review of B2B_DPA_TEMPLATE / B2B_PRIVACY_POLICY_ADDENDUM / IT guide / SSO doc before any company sees them (they carry the corrections in B10), enterprise contract terms; THEN B2B frontend + SSO handler + SOC 2 (Type 1 first, Type 2's 6-month observation window after).
 - Translations (English + Spanish + Brazilian Portuguese + Armenian; specialist clinical translator) · iOS path (iPhone purchase → PrivacyInfo.xcprivacy → TestFlight → App Store, Apple checkout-policy decision) · Institutional compassion path · B2B frontend + SSO handler + SOC 2 (if A4 = post-launch) · Native push + contextual nudge logic · HRV/HealthKit continuous signal · Neuroplasticity-acceleration queue · The Codex (I4).
 
