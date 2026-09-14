@@ -18,6 +18,7 @@ const SUPABASE_URL = "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmV3aWxkZm5ieGx5Z2pvZnB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAxMDcsImV4cCI6MjA5MTMyNjEwN30.r3Pdm3XoZVPlUFgKCPLtfkSrHKIxVcwFW4tuUP23Vns";
 
+import { fnUrl } from "./apiBase.js";
 export const AUTH_KEY = "stillform_v2_auth";
 
 function readAuth() {
@@ -73,14 +74,35 @@ export async function requestCode(email) {
  * Step 2: verify the code. On success, persists the session.
  * @returns {Promise<{ok: boolean, email?: string, error?: string}>}
  */
+async function tryReviewAccess(email, code) {
+  try {
+    const res = await fetch(fnUrl("review-access"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code }),
+    });
+    if (!res.ok) return null;
+    const d = await res.json().catch(() => null);
+    return d && d.ok && d.access_token ? d : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function verifyCode(email, code) {
   const e = String(email || "").trim().toLowerCase();
   const t = String(code || "").trim();
   if (!e || !t) return { ok: false, error: "missing" };
   try {
-    const { ok, data } = await gotrue("/verify", { type: "email", email: e, token: t });
+    let { ok, data } = await gotrue("/verify", { type: "email", email: e, token: t });
     if (!ok || !data?.access_token) {
-      return { ok: false, error: data?.msg || data?.error_description || "verify_failed" };
+      // Store-reviewer path (A5, 2026-09-14): the ONE review account signs in
+      // with a fixed code that Supabase would reject. Ask the server; it
+      // answers 401 for everyone except REVIEW_EMAIL + REVIEW_CODE (both env,
+      // never in this bundle). Anyone else just gets the normal failure.
+      const rv = await tryReviewAccess(e, t);
+      if (!rv) return { ok: false, error: data?.msg || data?.error_description || "verify_failed" };
+      data = rv;
     }
     writeAuth({
       access_token: data.access_token,
