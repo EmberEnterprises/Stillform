@@ -1,9 +1,9 @@
 **## ▶▶ TASK BOARD — 2026-09-10, written after the full line-by-line audit (Passes 0-4, all 86 docs vs code + git). READ THIS FIRST. Every item below traces to an AUDIT LEDGER entry at the tail of this file (search "AUDIT LEDGER"). Status vocabulary: [ARLIN] her step · [CLAUDE] code/doc, no decision needed · [DECISION] hers before anything is built · [DEVICE] needs her Mac/devices/deploy · [POST-LAUNCH] per the locked Apr-29 standard. Nothing here is from memory.**
 
 **A. LAUNCH BLOCKERS — ARLIN'S STEPS**
-- [ ] A1 [ARLIN] Lemon Squeezy: create the two products (monthly $24.99; annual $17.49/mo = $209.92/yr, save 30%) → paste the two hosted-checkout URLs. Claude wires CHECKOUT_URLS (B2). Until then no one can subscribe.
-- [ ] A2 [ARLIN] Confirm OPENAI_API_KEY is set in Netlify env (reframe/briefs/re-read all depend on it).
-- [ ] A3 [ARLIN] Confirm Supabase Auth URL configuration (Site URL + redirect URLs = https://stillformapp.com) — v2 uses OTP codes so the old localhost-link failure no longer applies, but the setting should still be right.
+- [x] A1 DONE 2026-09-14 (Claude, in Arlin's browser, with her yes): live store (identity verified, bank connected, webhook → stillformapp.com/.netlify/functions/subscription-webhook, 11 events). Product 961807 edited: Monthly $24.99 (variant 1510526), Annual renamed 'Stillform Annual' $209.92/yr (variant 1510525), all descriptions replaced with the framing-law line. Trial left at 14 days (terms.html says 7 — align in B13 unless Arlin says 7). Hosted checkout URLs: monthly https://embers.lemonsqueezy.com/checkout/buy/39d7df24-0644-46c1-9bb5-3f2cf89839e4?enabled=1510526 · annual https://embers.lemonsqueezy.com/checkout/buy/540c609b-2534-4362-9e9f-0b07b08dbedc?enabled=1510525 (verify both resolve when wiring B2).
+- [x] A2 DONE 2026-09-14 (Arlin confirmed the key is set in Netlify).
+- [x] A3 DONE 2026-09-14 (Arlin set Site URL https://stillformapp.com + redirect https://stillformapp.com/**).
 - [x] A4 DECIDED 2026-09-14 (Arlin): B2B IS POST-LAUNCH. Launch is individuals only; no B2B path, no SOC 2 gate. CANON line 333 gets the supersession note in the B13 batch. Arlin will retain an IP attorney before any B2B work (see E).
 - [ ] A5 [DECISION] Reviewer demo access for Play review: dedicated review account in Supabase vs review-code bypass. Then Claude builds (B5).
 - [ ] A6 [DECISION] Billing path: confirm LOGIN-ONLY (Netflix pattern) or not. If confirmed, Claude hides Paywall on native (B6).
