@@ -983,7 +983,7 @@ function validateIntentionFit(payload, { input = "", isSummaryRequest = false, h
     if (!hasAnchorHit) reasons.push("missing user-language anchor");
   }
 
-  if (reframe === normalizeForSnippetMatch("Your signal is real, and your system is loud right now. We separate what happened from what your stress system is adding, then move one step at a time. Keep it simple and run one clean step before you add more.")) {
+  if (reframe === normalizeForSnippetMatch("Nothing here holds up as a read yet, so one question before any of it: of what you wrote, which single part would you swear to as fact — and which part did your mind add on its way in?")) {
     reasons.push("generic deterministic line");
   }
 
@@ -1082,14 +1082,19 @@ function buildDeterministicFallback({ mode, route, input, isSummaryRequest = fal
     clarity: "We cut the loop by naming the thought-pattern, then act on evidence instead of repetition.",
     hype: "We convert activation into readiness and lock onto one execution anchor."
   }[mode] || "We separate signal from noise, then move on one concrete action.";
-  const snippet = buildInputSignalSnippet(input);
-  const signalLead = snippet ? `You said "${snippet}". ` : "";
-
+  // Stranger test 2026-09-14: the old generic fallback opened with `You said
+  // "<their words>"` and talked about "your stress system" — a mirrored,
+  // clinical line, the exact failure the anti-mirror doctrine bans, shown at
+  // the one moment the model had already failed. The fallback is now an
+  // honest EXTRACT turn in the house voice: no mirroring, no labels, one
+  // sharp question that moves the work forward. (modeAnchor kept for the
+  // liability/crisis branches above; unused here on purpose.)
+  void modeAnchor;
   return {
     distortion: null,
     mechanism: route?.id || "signal_noise",
-    reframe: `${signalLead}Your signal is real, and your system is loud right now. ${modeAnchor} Keep it simple and run one clean step before you add more.`,
-    next_step: route?.nextStep || "Take one deliberate breath and choose one action you can complete in the next 90 seconds.",
+    reframe: "Nothing here holds up as a read yet, so one question before any of it: of what you wrote, which single part would you swear to as fact — and which part did your mind add on its way in?",
+    next_step: route?.nextStep || "One breath. Then the one thing you can finish in the next ninety seconds.",
     question: null
   };
 }
