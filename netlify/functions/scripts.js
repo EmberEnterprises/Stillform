@@ -80,18 +80,9 @@ function createCorsHeaders(event) {
 // Crisis detection — same pattern as reframe.js. If user's situation
 // language signals a crisis context, do NOT generate a script —
 // surface support resources instead.
-const CRISIS_PATTERNS = [
-  /\b(suicid|kill myself|end (it|my life|things)|don'?t want to (be alive|live|exist))/i,
-  /\b(self.harm|harm myself|hurt myself|cut myself)/i,
-  /\b(overdos|take.*pills.*die|take all (my|the) pills)/i,
-  /\b(abuse|abusing|abused|domestic violence)\b.*\b(me|my)\b/i,
-  /\b(threaten|threatening) (to )?(kill|hurt|harm)\b/i
-];
+// Crisis detection (2026-09-19): shared detector, one list for the whole app.
+import { hasCrisisLanguage } from "./_crisisLanguage.js";
 
-function hasCrisisLanguage(text) {
-  if (!text || typeof text !== "string") return false;
-  return CRISIS_PATTERNS.some((re) => re.test(text));
-}
 
 const SCRIPTS_SYSTEM = `You are inside Stillform's Scripts tool. The user has a hard conversation to have. Your job is to produce a single verbatim message they could send or say — clarified into deployable language. Not advice. Not a reflection prompt. The line itself.
 

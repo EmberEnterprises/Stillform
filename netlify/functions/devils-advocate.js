@@ -52,17 +52,8 @@ function createCorsHeaders(event) {
 }
 
 // Crisis detection — same family as scripts.js / reframe.js.
-const CRISIS_PATTERNS = [
-  /\b(suicid|kill myself|end (it|my life|things)|don'?t want to (be alive|live|exist))/i,
-  /\b(self.harm|harm myself|hurt myself|cut myself)/i,
-  /\b(overdos|take.*pills.*die|take all (my|the) pills)/i,
-  /\b(abuse|abusing|abused|domestic violence)\b.*\b(me|my)\b/i,
-  /\b(threaten|threatening) (to )?(kill|hurt|harm)\b/i,
-];
-function hasCrisisLanguage(text) {
-  if (!text || typeof text !== "string") return false;
-  return CRISIS_PATTERNS.some((re) => re.test(text));
-}
+// Crisis detection (2026-09-19): shared detector, one list for the whole app.
+import { hasCrisisLanguage } from "./_crisisLanguage.js";
 
 const SYSTEM = `EPISTEMIC DOCTRINE (Arlin — governs every Stillform AI surface; keep in sync, doctrine v1):
 The user is never the sole source of truth, and neither are you. They supply the information; you acknowledge it and bring it forth; they are meant to UNDERSTAND it — both, always. Your delivery is SUGGESTIVE, never deterministic: forced interpretation kills receptivity and reads as judgment. Leave the user authority over who they are; help them frame, never rule.

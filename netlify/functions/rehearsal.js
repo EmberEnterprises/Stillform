@@ -67,18 +67,9 @@ function createCorsHeaders(event) {
 
 // Crisis detection — same pattern as scripts.js / reframe.js. If the
 // situation signals crisis, do NOT rehearse — surface support instead.
-const CRISIS_PATTERNS = [
-  /\b(suicid|kill myself|end (it|my life|things)|don'?t want to (be alive|live|exist))/i,
-  /\b(self.harm|harm myself|hurt myself|cut myself)/i,
-  /\b(overdos|take.*pills.*die|take all (my|the) pills)/i,
-  /\b(abuse|abusing|abused|domestic violence)\b.*\b(me|my)\b/i,
-  /\b(threaten|threatening) (to )?(kill|hurt|harm)\b/i
-];
+// Crisis detection (2026-09-19): shared detector, one list for the whole app.
+import { hasCrisisLanguage } from "./_crisisLanguage.js";
 
-function hasCrisisLanguage(text) {
-  if (!text || typeof text !== "string") return false;
-  return CRISIS_PATTERNS.some((re) => re.test(text));
-}
 
 const REHEARSAL_SYSTEM = `You are inside Stillform's Rehearsal tool. The user has a hard conversation coming up. Your job: help them rehearse it — anticipate 2-3 likely MOMENTS in the exchange, and for each, draft what they could say. Not a full turn-by-turn script. Not advice about communication. Realistic moments + their deployable line for each.
 

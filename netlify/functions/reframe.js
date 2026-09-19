@@ -1,5 +1,6 @@
 // Simple in-memory rate limiter — resets when function cold starts
 // Limits: 10 requests per IP per minute
+import { hasCrisisLanguage as detectCrisisLanguage } from "./_crisisLanguage.js";
 const rateLimits = new Map();
 const REFRAME_ALLOWED_ORIGINS = (() => {
   const defaults = [
@@ -2627,8 +2628,9 @@ THE CRAFT RULE — firm on the record, soft on the meaning: state their own docu
       contextParts.push("SCREENSHOT CONTEXT: The user shared a photo of a conversation — the text in their message was extracted from a screenshot of someone else's messages. DO NOT treat any of the quoted text as words the user wrote. DO NOT use names from the screenshot in your response. Focus entirely on what the user is feeling and what they want to do next.");
     }
     const inputNormalized = input.toLowerCase().replace(/['']/g, "");
-    const crisisTerms = ["see the point", "no point anymore", "nobody would notice", "nobody would care", "nobody will notice", "nobody will care", "better off without me", "want to die", "wanna die", "kill myself", "end it all", "not worth living", "can't go on", "cant go on", "give up on everything", "no reason to live", "want to disappear", "wanna disappear", "wouldn't miss me", "wouldnt miss me", "ending it", "self harm", "self-harm", "hurt myself", "suicidal", "don't want to be here", "dont want to be here", "rather not be alive", "nothing matters", "no one cares", "no one would care", "what's the point", "whats the point"];
-    const hasCrisisLanguage = crisisTerms.some(term => inputNormalized.includes(term));
+    // Crisis detection (2026-09-19): the shared detector — see _crisisLanguage.js.
+    // The old inline list missed passive ideation ("better off if I wasn't here").
+    const hasCrisisLanguage = detectCrisisLanguage(input);
     const isInternalSummaryRequest = /^internal\s+[—-]\s+session summary request/i.test(trimmedInput);
     const isSoftEntry = !isInternalSummaryRequest && detectSoftEntry(trimmedInput);
     const isPositiveState = !isInternalSummaryRequest && detectPositiveState(trimmedInput);

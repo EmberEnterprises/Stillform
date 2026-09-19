@@ -15,6 +15,7 @@ import { setPendingCandidate as setPendingWindow } from "../../lib/windowRead.js
 import { getWatchListChips } from "../../lib/biasProfile.js";
 import { noteAiPatternDetection } from "../../lib/biasProfile.js";
 import { getOtherRead } from "../../lib/otherReadApi.js";
+import { hasCrisisLanguage } from "../../lib/crisisLanguage.js";
 
 /**
  * Reframe — the middle step of the spine. AI metacognition partner.
@@ -61,6 +62,18 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
   // (non-editable) handoff block with the crisis door, plus the two
   // aggregate safety events (flags only — never content).
   const [crisis, setCrisis] = useState(false);
+  // Phone-side check (2026-09-19): the same detector the server runs, run
+  // BEFORE the request leaves the device — so the door opens even if the
+  // server misses, is slow, or is down. The server still adds its safety
+  // override to the AI reply; this only guarantees the door.
+  const preCheckCrisis = (words) => {
+    try {
+      if (hasCrisisLanguage(words)) {
+        setCrisis(true);
+        try { window.plausible?.("Crisis Detected", { props: { surface: "reframe", beat: beat || "main", side: "device" } }); } catch { /* non-fatal */ }
+      }
+    } catch { /* never block the send */ }
+  };
   const noteSafetyFlags = (result) => {
     if (!result) return;
     if (result.crisisDetected) {
@@ -108,6 +121,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
     const open = async () => {
       setThinking(true);
       setError(null);
+      preCheckCrisis(precisionName);
       const result = await sendReframeMessage({
         input: precisionName,
         history: [],
@@ -168,6 +182,7 @@ export default function Reframe({ beat = null, todayThread = null, precisionName
     setDraft("");
     setThinking(true);
     setError(null);
+    preCheckCrisis(text);
 
     const result = await sendReframeMessage({
       input: text,

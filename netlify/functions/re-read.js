@@ -63,18 +63,8 @@ function createCorsHeaders(event) {
 }
 
 // Crisis detection — same family as devils-advocate.js / reframe.js.
-const CRISIS_PATTERNS = [
-  /\b(suicid|kill myself|end (it|my life|things)|don'?t want to (be alive|live|exist))/i,
-  /\b(self.harm|harm myself|hurt myself|cut myself)/i,
-  /\b(overdos|take.*pills.*die|take all (my|the) pills)/i,
-  /\b(abuse|abusing|abused|domestic violence)\b/i,
-  /\b(threaten|threatening) (to )?(kill|hurt|harm)\b/i,
-  /\b(rape|raped|molest|assault(ed)?)\b/i,
-];
-function hasCrisisLanguage(text) {
-  if (!text || typeof text !== "string") return false;
-  return CRISIS_PATTERNS.some((re) => re.test(text));
-}
+// Crisis detection (2026-09-19): shared detector, one list for the whole app.
+import { hasCrisisLanguage } from "./_crisisLanguage.js";
 
 const HEAVIER_NOTE =
   "This one is heavier than a re-read. A memory like this deserves a real person, not a widening exercise — the app can hand you a summary of what you've built here to bring with you.";
