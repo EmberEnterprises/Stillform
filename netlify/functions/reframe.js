@@ -467,6 +467,19 @@ const _bansBySubstringCategory = (cat) => BANNED_OUTPUT
 // Same patterns as before, derived from BANNED_OUTPUT. Kept by name so all
 // existing callsites (validateOutputs, hasAnyPattern, findMatchingPattern)
 // continue working without changes.
+// Labels that narrate a person as a machine. The house voice says what is
+// true in their words; it never diagnoses the body back to them.
+const CLINICAL_LABEL_PATTERNS = [
+  /\bstress (response|system|reaction|hormones?)\b/i,
+  /\bnervous system\b/i,
+  /\bfight[- ]or[- ]flight\b/i,
+  /\b(threat|danger|alarm) (response|signal|mode)\b/i,
+  /\b(activat(ed|es|ing)|trigger(ed|s|ing)) (your|a|the) (jaw|body|system|response|stress)\b/i,
+  /\bsignal(s|ing|ed)? (stress|threat|danger|alarm)\b/i,
+  /\byour (body|system) (is|was) (reacting|responding|signaling|preparing|bracing for a threat)\b/i,
+  /\b(physiolog|cortisol|adrenaline|amygdala|sympathetic|dysregulat)/i,
+  /\bway of (marking|flagging|signaling) (a )?threat\b/i,
+];
 const BANNED_REFRAME_PATTERNS = _bansByCategory("validation_phrases");
 
 const GENERIC_GARBAGE_PATTERNS = _bansByCategory("generic_openers");
@@ -865,6 +878,14 @@ function validateWorkLoopPayload(payload, { hasCrisisLanguage = false, isLowDema
   if (novel < 3) reasons.push("rebuilt mirrors the input — contains nothing the user did not write");
   const qCount = `${rebuilt} ${payload.question || ""} ${payload.shape?.line || ""}`.split("?").length - 1;
   if (qCount > (isLowDemand ? 0 : 1)) reasons.push(isLowDemand ? "low-demand prefers statements" : "too many questions");
+  // CLINICAL / MECHANICAL LABELS (stranger test 2026-09-15, enforced
+  // 2026-10-01): the first-work-turn quality bar in the prompt held about two
+  // thirds of the time; "physical stress response", "activated your jaw
+  // response" still slipped through. Now mechanical: a rebuilt or shape line
+  // that narrates the user's body as a system is rejected and retried.
+  for (const t of [rebuilt, payload.shape?.line || ""]) {
+    if (t && hasAnyPattern(t, CLINICAL_LABEL_PATTERNS)) reasons.push("clinical label in rebuilt/shape");
+  }
   for (const t of [rebuilt, payload.shape?.line || "", payload.question || ""]) {
     if (t && hasAnySnippet(t, GENERIC_GARBAGE_SNIPPETS)) reasons.push("generic phrasing");
     if (t && hasAnyPattern(t, BANNED_REFRAME_PATTERNS)) reasons.push("banned phrase");
