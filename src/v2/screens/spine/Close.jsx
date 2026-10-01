@@ -647,27 +647,6 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
         />
       </div>
 
-      {openingChip && CHIP_DEFINITIONS[openingChip] ? (
-        <div className="sf-fade-enter sf-fade-enter--delay-1" style={{ marginTop: "var(--sf-space-24)" }} aria-label="Where you land now">
-          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
-            {landing ? `Opened ${openingChip} · landed ${landing}` : `Opened ${openingChip} · where do you land now?`}
-          </MonoLabel>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
-            {["settled", "focused", "mixed", "unsure", "flat", "anxious", "angry", "stuck"].map((c) => (
-              <button
-                key={c}
-                type="button"
-                className="sf-chip"
-                aria-selected={landing === c}
-                aria-pressed={landing === c}
-                onClick={() => tapLanding(c)}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
 
       {surfacedFrame ? (
         <div
@@ -695,6 +674,28 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
             {text.trim() ? "↩ Use what surfaced instead" : "↩ Use what surfaced — one tap fills it"}
           
           </button>
+        </div>
+      ) : null}
+
+      {openingChip && CHIP_DEFINITIONS[openingChip] ? (
+        <div className="sf-fade-enter sf-fade-enter--delay-1" style={{ marginTop: "var(--sf-space-24)" }} aria-label="Where you land now">
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+            {landing ? `Opened ${openingChip} · landed ${landing}` : `Opened ${openingChip} · where do you land now?`}
+          </MonoLabel>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
+            {["settled", "focused", "mixed", "unsure", "flat", "anxious", "angry", "stuck"].map((c) => (
+              <button
+                key={c}
+                type="button"
+                className="sf-chip"
+                aria-selected={landing === c}
+                aria-pressed={landing === c}
+                onClick={() => tapLanding(c)}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
       ) : null}
 
