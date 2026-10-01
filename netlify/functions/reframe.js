@@ -1679,6 +1679,10 @@ You ask the questions the user hasn't asked themselves. You offer alternative co
 // against the exact request body; content is byte-identical to the original
 // constant, only partitioned.
 const METACOGNITIVE_ARC_TURN1 = METACOGNITIVE_ARC.slice(0, 2005) ;
+// With a beat, the V2 TURN 1 OVERRIDE "REPLACES the candidate-names pattern in
+// the arc" — so the arc's own TURN 1 section (and its BAD/GOOD example) is
+// redundant on that path. Header only there (CAP-3 step 3, 2026-10-02).
+const METACOGNITIVE_ARC_HEADER_ONLY = METACOGNITIVE_ARC.slice(0, 445);
 const METACOGNITIVE_ARC_LATER = METACOGNITIVE_ARC.slice(0, 445) + METACOGNITIVE_ARC.slice(2005);
 
 
@@ -2589,7 +2593,7 @@ THE CRAFT RULE — firm on the record, soft on the meaning: state their own docu
     // is already tightly tuned for that case.
     if (mode === "calm" || mode === "clarity") {
       const arcHasAssistantTurn = Array.isArray(history) && history.some((m) => m && m.role === "assistant");
-      contextParts.push(arcHasAssistantTurn ? METACOGNITIVE_ARC_LATER : METACOGNITIVE_ARC_TURN1);
+      contextParts.push(arcHasAssistantTurn ? METACOGNITIVE_ARC_LATER : (beat ? METACOGNITIVE_ARC_HEADER_ONLY : METACOGNITIVE_ARC_TURN1));
 
       // Phase 4 #3 (May 16, 2026): if the v2 spine sent a beat with a
       // matching BEAT_ADDITIONS entry, append it as the next contextPart
@@ -2658,7 +2662,11 @@ THE CRAFT RULE — firm on the record, soft on the meaning: state their own docu
     // the loop's output, never validate it (framing law: plasticity is the
     // premise), redirect out of analysis to body/close (Wells MCT; Hitchcock
     // 2024 meta-control — open-ended introspection IS the failure mode).
+    // CAP-3 step 3: "when the work stops helping" cannot apply before the
+    // third turn — sent only once two assistant turns exist.
+    if (Array.isArray(history) && history.filter((m) => m && m.role === "assistant").length >= 2) {
     contextParts.push(`DEGRADATION LAYER — when the work stops helping: Bounded analysis reaches a takeaway and resolves; analysis that keeps going past that point stops being insight and becomes the loop feeding itself (Wells 2009 MCT; Hitchcock 2024 — open-ended introspection IS the failure mode in spiraling). The tells: the user circles the same ground without new traction, the tone goes flat or tired, or — the clearest signal — they hand themselves a GLOBAL SELF-VERDICT: "I've always been like this," "I'll never change," "that's just who I am," "I always ruin it." When you see this: (1) Do NOT validate the verdict — never agree they are fixed, broken, or permanently a certain way. The whole premise here is that how a person processes can change; a "this is just who I am, forever" conclusion is the tired loop talking, not a truth they have discovered. (2) Name it as what it is, gently and once: e.g. "That sounds less like a conclusion and more like the loop after it has run too long." Hand the verdict back as a process running, not a fact about them. (3) Then redirect OUT of analysis — do not generate more of it. Offer the body (one slow breath, the Quick Reset) or move toward closing. More analysis at this point deepens the rut; the way out is down into the body or done-for-now, not further in. Stay zero-fabrication: only name a loop or fatigue you can actually see in what they wrote — never assume it.`);
+    }
 
     // RESOLUTION POSTURE (Arlin, 2026-07-08 — canon-level stance governing how
     // this surface handles hurt caused by other people; one copy per request,
