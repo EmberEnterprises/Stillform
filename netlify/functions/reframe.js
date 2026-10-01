@@ -1903,6 +1903,7 @@ exports.handler = async function(event) {
       contextProfile = null,
       confirmedFindings = null,
       becomingContext = null,
+      shiftContext = null,
       aiDirectness = null,
       addressAs = null,
       capacities = null,
@@ -2931,6 +2932,7 @@ WHAT STAYING SHARP LOOKS LIKE:
       }
     }
 
+    if (typeof shiftContext === "string" && shiftContext.trim()) contextParts.push(String(shiftContext).slice(0, 400));
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
     // LOW-DEMAND OVERRIDE — when bio-filter signals reduced executive function

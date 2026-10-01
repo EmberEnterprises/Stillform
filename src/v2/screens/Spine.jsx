@@ -549,6 +549,7 @@ export default function Spine({ onExit, onNavigate = null, forcedBeat = null, in
       surfacedFrame={surfacedFrame}
       breathingOffer={config?.close?.breathingOffer || null}
       beat={beat}
+      openingChip={selectedChip}
       onReturnHome={handleCloseToStateCheck}
       onWantScript={(seed) => {
         setScriptSeed(seed);

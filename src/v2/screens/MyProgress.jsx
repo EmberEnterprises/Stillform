@@ -13,6 +13,7 @@ import { getPendingCandidate as getPendingMove } from "../lib/protectiveMoves.js
 import { getPendingCandidate as getPendingStrength } from "../lib/strengths.js";
 import { getPendingCandidate as getPendingValue } from "../lib/values.js";
 import { getObserverSeatCount } from "../lib/observerSeat.js";
+import { getShiftLine } from "../lib/shiftLog.js";
 import { getOtherReadEffect } from "../lib/beliefRating.js";
 import { getTriggerProfile, getTriggerDecay } from "../lib/triggerProfile.js";
 import { getSeasonReview } from "../lib/seasonReview.js";
@@ -415,6 +416,11 @@ export default function MyProgress({ onExit, onNavigate }) {
           <span className="sf-sec-head-lbl">The evidence</span>
           <div className="sf-sec-rule" />
         </div>
+        {(() => { let l = null; try { l = getShiftLine(); } catch { l = null; } return l ? (
+          <p style={{ margin: "var(--sf-space-12) 0 var(--sf-space-16)", fontFamily: "var(--sf-font-serif)", fontWeight: 300, fontSize: "15px", lineHeight: 1.55, color: "var(--sf-text-quiet)" }} aria-label="Where you land after sessions">
+            {l}
+          </p>
+        ) : null; })()}
                 <ProgressEntry
           title="Your naming, day by day"
           description="Every state you've named, in your words — the raw record the practice is built from."

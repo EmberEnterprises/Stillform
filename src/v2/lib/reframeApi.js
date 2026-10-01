@@ -25,6 +25,7 @@
  * Signal Profile + bio-filter have no source module in this build.
  */
 import { fnUrl } from "./apiBase.js";
+import { formatShiftForAI } from "./shiftLog.js";
 
 import { getOrCreateInstallId } from "./identity.js";
 import { formatBiasProfileForAI } from "./biasProfile.js";
@@ -170,6 +171,7 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         priorSessions,
         confirmedFindings,
         becomingContext,
+        shiftContext: (() => { try { return formatShiftForAI(); } catch { return null; } })(),
         aiDirectness,
         addressAs,
         capacities,

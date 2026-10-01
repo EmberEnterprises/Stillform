@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { getResurfaceLine } from "../../lib/keepShelf.js";
 import { downloadEventIcs } from "../../lib/icsExport.js";
 import { draftStatement } from "../../lib/reframeApi.js";
+import { recordShift } from "../../lib/shiftLog.js";
+import { CHIP_DEFINITIONS } from "../../lib/chipDefinitions.js";
 import { getPref, hasExplicitPref } from "../../lib/userPrefs.js";
 import EditorialBlock from "../../components/EditorialBlock.jsx";
 import Button from "../../components/Button.jsx";
@@ -71,9 +73,18 @@ import { gatherEodArtifactInputs, generateEodArtifact, saveEodArtifact, readEodA
  */
 const MIN_TAKEAWAY_LEN = 4;
 
-export default function Close({ surfacedFrame, breathingOffer = null, beat = null, onReturnHome, onWantScript = null }) {
+export default function Close({ surfacedFrame, breathingOffer = null, beat = null, onReturnHome, onWantScript = null, openingChip = null }) {
   const [step, setStep] = useState("compose");
   const [text, setText] = useState("");
+  // Where you land (2026-10-01): one optional tap, stored against the chip the
+  // session opened with. The first post-state capture in v2; see shiftLog.js.
+  const [landing, setLanding] = useState(null);
+  const landingSessionId = React.useMemo(() => `close-${Date.now()}`, []);
+  const tapLanding = (chip) => {
+    setLanding(chip);
+    try { recordShift({ pre: openingChip, post: chip, sessionId: landingSessionId, beat }); } catch { /* fail-silent */ }
+    try { window.plausible?.("Landing Recorded", { props: { beat: beat || "main" } }); } catch { /* non-fatal */ }
+  };
   // PCE.1: structured close — forward implementation intention + lock-in.
   const [nextMove, setNextMove] = useState("");
   // J6 resurfacing (2026-07-15): a line kept in a past reframe returns here at
@@ -635,6 +646,28 @@ export default function Close({ surfacedFrame, breathingOffer = null, beat = nul
           aria-label="Name what landed for you"
         />
       </div>
+
+      {openingChip && CHIP_DEFINITIONS[openingChip] ? (
+        <div className="sf-fade-enter sf-fade-enter--delay-1" style={{ marginTop: "var(--sf-space-24)" }} aria-label="Where you land now">
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-8)" }}>
+            {landing ? `Opened ${openingChip} · landed ${landing}` : `Opened ${openingChip} · where do you land now?`}
+          </MonoLabel>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
+            {["settled", "focused", "mixed", "unsure", "flat", "anxious", "angry", "stuck"].map((c) => (
+              <button
+                key={c}
+                type="button"
+                className="sf-chip"
+                aria-selected={landing === c}
+                aria-pressed={landing === c}
+                onClick={() => tapLanding(c)}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {surfacedFrame ? (
         <div
