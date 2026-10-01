@@ -142,7 +142,15 @@ export function getFallbackActivePrompt(beat, threadLength) {
  * @param {number} params.sessionCount
  * @returns {Promise<{headline: string, body: string, actionLabel: string|null, source: "ai"|"fallback"|"cache"}>}
  */
+// The AI endpoint has never been built (stranger walk 2026-10-02 saw the 404 on
+// every home open). Until it exists this flag stays false: no wasted request,
+// no console error, identical user experience (the fallback IS the day-one
+// copy). Flip to true when netlify/functions/active-prompt.js ships — and only
+// after the OpenAI capacity work, since it would add a model call per home open.
+const AI_ACTIVE_PROMPT_ENABLED = false;
+
 export async function getActivePromptAsync({ beat, threadLength, sessionCount }) {
+  if (!AI_ACTIVE_PROMPT_ENABLED) return getFallbackActivePrompt({ beat, threadLength, sessionCount });
   // Cache hit path — recent AI generation, return it.
   const cached = readCache(beat);
   if (cached) {
