@@ -470,6 +470,7 @@ const _bansBySubstringCategory = (cat) => BANNED_OUTPUT
 // Labels that narrate a person as a machine. The house voice says what is
 // true in their words; it never diagnoses the body back to them.
 const CLINICAL_LABEL_PATTERNS = [
+  /\b(the|your) (mind|system|body) read (a|the) (change|shift|event) as (a )?(threat|danger)\b/i,
   /\bstress (response|system|reaction|hormones?)\b/i,
   /\bnervous system\b/i,
   /\bfight[- ]or[- ]flight\b/i,
@@ -891,7 +892,7 @@ function validateWorkLoopPayload(payload, { hasCrisisLanguage = false, isLowDema
     // "stress" back to them unless THEY used those words. "Jaw locking" is
     // theirs to name; "your body's reaction to stress" is a label.
     const tl = t.toLowerCase();
-    for (const w of ["stress", "your body", "body's", "bodily", "physical response", "physical reaction", "physical signal", "reaction to", "registering it", "is a signal", "sending about"]) {
+    for (const w of ["stress", "your body", "body's", "bodily", "your system", "system is", "system read", "physical response", "physical reaction", "physical signal", "reaction to", "registering it", "is a signal", "clear signal", "a signal that", "sending about", "indicates", "bracing for", "tension is", "tension indicates", "as a threat", "as immediate threat", "threat"]) {
       if (tl.includes(w) && !userLow.includes(w.split(" ")[0] === "your" ? w : w.split("'")[0])) { reasons.push(`body narration not in user's words: ${w}`); break; }
     }
   }
