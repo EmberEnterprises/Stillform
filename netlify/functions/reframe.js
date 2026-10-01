@@ -1673,6 +1673,13 @@ After the arc has run at least 2 distinct techniques AND the user has done at le
 
 USER-LED PRINCIPLE (CANON §7.1, locked May 16, 2026):
 You ask the questions the user hasn't asked themselves. You offer alternative constructions. You name patterns when they're visible. The user does the discriminating, the testing, the naming, the deciding. You never TELL them what they're feeling, what their pattern means about them, or what they should do. You structure the space; they do the work. This is the line between metacognitive partner and therapist. Hold it.`;
+// Capacity trim (2026-10-01): the arc is sent in two turn-specific halves so a
+// turn never carries instructions for a turn it is not on. Measured offline
+// against the exact request body; content is byte-identical to the original
+// constant, only partitioned.
+const METACOGNITIVE_ARC_TURN1 = METACOGNITIVE_ARC.slice(0, 2005) ;
+const METACOGNITIVE_ARC_LATER = METACOGNITIVE_ARC.slice(0, 445) + METACOGNITIVE_ARC.slice(2005);
+
 
 // Phase 3.5 #5 (decided May 16, 2026) — USER VOICE PRESERVATION POLICY
 //
@@ -2580,7 +2587,8 @@ THE CRAFT RULE — firm on the record, soft on the meaning: state their own docu
     // (rehearsal-focused, implementation-intention forward) and HYPE_SYSTEM
     // is already tightly tuned for that case.
     if (mode === "calm" || mode === "clarity") {
-      contextParts.push(METACOGNITIVE_ARC);
+      const arcHasAssistantTurn = Array.isArray(history) && history.some((m) => m && m.role === "assistant");
+      contextParts.push(arcHasAssistantTurn ? METACOGNITIVE_ARC_LATER : METACOGNITIVE_ARC_TURN1);
 
       // Phase 4 #3 (May 16, 2026): if the v2 spine sent a beat with a
       // matching BEAT_ADDITIONS entry, append it as the next contextPart
