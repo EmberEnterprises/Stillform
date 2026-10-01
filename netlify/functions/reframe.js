@@ -2598,7 +2598,11 @@ THE CRAFT RULE — firm on the record, soft on the meaning: state their own docu
       // override contains the May 17 failed exchange as a concrete
       // counter-example — concrete examples land harder than abstract
       // rules with these models. No-op for v1 callers (beat is null).
-      if (beat) {
+      // Capacity trim (2026-10-01): this override governs TURN 1 only, but
+      // it was being sent on every turn (~800 tokens each). Now only when
+      // the thread has no assistant turn yet. Turns 2+ keep the arc alone.
+      const hasAssistantTurn = Array.isArray(history) && history.some((m) => m && m.role === "assistant");
+      if (beat && !hasAssistantTurn) {
         contextParts.push(METACOGNITIVE_ARC_V2_TURN1_OVERRIDE);
       }
 
