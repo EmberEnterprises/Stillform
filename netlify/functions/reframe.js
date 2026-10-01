@@ -892,7 +892,7 @@ function validateWorkLoopPayload(payload, { hasCrisisLanguage = false, isLowDema
     // "stress" back to them unless THEY used those words. "Jaw locking" is
     // theirs to name; "your body's reaction to stress" is a label.
     const tl = t.toLowerCase();
-    for (const w of ["stress", "your body", "body's", "bodily", "your system", "system is", "system read", "physical response", "physical reaction", "physical signal", "reaction to", "registering it", "is a signal", "clear signal", "a signal that", "sending about", "indicates", "bracing for", "tension is", "tension indicates", "as a threat", "as immediate threat", "threat"]) {
+    for (const w of ["stress", "your body", "body's", "bodily", "your system", "system is", "system read", "physical response", "physical reaction", "physical signal", "registering it", "is a signal", "clear signal", "a signal that", "sending about", "tension indicates", "as a threat", "as immediate threat"]) {
       if (tl.includes(w) && !userLow.includes(w.split(" ")[0] === "your" ? w : w.split("'")[0])) { reasons.push(`body narration not in user's words: ${w}`); break; }
     }
   }
