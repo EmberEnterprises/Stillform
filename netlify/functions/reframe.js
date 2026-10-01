@@ -340,8 +340,8 @@ WORK MODE — when material suffices (see MODE RULES):
 }
 
 FIRST-WORK-TURN QUALITY BAR (stranger test, 2026-09-14 — the first thing a new person reads from you is the flattest thing they read; fix that here):
-- On the FIRST work turn of a thread, "shape.line" MUST name what the mind DID with the material, in the user's register, e.g. "You read the moved deadline as a verdict on you before the day had changed." — not "a change triggered a physical response."
-- "rebuilt" on the first work turn MUST carry at least one of the user's own concrete words and MUST NOT use clinical or mechanical labels ("signaling stress", "activated your response", "your system is reacting"). Say what is actually true about THEIR situation, in words they would say back.
+- On the FIRST work turn of a thread, "shape.line" MUST name what the mind DID with the material (the verb: read-as, braced-for, forecast, filled-in, decided-before), in the user's own register and about THEIR specific situation. Never a description of events, never a sentence about what the body did. Never reuse any sentence from these instructions.
+- "rebuilt" on the first work turn MUST carry at least one of the user's own concrete words and MUST NOT narrate their body or name "stress" unless they did. No "signaling stress", "your body's reaction", "physical response", "your system is reacting". Say what is actually true about THEIR situation (the fact, the part they added, what is actually decided), in words they would say back.
 - If the material is too thin to meet this bar honestly, use EXTRACT mode instead of a flat work turn. A sharp question beats a generic rebuild.
 
 MODE RULES:
@@ -883,8 +883,17 @@ function validateWorkLoopPayload(payload, { hasCrisisLanguage = false, isLowDema
   // thirds of the time; "physical stress response", "activated your jaw
   // response" still slipped through. Now mechanical: a rebuilt or shape line
   // that narrates the user's body as a system is rejected and retried.
+  const userLow = String(userInput || "").toLowerCase();
   for (const t of [rebuilt, payload.shape?.line || ""]) {
-    if (t && hasAnyPattern(t, CLINICAL_LABEL_PATTERNS)) reasons.push("clinical label in rebuilt/shape");
+    if (!t) continue;
+    if (hasAnyPattern(t, CLINICAL_LABEL_PATTERNS)) reasons.push("clinical label in rebuilt/shape");
+    // Body-narration guard: the AI may not describe the person's body or
+    // "stress" back to them unless THEY used those words. "Jaw locking" is
+    // theirs to name; "your body's reaction to stress" is a label.
+    const tl = t.toLowerCase();
+    for (const w of ["stress", "your body", "body's", "bodily", "physical response", "physical reaction", "physical signal", "reaction to", "registering it", "is a signal", "sending about"]) {
+      if (tl.includes(w) && !userLow.includes(w.split(" ")[0] === "your" ? w : w.split("'")[0])) { reasons.push(`body narration not in user's words: ${w}`); break; }
+    }
   }
   for (const t of [rebuilt, payload.shape?.line || "", payload.question || ""]) {
     if (t && hasAnySnippet(t, GENERIC_GARBAGE_SNIPPETS)) reasons.push("generic phrasing");
