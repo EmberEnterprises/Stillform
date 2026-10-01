@@ -3007,6 +3007,7 @@ WHAT STAYING SHARP LOOKS LIKE:
           })
         });
         const data = await response.json();
+        if (data && data.usage) lastUsage = data.usage; // CAP-4: real token counts per call
         if (!response.ok) {
           console.error("API error:", JSON.stringify(data));
           throw new Error(data.error?.message || "API error " + response.status);
@@ -3023,6 +3024,7 @@ WHAT STAYING SHARP LOOKS LIKE:
     let voiceRepairUsed = false;
     let voiceFallbackUsed = false;
     let lastValidation = { ok: false, reasons: ["no response"] };
+    let lastUsage = null; // CAP-4 (2026-10-01): OpenAI usage of the final successful call
     let lastVoiceValidation = { ok: false, reasons: ["no response"] };
     let lastIntentionValidation = { ok: false, reasons: ["no response"], anchors: [] };
     let previousRaw = "";
@@ -3128,7 +3130,11 @@ WHAT STAYING SHARP LOOKS LIKE:
         voiceRepairUsed,
         voiceFallbackUsed,
         crisisDetected: hasCrisisLanguage,
-        liabilityGuard: hasFinancial || hasMedical || hasLegal
+        liabilityGuard: hasFinancial || hasMedical || hasLegal,
+        // CAP-4: capacity telemetry — prompt size in tokens (from OpenAI) and
+        // the system-prompt character count, so compression is measured.
+        usage: lastUsage ? { prompt_tokens: lastUsage.prompt_tokens, completion_tokens: lastUsage.completion_tokens } : null,
+        systemPromptChars: typeof systemPrompt === "string" ? systemPrompt.length : null
       })
     };
   } catch (err) {
