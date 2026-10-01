@@ -888,13 +888,13 @@ function validateWorkLoopPayload(payload, { hasCrisisLanguage = false, isLowDema
   for (const t of [rebuilt, payload.shape?.line || ""]) {
     if (!t) continue;
     if (hasAnyPattern(t, CLINICAL_LABEL_PATTERNS)) reasons.push("clinical label in rebuilt/shape");
-    // Body-narration guard: the AI may not describe the person's body or
-    // "stress" back to them unless THEY used those words. "Jaw locking" is
-    // theirs to name; "your body's reaction to stress" is a label.
-    const tl = t.toLowerCase();
-    for (const w of ["stress", "your body", "body's", "bodily", "your system", "system is", "system read", "physical response", "physical reaction", "physical signal", "registering it", "is a signal", "clear signal", "a signal that", "sending about", "tension indicates", "as a threat", "as immediate threat"]) {
-      if (tl.includes(w) && !userLow.includes(w.split(" ")[0] === "your" ? w : w.split("'")[0])) { reasons.push(`body narration not in user's words: ${w}`); break; }
-    }
+    // Body-narration word guard (rounds 2–4, 2026-10-01) is OFF: it raised
+    // the fallback rate on first turns (the model could not satisfy it in
+    // three retries), which is a worse first-session experience than a
+    // slightly clinical line. The regex CLINICAL_LABEL_PATTERNS above stays
+    // (the egregious labels). Sharper first turns = board item Q-1, done as
+    // a dedicated turn-one prompt, not as more rejection rules.
+    void userLow;
   }
   for (const t of [rebuilt, payload.shape?.line || "", payload.question || ""]) {
     if (t && hasAnySnippet(t, GENERIC_GARBAGE_SNIPPETS)) reasons.push("generic phrasing");
