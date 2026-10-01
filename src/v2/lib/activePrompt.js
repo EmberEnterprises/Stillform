@@ -150,7 +150,7 @@ export function getFallbackActivePrompt(beat, threadLength) {
 const AI_ACTIVE_PROMPT_ENABLED = false;
 
 export async function getActivePromptAsync({ beat, threadLength, sessionCount }) {
-  if (!AI_ACTIVE_PROMPT_ENABLED) return getFallbackActivePrompt({ beat, threadLength, sessionCount });
+  if (!AI_ACTIVE_PROMPT_ENABLED) return getFallbackActivePrompt(beat, threadLength);
   // Cache hit path — recent AI generation, return it.
   const cached = readCache(beat);
   if (cached) {
