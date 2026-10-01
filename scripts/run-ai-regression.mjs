@@ -250,6 +250,10 @@ async function callReframe(scenario) {
     install_id: "regression-test",
     user_id: null,
     sessionCount: 0,
+    // 2026-10-02: the live app ALWAYS sends a beat (the work-loop path). Without
+    // it the function takes the legacy prompt path, which no screen uses. Set
+    // REFRAME_BEAT=legacy to reproduce the old behaviour.
+    beat: process.env.REFRAME_BEAT === "legacy" ? undefined : (process.env.REFRAME_BEAT || "main"),
     // 2026-07-01: scenarios may carry extra context channels (ambient,
     // capacities, confirmedFindings, triggerProfile, vulnerabilities, …)
     // added to the AI since May — spread verbatim so they reach the backend
